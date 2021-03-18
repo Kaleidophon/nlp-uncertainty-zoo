@@ -7,6 +7,7 @@ from abc import ABC
 from typing import Dict, Any, Optional, Union
 
 # EXT
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -16,10 +17,6 @@ from tqdm import tqdm
 
 # Custom types
 Device = Union[torch.device, str]
-
-
-# TODO: Add early stopping
-# TODO: Add model saving
 
 
 class Module(ABC):
@@ -33,7 +30,8 @@ class Module(ABC):
         model_class: type,
         model_params: Dict[str, Any],
         train_params: Dict[str, Any],
-        device: Device,
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
     ):
         """
         Initialize a module.
@@ -52,6 +50,7 @@ class Module(ABC):
         self.model_class = model_class
         self.model = model_class(**model_params)
         self.train_params = train_params
+        self.model_dir = model_dir
         self.device = device
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.train_params["lr"])
         self.to(device)
@@ -86,10 +85,15 @@ class Module(ABC):
         """
         if None not in (X_val, y_val):
             X_val, y_val = X_val.to(self.device), y_val.to(self.device)
+            dl_val = self._init_data_loader(X_val, y_val)
 
         X_train, y_train = X_train.to(self.device), y_train.to(self.device)
         dl_train = self._init_data_loader(X_train, y_train)
         num_epochs = self.train_params["num_epochs"]
+
+        best_val_loss = np.inf
+        early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
+        num_no_improvements = 0
 
         with tqdm(total=num_epochs) as progress_bar:
             for epoch in tqdm(self.train_params["num_epochs"]):
@@ -109,11 +113,24 @@ class Module(ABC):
                 if None not in (X_val, y_val):
                     X_val, y_val = X_val.to(self.device), y_val.to(self.device)
                     self.model.eval()
-                    dl_val = self._init_data_loader(X_val, y_val)
                     val_loss = self._epoch_iter(epoch, dl_val, summary_writer)
 
                     if summary_writer is not None:
                         summary_writer.add_scalar("Epoch val loss", val_loss, epoch)
+
+                    if val_loss < best_val_loss:
+                        best_val_loss = best_val_loss
+
+                        with open(
+                            f"{self.model_dir}/{epoch}_{val_loss:.2f}.pt"
+                        ) as model_path:
+                            torch.save(self, model_path)
+
+                    else:
+                        num_no_improvements += 1
+
+                        if num_no_improvements > early_stopping_pat:
+                            break
 
         # Additional training step, e.g. temperature scaling on val
         if None not in (X_val, y_val):
@@ -159,7 +176,7 @@ class Module(ABC):
         summary_writer: SummaryWriter
             Summary writer to track training statistics.
         """
-        epoch_loss = 0
+        epoch_loss = torch.zeros(1)
 
         for i, (X, y) in enumerate(data_loader):
             batch_loss = self.get_loss(i, X, y, summary_writer)
@@ -233,3 +250,21 @@ class Module(ABC):
             Device the model should be moved to.
         """
         self.model.to(device)
+
+    @staticmethod
+    def load(model_path: str):
+        """
+        Load model from path.
+
+        Parameters
+        ----------
+        model_path: str
+            Path model was saved to.
+
+        Returns
+        -------
+        Module
+            Loaded model.
+        """
+        with open(model_path, "rb") as pickled_model:
+            return torch.load(pickled_model)
