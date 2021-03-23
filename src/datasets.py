@@ -3,20 +3,50 @@ Module to implement data reading and batching functionalities.
 """
 
 # STD
-from abc import ABC
+from abc import ABC, abstractmethod
 import codecs
+from copy import deepcopy
+import math
 import os
-from typing import Dict, Optional, Any
+from random import shuffle
+from typing import Dict, Optional, Any, List, Union, Tuple
 
 # EXT
 from t2i import T2I
 import torch
-from torch.utils.data import Dataset, TensorDataset
+from torch.utils.data import Dataset
+
+# TYPES
+# List of sequences and corresponding labels
+BatchedSequences = List[torch.LongTensor]
 
 
-# TODO: How to return just sequences or sequences and labels
-# TODO: Language modelling-style batching
 # TODO: Create wikitext dataset
+
+
+class DataSplit(Dataset):
+    """
+    Wrapper class for a data split.
+    """
+
+    def __init__(self, batched_sequences: BatchedSequences):
+        self.batched_sequences = batched_sequences
+
+    def __len__(self):
+        return len(self.batched_sequences)
+
+    def __getitem__(self, item):
+        return self.batched_sequences[item]
+
+    def __iter__(self):
+        for input_, labels in self.batched_sequences:
+            yield input_, labels
+
+    def shuffle(self):
+        dataset = deepcopy(self)
+        shuffle(dataset.batched_sequences)
+
+        return dataset
 
 
 class TextDataset(ABC):
@@ -29,8 +59,9 @@ class TextDataset(ABC):
         name: str,
         data_dir: str,
         splits: Dict[str, str],
+        batch_size: int,
         batch_style: str = "padding",
-        max_length: Optional[int] = None,
+        sequence_length: Optional[int] = None,
         **indexing_params: Dict[str, Any]
     ):
         """
@@ -44,11 +75,13 @@ class TextDataset(ABC):
             Directory in which datasets are located.
         splits: Dict[str, str]
             Dictionary mapping from split ('train', 'valid', 'test') to filename containing that split.
+        batch_size: int
+            Number of sequences in a batch.
         batch_style: str
             Style used to pack sequences into batches, either 'padding' (pad sequences up to a certain length) or
             'continuous' (style often used for language modelling, sequences continue over batch boundaries). Default is
             'padding'.
-        max_length: Optional[int]
+        sequence_length: Optional[int]
             Maximum length for padding if batch_style='padding'. No padding if max_length=None, which is the default.
         indexing_params: Dict[str, Any]
             Parameters for t2i.T2I indexing class.
@@ -59,10 +92,11 @@ class TextDataset(ABC):
         self.name = name
         self.data_dir = data_dir
         self.splits = splits
+        self.batch_size = batch_size
         self.t2i = None
         self.indexing_params = indexing_params
         self.batch_style = batch_style
-        self.max_length = max_length
+        self.sequence_length = sequence_length
 
         # Splits
         self._train = None
@@ -82,7 +116,12 @@ class TextDataset(ABC):
         if self._train is None:
             self._train = self._load("train")
 
-        return self._train
+        batches = self._train
+
+        if self.batch_style == "padding":
+            batches.shuffle()
+
+        return batches
 
     @property
     def valid(self) -> Dataset:
@@ -122,7 +161,7 @@ class TextDataset(ABC):
 
         return self._test
 
-    def _load(self, split: str) -> Dataset:
+    def _load(self, split: str) -> DataSplit:
         """
         Load a data split as well as index and batch it. If the split is not "train" and the training split hasn't been
         loaded yet, it will be to build the index.
@@ -142,21 +181,128 @@ class TextDataset(ABC):
         split_paths = os.path.join(self.data_dir, self.name, self.splits[split])
 
         with codecs.open(split_paths, "rb", "utf-8") as file:
-            lines = [line.strip() for line in file.readlines()]
+            sequences = [line.strip() for line in file.readlines()]
 
         # Initialize indexing
         if split == "train" and self.t2i is None:
-            self.t2i = T2I.build(lines, **self.indexing_params)
+            self.t2i = T2I.build(sequences, **self.indexing_params)
 
-        # Index sentences and convert to tensors
-        indexed_lines = list(
-            map(
-                torch.LongTensor,
-                self.t2i(
-                    lines,
-                    pad_to=self.max_length if self.batch_style == "padding" else None,
-                ),
+        return self._batch(split, sequences)
+
+    @abstractmethod
+    def _get_labels(
+        self, split: str, batched_sequences: BatchedSequences
+    ) -> Tuple[BatchedSequences, List[torch.LongTensor]]:
+        """
+        Get the labels for a dataset by loading them or deriving them from the inputs.
+
+        Parameters
+        ----------
+        split: str
+            Name of the split. Has to be either 'train', 'valid' or 'test'.
+        batched_sequences: BatchedSequences
+            Batched sequences in a data split.
+
+        Returns
+        -------
+        List[torch.LongTensor]
+            List of labels for batches as LongTensors.
+        """
+        pass
+
+    def _batch(self, split: str, sequences: List[str]) -> DataSplit:
+        """
+
+
+        Parameters
+        ----------
+        split
+        sequences
+
+        Returns
+        -------
+
+        """
+        batched_sequences = None
+
+        if self.batch_style == "padding":
+            indexed_sequences = list(
+                map(
+                    torch.LongTensor,
+                    self.t2i(
+                        sequences,
+                        pad_to=self.sequence_length
+                        if self.sequence_length is not None
+                        else "max",
+                    ),
+                )
             )
+            batched_sequences = torch.stack(
+                list(map(torch.LongTensor, indexed_sequences)), dim=0
+            )
+            batched_sequences = torch.split(
+                batched_sequences, split_size_or_sections=self.batch_size, dim=0
+            )
+
+        elif self.batch_style == "continuous":
+            indexed_sequences = list(map(torch.LongTensor, self.t2i(sequences)))
+            indexed_sequences = torch.stack(indexed_sequences, dim=0)
+
+            # Work out how cleanly we can divide the dataset into batch-sized parts
+            num_batched_steps = indexed_sequences.shape[0] // self.batch_size
+
+            # Trim off any extra elements that wouldn't cleanly fit (remainders)
+            indexed_sequences = indexed_sequences.narrow(
+                0, 0, num_batched_steps * self.batch_size
+            )
+
+            # Evenly divide the data across the bsz batches.
+            raw_batches = indexed_sequences.view(self.batch_size, -1).t().contiguous()
+
+            num_batches = math.ceil(num_batched_steps / self.sequence_length)
+            batched_sequences = [
+                raw_batches[
+                    n * self.sequence_length : (n + 1) * self.sequence_length + 1, :
+                ]
+                for n in range(num_batches)
+            ]
+
+        batched_sequences, batched_labels = self._get_labels(split, batched_sequences)
+
+        # Batches of (sequences, labels)
+        return DataSplit(list(zip(batched_sequences, batched_labels)))
+
+
+class LanguageModelingDataset(TextDataset):
+    """
+    A superclass for language modeling datasets.
+    """
+
+    def _get_labels(
+        self, split: str, batched_sequences: BatchedSequences
+    ) -> Tuple[List[torch.LongTensor], List[torch.LongTensor]]:
+        batched_sequences, batched_labels = zip(
+            *[(batch[:-1, :], batch[1:, :]) for batch in batched_sequences]
         )
 
-        return TensorDataset(*indexed_lines)
+        return list(batched_sequences), list(batched_labels)
+
+
+class Wikitext103Dataset(LanguageModelingDataset):
+    """
+    Dataset class for the Wikitext-103 dataset.
+    """
+
+    def __init__(self, data_dir: str, batch_size: int, sequence_length: int):
+        super().__init__(
+            name="wikitext-103",
+            data_dir=data_dir,
+            splits={
+                "train": "wiki.train.tokens",
+                "valid": "wiki.valid.tokens",
+                "test": "wiki.test.tokens",
+            },
+            batch_size=batch_size,
+            batch_style="continuous",
+            sequence_length=sequence_length,
+        )
