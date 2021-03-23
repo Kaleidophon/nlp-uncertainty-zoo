@@ -19,6 +19,10 @@ from tqdm import tqdm
 Device = Union[torch.device, str]
 
 
+# TODO: Add tracking of CO2 emissions
+# TODO: Model superclass with build_architecture()
+
+
 class Module(ABC):
     """
     Abstract module class. It is a wrapper that defines data loading, batching, training and evaluation loops, so that
