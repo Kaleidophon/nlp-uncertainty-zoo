@@ -3,10 +3,12 @@ Define common methods of a module class.
 """
 
 # STD
-from abc import ABC
-from typing import Dict, Any, Optional, Union
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional, List
+import os
 
 # EXT
+from codecarbon import OfflineEmissionsTracker
 import numpy as np
 import torch
 import torch.nn as nn
@@ -15,12 +17,74 @@ import torch.utils.data as data
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-# Custom types
-Device = Union[torch.device, str]
+# PROJECT
+from src.datasets import DataSplit, TextDataset
+from src.types import Device
 
 
-# TODO: Add tracking of CO2 emissions
-# TODO: Model superclass with build_architecture()
+class Model(ABC, nn.Module):
+    """
+    Abstract model class, defining how the forward pass of a model looks and how the architecture is being built.
+    """
+
+    def __init__(self, num_layers: int, layer_sizes: List[int], **build_params):
+        """
+        Initialize a model.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of model layers.
+        layer_sizes: List[int]
+            List of hidden units per layer.
+        build_params: Dict[str, Any]
+            Dictionary containing additional parameters used to set up the architecture.
+        """
+        self.num_layers = num_layers
+        self.layers_sizes = layer_sizes
+        self.architecture = self._build_architecture(
+            num_layers, layer_sizes, **build_params
+        )
+
+        super().__init__()
+
+    def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Forward pass of the model.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Output predictions for input.
+        """
+        output = self.architecture(input_)
+
+        return output
+
+    @staticmethod
+    @abstractmethod
+    def _build(num_layers: int, layer_sizes: List[int]) -> nn.Sequential:
+        """
+        Build the architecture of a model.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of model layers.
+        layer_sizes: List[int]
+            List of hidden units per layer.
+
+        Returns
+        -------
+        nn.Sequential
+            Built architecture.
+        """
+        pass
 
 
 class Module(ABC):
@@ -31,6 +95,7 @@ class Module(ABC):
 
     def __init__(
         self,
+        model_name: str,
         model_class: type,
         model_params: Dict[str, Any],
         train_params: Dict[str, Any],
@@ -42,6 +107,8 @@ class Module(ABC):
 
         Parameters
         ----------
+        model_name: str
+            Name of the model.
         model_class: type
             Class of the model that is being wrapped.
         model_params: Dict[str, Any]
@@ -51,6 +118,7 @@ class Module(ABC):
         device: Device
             The device the model is located on.
         """
+        self.model_name = model_name
         self.model_class = model_class
         self.model = model_class(**model_params)
         self.train_params = train_params
@@ -59,12 +127,16 @@ class Module(ABC):
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.train_params["lr"])
         self.to(device)
 
+        # Check if model directory exists, if not, create
+        if model_dir is not None:
+            full_model_dir = os.path.join(model_dir, model_name)
+
+            if not os.path.exists(full_model_dir):
+                os.mkdir(full_model_dir)
+
     def fit(
         self,
-        X_train: torch.Tensor,
-        y_train: torch.Tensor,
-        X_val: Optional[torch.Tensor],
-        y_val: Optional[torch.Tensor],
+        dataset: TextDataset,
         verbose: bool = True,
         summary_writer: Optional[SummaryWriter] = None,
     ):
@@ -73,36 +145,34 @@ class Module(ABC):
 
         Parameters
         ----------
-        X_train: torch.Tensor
-            Training data.
-        y_train: torch.Tensor
-            Training labels.
-        X_val: Optional[torch.Tensor]
-            Validation data.
-        y_val: Optional[torch.Tensor]
-            Validation labels.
+        dataset: TextDataset
+            Dataset the model is being trained on.
         verbose: bool
             Whether to display information about current loss.
         summary_writer: Optional[SummaryWriter]
             Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        if None not in (X_val, y_val):
-            X_val, y_val = X_val.to(self.device), y_val.to(self.device)
-            dl_val = self._init_data_loader(X_val, y_val)
-
-        X_train, y_train = X_train.to(self.device), y_train.to(self.device)
-        dl_train = self._init_data_loader(X_train, y_train)
+        device = self.train_params["device"]
         num_epochs = self.train_params["num_epochs"]
 
         best_val_loss = np.inf
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
         num_no_improvements = 0
+        # TODO: Set country code in config
+        tracker = OfflineEmissionsTracker(
+            project_name="nlp-uncertainty-zoo",
+            country_iso_code="DNK",
+            output_dir=self.model_dir,
+        )
+        tracker.start()
 
         with tqdm(total=num_epochs) as progress_bar:
             for epoch in tqdm(self.train_params["num_epochs"]):
                 self.model.train()
-                train_loss = self._epoch_iter(epoch, dl_train, summary_writer)
+                train_loss = self._epoch_iter(
+                    epoch, dataset.train.to(device), summary_writer
+                )
 
                 # Update progress bar and summary writer
                 if verbose is not None:
@@ -114,32 +184,34 @@ class Module(ABC):
                 if summary_writer is not None:
                     summary_writer.add_scalar("Epoch train loss", train_loss, epoch)
 
-                if None not in (X_val, y_val):
-                    X_val, y_val = X_val.to(self.device), y_val.to(self.device)
-                    self.model.eval()
-                    val_loss = self._epoch_iter(epoch, dl_val, summary_writer)
+                # Get validation loss
+                self.model.eval()
+                val_loss = self._epoch_iter(
+                    epoch, dataset.valid.to(device), summary_writer
+                )
 
-                    if summary_writer is not None:
-                        summary_writer.add_scalar("Epoch val loss", val_loss, epoch)
+                if summary_writer is not None:
+                    summary_writer.add_scalar("Epoch val loss", val_loss, epoch)
 
-                    if val_loss < best_val_loss:
-                        best_val_loss = best_val_loss
+                if val_loss < best_val_loss:
+                    best_val_loss = best_val_loss
 
-                        with open(
-                            f"{self.model_dir}/{epoch}_{val_loss:.2f}.pt"
-                        ) as model_path:
-                            torch.save(self, model_path)
+                    with open(
+                        os.path.join(self.model_dir, f"{epoch}_{val_loss:.2f}.pt")
+                    ) as model_path:
+                        torch.save(self, model_path)
 
-                    else:
-                        num_no_improvements += 1
+                else:
+                    num_no_improvements += 1
 
-                        if num_no_improvements > early_stopping_pat:
-                            break
+                    if num_no_improvements > early_stopping_pat:
+                        break
 
         # Additional training step, e.g. temperature scaling on val
-        if None not in (X_val, y_val):
-            dl_val = self._init_data_loader(X_val, y_val)
-            self._finetune(dl_val)
+        self._finetune(dataset.valid.to(device))
+
+        # Stop emission tracking
+        tracker.stop()
 
     def predict(self, X: torch.Tensor) -> torch.Tensor:
         """
@@ -159,13 +231,10 @@ class Module(ABC):
 
         return self.model(X)
 
-    def _init_data_loader(self, X: torch.Tensor, y: torch.Tensor) -> data.DataLoader:
-        ...  # TODO
-
     def _epoch_iter(
         self,
         n_epoch: int,
-        data_loader: data.DataLoader,
+        data_split: DataSplit,
         summary_writer: Optional[SummaryWriter] = None,
     ) -> torch.Tensor:
         """
@@ -175,19 +244,19 @@ class Module(ABC):
         ----------
         n_epoch: int
             Number of the current epoch.
-        data_loader: data.DataLoader
-            Data loader for current data split.
+        data_split: DataSplit
+            Current data split.
         summary_writer: SummaryWriter
             Summary writer to track training statistics.
         """
         epoch_loss = torch.zeros(1)
 
-        for i, (X, y) in enumerate(data_loader):
+        for i, (X, y) in enumerate(data_split):
             batch_loss = self.get_loss(i, X, y, summary_writer)
 
             if summary_writer is not None:
                 summary_writer.add_scalar(
-                    "Batch train loss", batch_loss, n_epoch * len(data_loader) + i
+                    "Batch train loss", batch_loss, n_epoch * len(data_split) + i
                 )
 
             epoch_loss += batch_loss

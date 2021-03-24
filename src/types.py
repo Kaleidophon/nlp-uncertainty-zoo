@@ -1,0 +1,12 @@
+"""
+Define custom types for this project.
+"""
+
+# STD
+from typing import List, Union
+
+# EXT
+import torch
+
+BatchedSequences = List[torch.LongTensor]
+Device = Union[torch.device, str]

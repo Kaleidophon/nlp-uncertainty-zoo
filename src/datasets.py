@@ -16,9 +16,8 @@ from t2i import T2I
 import torch
 from torch.utils.data import Dataset
 
-# TYPES
-# List of sequences and corresponding labels
-BatchedSequences = List[torch.LongTensor]
+# PROJECT
+from src.types import BatchedSequences, Device
 
 
 class DataSplit(Dataset):
@@ -38,6 +37,12 @@ class DataSplit(Dataset):
     def __iter__(self):
         for input_, labels in self.batched_sequences:
             yield input_, labels
+
+    def to(self, device: Device):
+        self.batched_sequences = [
+            (input_.to(device), target.to(device))
+            for input_, target in self.batched_sequences
+        ]
 
     def shuffle(self):
         dataset = deepcopy(self)
@@ -101,7 +106,7 @@ class TextDataset(ABC):
         self._test = None
 
     @property
-    def train(self) -> Dataset:
+    def train(self) -> DataSplit:
         """
         Retrieve the training split of a dataset.
 
@@ -121,7 +126,7 @@ class TextDataset(ABC):
         return batches
 
     @property
-    def valid(self) -> Dataset:
+    def valid(self) -> DataSplit:
         """
         Retrieve the validation split of a dataset.
 
@@ -140,7 +145,7 @@ class TextDataset(ABC):
         return self._valid
 
     @property
-    def test(self) -> Dataset:
+    def test(self) -> DataSplit:
         """
         Retrieve the test split of a dataset.
 
@@ -202,8 +207,8 @@ class TextDataset(ABC):
 
         Returns
         -------
-        List[torch.LongTensor]
-            List of labels for batches as LongTensors.
+        Tuple[List[torch.LongTensor], List[torch.LongTensor]]
+            Paired list of batched inputs and labels.
         """
         pass
 
@@ -293,6 +298,21 @@ class LanguageModelingDataset(TextDataset):
     def _get_labels(
         self, split: str, batched_sequences: BatchedSequences
     ) -> Tuple[List[torch.LongTensor], List[torch.LongTensor]]:
+        """
+        Get the labels for a dataset by loading them or deriving them from the inputs.
+
+        Parameters
+        ----------
+        split: str
+            Name of the split. Has to be either 'train', 'valid' or 'test'.
+        batched_sequences: BatchedSequences
+            Batched sequences in a data split.
+
+        Returns
+        -------
+        Tuple[List[torch.LongTensor], List[torch.LongTensor]]
+            Paired list of batched inputs and labels.
+        """
         batched_sequences, batched_labels = zip(
             *[(batch[:, :-1], batch[:, 1:]) for batch in batched_sequences]
         )
