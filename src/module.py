@@ -4,7 +4,7 @@ Define common methods of a module class.
 
 # STD
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import os
 
 # EXT
@@ -27,7 +27,16 @@ class Model(ABC, nn.Module):
     Abstract model class, defining how the forward pass of a model looks and how the architecture is being built.
     """
 
-    def __init__(self, num_layers: int, layer_sizes: List[int], **build_params):
+    def __init__(
+        self,
+        num_layers: int,
+        vocab_size: int,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        device: Device,
+        **build_params,
+    ):
         """
         Initialize a model.
 
@@ -35,19 +44,27 @@ class Model(ABC, nn.Module):
         ----------
         num_layers: int
             Number of model layers.
-        layer_sizes: List[int]
-            List of hidden units per layer.
+        vocab_size: int
+            Vocabulary size.
+        input_size: int
+            Dimensionality of input to model.
+        hidden_size: int
+            Size of hidden representations.
+        output_size: int
+            Size of output of model.
         build_params: Dict[str, Any]
             Dictionary containing additional parameters used to set up the architecture.
         """
         self.num_layers = num_layers
-        self.layers_sizes = layer_sizes
-        self.architecture = self._build_architecture(
-            num_layers, layer_sizes, **build_params
-        )
+        self.vocab_size = vocab_size
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.device = device
 
         super().__init__()
 
+    @abstractmethod
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         """
         Forward pass of the model.
@@ -65,26 +82,6 @@ class Model(ABC, nn.Module):
         output = self.architecture(input_)
 
         return output
-
-    @staticmethod
-    @abstractmethod
-    def _build(num_layers: int, layer_sizes: List[int]) -> nn.Sequential:
-        """
-        Build the architecture of a model.
-
-        Parameters
-        ----------
-        num_layers: int
-            Number of model layers.
-        layer_sizes: List[int]
-            List of hidden units per layer.
-
-        Returns
-        -------
-        nn.Sequential
-            Built architecture.
-        """
-        pass
 
 
 class Module(ABC):
