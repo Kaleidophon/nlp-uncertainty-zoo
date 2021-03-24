@@ -9,7 +9,7 @@ from copy import deepcopy
 import math
 import os
 from random import shuffle
-from typing import Dict, Optional, Any, List, Union, Tuple
+from typing import Dict, Optional, Any, List, Tuple
 
 # EXT
 from t2i import T2I
@@ -19,9 +19,6 @@ from torch.utils.data import Dataset
 # TYPES
 # List of sequences and corresponding labels
 BatchedSequences = List[torch.LongTensor]
-
-
-# TODO: Create wikitext dataset
 
 
 class DataSplit(Dataset):
@@ -212,20 +209,26 @@ class TextDataset(ABC):
 
     def _batch(self, split: str, sequences: List[str]) -> DataSplit:
         """
-
+        Index and batch sequences based on batching style specified by batch_style. If batch_style="padding", one batch
+        instance will correspond to a single sequences padded up to a certain length either specified by sequence_length
+        or corresponding to the maximum sequence length found in the training set.
 
         Parameters
         ----------
-        split
-        sequences
+        split: str
+            Data split to be batched.
+        sequences: List[str]
+            List of sequences in split as strings.
 
         Returns
         -------
-
+        DataSplit
+            DataSplit class containing indexed sequences and target labels.
         """
         batched_sequences = None
 
         if self.batch_style == "padding":
+
             indexed_sequences = list(
                 map(
                     torch.LongTensor,
@@ -237,6 +240,15 @@ class TextDataset(ABC):
                     ),
                 )
             )
+
+            if self.sequence_length is None:
+                self.sequence_length = max(len(seq) for seq in indexed_sequences)
+
+            # Filter out sequences which are too long
+            indexed_sequences = filter(
+                lambda seq: len(seq) <= self.sequence_length, indexed_sequences
+            )
+
             batched_sequences = torch.stack(
                 list(map(torch.LongTensor, indexed_sequences)), dim=0
             )
@@ -246,7 +258,7 @@ class TextDataset(ABC):
 
         elif self.batch_style == "continuous":
             indexed_sequences = list(map(torch.LongTensor, self.t2i(sequences)))
-            indexed_sequences = torch.stack(indexed_sequences, dim=0)
+            indexed_sequences = torch.cat(indexed_sequences, dim=0)
 
             # Work out how cleanly we can divide the dataset into batch-sized parts
             num_batched_steps = indexed_sequences.shape[0] // self.batch_size
@@ -282,7 +294,7 @@ class LanguageModelingDataset(TextDataset):
         self, split: str, batched_sequences: BatchedSequences
     ) -> Tuple[List[torch.LongTensor], List[torch.LongTensor]]:
         batched_sequences, batched_labels = zip(
-            *[(batch[:-1, :], batch[1:, :]) for batch in batched_sequences]
+            *[(batch[:, :-1], batch[:, 1:]) for batch in batched_sequences]
         )
 
         return list(batched_sequences), list(batched_labels)
@@ -303,6 +315,6 @@ class Wikitext103Dataset(LanguageModelingDataset):
                 "test": "wiki.test.tokens",
             },
             batch_size=batch_size,
-            batch_style="continuous",
+            batch_style="padding",
             sequence_length=sequence_length,
         )
