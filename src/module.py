@@ -79,9 +79,7 @@ class Model(ABC, nn.Module):
         torch.FloatTensor
             Output predictions for input.
         """
-        output = self.architecture(input_)
-
-        return output
+        pass
 
 
 class Module(ABC):

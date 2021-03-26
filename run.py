@@ -13,13 +13,21 @@ from src.config import PREPROCESSING_PARAMS, TRAIN_PARAMS, MODEL_PARAMS
 from src.datasets import Wikitext103Dataset
 from src.lstm import LSTMModule
 from src.dropout import VariationalLSTMModule
+from src.transformer import TransformerModule
 
 # CONST
 RESULT_DIR = "./results"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
 AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset}
-AVAILABLE_MODELS = {"lstm": LSTMModule, "variational_lstm": VariationalLSTMModule}
+AVAILABLE_MODELS = {
+    "lstm": LSTMModule,
+    "variational_lstm": VariationalLSTMModule,
+    "transformer": TransformerModule,
+}
+
+
+# TODO: Add notification about finished training runs using https://github.com/huggingface/knockknock
 
 
 if __name__ == "__main__":
@@ -32,7 +40,11 @@ if __name__ == "__main__":
         help="Dataset to run experiments on.",
     )
     parser.add_argument(
-        "--models", type=str, nargs="+", choices=AVAILABLE_MODELS.keys()
+        "--models",
+        type=str,
+        required=True,
+        nargs="+",
+        choices=AVAILABLE_MODELS.keys(),
     )
     parser.add_argument("--data-dir", type=str, default=DATA_DIR)
     parser.add_argument("--result-dir", type=str, default=RESULT_DIR)
@@ -45,10 +57,7 @@ if __name__ == "__main__":
     )
     summary_writer = SummaryWriter()
 
-    # TODO: Take this from CL args
-    models = ["lstm"]
-
-    for model_name in models:
+    for model_name in args.models:
 
         model_params = MODEL_PARAMS[args.data][model_name]
         train_params = TRAIN_PARAMS[args.data][model_name]

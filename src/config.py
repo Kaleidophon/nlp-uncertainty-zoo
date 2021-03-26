@@ -20,6 +20,7 @@ TRAIN_PARAMS = {
     "wikitext-103": {
         "lstm": {"lr": 0.01, **SHARED_TRAIN_PARAMS["wikitext-103"]},
         "variational_lstm": {"lr": 0.01, **SHARED_TRAIN_PARAMS["wikitext-103"]},
+        "transformer": {"lr": 0.01, **SHARED_TRAIN_PARAMS["wikitext-103"]},
     }
 }
 
@@ -43,6 +44,13 @@ MODEL_PARAMS = {
         "variational_lstm": {
             "num_layers": 2,
             "dropout": 0.35,
+            **SHARED_MODEL_PARAMS["wikitext-103"],
+        },
+        "transformer": {
+            "num_layers": 6,
+            "dropout": 0.2,
+            "num_heads": 5,
+            "sequence_length": 30,
             **SHARED_MODEL_PARAMS["wikitext-103"],
         },
     }
