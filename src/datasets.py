@@ -309,7 +309,9 @@ class LanguageModelingDataset(TextDataset):
     """
 
     def _get_labels(
-        self, split: str, batched_sequences: BatchedSequences
+        self,
+        split: str,
+        batched_sequences: BatchedSequences,
     ) -> Tuple[List[torch.LongTensor], List[torch.LongTensor]]:
         """
         Get the labels for a dataset by loading them or deriving them from the inputs.
@@ -338,7 +340,13 @@ class Wikitext103Dataset(LanguageModelingDataset):
     Dataset class for the Wikitext-103 dataset.
     """
 
-    def __init__(self, data_dir: str, batch_size: int, sequence_length: int):
+    def __init__(
+        self,
+        data_dir: str,
+        batch_size: int,
+        sequence_length: int,
+        indexing_params: Dict[str, Any],
+    ):
         super().__init__(
             name="wikitext-103",
             data_dir=data_dir,
@@ -350,4 +358,5 @@ class Wikitext103Dataset(LanguageModelingDataset):
             batch_size=batch_size,
             batch_style="continuous",
             sequence_length=sequence_length,
+            **indexing_params,
         )

@@ -9,13 +9,17 @@ import argparse
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
+from src.config import PREPROCESSING_PARAMS, TRAIN_PARAMS, MODEL_PARAMS
 from src.datasets import Wikitext103Dataset
+from src.lstm import LSTMModule
+from src.dropout import VariationalLSTMModule
 
 # CONST
 RESULT_DIR = "./results"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
 AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset}
+AVAILABLE_MODELS = {"lstm": LSTMModule, "variational_lstm": VariationalLSTMModule}
 
 
 if __name__ == "__main__":
@@ -28,10 +32,7 @@ if __name__ == "__main__":
         help="Dataset to run experiments on.",
     )
     parser.add_argument(
-        "--models",
-        type=str,
-        nargs="+",
-        # choices= ... TODO: Add available models here
+        "--models", type=str, nargs="+", choices=AVAILABLE_MODELS.keys()
     )
     parser.add_argument("--data-dir", type=str, default=DATA_DIR)
     parser.add_argument("--result-dir", type=str, default=RESULT_DIR)
@@ -39,35 +40,20 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Read data
-    # TODO: Put batch size and sequence length into config
     data = AVAILABLE_DATASETS[args.data](
-        data_dir=args.data_dir, batch_size=5, sequence_length=12
+        data_dir=args.data_dir, **PREPROCESSING_PARAMS[args.data]
     )
-
     summary_writer = SummaryWriter()
 
-    # TODO: Debug
-    from src.lstm import LSTMModule
-    from src.dropout import VariationalLSTMModule
+    # TODO: Take this from CL args
+    models = ["lstm"]
 
-    train = data.train
+    for model_name in models:
 
-    model_params = {
-        "num_layers": 2,
-        "vocab_size": len(data.t2i),
-        "input_size": 100,
-        "hidden_size": 100,
-        "output_size": len(data.t2i),
-        "dropout": 0.2,
-    }
-    train_params = {"lr": 0.01, "num_epochs": 10}
+        model_params = MODEL_PARAMS[args.data][model_name]
+        train_params = TRAIN_PARAMS[args.data][model_name]
 
-    # lstm_module = LSTMModule(model_params, train_params, model_dir="models")
-    # lstm_module.fit(data, summary_writer=summary_writer)
-    var_lstm_module = VariationalLSTMModule(
-        model_params, train_params, model_dir="models"
-    )
-    # var_lstm_module.fit(data)
-    for X, y in data.test:
-        out = var_lstm_module.predict(X)
-        ...
+        module = AVAILABLE_MODELS[model_name](
+            model_params, train_params, model_dir="models"
+        )
+        module.fit(data)
