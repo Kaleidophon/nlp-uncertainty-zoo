@@ -117,7 +117,7 @@ class Module(ABC):
         """
         self.model_name = model_name
         self.model_class = model_class
-        self.model = model_class(**model_params)
+        self.model = model_class(**model_params, device=device)
         self.train_params = train_params
         self.model_dir = model_dir
         self.device = device
@@ -126,10 +126,10 @@ class Module(ABC):
 
         # Check if model directory exists, if not, create
         if model_dir is not None:
-            full_model_dir = os.path.join(model_dir, model_name)
+            self.full_model_dir = os.path.join(model_dir, model_name)
 
-            if not os.path.exists(full_model_dir):
-                os.mkdir(full_model_dir)
+            if not os.path.exists(self.full_model_dir):
+                os.mkdir(self.full_model_dir)
 
     def fit(
         self,
@@ -150,7 +150,7 @@ class Module(ABC):
             Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        device = self.train_params["device"]
+        device = self.device
         num_epochs = self.train_params["num_epochs"]
 
         best_val_loss = np.inf
@@ -163,28 +163,34 @@ class Module(ABC):
             output_dir=self.model_dir,
         )
         tracker.start()
+        total_steps = num_epochs * len(dataset.train) + num_epochs * len(dataset.valid)
 
-        with tqdm(total=num_epochs) as progress_bar:
-            for epoch in tqdm(self.train_params["num_epochs"]):
+        with tqdm(total=total_steps) as progress_bar:
+            for epoch in range(self.train_params["num_epochs"]):
                 self.model.train()
                 train_loss = self._epoch_iter(
-                    epoch, dataset.train.to(device), summary_writer
+                    epoch,
+                    dataset.train.to(device),
+                    progress_bar if verbose else None,
+                    summary_writer,
                 )
 
                 # Update progress bar and summary writer
                 if verbose is not None:
                     progress_bar.set_description(
-                        f"Epoch {epoch + 1} / {num_epochs}: Train Loss {train_loss:.4f}"
+                        f"Epoch {epoch + 1} / {num_epochs}: Train Loss {train_loss.item():.4f}"
                     )
                     progress_bar.update(1)
 
                 if summary_writer is not None:
-                    summary_writer.add_scalar("Epoch train loss", train_loss, epoch)
+                    summary_writer.add_scalar(
+                        "Epoch train loss", train_loss.item(), epoch
+                    )
 
                 # Get validation loss
                 self.model.eval()
                 val_loss = self._epoch_iter(
-                    epoch, dataset.valid.to(device), summary_writer
+                    epoch, dataset.valid.to(device), progress_bar if verbose else None
                 )
 
                 if summary_writer is not None:
@@ -193,10 +199,14 @@ class Module(ABC):
                 if val_loss < best_val_loss:
                     best_val_loss = best_val_loss
 
-                    with open(
-                        os.path.join(self.model_dir, f"{epoch}_{val_loss:.2f}.pt")
-                    ) as model_path:
-                        torch.save(self, model_path)
+                    if self.model_dir is not None:
+                        torch.save(
+                            self,
+                            os.path.join(
+                                self.full_model_dir,
+                                f"{epoch + 1}_{val_loss.item():.2f}.pt",
+                            ),
+                        )
 
                 else:
                     num_no_improvements += 1
@@ -230,8 +240,9 @@ class Module(ABC):
 
     def _epoch_iter(
         self,
-        n_epoch: int,
+        epoch: int,
         data_split: DataSplit,
+        progress_bar: Optional[tqdm] = None,
         summary_writer: Optional[SummaryWriter] = None,
     ) -> torch.Tensor:
         """
@@ -239,21 +250,31 @@ class Module(ABC):
 
         Parameters
         ----------
-        n_epoch: int
+        epoch: int
             Number of the current epoch.
         data_split: DataSplit
             Current data split.
+        progress_bar: Optional[tqdm]
+            Progress bar used to display information about current run.
         summary_writer: SummaryWriter
             Summary writer to track training statistics.
         """
         epoch_loss = torch.zeros(1)
+        num_batches = len(data_split)
 
         for i, (X, y) in enumerate(data_split):
             batch_loss = self.get_loss(i, X, y, summary_writer)
 
+            # Update progress bar and summary writer
+            if progress_bar is not None:
+                progress_bar.set_description(
+                    f"Epoch {epoch + 1}: {i+1}/{num_batches} | Loss {batch_loss.item():.4f}"
+                )
+                progress_bar.update(1)
+
             if summary_writer is not None:
                 summary_writer.add_scalar(
-                    "Batch train loss", batch_loss, n_epoch * len(data_split) + i
+                    "Batch train loss", batch_loss, epoch * len(data_split) + i
                 )
 
             epoch_loss += batch_loss
@@ -292,8 +313,13 @@ class Module(ABC):
         torch.Tensor
             Batch loss.
         """
+
         loss_function = nn.NLLLoss()
         preds = self.model(X)
+        batch_size, sequence_length, output_size = preds.shape
+        preds = preds.reshape(batch_size * sequence_length, output_size)
+        y = y.reshape(batch_size * sequence_length)
+
         loss = loss_function(preds, y)
 
         return loss

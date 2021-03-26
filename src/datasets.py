@@ -38,11 +38,13 @@ class DataSplit(Dataset):
         for input_, labels in self.batched_sequences:
             yield input_, labels
 
-    def to(self, device: Device):
+    def to(self, device: Device) -> Dataset:
         self.batched_sequences = [
             (input_.to(device), target.to(device))
             for input_, target in self.batched_sequences
         ]
+
+        return self
 
     def shuffle(self):
         dataset = deepcopy(self)
@@ -251,7 +253,7 @@ class TextDataset(ABC):
 
             # Filter out sequences which are too long
             indexed_sequences = filter(
-                lambda seq: len(seq) <= self.sequence_length, indexed_sequences
+                lambda seq: len(seq) < self.sequence_length - 2, indexed_sequences
             )
 
             batched_sequences = torch.stack(
@@ -263,6 +265,17 @@ class TextDataset(ABC):
 
         elif self.batch_style == "continuous":
             indexed_sequences = list(map(torch.LongTensor, self.t2i(sequences)))
+
+            if self.sequence_length is None:
+                self.sequence_length = max(len(seq) for seq in indexed_sequences)
+
+            # Filter out sequences which are too long
+            indexed_sequences = list(
+                filter(
+                    lambda seq: len(seq) < self.sequence_length - 1, indexed_sequences
+                )
+            )
+
             indexed_sequences = torch.cat(indexed_sequences, dim=0)
 
             # Work out how cleanly we can divide the dataset into batch-sized parts
@@ -274,12 +287,12 @@ class TextDataset(ABC):
             )
 
             # Evenly divide the data across the bsz batches.
-            raw_batches = indexed_sequences.view(self.batch_size, -1).t().contiguous()
+            raw_batches = indexed_sequences.view(self.batch_size, -1).contiguous()
 
             num_batches = math.ceil(num_batched_steps / self.sequence_length)
             batched_sequences = [
                 raw_batches[
-                    n * self.sequence_length : (n + 1) * self.sequence_length + 1, :
+                    :, n * self.sequence_length : (n + 1) * self.sequence_length + 1
                 ]
                 for n in range(num_batches)
             ]
@@ -335,6 +348,6 @@ class Wikitext103Dataset(LanguageModelingDataset):
                 "test": "wiki.test.tokens",
             },
             batch_size=batch_size,
-            batch_style="padding",
+            batch_style="continuous",
             sequence_length=sequence_length,
         )

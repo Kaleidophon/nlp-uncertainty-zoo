@@ -57,9 +57,8 @@ class LSTM(Model):
         # Initialize network
         self.embeddings = nn.Embedding(vocab_size, input_size)
         self.gates = {}
-        self.dropout_masks = {}
         self.decoder = nn.Linear(hidden_size, output_size)
-        self.dropout_out = nn.Dropout(dropout)
+        self.dropout = dropout
 
         for layer in range(num_layers):
             self.gates[layer] = {
@@ -76,10 +75,10 @@ class LSTM(Model):
     def forward(
         self, input_: torch.LongTensor, hidden: Optional[HiddenDict] = None
     ) -> torch.FloatTensor:
+        batch_size, sequence_length = input_.shape
 
         # Initialize hidden activations if not given
         if hidden is None:
-            batch_size = input_.shape[0]
             hidden = {
                 layer: (
                     torch.zeros(batch_size, self.hidden_size, device=self.device),
@@ -91,41 +90,47 @@ class LSTM(Model):
         # Sample all dropout masks used for this batch
         dropout_masks_input = {
             layer: torch.bernoulli(
-                torch.ones(self.input_size, self.hidden_size) * (1 - self.dropout)
+                torch.ones(batch_size, self.hidden_size) * (1 - self.dropout)
             )
             for layer in range(self.num_layers)
         }
         dropout_masks_time = {
             layer: torch.bernoulli(
-                torch.ones(self.hidden_size, self.hidden_size) * (1 - self.dropout)
+                torch.ones(batch_size, self.hidden_size) * (1 - self.dropout)
             )
             for layer in range(self.num_layers)
         }
 
-        embeddings = self.embeddings(input_)
-        input_ = embeddings.squeeze(0)
+        outputs = []
 
-        for layer in range(self.num_layers):
-            new_hidden = self.forward_step(
-                layer,
-                hidden[layer],
-                input_,
-                dropout_masks_input[layer],
-                dropout_masks_time[layer],
+        for t in range(sequence_length):
+
+            embeddings = self.embeddings(input_[:, t])
+            layer_input = embeddings.squeeze(0)
+
+            for layer in range(self.num_layers):
+                new_hidden = self.forward_step(
+                    layer,
+                    hidden[layer],
+                    layer_input,
+                    dropout_masks_input[layer],
+                    dropout_masks_time[layer],
+                )
+                layer_input = new_hidden[
+                    0
+                ]  # New hidden state becomes input for next layer
+                hidden[layer] = new_hidden  # Store for next step
+
+            dropout_out = torch.bernoulli(
+                torch.ones(batch_size, self.hidden_size) * (1 - self.dropout)
             )
-            input_ = new_hidden[0]  # New hidden state becomes input for next layer
-            hidden[layer] = new_hidden  # Store for next step
+            out = layer_input * dropout_out
+            out = self.decoder(out)
+            outputs.append(out)
 
-        dropout_out = torch.bernoulli(
-            torch.ones(self.hidden_size, self.vocab_size) * (1 - self.dropout)
-        )
-        dropout_out = dropout_out.repeat(
-            1, 1, input_.shape[1]
-        )  # Repeat same mask across time dimension
-        out = input_ * dropout_out
-        out = self.decoder(out)
+        outputs = torch.stack(outputs, dim=1)
 
-        return out
+        return outputs
 
     def forward_step(
         self,
