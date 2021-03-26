@@ -59,6 +59,7 @@ class LSTM(Model):
         self.gates = {}
         self.decoder = nn.Linear(hidden_size, output_size)
         self.dropout = dropout
+        self._dropout = 0
 
         for layer in range(num_layers):
             self.gates[layer] = {
@@ -195,6 +196,16 @@ class LSTM(Model):
         hx = o_g * torch.tanh(cx)
 
         return hx, cx
+
+    def eval(self):
+        # Turn off dropout
+        self._dropout, self.dropout = self.dropout, 0
+        super().eval()
+
+    def train(self, *args):
+        # Reinstate old dropout prob
+        self.dropout = self._dropout
+        super().train(*args)
 
 
 class LSTMModule(Module):

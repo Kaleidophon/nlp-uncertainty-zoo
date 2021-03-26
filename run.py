@@ -48,6 +48,7 @@ if __name__ == "__main__":
 
     # TODO: Debug
     from src.lstm import LSTMModule
+    from src.dropout import VariationalLSTMModule
 
     train = data.train
 
@@ -57,9 +58,16 @@ if __name__ == "__main__":
         "input_size": 100,
         "hidden_size": 100,
         "output_size": len(data.t2i),
-        "dropout": 0,
+        "dropout": 0.2,
     }
     train_params = {"lr": 0.01, "num_epochs": 10}
 
-    lstm_module = LSTMModule(model_params, train_params, model_dir="models")
-    lstm_module.fit(data, summary_writer=summary_writer)
+    # lstm_module = LSTMModule(model_params, train_params, model_dir="models")
+    # lstm_module.fit(data, summary_writer=summary_writer)
+    var_lstm_module = VariationalLSTMModule(
+        model_params, train_params, model_dir="models"
+    )
+    # var_lstm_module.fit(data)
+    for X, y in data.test:
+        out = var_lstm_module.predict(X)
+        ...

@@ -220,7 +220,7 @@ class Module(ABC):
         # Stop emission tracking
         tracker.stop()
 
-    def predict(self, X: torch.Tensor) -> torch.Tensor:
+    def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Make a prediction for some input.
 
