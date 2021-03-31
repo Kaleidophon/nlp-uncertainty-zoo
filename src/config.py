@@ -21,6 +21,7 @@ _TRAIN_PARAMS = {
         "lstm": {"lr": 0.01},
         "variational_lstm": {"lr": 0.01},
         "transformer": {"lr": 0.01, "gamma": 0.95},
+        "variational_transformer": {"lr": 0.01, "gamma": 0.95},
     }
 }
 TRAIN_PARAMS = {
@@ -47,6 +48,12 @@ _MODEL_PARAMS = {
         "lstm": {"num_layers": 2, "dropout": 0.2},
         "variational_lstm": {"num_layers": 2, "dropout": 0.35},
         "transformer": {
+            "num_layers": 6,
+            "dropout": 0.2,
+            "num_heads": 5,
+            "sequence_length": 30,
+        },
+        "variational_transformer": {
             "num_layers": 6,
             "dropout": 0.2,
             "num_heads": 5,

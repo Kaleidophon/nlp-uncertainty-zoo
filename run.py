@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 from src.config import PREPROCESSING_PARAMS, TRAIN_PARAMS, MODEL_PARAMS
 from src.datasets import Wikitext103Dataset
 from src.lstm import LSTMModule
-from src.dropout import VariationalLSTMModule
+from src.dropout import VariationalLSTMModule, VariationalTransformerModule
 from src.transformer import TransformerModule
 
 # CONST
@@ -24,6 +24,7 @@ AVAILABLE_MODELS = {
     "lstm": LSTMModule,
     "variational_lstm": VariationalLSTMModule,
     "transformer": TransformerModule,
+    "variational_transformer": VariationalTransformerModule,
 }
 
 
