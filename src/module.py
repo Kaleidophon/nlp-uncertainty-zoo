@@ -119,8 +119,15 @@ class Module(ABC):
         self.train_params = train_params
         self.model_dir = model_dir
         self.device = device
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.train_params["lr"])
         self.to(device)
+
+        # Initialize optimizer and scheduler
+        self.optimizer = optim.Adam(self.model.parameters(), lr=self.train_params["lr"])
+        self.scheduler = optim.lr_scheduler.StepLR(
+            self.optimizer,
+            step_size=self.train_params["step_size"],
+            gamma=self.train_params["gamma"],
+        )
 
         # Check if model directory exists, if not, create
         if model_dir is not None:
@@ -156,9 +163,9 @@ class Module(ABC):
         num_no_improvements = 0
         # TODO: Set country code in config
         tracker = OfflineEmissionsTracker(
-            project_name="nlp-uncertainty-zoo",
+            project_name=f"nlp-uncertainty-zoo_{self.model_name}",
             country_iso_code="DNK",
-            output_dir=self.model_dir,
+            output_dir=self.full_model_dir,
         )
         tracker.start()
         total_steps = num_epochs * len(dataset.train) + num_epochs * len(dataset.valid)

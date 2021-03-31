@@ -8,10 +8,8 @@ from typing import Optional, Dict, Any
 # EXT
 import torch
 import torch.nn as nn
-from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
-from src.datasets import DataSplit
 from src.module import Module, Model
 from src.types import HiddenDict, Device, HiddenStates
 
@@ -49,6 +47,8 @@ class LSTM(Model):
         dropout: float
             Dropout rate. Dropout applications corresponds to `Gal & Ghahramani (2016)
             <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
+        device: Device
+            Device the model is located on.
         """
         super().__init__(
             num_layers, vocab_size, input_size, hidden_size, output_size, device
