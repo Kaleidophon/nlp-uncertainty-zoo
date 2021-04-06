@@ -32,6 +32,9 @@ except ImportError:
     )
 
 
+# TODO: Swap usage of model and module
+
+
 class Model(ABC, nn.Module):
     """
     Abstract model class, defining how the forward pass of a model looks and how the architecture is being built.

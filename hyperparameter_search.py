@@ -202,6 +202,9 @@ if __name__ == "__main__":
     parser.add_argument("--save-top-n", type=int, default=10)
     parser.add_argument("--track-emissions", action="store_true", default=False)
 
+    # TODO: Emissions tracking path
+    # TODO: Wrap in function, add knockknock bot and compile info
+
     args = parser.parse_args()
 
     np.random.seed(SEED)

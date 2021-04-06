@@ -49,6 +49,11 @@ if __name__ == "__main__":
     )
     summary_writer = SummaryWriter()
 
+    # TODO: Initialize emissions tracker here
+    # TODO: Add number of runs
+    # TODO: Add setting of random seed
+    # TODO: Wrap in function, add knockknock bot and compile info
+
     for model_name in args.models:
 
         model_params = MODEL_PARAMS[args.data][model_name]
