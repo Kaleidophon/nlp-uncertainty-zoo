@@ -20,6 +20,7 @@ from tqdm import tqdm
 # PROJECT
 from src.datasets import DataSplit, TextDataset
 from src.types import Device
+from secret import COUNTRY_CODE
 
 
 class Model(ABC, nn.Module):
@@ -138,65 +139,78 @@ class Module(ABC):
 
     def fit(
         self,
-        dataset: TextDataset,
+        train_data: DataSplit,
+        valid_data: Optional[DataSplit] = None,
         verbose: bool = True,
         summary_writer: Optional[SummaryWriter] = None,
+        track_emissions: bool = True,
+        emission_tracking_path: Optional[str] = None,
     ):
         """
         Fit the model to training data.
 
         Parameters
         ----------
-        dataset: TextDataset
-            Dataset the model is being trained on.
+        train_data: DataSplit
+            Training data split.
+        valid_data: Optional[DataSplit]
+            Validation data split.
         verbose: bool
             Whether to display information about current loss.
         summary_writer: Optional[SummaryWriter]
             Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        track_emissions: bool
+            Indicate whether carbon emissions should be tracked.
+        emission_tracking_path: Optional[str]
+            Path that determines where emission tracking information is being saved to. If None, defaults to the model
+            save directory.
         """
-        device = self.device
         num_epochs = self.train_params["num_epochs"]
 
         best_val_loss = np.inf
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
         num_no_improvements = 0
-        # TODO: Set country code in config
-        tracker = OfflineEmissionsTracker(
-            project_name=f"nlp-uncertainty-zoo_{self.model_name}",
-            country_iso_code="DNK",
-            output_dir=self.full_model_dir,
-        )
-        tracker.start()
-        total_steps = num_epochs * len(dataset.train) + num_epochs * len(dataset.valid)
 
-        with tqdm(total=total_steps) as progress_bar:
-            for epoch in range(self.train_params["num_epochs"]):
-                self.model.train()
-                train_loss = self._epoch_iter(
-                    epoch,
-                    dataset.train.to(device),
-                    progress_bar if verbose else None,
-                    summary_writer,
+        if track_emissions:
+            tracker = OfflineEmissionsTracker(
+                project_name=f"nlp-uncertainty-zoo_{self.model_name}",
+                country_iso_code=COUNTRY_CODE,
+                output_dir=self.full_model_dir
+                if emission_tracking_path is None
+                else emission_tracking_path,
+            )
+            tracker.start()
+
+        total_steps = num_epochs * len(train_data)
+        progress_bar = tqdm(total=total_steps) if verbose else None
+
+        if valid_data is not None:
+            total_steps += num_epochs * len(valid_data)
+
+        for epoch in range(self.train_params["num_epochs"]):
+            self.model.train()
+            train_loss = self._epoch_iter(
+                epoch,
+                train_data,
+                progress_bar,
+                summary_writer,
+            )
+
+            # Update progress bar and summary writer
+            if verbose:
+                progress_bar.set_description(
+                    f"Epoch {epoch + 1} / {num_epochs}: Train Loss {train_loss.item():.4f}"
                 )
+                progress_bar.update(1)
 
-                # Update progress bar and summary writer
-                if verbose is not None:
-                    progress_bar.set_description(
-                        f"Epoch {epoch + 1} / {num_epochs}: Train Loss {train_loss.item():.4f}"
-                    )
-                    progress_bar.update(1)
+            if summary_writer is not None:
+                summary_writer.add_scalar("Epoch train loss", train_loss.item(), epoch)
 
-                if summary_writer is not None:
-                    summary_writer.add_scalar(
-                        "Epoch train loss", train_loss.item(), epoch
-                    )
-
-                # Get validation loss
+            # Get validation loss
+            if valid_data is not None:
                 self.model.eval()
-                val_loss = self._epoch_iter(
-                    epoch, dataset.valid.to(device), progress_bar if verbose else None
-                )
+                val_loss = self._epoch_iter(epoch, valid_data, progress_bar)
 
                 if summary_writer is not None:
                     summary_writer.add_scalar("Epoch val loss", val_loss, epoch)
@@ -220,10 +234,12 @@ class Module(ABC):
                         break
 
         # Additional training step, e.g. temperature scaling on val
-        self._finetune(dataset.valid.to(device))
+        if valid_data is not None:
+            self._finetune(valid_data)
 
         # Stop emission tracking
-        tracker.stop()
+        if track_emissions:
+            tracker.stop()
 
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
@@ -242,6 +258,26 @@ class Module(ABC):
         X.to(self.device)
 
         return self.model(X)
+
+    def eval(self, data_split: DataSplit) -> torch.Tensor:
+        """
+        Evaluate a data split.
+
+        Parameters
+        ----------
+        data_split: DataSplit
+            Data split the model should be evaluated on.
+
+        Returns
+        -------
+        torch.Tensor
+            Loss on evaluation split.
+        """
+        self.model.eval()
+        loss = self._epoch_iter(0, data_split)
+        self.model.train()
+
+        return loss
 
     def _epoch_iter(
         self,
@@ -329,7 +365,7 @@ class Module(ABC):
 
         return loss
 
-    def _finetune(self, data_loader: data.DataLoader) -> torch.Tensor:
+    def _finetune(self, data_loader: DataSplit) -> torch.Tensor:
         """
         Do an additional training / fine-tuning step, which is required for some models. Is being overwritten in some
         subclasses.

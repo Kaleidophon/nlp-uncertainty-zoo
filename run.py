@@ -9,24 +9,18 @@ import argparse
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
-from src.config import PREPROCESSING_PARAMS, TRAIN_PARAMS, MODEL_PARAMS
-from src.datasets import Wikitext103Dataset
-from src.lstm import LSTMModule
-from src.dropout import VariationalLSTMModule, VariationalTransformerModule
-from src.transformer import TransformerModule
+from src.config import (
+    PREPROCESSING_PARAMS,
+    TRAIN_PARAMS,
+    MODEL_PARAMS,
+    AVAILABLE_DATASETS,
+    AVAILABLE_MODELS,
+)
 
 # CONST
 RESULT_DIR = "./results"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
-AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset}
-AVAILABLE_MODELS = {
-    "lstm": LSTMModule,
-    "variational_lstm": VariationalLSTMModule,
-    "transformer": TransformerModule,
-    "variational_transformer": VariationalTransformerModule,
-}
-
 
 # TODO: Add notification about finished training runs using https://github.com/huggingface/knockknock
 
@@ -66,4 +60,7 @@ if __name__ == "__main__":
         module = AVAILABLE_MODELS[model_name](
             model_params, train_params, model_dir="models"
         )
-        module.fit(data)
+        module.fit(
+            train_data=data.train.to(module.device),
+            valid_data=data.valid.to(module.device),
+        )

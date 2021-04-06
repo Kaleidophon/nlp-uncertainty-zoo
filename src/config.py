@@ -2,8 +2,28 @@
 This module puts all the hyper-, training and preprocessing parameters used in this project into one single place.
 """
 
+# EXT
+from sklearn.utils.fixes import loguniform
+from scipy.stats import uniform
+
+# PROJECT
+from src.datasets import Wikitext103Dataset
+from src.dropout import VariationalLSTMModule, VariationalTransformerModule
+from src.lstm import LSTMModule
+from src.transformer import TransformerModule
+
+# AVAILABLE DATASETS AND MODELS
+AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset}
+AVAILABLE_MODELS = {
+    "lstm": LSTMModule,
+    "variational_lstm": VariationalLSTMModule,
+    "transformer": TransformerModule,
+    "variational_transformer": VariationalTransformerModule,
+}
+
 # PREPROCESSING PARAMETERS
 # List of preprocessing parameters by dataset
+
 SHARED_PREPROCESSING_PARAMS = {"indexing_params": {"min_freq": 20}}
 _PREPROCESSING_PARAMS = {"wikitext-103": {"batch_size": 64, "sequence_length": 30}}
 
@@ -15,7 +35,7 @@ PREPROCESSING_PARAMS = {
 
 # TRAINING PARAMETERS
 # Training parameters by dataset and model
-SHARED_TRAIN_PARAMS = {"wikitext-103": {"num_epochs": 10, "step_size": 1, "gamma": 1}}
+SHARED_TRAIN_PARAMS = {"wikitext-103": {"num_epochs": 1, "step_size": 1, "gamma": 1}}
 _TRAIN_PARAMS = {
     "wikitext-103": {
         "lstm": {"lr": 0.01},
@@ -67,4 +87,29 @@ MODEL_PARAMS = {
         for model_name, model_params in model_dicts.items()
     }
     for dataset, model_dicts in _MODEL_PARAMS.items()
+}
+
+# HYPERPARAMETER SEARCH
+# Number of tested configurations per dataset per model
+NUM_EVALS = {
+    "wikitext-103": {
+        "lstm": 20,
+        "variational_lstm": 20,
+        "transformer": 10,
+        "variational_transformer": 10,
+    }
+}
+
+# Search ranges / options per dataset per model
+PARAM_SEARCH = {
+    "wikitext-103": {
+        "lstm": {"num_layers": list(range(2, 6)), "dropout": uniform(0.1, 0.4)},
+        "variational_lstm": {},
+        "transformer": {
+            "num_layers": list(range(2, 6)),
+            "dropout": uniform(0.1, 0.4),
+            "num_heads": [5, 10, 15],
+        },
+        "variational_transformer": {},
+    }
 }
