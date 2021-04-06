@@ -22,9 +22,6 @@ RESULT_DIR = "./results"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
 
-# TODO: Add notification about finished training runs using https://github.com/huggingface/knockknock
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(

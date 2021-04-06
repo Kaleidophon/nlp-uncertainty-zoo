@@ -3,3 +3,4 @@ numpy
 codecarbon
 tensorboard
 scikit-learn
+knockknock

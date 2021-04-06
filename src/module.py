@@ -9,6 +9,7 @@ import os
 
 # EXT
 from codecarbon import OfflineEmissionsTracker
+from knockknock import telegram_sender
 import numpy as np
 import torch
 import torch.nn as nn
@@ -18,9 +19,17 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 # PROJECT
-from src.datasets import DataSplit, TextDataset
+from src.datasets import DataSplit
 from src.types import Device
 from secret import COUNTRY_CODE
+
+try:
+    from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID
+
+except ImportError:
+    raise ImportError(
+        "secret.py wasn't found, please rename secret_template.py and fill in the information."
+    )
 
 
 class Model(ABC, nn.Module):
@@ -137,6 +146,7 @@ class Module(ABC):
             if not os.path.exists(self.full_model_dir):
                 os.mkdir(self.full_model_dir)
 
+    @telegram_sender(token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID)
     def fit(
         self,
         train_data: DataSplit,
@@ -237,9 +247,19 @@ class Module(ABC):
         if valid_data is not None:
             self._finetune(valid_data)
 
+        # Make a nice result dict for knockknock
+        result_dict = {
+            "model_name": self.model_name,
+            "train_loss": train_loss.item(),
+            "best_val_loss": best_val_loss,
+        }
+
         # Stop emission tracking
         if track_emissions:
             tracker.stop()
+            result_dict["emissions"] = tracker._prepare_emissions_data().emissions
+
+        return result_dict
 
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
