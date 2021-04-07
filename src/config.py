@@ -93,9 +93,9 @@ MODEL_PARAMS = {
 # Number of tested configurations per dataset per model
 NUM_EVALS = {
     "wikitext-103": {
-        "lstm": 20,
+        "lstm": 2,
         "variational_lstm": 20,
-        "transformer": 10,
+        "transformer": 2,
         "variational_transformer": 10,
     }
 }

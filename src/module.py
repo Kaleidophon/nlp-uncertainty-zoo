@@ -21,16 +21,6 @@ from tqdm import tqdm
 # PROJECT
 from src.datasets import DataSplit
 from src.types import Device
-from secret import COUNTRY_CODE
-
-try:
-    from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID
-
-except ImportError:
-    raise ImportError(
-        "secret.py wasn't found, please rename secret_template.py and fill in the information."
-    )
-
 
 # TODO: Swap usage of model and module
 
@@ -149,15 +139,13 @@ class Module(ABC):
             if not os.path.exists(self.full_model_dir):
                 os.mkdir(self.full_model_dir)
 
-    @telegram_sender(token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID)
     def fit(
         self,
         train_data: DataSplit,
         valid_data: Optional[DataSplit] = None,
         verbose: bool = True,
         summary_writer: Optional[SummaryWriter] = None,
-        track_emissions: bool = True,
-        emission_tracking_path: Optional[str] = None,
+        emission_tracker: Optional[OfflineEmissionsTracker] = None,
     ):
         """
         Fit the model to training data.
@@ -173,11 +161,8 @@ class Module(ABC):
         summary_writer: Optional[SummaryWriter]
             Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
-        track_emissions: bool
-            Indicate whether carbon emissions should be tracked.
-        emission_tracking_path: Optional[str]
-            Path that determines where emission tracking information is being saved to. If None, defaults to the model
-            save directory.
+        emission_tracker: Optional[OfflineEmissionsTracker]
+            Emission tracker for this number of experiments.
         """
         num_epochs = self.train_params["num_epochs"]
 
@@ -185,15 +170,8 @@ class Module(ABC):
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
         num_no_improvements = 0
 
-        if track_emissions:
-            tracker = OfflineEmissionsTracker(
-                project_name=f"nlp-uncertainty-zoo_{self.model_name}",
-                country_iso_code=COUNTRY_CODE,
-                output_dir=self.full_model_dir
-                if emission_tracking_path is None
-                else emission_tracking_path,
-            )
-            tracker.start()
+        if emission_tracker is not None:
+            emission_tracker.start()
 
         total_steps = num_epochs * len(train_data)
         progress_bar = tqdm(total=total_steps) if verbose else None
@@ -258,9 +236,8 @@ class Module(ABC):
         }
 
         # Stop emission tracking
-        if track_emissions:
-            tracker.stop()
-            result_dict["emissions"] = tracker._prepare_emissions_data().emissions
+        if emission_tracker is not None:
+            emission_tracker.stop()
 
         return result_dict
 

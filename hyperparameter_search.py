@@ -4,14 +4,17 @@ Perform hyperparameter search.
 
 # STD
 import argparse
+from datetime import datetime
 import json
 import os
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 # EXT
+from codecarbon import OfflineEmissionsTracker
+from knockknock import telegram_sender
 from sklearn.model_selection import ParameterSampler
 import numpy as np
-import torch
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 # PROJECT
@@ -30,35 +33,55 @@ SEED = 123
 HYPERPARAM_DIR = "./hyperparameters"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
+EMISSION_DIR = "./emissions"
 
 
+try:
+    from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID, COUNTRY_CODE
+
+except ImportError:
+    raise ImportError(
+        "secret.py wasn't found, please rename secret_template.py and fill in the information."
+    )
+
+
+@telegram_sender(token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID)
 def perform_hyperparameter_search(
-    dataset_name: str,
     models: List[str],
+    dataset_name: str,
     result_dir: str,
     save_top_n: int = 10,
     device: str = "cpu",
-    track_emissions: bool = True,
-):
+    summary_writer: Optional[SummaryWriter] = None,
+    emission_tracker: Optional[OfflineEmissionsTracker] = None,
+) -> str:
     """
     Perform hyperparameter search for a list of models and save the results into a directory.
 
     Parameters
     ----------
-    dataset_name: str
-        Name of data set models should be evaluated on.
     models: List[str]
         List specifying the names of models.
+    dataset_name: str
+        Name of data set models should be evaluated on.
     result_dir: str
         Directory that results should be saved to.
     save_top_n: int
         Save the top n parameter configuration. Default is 10.
     device: Device
         Device hyperparameter search happens on.
-    track_emissions: bool
-        Indicate whether carbon emissions should be tracked.
-    """
+    summary_writer: Optional[SummaryWriter]
+        Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
+        default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+    emission_tracker: Optional[OfflineEmissionsTracker]
+        Emission tracker for this number of experiments.
 
+    Returns
+    -------
+    str
+        Information being passed on to knockknock.
+    """
+    info_dict = {}
     dataset = AVAILABLE_DATASETS[dataset_name](
         data_dir=args.data_dir, **PREPROCESSING_PARAMS[dataset_name]
     )
@@ -75,8 +98,8 @@ def perform_hyperparameter_search(
 
             for run, param_set in enumerate(sampled_params):
 
-                model_params = MODEL_PARAMS[args.data][model_name]
-                train_params = TRAIN_PARAMS[args.data][model_name]
+                model_params = MODEL_PARAMS[dataset_name][model_name]
+                train_params = TRAIN_PARAMS[dataset_name][model_name]
 
                 module = AVAILABLE_MODELS[model_name](
                     model_params, train_params, model_dir="models", device=device
@@ -86,7 +109,8 @@ def perform_hyperparameter_search(
                     module.fit(
                         dataset.train.to(device),
                         verbose=False,
-                        track_emissions=track_emissions,
+                        summary_writer=summary_writer,
+                        emission_tracker=emission_tracker,
                     )
                     score = -module.eval(dataset.valid.to(device)).item()
 
@@ -113,12 +137,18 @@ def perform_hyperparameter_search(
                     )[:save_top_n]
                 )
                 model_result_dir = f"{result_dir}/{dataset_name}/"
+                info_dict[model_name] = sorted_scores[0]
 
                 if not os.path.exists(model_result_dir):
                     os.makedirs(model_result_dir)
 
                 with open(f"{model_result_dir}/{model_name}.json", "w") as result_file:
                     result_file.write(json.dumps(sorted_scores, indent=4, default=str))
+
+    if tracker is not None:
+        info_dict["emissions"] = tracker._prepare_emissions_data().emissions
+
+    return "\n" + json.dumps(info_dict, indent=4)
 
 
 def get_num_runs(model_names: List[str], dataset_name: str) -> int:
@@ -183,7 +213,7 @@ def sample_hyperparameters(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--data",
+        "--dataset",
         type=str,
         required=True,
         choices=AVAILABLE_DATASETS.keys(),
@@ -200,21 +230,30 @@ if __name__ == "__main__":
     parser.add_argument("--hyperparam-dir", type=str, default=HYPERPARAM_DIR)
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--save-top-n", type=int, default=10)
+    parser.add_argument("--emission-dir", type=str, default=EMISSION_DIR)
     parser.add_argument("--track-emissions", action="store_true", default=False)
-
-    # TODO: Emissions tracking path
-    # TODO: Wrap in function, add knockknock bot and compile info
-
+    parser.add_argument("--seed", type=int, default=SEED)
     args = parser.parse_args()
 
-    np.random.seed(SEED)
-    torch.manual_seed(SEED)
+    summary_writer = SummaryWriter()
+    tracker = None
+
+    if args.track_emissions:
+        timestamp = str(datetime.now().strftime("%d-%m-%Y (%H:%M:%S)"))
+        emissions_path = os.path.join(args.emission_dir, timestamp)
+        os.mkdir(emissions_path)
+        tracker = OfflineEmissionsTracker(
+            project_name="nlp-uncertainty-zoo-hyperparameters",
+            country_iso_code=COUNTRY_CODE,
+            output_dir=emissions_path,
+        )
 
     perform_hyperparameter_search(
-        args.data,
         args.models,
+        args.dataset,
         args.hyperparam_dir,
         args.save_top_n,
         args.device,
-        args.track_emissions,
+        summary_writer,
+        tracker,
     )
