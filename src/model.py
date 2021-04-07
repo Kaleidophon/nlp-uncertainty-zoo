@@ -1,5 +1,9 @@
 """
-Define common methods of a module class.
+Define common methods of models. This done by separating the logic into two parts:
+    * Module: This class *only* defines the model architecture and forward pass. This is also done so that others can
+      easily copy and adapt the code if necessary.
+    * Model: This wrapper class defines all the other logic necessary to use a model in practice: Training, loss
+      computation, saving and loading, etc.
 """
 
 # STD
@@ -9,7 +13,6 @@ import os
 
 # EXT
 from codecarbon import OfflineEmissionsTracker
-from knockknock import telegram_sender
 import numpy as np
 import torch
 import torch.nn as nn
@@ -22,12 +25,10 @@ from tqdm import tqdm
 from src.datasets import DataSplit
 from src.types import Device
 
-# TODO: Swap usage of model and module
 
-
-class Model(ABC, nn.Module):
+class Module(ABC, nn.Module):
     """
-    Abstract model class, defining how the forward pass of a model looks and how the architecture is being built.
+    Abstract module class, defining how the forward pass of a model looks.
     """
 
     def __init__(
@@ -85,16 +86,16 @@ class Model(ABC, nn.Module):
         pass
 
 
-class Module(ABC):
+class Model(ABC):
     """
-    Abstract module class. It is a wrapper that defines data loading, batching, training and evaluation loops, so that
-    the core model class can only define the model's forward pass.
+    Abstract model class. It is a wrapper that defines data loading, batching, training and evaluation loops, so that
+    the core module class can only define the model's forward pass.
     """
 
     def __init__(
         self,
         model_name: str,
-        model_class: type,
+        module_class: type,
         model_params: Dict[str, Any],
         train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
@@ -107,7 +108,7 @@ class Module(ABC):
         ----------
         model_name: str
             Name of the model.
-        model_class: type
+        module_class: type
             Class of the model that is being wrapped.
         model_params: Dict[str, Any]
             Parameters to initialize the model.
@@ -117,15 +118,17 @@ class Module(ABC):
             The device the model is located on.
         """
         self.model_name = model_name
-        self.model_class = model_class
-        self.model = model_class(**model_params, device=device)
+        self.module_class = module_class
+        self.module = module_class(**model_params, device=device)
         self.train_params = train_params
         self.model_dir = model_dir
         self.device = device
         self.to(device)
 
         # Initialize optimizer and scheduler
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.train_params["lr"])
+        self.optimizer = optim.Adam(
+            self.module.parameters(), lr=self.train_params["lr"]
+        )
         self.scheduler = optim.lr_scheduler.StepLR(
             self.optimizer,
             step_size=self.train_params["step_size"],
@@ -145,7 +148,6 @@ class Module(ABC):
         valid_data: Optional[DataSplit] = None,
         verbose: bool = True,
         summary_writer: Optional[SummaryWriter] = None,
-        emission_tracker: Optional[OfflineEmissionsTracker] = None,
     ):
         """
         Fit the model to training data.
@@ -161,18 +163,12 @@ class Module(ABC):
         summary_writer: Optional[SummaryWriter]
             Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
-        emission_tracker: Optional[OfflineEmissionsTracker]
-            Emission tracker for this number of experiments.
         """
         num_epochs = self.train_params["num_epochs"]
 
         best_val_loss = np.inf
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
         num_no_improvements = 0
-
-        if emission_tracker is not None:
-            emission_tracker.start()
-
         total_steps = num_epochs * len(train_data)
         progress_bar = tqdm(total=total_steps) if verbose else None
 
@@ -180,7 +176,7 @@ class Module(ABC):
             total_steps += num_epochs * len(valid_data)
 
         for epoch in range(self.train_params["num_epochs"]):
-            self.model.train()
+            self.module.train()
             train_loss = self._epoch_iter(
                 epoch,
                 train_data,
@@ -200,7 +196,7 @@ class Module(ABC):
 
             # Get validation loss
             if valid_data is not None:
-                self.model.eval()
+                self.module.eval()
                 val_loss = self._epoch_iter(epoch, valid_data, progress_bar)
 
                 if summary_writer is not None:
@@ -235,10 +231,6 @@ class Module(ABC):
             "best_val_loss": best_val_loss,
         }
 
-        # Stop emission tracking
-        if emission_tracker is not None:
-            emission_tracker.stop()
-
         return result_dict
 
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
@@ -257,7 +249,7 @@ class Module(ABC):
         """
         X.to(self.device)
 
-        return self.model(X)
+        return self.module(X)
 
     def eval(self, data_split: DataSplit) -> torch.Tensor:
         """
@@ -273,9 +265,9 @@ class Module(ABC):
         torch.Tensor
             Loss on evaluation split.
         """
-        self.model.eval()
+        self.module.eval()
         loss = self._epoch_iter(0, data_split)
-        self.model.train()
+        self.module.train()
 
         return loss
 
@@ -320,7 +312,7 @@ class Module(ABC):
 
             epoch_loss += batch_loss
 
-            if self.model.training:
+            if self.module.training:
                 batch_loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
@@ -356,7 +348,7 @@ class Module(ABC):
         """
 
         loss_function = nn.NLLLoss()
-        preds = self.model(X)
+        preds = self.module(X)
         batch_size, sequence_length, output_size = preds.shape
         preds = preds.reshape(batch_size * sequence_length, output_size)
         y = y.reshape(batch_size * sequence_length)
@@ -386,7 +378,7 @@ class Module(ABC):
         device: Device
             Device the model should be moved to.
         """
-        self.model.to(device)
+        self.module.to(device)
 
     @staticmethod
     def load(model_path: str):
@@ -400,7 +392,7 @@ class Module(ABC):
 
         Returns
         -------
-        Module
+        Model
             Loaded model.
         """
         with open(model_path, "rb") as pickled_model:

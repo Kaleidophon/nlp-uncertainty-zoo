@@ -14,24 +14,23 @@ from typing import Dict, Any, Optional
 import torch
 
 # PROJECT
-from src.lstm import LSTM
-from src.module import Module, Model
-from src.transformer import Transformer
+from src.lstm import LSTMModule
+from src.model import Model, Module
+from src.transformer import TransformerModule
 from src.types import Device
 
 
-class VariationalLSTM(LSTM):
+class VariationalLSTMModule(LSTMModule):
     """
     Implementation of variational LSTM by `(Gal & Ghrahramani, 2016b) <https://arxiv.org/pdf/1512.05287.pdf>`.
     """
 
     def eval(self):
         # By calling the grandparent method here, we use dropout even during inference
-        Model.train(self)
-        # Model.eval(self)
+        Module.train(self)
 
 
-class VariationalLSTMModule(Module):
+class VariationalLSTM(Model):
     """
     Module for the variational LSTM.
     """
@@ -45,7 +44,7 @@ class VariationalLSTMModule(Module):
     ):
         super().__init__(
             "variational_lstm",
-            VariationalLSTM,
+            VariationalLSTMModule,
             model_params,
             train_params,
             model_dir,
@@ -74,26 +73,23 @@ class VariationalLSTMModule(Module):
 
         preds = []
         for _ in range(num_predictions):
-            preds.append(self.model(X))
+            preds.append(self.module(X))
 
         preds = torch.stack(preds, dim=1)
 
         return preds
 
 
-class VariationalTransformer(Transformer):
+class VariationalTransformerModule(TransformerModule):
     """
     Implementation of Variational Transformer by `Xiao et al., (2021) <https://arxiv.org/pdf/2006.08344.pdf>`_.
     """
 
     def eval(self, *args):
         super().train()
-        # Make sure that all dropout modules are not turned to train
-        # for module in self.modules():
-        #    if module.__class__.__name__.startswith("Dropout"):
 
 
-class VariationalTransformerModule(Module):
+class VariationalTransformer(Model):
     """
     Module for the variational transformer.
     """
@@ -136,7 +132,7 @@ class VariationalTransformerModule(Module):
 
         preds = []
         for _ in range(num_predictions):
-            preds.append(self.model(X))
+            preds.append(self.module(X))
 
         preds = torch.stack(preds, dim=1)
 

@@ -10,11 +10,11 @@ import torch
 import torch.nn as nn
 
 # PROJECT
-from src.module import Module, Model
+from src.model import Model, Module
 from src.types import HiddenDict, Device, HiddenStates
 
 
-class LSTM(Model):
+class LSTMModule(Module):
     """
     Implementation of a LSTM.
     """
@@ -208,9 +208,9 @@ class LSTM(Model):
         super().train(*args)
 
 
-class LSTMModule(Module):
+class LSTM(Model):
     """
-    Module wrapper class for a LSTM.
+    Model wrapper class for a LSTM.
     """
 
     def __init__(
@@ -220,4 +220,6 @@ class LSTMModule(Module):
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
-        super().__init__("lstm", LSTM, model_params, train_params, model_dir, device)
+        super().__init__(
+            "lstm", LSTMModule, model_params, train_params, model_dir, device
+        )

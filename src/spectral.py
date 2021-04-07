@@ -7,24 +7,24 @@ this module implements a mixin enabling spectral normalization and, inheriting f
 """
 
 # PROJECT
-from src.transformer import Transformer, TransformerModule
+from src.transformer import TransformerModule, Transformer
 
 
 class SpectralNormMixin:
     ...  # TODO
 
 
-class SNGPTransformer(Transformer, SpectralNormMixin):
+class SNGPTransformerModule(TransformerModule, SpectralNormMixin):
     ...  # TODO
 
 
-class SNGPTransformerModule(TransformerModule):
+class SNGPTransformer(Transformer):
     ...  # TODO
 
 
-class DDUTransformer(Transformer, SpectralNormMixin):
+class DDUTransformerModule(TransformerModule, SpectralNormMixin):
     ...  # TODO
 
 
-class DDUTransformerModule(TransformerModule):
+class DDUTransformer(Transformer):
     ...  # TODO

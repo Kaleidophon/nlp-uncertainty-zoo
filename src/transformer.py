@@ -11,11 +11,11 @@ import torch
 import torch.nn as nn
 
 # PROJECT
-from src.module import Module, Model
+from src.model import Model, Module
 from src.types import Device
 
 
-class Transformer(Model):
+class TransformerModule(Module):
     """
     Implementation of a transformer for classification.
     """
@@ -91,7 +91,7 @@ class Transformer(Model):
         return out
 
 
-class TransformerModule(Module):
+class Transformer(Model):
     def __init__(
         self,
         model_params: Dict[str, Any],
@@ -100,7 +100,12 @@ class TransformerModule(Module):
         device: Device = "cpu",
     ):
         super().__init__(
-            "transformer", Transformer, model_params, train_params, model_dir, device
+            "transformer",
+            TransformerModule,
+            model_params,
+            train_params,
+            model_dir,
+            device,
         )
 
 

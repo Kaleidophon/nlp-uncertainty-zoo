@@ -132,3 +132,4 @@ dmypy.json
 data/raw/
 runs/
 secret.py
+emissions/

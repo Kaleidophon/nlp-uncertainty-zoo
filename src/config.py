@@ -8,17 +8,17 @@ from scipy.stats import uniform
 
 # PROJECT
 from src.datasets import Wikitext103Dataset
-from src.dropout import VariationalLSTMModule, VariationalTransformerModule
-from src.lstm import LSTMModule
-from src.transformer import TransformerModule
+from src.dropout import VariationalLSTM, VariationalTransformer
+from src.lstm import LSTM
+from src.transformer import Transformer
 
 # AVAILABLE DATASETS AND MODELS
 AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset}
 AVAILABLE_MODELS = {
-    "lstm": LSTMModule,
-    "variational_lstm": VariationalLSTMModule,
-    "transformer": TransformerModule,
-    "variational_transformer": VariationalTransformerModule,
+    "lstm": LSTM,
+    "variational_lstm": VariationalLSTM,
+    "transformer": Transformer,
+    "variational_transformer": VariationalTransformer,
 }
 
 # PREPROCESSING PARAMETERS

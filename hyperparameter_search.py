@@ -53,7 +53,6 @@ def perform_hyperparameter_search(
     save_top_n: int = 10,
     device: str = "cpu",
     summary_writer: Optional[SummaryWriter] = None,
-    emission_tracker: Optional[OfflineEmissionsTracker] = None,
 ) -> str:
     """
     Perform hyperparameter search for a list of models and save the results into a directory.
@@ -73,8 +72,6 @@ def perform_hyperparameter_search(
     summary_writer: Optional[SummaryWriter]
         Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
         default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
-    emission_tracker: Optional[OfflineEmissionsTracker]
-        Emission tracker for this number of experiments.
 
     Returns
     -------
@@ -110,7 +107,6 @@ def perform_hyperparameter_search(
                         dataset.train.to(device),
                         verbose=False,
                         summary_writer=summary_writer,
-                        emission_tracker=emission_tracker,
                     )
                     score = -module.eval(dataset.valid.to(device)).item()
 
@@ -247,6 +243,7 @@ if __name__ == "__main__":
             country_iso_code=COUNTRY_CODE,
             output_dir=emissions_path,
         )
+        tracker.start()
 
     perform_hyperparameter_search(
         args.models,
@@ -255,5 +252,7 @@ if __name__ == "__main__":
         args.save_top_n,
         args.device,
         summary_writer,
-        tracker,
     )
+
+    if tracker is not None:
+        tracker.stop()

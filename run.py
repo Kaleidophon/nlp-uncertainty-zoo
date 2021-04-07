@@ -48,7 +48,6 @@ def run_experiments(
     runs: int,
     seed: int,
     summary_writer: Optional[SummaryWriter] = None,
-    emission_tracker: Optional[OfflineEmissionsTracker] = None,
 ) -> Dict[str, Any]:
     """
     Run experiments. An experiment consists of training evaluating a number of models on a dataset and savng
@@ -67,8 +66,6 @@ def run_experiments(
     summary_writer: Optional[SummaryWriter]
         Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
         default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
-    emission_tracker: Optional[OfflineEmissionsTracker]
-        Emission tracker for this number of experiments.
 
     Returns
     -------
@@ -92,7 +89,6 @@ def run_experiments(
                 train_data=data.train.to(module.device),
                 valid_data=data.valid.to(module.device),
                 summary_writer=summary_writer,
-                emission_tracker=emission_tracker,
             )
 
             # TODO: Evaluate
@@ -145,7 +141,11 @@ if __name__ == "__main__":
             country_iso_code=COUNTRY_CODE,
             output_dir=emissions_path,
         )
+        tracker.start()
 
     run_experiments(
         args.models, args.dataset, args.run, args.seed, summary_writer, tracker
     )
+
+    if tracker is not None:
+        tracker.stop()
