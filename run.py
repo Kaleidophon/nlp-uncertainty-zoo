@@ -41,7 +41,6 @@ except ImportError:
     )
 
 
-@telegram_sender(token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID)
 def run_experiments(
     model_names: List[str],
     dataset_name: str,
@@ -122,6 +121,7 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--runs", type=str, default=5)
     parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument("--knock", action="store_true", default=False)
     args = parser.parse_args()
 
     # Read data
@@ -143,9 +143,13 @@ if __name__ == "__main__":
         )
         tracker.start()
 
-    run_experiments(
-        args.models, args.dataset, args.run, args.seed, summary_writer, tracker
-    )
+    # Apply decorator
+    if args.knock:
+        run_experiments = telegram_sender(
+            token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
+        )(run_experiments)
+
+    run_experiments(args.models, args.dataset, args.run, args.seed, summary_writer)
 
     if tracker is not None:
         tracker.stop()

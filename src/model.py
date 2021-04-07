@@ -296,7 +296,8 @@ class Model(ABC):
         num_batches = len(data_split)
 
         for i, (X, y) in enumerate(data_split):
-            batch_loss = self.get_loss(i, X, y, summary_writer)
+            global_batch_num = epoch * len(data_split) + i
+            batch_loss = self.get_loss(global_batch_num, X, y, summary_writer)
 
             # Update progress bar and summary writer
             if progress_bar is not None:
@@ -307,11 +308,12 @@ class Model(ABC):
 
             if summary_writer is not None:
                 summary_writer.add_scalar(
-                    "Batch train loss", batch_loss, epoch * len(data_split) + i
+                    "Batch train loss", batch_loss, global_batch_num
                 )
 
             epoch_loss += batch_loss
 
+            # TODO: This will fine-tune MC Dropot models on test??
             if self.module.training:
                 batch_loss.backward()
                 self.optimizer.step()

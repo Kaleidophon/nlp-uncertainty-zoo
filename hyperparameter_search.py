@@ -45,7 +45,6 @@ except ImportError:
     )
 
 
-@telegram_sender(token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID)
 def perform_hyperparameter_search(
     models: List[str],
     dataset_name: str,
@@ -105,7 +104,7 @@ def perform_hyperparameter_search(
                 try:
                     module.fit(
                         dataset.train.to(device),
-                        verbose=False,
+                        verbose=True,  # TODO
                         summary_writer=summary_writer,
                     )
                     score = -module.eval(dataset.valid.to(device)).item()
@@ -142,6 +141,7 @@ def perform_hyperparameter_search(
                     result_file.write(json.dumps(sorted_scores, indent=4, default=str))
 
     if tracker is not None:
+        tracker.stop()
         info_dict["emissions"] = tracker._prepare_emissions_data().emissions
 
     return "\n" + json.dumps(info_dict, indent=4)
@@ -228,6 +228,7 @@ if __name__ == "__main__":
     parser.add_argument("--save-top-n", type=int, default=10)
     parser.add_argument("--emission-dir", type=str, default=EMISSION_DIR)
     parser.add_argument("--track-emissions", action="store_true", default=False)
+    parser.add_argument("--knock", action="store_true", default=False)
     parser.add_argument("--seed", type=int, default=SEED)
     args = parser.parse_args()
 
@@ -245,6 +246,12 @@ if __name__ == "__main__":
         )
         tracker.start()
 
+    # Apply decorator
+    if args.knock:
+        perform_hyperparameter_search = telegram_sender(
+            token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
+        )(perform_hyperparameter_search)
+
     perform_hyperparameter_search(
         args.models,
         args.dataset,
@@ -253,6 +260,3 @@ if __name__ == "__main__":
         args.device,
         summary_writer,
     )
-
-    if tracker is not None:
-        tracker.stop()
