@@ -80,15 +80,20 @@ class TransformerModule(Module):
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        hidden = self._get_hidden(input_)
+        out = self.output_dropout(hidden)
+        out = self.output(out)
+
+        return out
+
+    def _get_hidden(self, input_: torch.LongTensor) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
         embeddings = self.pos_embeddings(word_embeddings)
         embeddings = self.input_dropout(embeddings)
 
-        out = self.encoder(embeddings)
-        out = self.output_dropout(out)
-        out = self.output(out)
+        hidden = self.encoder(embeddings)
 
-        return out
+        return hidden
 
 
 class Transformer(Model):

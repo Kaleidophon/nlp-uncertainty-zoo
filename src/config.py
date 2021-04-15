@@ -10,7 +10,7 @@ from scipy.stats import uniform
 from src.datasets import Wikitext103Dataset
 from src.dropout import VariationalLSTM, VariationalTransformer
 from src.lstm import LSTM
-from src.spectral import SNGPTransformer
+from src.spectral import SNGPTransformer, DDUTransformer
 from src.transformer import Transformer
 
 # AVAILABLE DATASETS AND MODELS
@@ -21,6 +21,7 @@ AVAILABLE_MODELS = {
     "transformer": Transformer,
     "variational_transformer": VariationalTransformer,
     "sngp_transformer": SNGPTransformer,
+    "ddu_transformer": DDUTransformer,
 }
 
 # PREPROCESSING PARAMETERS
@@ -37,7 +38,7 @@ PREPROCESSING_PARAMS = {
 
 # TRAINING PARAMETERS
 # Training parameters by dataset and model
-SHARED_TRAIN_PARAMS = {"wikitext-103": {"num_epochs": 3, "step_size": 1, "gamma": 1}}
+SHARED_TRAIN_PARAMS = {"wikitext-103": {"num_epochs": 1, "step_size": 1, "gamma": 1}}
 _TRAIN_PARAMS = {
     "wikitext-103": {
         "lstm": {"lr": 0.01},
@@ -45,6 +46,7 @@ _TRAIN_PARAMS = {
         "transformer": {"lr": 0.01, "gamma": 0.95},
         "variational_transformer": {"lr": 0.01, "gamma": 0.95},
         "sngp_transformer": {"lr": 0.2, "gamma": 0.6, "weight_decay": 0.01},
+        "ddu_transformer": {"lr": 0.01, "gamma": 0.95},
     }
 }
 TRAIN_PARAMS = {
@@ -88,6 +90,12 @@ _MODEL_PARAMS = {
             "num_heads": 5,
             "sequence_length": 30,
         },
+        "ddu_transformer": {
+            "num_layers": 6,
+            "dropout": 0.2,
+            "num_heads": 5,
+            "sequence_length": 30,
+        },
     }
 }
 MODEL_PARAMS = {
@@ -107,6 +115,7 @@ NUM_EVALS = {
         "transformer": 2,
         "variational_transformer": 10,
         "sngp_transformer": 10,
+        "ddu_transformer": 10,
     }
 }
 
@@ -122,5 +131,6 @@ PARAM_SEARCH = {
         },
         "variational_transformer": {},
         "sngp_transformer": {},
+        "ddu_transformer": {},
     }
 }

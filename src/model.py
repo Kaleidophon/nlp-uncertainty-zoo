@@ -222,7 +222,7 @@ class Model(ABC):
 
         # Additional training step, e.g. temperature scaling on val
         if valid_data is not None:
-            self._finetune(valid_data)
+            self._finetune(valid_data, verbose, summary_writer)
 
         # Make a nice result dict for knockknock
         result_dict = {
@@ -359,15 +359,25 @@ class Model(ABC):
 
         return loss
 
-    def _finetune(self, data_loader: DataSplit) -> torch.Tensor:
+    def _finetune(
+        self,
+        data_split: DataSplit,
+        verbose: bool,
+        summary_writer: Optional[SummaryWriter] = None,
+    ):
         """
         Do an additional training / fine-tuning step, which is required for some models. Is being overwritten in some
         subclasses.
 
         Parameters
         ----------
-        data_loader: data.DataLoader
-            Data loader for fine-tuning data.
+        data_split: data.DataSplit
+            Data split for fine-tuning step.
+        verbose: bool
+            Whether to display information about current loss.
+        summary_writer: Optional[SummaryWriter]
+            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
+            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         pass
 

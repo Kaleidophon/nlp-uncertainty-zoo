@@ -125,8 +125,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Read data
-    data = AVAILABLE_DATASETS[args.data](
-        data_dir=args.data_dir, **PREPROCESSING_PARAMS[args.data]
+    data = AVAILABLE_DATASETS[args.dataset](
+        data_dir=args.data_dir, **PREPROCESSING_PARAMS[args.dataset]
     )
 
     summary_writer = SummaryWriter()
@@ -149,7 +149,7 @@ if __name__ == "__main__":
             token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
         )(run_experiments)
 
-    run_experiments(args.models, args.dataset, args.run, args.seed, summary_writer)
+    run_experiments(args.models, args.dataset, args.runs, args.seed, summary_writer)
 
     if tracker is not None:
         tracker.stop()
