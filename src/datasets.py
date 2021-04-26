@@ -66,7 +66,7 @@ class TextDataset(ABC):
         batch_size: int,
         batch_style: str = "padding",
         sequence_length: Optional[int] = None,
-        **indexing_params: Dict[str, Any]
+        **indexing_params: Dict[str, Any],
     ):
         """
         Initialize a dataset.
@@ -345,7 +345,7 @@ class Wikitext103Dataset(LanguageModelingDataset):
         data_dir: str,
         batch_size: int,
         sequence_length: int,
-        indexing_params: Dict[str, Any],
+        **indexing_params: Dict[str, Any],
     ):
         super().__init__(
             name="wikitext-103",
@@ -354,6 +354,33 @@ class Wikitext103Dataset(LanguageModelingDataset):
                 "train": "wiki.train.tokens",
                 "valid": "wiki.valid.tokens",
                 "test": "wiki.test.tokens",
+            },
+            batch_size=batch_size,
+            batch_style="continuous",
+            sequence_length=sequence_length,
+            **indexing_params,
+        )
+
+
+class PennTreebankDataset(LanguageModelingDataset):
+    """
+    Dataset class for the Penn Treebank.
+    """
+
+    def __init__(
+        self,
+        data_dir: str,
+        batch_size: int,
+        sequence_length: int,
+        **indexing_params: Dict[str, Any],
+    ):
+        super().__init__(
+            name="ptb",
+            data_dir=data_dir,
+            splits={
+                "train": "ptb.train.txt",
+                "valid": "ptb.valid.txt",
+                "test": "ptb.test.txt",
             },
             batch_size=batch_size,
             batch_style="continuous",

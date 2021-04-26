@@ -14,6 +14,9 @@ from src.model import Model, Module
 from src.types import HiddenDict, Device, HiddenStates
 
 
+# TODO: Add weight decay as hyperparam
+
+
 class LSTMModule(Module):
     """
     Implementation of a LSTM.
@@ -26,6 +29,7 @@ class LSTMModule(Module):
         input_size: int,
         hidden_size: int,
         output_size: int,
+        input_dropout: float,
         dropout: float,
         device: Device,
     ):
@@ -44,8 +48,11 @@ class LSTMModule(Module):
             Size of hidden representations.
         output_size: int
             Size of output of model.
+        input_dropout: float
+            Dropout on word embeddings. Dropout application corresponds to `Gal & Ghahramani (2016)
+            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
         dropout: float
-            Dropout rate. Dropout applications corresponds to `Gal & Ghahramani (2016)
+            Dropout rate. Dropout application corresponds to `Gal & Ghahramani (2016)
             <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
         device: Device
             Device the model is located on.
@@ -59,7 +66,9 @@ class LSTMModule(Module):
         self.gates = {}
         self.decoder = nn.Linear(hidden_size, output_size)
         self.dropout = dropout
+        self.input_dropout = input_dropout
         self._dropout = 0
+        self._input_dropout = input_dropout
 
         for layer in range(num_layers):
             self.gates[layer] = {
@@ -91,7 +100,7 @@ class LSTMModule(Module):
         # Sample all dropout masks used for this batch
         dropout_masks_input = {
             layer: torch.bernoulli(
-                torch.ones(batch_size, self.hidden_size) * (1 - self.dropout)
+                torch.ones(batch_size, self.hidden_size) * (1 - self.input_dropout)
             )
             for layer in range(self.num_layers)
         }
@@ -200,11 +209,13 @@ class LSTMModule(Module):
     def eval(self):
         # Turn off dropout
         self._dropout, self.dropout = self.dropout, 0
+        self._input_dropout, self.input_dropout = self.inpt_dropout, 0
         super().eval()
 
     def train(self, *args):
         # Reinstate old dropout prob
         self.dropout = self._dropout
+        self.input_dropout = self._input_dropout
         super().train(*args)
 
 

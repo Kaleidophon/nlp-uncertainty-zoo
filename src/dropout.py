@@ -20,6 +20,9 @@ from src.transformer import TransformerModule
 from src.types import Device
 
 
+# TODO: Set number of forward passes as parameter
+
+
 class VariationalLSTMModule(LSTMModule):
     """
     Implementation of variational LSTM by `(Gal & Ghrahramani, 2016b) <https://arxiv.org/pdf/1512.05287.pdf>`.

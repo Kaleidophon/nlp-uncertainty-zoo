@@ -15,6 +15,9 @@ from src.model import Model, Module
 from src.types import Device
 
 
+# TODO: Make input-dropout separate
+
+
 class TransformerModule(Module):
     """
     Implementation of a transformer for classification.

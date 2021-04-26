@@ -7,14 +7,14 @@ from sklearn.utils.fixes import loguniform
 from scipy.stats import uniform
 
 # PROJECT
-from src.datasets import Wikitext103Dataset
+from src.datasets import Wikitext103Dataset, PennTreebankDataset
 from src.dropout import VariationalLSTM, VariationalTransformer
 from src.lstm import LSTM
 from src.spectral import SNGPTransformer, DDUTransformer
 from src.transformer import Transformer
 
 # AVAILABLE DATASETS AND MODELS
-AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset}
+AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset, "ptb": PennTreebankDataset}
 AVAILABLE_MODELS = {
     "lstm": LSTM,
     "variational_lstm": VariationalLSTM,
@@ -27,8 +27,11 @@ AVAILABLE_MODELS = {
 # PREPROCESSING PARAMETERS
 # List of preprocessing parameters by dataset
 
-SHARED_PREPROCESSING_PARAMS = {"indexing_params": {"min_freq": 20}}
-_PREPROCESSING_PARAMS = {"wikitext-103": {"batch_size": 64, "sequence_length": 30}}
+SHARED_PREPROCESSING_PARAMS = {}
+_PREPROCESSING_PARAMS = {
+    "wikitext-103": {"batch_size": 64, "sequence_length": 30, "min_freq": 20},
+    "ptb": {"batch_size": 20, "sequence_length": 35, "max_size": 9999},  # - <unk> token
+}
 
 # Update shared preprocessing params wth dataset-specific params
 PREPROCESSING_PARAMS = {
@@ -38,7 +41,10 @@ PREPROCESSING_PARAMS = {
 
 # TRAINING PARAMETERS
 # Training parameters by dataset and model
-SHARED_TRAIN_PARAMS = {"wikitext-103": {"num_epochs": 1, "step_size": 1, "gamma": 1}}
+SHARED_TRAIN_PARAMS = {
+    "wikitext-103": {"num_epochs": 1, "step_size": 1, "gamma": 1},
+    "ptb": {"step_size": 1, "gamma": 1},
+}
 _TRAIN_PARAMS = {
     "wikitext-103": {
         "lstm": {"lr": 0.01},
@@ -47,7 +53,15 @@ _TRAIN_PARAMS = {
         "variational_transformer": {"lr": 0.01, "gamma": 0.95},
         "sngp_transformer": {"lr": 0.2, "gamma": 0.6, "weight_decay": 0.01},
         "ddu_transformer": {"lr": 0.01, "gamma": 0.95},
-    }
+    },
+    "ptb": {
+        "variational_lstm": {
+            "weight_decay": 1.15,
+            "lr": 1,
+            "num_epochs": 55,
+            "early_stopping_pat": 10,
+        }
+    },
 }
 TRAIN_PARAMS = {
     dataset: {
@@ -66,7 +80,8 @@ SHARED_MODEL_PARAMS = {
         "hidden_size": 100,
         "output_size": 20245,
         "vocab_size": 20245,
-    }
+    },
+    "ptb": {},
 }
 _MODEL_PARAMS = {
     "wikitext-103": {
@@ -96,7 +111,18 @@ _MODEL_PARAMS = {
             "num_heads": 5,
             "sequence_length": 30,
         },
-    }
+    },
+    "ptb": {
+        "variational_lstm": {
+            "num_layers": 2,
+            "hidden_size": 1500,
+            "input_size": 1500,
+            "input_dropout": 0.3,  # Medium model Gal & Ghrahramani (2016)
+            "dropout": 0.5,  # Medium model Gal & Ghrahramani (2016)
+            "vocab_size": 10000,
+            "output_size": 10000,
+        }
+    },
 }
 MODEL_PARAMS = {
     dataset: {
