@@ -50,7 +50,7 @@ _TRAIN_PARAMS = {
         "lstm": {"lr": 0.01},
         "variational_lstm": {"lr": 0.01},
         "transformer": {"lr": 0.01, "gamma": 0.95},
-        "variational_transformer": {"lr": 0.01, "gamma": 0.95},
+        "variational_transformer": {"lr": 0.01, "gamma": 0.95, "weight_decay": 0},
         "sngp_transformer": {"lr": 0.2, "gamma": 0.6, "weight_decay": 0.01},
         "ddu_transformer": {"lr": 0.01, "gamma": 0.95},
     },
@@ -89,24 +89,29 @@ _MODEL_PARAMS = {
         "variational_lstm": {"num_layers": 2, "dropout": 0.35},
         "transformer": {
             "num_layers": 6,
+            "input_dropout": 0.2,
             "dropout": 0.2,
             "num_heads": 5,
             "sequence_length": 30,
         },
         "variational_transformer": {
             "num_layers": 6,
+            "input_dropout": 0.2,
             "dropout": 0.2,
             "num_heads": 5,
             "sequence_length": 30,
+            "num_predictions": 100,
         },
         "sngp_transformer": {
             "num_layers": 6,
+            "input_dropout": 0.2,
             "dropout": 0.2,
             "num_heads": 5,
             "sequence_length": 30,
         },
         "ddu_transformer": {
             "num_layers": 6,
+            "input_dropout": 0.2,
             "dropout": 0.2,
             "num_heads": 5,
             "sequence_length": 30,
@@ -121,6 +126,7 @@ _MODEL_PARAMS = {
             "dropout": 0.5,  # Medium model Gal & Ghrahramani (2016)
             "vocab_size": 10000,
             "output_size": 10000,
+            "num_predictions": 100,
         }
     },
 }

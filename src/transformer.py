@@ -15,9 +15,6 @@ from src.model import Model, Module
 from src.types import Device
 
 
-# TODO: Make input-dropout separate
-
-
 class TransformerModule(Module):
     """
     Implementation of a transformer for classification.
@@ -30,6 +27,7 @@ class TransformerModule(Module):
         input_size: int,
         hidden_size: int,
         output_size: int,
+        input_dropout: float,
         dropout: float,
         num_heads: int,
         sequence_length: int,
@@ -50,6 +48,9 @@ class TransformerModule(Module):
             Size of hidden representations.
         output_size: int
             Size of output of model.
+        input_dropout: float
+            Dropout on word embeddings. Dropout application corresponds to `Gal & Ghahramani (2016)
+            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
         dropout: float
             Dropout rate.
         num_heads: int
@@ -65,7 +66,7 @@ class TransformerModule(Module):
         )
 
         self.dropout = dropout
-        self.input_dropout = nn.Dropout(self.dropout)
+        self.input_dropout = nn.Dropout(input_dropout)
         self.output_dropout = nn.Dropout(self.dropout)
         self.num_heads = num_heads
         self.sequence_length = sequence_length

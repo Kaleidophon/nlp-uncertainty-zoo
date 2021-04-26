@@ -14,9 +14,6 @@ from src.model import Model, Module
 from src.types import HiddenDict, Device, HiddenStates
 
 
-# TODO: Add weight decay as hyperparam
-
-
 class LSTMModule(Module):
     """
     Implementation of a LSTM.
@@ -207,13 +204,13 @@ class LSTMModule(Module):
         return hx, cx
 
     def eval(self):
-        # Turn off dropout
+        # Manually turn off dropout
         self._dropout, self.dropout = self.dropout, 0
         self._input_dropout, self.input_dropout = self.inpt_dropout, 0
         super().eval()
 
     def train(self, *args):
-        # Reinstate old dropout prob
+        # Manally reinstate old dropout prob
         self.dropout = self._dropout
         self.input_dropout = self._input_dropout
         super().train(*args)

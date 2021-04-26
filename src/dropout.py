@@ -15,12 +15,9 @@ import torch
 
 # PROJECT
 from src.lstm import LSTMModule
-from src.model import Model, Module
+from src.model import Model
 from src.transformer import TransformerModule
 from src.types import Device
-
-
-# TODO: Set number of forward passes as parameter
 
 
 class VariationalLSTMModule(LSTMModule):
@@ -28,9 +25,56 @@ class VariationalLSTMModule(LSTMModule):
     Implementation of variational LSTM by `(Gal & Ghrahramani, 2016b) <https://arxiv.org/pdf/1512.05287.pdf>`.
     """
 
-    def eval(self):
-        # By calling the grandparent method here, we use dropout even during inference
-        Module.train(self)
+    def __init__(
+        self,
+        num_layers: int,
+        vocab_size: int,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        input_dropout: float,
+        dropout: float,
+        num_predictions: int,
+        device: Device,
+    ):
+        """
+        Initialize a LSTM.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of model layers.
+        vocab_size: int
+            Vocabulary size.
+        input_size: int
+            Dimensionality of input to model.
+        hidden_size: int
+            Size of hidden representations.
+        output_size: int
+            Size of output of model.
+        input_dropout: float
+            Dropout on word embeddings. Dropout application corresponds to `Gal & Ghahramani (2016)
+            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
+        dropout: float
+            Dropout rate. Dropout application corresponds to `Gal & Ghahramani (2016)
+            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
+        num_predictions: int
+            Number of predictions with different dropout masks.
+        device: Device
+            Device the model is located on.
+        """
+        self.num_predictions = num_predictions
+
+        super().__init__(
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            input_dropout,
+            dropout,
+            device,
+        )
 
 
 class VariationalLSTM(Model):
@@ -55,7 +99,7 @@ class VariationalLSTM(Model):
         )
 
     def predict(
-        self, X: torch.Tensor, num_predictions: int = 10, *args, **kwargs
+        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
     ) -> torch.Tensor:
         """
         Make a prediction for some input.
@@ -66,12 +110,17 @@ class VariationalLSTM(Model):
             Input data points.
         num_predictions: int
             Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
+            If None, the attribute of the same name set during initialization is used.
 
         Returns
         -------
         torch.Tensor
             Predictions.
         """
+        num_predictions = (
+            num_predictions if num_predictions is None else self.module.num_predictions
+        )
+
         X.to(self.device)
 
         preds = []
@@ -79,6 +128,7 @@ class VariationalLSTM(Model):
             preds.append(self.module(X))
 
         preds = torch.stack(preds, dim=1)
+        preds = preds.mean(dim=1)
 
         return preds
 
@@ -88,8 +138,71 @@ class VariationalTransformerModule(TransformerModule):
     Implementation of Variational Transformer by `Xiao et al., (2021) <https://arxiv.org/pdf/2006.08344.pdf>`_.
     """
 
+    def __init__(
+        self,
+        num_layers: int,
+        vocab_size: int,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        input_dropout: float,
+        dropout: float,
+        num_heads: int,
+        sequence_length: int,
+        num_predictions: int,
+        device: Device,
+    ):
+        """
+        Initialize a transformer.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of model layers.
+        vocab_size: int
+            Vocabulary size.
+        input_size: int
+            Dimensionality of input to model.
+        hidden_size: int
+            Size of hidden representations.
+        output_size: int
+            Size of output of model.
+        input_dropout: float
+            Dropout on word embeddings. Dropout application corresponds to `Gal & Ghahramani (2016)
+            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
+        dropout: float
+            Dropout rate.
+        num_heads: int
+            Number of self-attention heads per layer.
+        sequence_length: int
+            Maximum sequence length in dataset. Used to initialize positional embeddings.
+        num_predictions: int
+            Number of predictions with different dropout masks.
+        device: Device
+            Device the model is located on.
+        """
+
+        self.num_predictions = num_predictions
+
+        super().__init__(
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            input_dropout,
+            dropout,
+            num_heads,
+            sequence_length,
+            device,
+        )
+
     def eval(self, *args):
-        super().train()
+        super().eval()
+
+        for module in self._modules.values():
+            if isinstance(module, torch.nn.Dropout):
+                module.train()
 
 
 class VariationalTransformer(Model):
@@ -106,7 +219,7 @@ class VariationalTransformer(Model):
     ):
         super().__init__(
             "variational_transformer",
-            VariationalTransformer,
+            VariationalTransformerModule,
             model_params,
             train_params,
             model_dir,
@@ -114,7 +227,7 @@ class VariationalTransformer(Model):
         )
 
     def predict(
-        self, X: torch.Tensor, num_predictions: int = 10, *args, **kwargs
+        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
     ) -> torch.Tensor:
         """
         Make a prediction for some input.
@@ -131,6 +244,10 @@ class VariationalTransformer(Model):
         torch.Tensor
             Predictions.
         """
+        num_predictions = (
+            num_predictions if num_predictions is None else self.module.num_predictions
+        )
+
         X.to(self.device)
 
         preds = []
@@ -138,5 +255,6 @@ class VariationalTransformer(Model):
             preds.append(self.module(X))
 
         preds = torch.stack(preds, dim=1)
+        preds = preds.mean(dim=1)
 
         return preds

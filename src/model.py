@@ -12,12 +12,10 @@ from typing import Dict, Any, Optional
 import os
 
 # EXT
-from codecarbon import OfflineEmissionsTracker
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.utils.data as data
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
@@ -127,7 +125,9 @@ class Model(ABC):
 
         # Initialize optimizer and scheduler
         self.optimizer = optim.Adam(
-            self.module.parameters(), lr=self.train_params["lr"]
+            self.module.parameters(),
+            lr=self.train_params["lr"],
+            weight_decay=self.train_params["weight_decay"],
         )
         self.scheduler = optim.lr_scheduler.StepLR(
             self.optimizer,
@@ -313,7 +313,7 @@ class Model(ABC):
 
             epoch_loss += batch_loss
 
-            # TODO: This will fine-tune MC Dropot models on test??
+            # TODO: This will fine-tune MC Dropout models on test??
             if self.module.training:
                 batch_loss.backward()
                 self.optimizer.step()

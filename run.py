@@ -81,12 +81,13 @@ def run_experiments(
             model_params = MODEL_PARAMS[dataset_name][model_name]
             train_params = TRAIN_PARAMS[dataset_name][model_name]
 
-            module = AVAILABLE_MODELS[model_name](
+            model = AVAILABLE_MODELS[model_name](
                 model_params, train_params, model_dir="models"
             )
-            module.fit(
-                train_data=data.train.to(module.device),
-                valid_data=data.valid.to(module.device),
+            model.module.eval()
+            model.fit(
+                train_data=data.train.to(model.device),
+                valid_data=data.valid.to(model.device),
                 summary_writer=summary_writer,
             )
 
