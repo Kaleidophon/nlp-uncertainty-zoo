@@ -206,11 +206,11 @@ class LSTMModule(Module):
     def eval(self):
         # Manually turn off dropout
         self._dropout, self.dropout = self.dropout, 0
-        self._input_dropout, self.input_dropout = self.inpt_dropout, 0
+        self._input_dropout, self.input_dropout = self.input_dropout, 0
         super().eval()
 
     def train(self, *args):
-        # Manally reinstate old dropout prob
+        # Manually reinstate old dropout prob
         self.dropout = self._dropout
         self.input_dropout = self._input_dropout
         super().train(*args)

@@ -126,7 +126,7 @@ _MODEL_PARAMS = {
             "dropout": 0.5,  # Medium model Gal & Ghrahramani (2016)
             "vocab_size": 10000,
             "output_size": 10000,
-            "num_predictions": 100,
+            "num_predictions": 10,
         }
     },
 }

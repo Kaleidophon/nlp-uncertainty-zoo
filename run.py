@@ -6,16 +6,19 @@ Execute experiments.
 import argparse
 from datetime import datetime
 import os
-from typing import List, Any, Dict, Optional
+from typing import List, Any, Dict, Optional, Tuple
 
 # EXT
 from codecarbon import OfflineEmissionsTracker
 from knockknock import telegram_sender
 import numpy as np
 import torch
+from torch.nn.functional import cross_entropy
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
+from src.model import Model
+from src.datasets import DataSplit, LanguageModelingDataset
 from src.config import (
     PREPROCESSING_PARAMS,
     TRAIN_PARAMS,
@@ -30,6 +33,13 @@ RESULT_DIR = "./results"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
 EMISSION_DIR = "./emissions"
+
+# Map from dataset class to evaluation function
+EVAL_FUNCS = {
+    LanguageModelingDataset: lambda preds, labels: torch.exp(
+        cross_entropy(preds, labels)
+    )
+}
 
 
 try:
@@ -84,18 +94,56 @@ def run_experiments(
             model = AVAILABLE_MODELS[model_name](
                 model_params, train_params, model_dir="models"
             )
-            model.module.eval()
             model.fit(
                 train_data=data.train.to(model.device),
                 valid_data=data.valid.to(model.device),
                 summary_writer=summary_writer,
             )
 
-            # TODO: Evaluate
+            # Evaluate
+            model.module.eval()
+            preds, labels = get_predictions(model, data.test.to(model.device))
+            score = EVAL_FUNCS[type(data).__bases__[0]](preds, labels)
+            print(score)
             # TODO: Save model predictions
             # TODO: Compile info for knockkock
 
     return {}
+
+
+def get_predictions(
+    model: Model, test_split: DataSplit
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Retrieve the predictions from the models for a test split.
+
+    Parameters
+    ----------
+    model: Model
+        Current model.
+    test_split: DataSplit
+        Test split the model is being evaluated on.
+
+    Returns
+    -------
+    Tuple[torch.Tensor, torch.Tensor]
+        Tuple of predictions and targets as tensors.
+    """
+    batch_preds, batch_labels = [], []
+
+    for (X, y) in test_split:
+        preds = model.predict(X.to(model.device))
+        batch_preds.append(preds)
+        batch_labels.append(y)
+        break  # TODO: Debug
+
+    batch_preds = torch.cat(batch_preds, dim=0)
+    batch_labels = torch.cat(batch_labels, dim=0)
+    num_samples, sequence_length, num_classes = batch_preds.shape
+    batch_preds = batch_preds.reshape(num_samples * sequence_length, num_classes)
+    batch_labels = batch_labels.reshape(num_samples * sequence_length)
+
+    return batch_preds, batch_labels
 
 
 if __name__ == "__main__":
