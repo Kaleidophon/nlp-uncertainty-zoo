@@ -4,3 +4,5 @@ codecarbon
 tensorboard
 scikit-learn
 knockknock
+transformers
+token2index

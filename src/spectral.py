@@ -83,6 +83,7 @@ class SNGPTransformerModule(TransformerModule):
         self.output.weight.data.normal_(0, 1)
         self.output.bias.data.uniform_(0, 2 * math.pi)
 
+        # TODO: Add length-scale parameter
         self.register_parameter(
             name="Beta", param=nn.Parameter(torch.randn(hidden_size, output_size))
         )
@@ -98,6 +99,10 @@ class SNGPTransformerModule(TransformerModule):
 
         out = self.encoder(embeddings)
         out = self.output_dropout(out)
+
+        # TODO: Add projection layer (which is not learned?)
+        # TODO: Add input layer normalization with 128 (?)
+
         Phi = math.sqrt(2 / self.hidden_size) * torch.cos(self.output(-out))
         out = Phi @ self.Beta
 

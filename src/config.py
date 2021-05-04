@@ -31,6 +31,7 @@ SHARED_PREPROCESSING_PARAMS = {}
 _PREPROCESSING_PARAMS = {
     "wikitext-103": {"batch_size": 64, "sequence_length": 30, "min_freq": 20},
     "ptb": {"batch_size": 20, "sequence_length": 35, "max_size": 9999},  # - <unk> token
+    "clinc": {"sequence_length": 32},
 }
 
 # Update shared preprocessing params wth dataset-specific params
@@ -60,6 +61,14 @@ _TRAIN_PARAMS = {
             "lr": 1,
             "num_epochs": 55,
             "early_stopping_pat": 10,
+        }
+    },
+    "clinc": {
+        "sngp_transformer": {
+            "lr": 5e-5,
+            "length_scale": 2,
+            "weight_decay": 0.1,
+            "num_epochs": 40,
         }
     },
 }
@@ -127,6 +136,14 @@ _MODEL_PARAMS = {
             "vocab_size": 10000,
             "output_size": 10000,
             "num_predictions": 10,
+        }
+    },
+    "clinc": {
+        "sngp_transformer": {
+            "num_layers": 12,
+            "hidden_size": 768,
+            "num_heads": 12,
+            "vocab_size": 10000,
         }
     },
 }
