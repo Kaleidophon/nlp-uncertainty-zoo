@@ -299,6 +299,9 @@ class Model(ABC):
             global_batch_num = epoch * len(data_split) + i
             batch_loss = self.get_loss(global_batch_num, X, y, summary_writer)
 
+            # TODO: Debug
+            return
+
             # Update progress bar and summary writer
             if progress_bar is not None:
                 progress_bar.set_description(
@@ -313,7 +316,6 @@ class Model(ABC):
 
             epoch_loss += batch_loss
 
-            # TODO: This will fine-tune MC Dropout models on test??
             if self.module.training:
                 batch_loss.backward()
                 self.optimizer.step()

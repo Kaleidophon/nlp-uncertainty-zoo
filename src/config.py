@@ -45,6 +45,7 @@ PREPROCESSING_PARAMS = {
 SHARED_TRAIN_PARAMS = {
     "wikitext-103": {"num_epochs": 1, "step_size": 1, "gamma": 1},
     "ptb": {"step_size": 1, "gamma": 1},
+    "clinc": {},
 }
 _TRAIN_PARAMS = {
     "wikitext-103": {
