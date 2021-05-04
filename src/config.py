@@ -92,6 +92,7 @@ SHARED_MODEL_PARAMS = {
         "vocab_size": 20245,
     },
     "ptb": {},
+    "clinc": {},
 }
 _MODEL_PARAMS = {
     "wikitext-103": {
