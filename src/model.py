@@ -296,6 +296,7 @@ class Model(ABC):
         num_batches = len(data_split)
 
         for i, (X, y) in enumerate(data_split):
+            X, y = X.to(self.device), y.to(self.device)
             global_batch_num = epoch * len(data_split) + i
             batch_loss = self.get_loss(global_batch_num, X, y, summary_writer)
 

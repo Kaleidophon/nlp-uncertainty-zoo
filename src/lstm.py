@@ -97,25 +97,20 @@ class LSTMModule(Module):
                 for layer in range(self.num_layers)
             }
 
-        # Detach hidden activitations to limit gradient computations
+        # Detach hidden activations to limit gradient computations
         else:
             for hd in hidden.values():
                 hd[0].detach()
                 hd[1].detach()
 
         # Sample all dropout masks used for this batch
+        mask_tensor = torch.ones(batch_size, self.hidden_size, device=self.device)
         dropout_masks_input = {
-            layer: torch.bernoulli(
-                torch.ones(batch_size, self.hidden_size, device=self.device)
-                * (1 - self.input_dropout)
-            )
+            layer: torch.bernoulli(mask_tensor * (1 - self.input_dropout))
             for layer in range(self.num_layers)
         }
         dropout_masks_time = {
-            layer: torch.bernoulli(
-                torch.ones(batch_size, self.hidden_size, device=self.device)
-                * (1 - self.dropout)
-            )
+            layer: torch.bernoulli(mask_tensor * (1 - self.dropout))
             for layer in range(self.num_layers)
         }
 
@@ -139,10 +134,7 @@ class LSTMModule(Module):
                 ]  # New hidden state becomes input for next layer
                 hidden[layer] = new_hidden  # Store for next step
 
-            dropout_out = torch.bernoulli(
-                torch.ones(batch_size, self.hidden_size, device=self.device)
-                * (1 - self.dropout)
-            )
+            dropout_out = torch.bernoulli(mask_tensor * (1 - self.dropout))
             out = layer_input * dropout_out
             out = self.decoder(out)
             outputs.append(out)

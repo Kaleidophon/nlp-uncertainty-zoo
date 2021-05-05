@@ -112,14 +112,14 @@ def run_experiments(
                 model_params, train_params, model_dir=model_dir, device=device
             )
             model.fit(
-                train_data=dataset.train.to(model.device),
-                valid_data=dataset.valid.to(model.device),
+                train_data=dataset.train,
+                valid_data=dataset.valid,
                 summary_writer=summary_writer,
             )
 
             # Evaluate
             model.module.eval()
-            seqs, preds, labels = get_predictions(model, dataset.test.to(model.device))
+            seqs, preds, labels = get_predictions(model, dataset.test)
             total_loss = save_predictions(
                 f"{result_dir}/{model_name}_{run+1}_{timestamp}.csv",
                 dataset,
@@ -164,8 +164,9 @@ def get_predictions(
     batch_seqs, batch_preds, batch_labels = [], [], []
 
     for (X, y) in test_split:
+        X, y = X.to(model.device), y.to(model.device)
         batch_seqs.append(X)
-        preds = model.predict(X.to(model.device))
+        preds = model.predict(X)
         batch_preds.append(preds)
         batch_labels.append(y)
 
