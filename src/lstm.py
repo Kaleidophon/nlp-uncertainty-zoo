@@ -97,6 +97,12 @@ class LSTMModule(Module):
                 for layer in range(self.num_layers)
             }
 
+        # Detach hidden activitations to limit gradient computations
+        else:
+            for hd in hidden.values():
+                hd[0].detach()
+                hd[1].detach()
+
         # Sample all dropout masks used for this batch
         dropout_masks_input = {
             layer: torch.bernoulli(
