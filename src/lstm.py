@@ -98,13 +98,13 @@ class LSTMModule(Module):
         dropout_masks_input = {
             layer: torch.bernoulli(
                 torch.ones(batch_size, self.hidden_size) * (1 - self.input_dropout)
-            )
+            ).to(self.device)
             for layer in range(self.num_layers)
         }
         dropout_masks_time = {
             layer: torch.bernoulli(
                 torch.ones(batch_size, self.hidden_size) * (1 - self.dropout)
-            )
+            ).to(self.devce)
             for layer in range(self.num_layers)
         }
 
