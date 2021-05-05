@@ -131,7 +131,7 @@ class LSTMModule(Module):
                 hidden[layer] = new_hidden  # Store for next step
 
             dropout_out = torch.bernoulli(
-                torch.ones(batch_size, self.hidden_siz, device=self.device)
+                torch.ones(batch_size, self.hidden_size, device=self.device)
                 * (1 - self.dropout)
             )
             out = layer_input * dropout_out
