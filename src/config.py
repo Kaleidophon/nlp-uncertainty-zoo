@@ -30,7 +30,11 @@ AVAILABLE_MODELS = {
 SHARED_PREPROCESSING_PARAMS = {}
 _PREPROCESSING_PARAMS = {
     "wikitext-103": {"batch_size": 64, "sequence_length": 30, "min_freq": 20},
-    "ptb": {"batch_size": 20, "sequence_length": 35, "max_size": 9999},  # - <unk> token
+    "ptb": {
+        "batch_size": 128,
+        "sequence_length": 35,
+        "max_size": 9999,
+    },  # - <unk> token
     "clinc": {"sequence_length": 32},
 }
 
