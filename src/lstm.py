@@ -79,6 +79,9 @@ class LSTMModule(Module):
                 "ho": nn.Linear(hidden_size, hidden_size).to(self.device),
             }
 
+            for name, gate in self.gates[layer].items():
+                self.add_module(f"Layer {layer+1} / {name}", gate)
+
     def forward(
         self, input_: torch.LongTensor, hidden: Optional[HiddenDict] = None
     ) -> torch.FloatTensor:
