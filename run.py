@@ -30,6 +30,7 @@ from src.config import (
     AVAILABLE_DATASETS,
     AVAILABLE_MODELS,
 )
+from src.types import Device
 
 # CONST
 SEED = 123
@@ -60,7 +61,9 @@ def run_experiments(
     dataset: TextDataset,
     runs: int,
     seed: int,
-    result_dir: int,
+    device: Device,
+    model_dir: str,
+    result_dir: str,
     summary_writer: Optional[SummaryWriter] = None,
 ) -> str:
     """
@@ -77,6 +80,10 @@ def run_experiments(
         Number of runs with different random seeds per model.
     seed: int
         Initial seed for every model.
+    device: Device
+        Device the model is being trained on.
+    model_dir: str
+        Directory that models are being saved to.
     result_dir: str
         Directory where results will be written to.
     summary_writer: Optional[SummaryWriter]
@@ -102,7 +109,7 @@ def run_experiments(
             train_params = TRAIN_PARAMS[dataset.name][model_name]
 
             model = AVAILABLE_MODELS[model_name](
-                model_params, train_params, model_dir="models"
+                model_params, train_params, model_dir=model_dir, device=device
             )
             model.fit(
                 train_data=dataset.train.to(model.device),
@@ -269,7 +276,14 @@ if __name__ == "__main__":
         )(run_experiments)
 
     run_experiments(
-        args.models, data, args.runs, args.seed, args.result_dir, summary_writer
+        args.models,
+        data,
+        args.runs,
+        args.seed,
+        args.device,
+        args.model_dir,
+        args.result_dir,
+        summary_writer,
     )
 
     if tracker is not None:
