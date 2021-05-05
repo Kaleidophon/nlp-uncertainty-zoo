@@ -69,14 +69,14 @@ class LSTMModule(Module):
 
         for layer in range(num_layers):
             self.gates[layer] = {
-                "ii": nn.Linear(input_size, hidden_size),
-                "if": nn.Linear(input_size, hidden_size),
-                "ig": nn.Linear(input_size, hidden_size),
-                "io": nn.Linear(input_size, hidden_size),
-                "hi": nn.Linear(hidden_size, hidden_size),
-                "hf": nn.Linear(hidden_size, hidden_size),
-                "hg": nn.Linear(hidden_size, hidden_size),
-                "ho": nn.Linear(hidden_size, hidden_size),
+                "ii": nn.Linear(input_size, hidden_size).to(self.device),
+                "if": nn.Linear(input_size, hidden_size).to(self.device),
+                "ig": nn.Linear(input_size, hidden_size).to(self.device),
+                "io": nn.Linear(input_size, hidden_size).to(self.device),
+                "hi": nn.Linear(hidden_size, hidden_size).to(self.device),
+                "hf": nn.Linear(hidden_size, hidden_size).to(self.device),
+                "hg": nn.Linear(hidden_size, hidden_size).to(self.device),
+                "ho": nn.Linear(hidden_size, hidden_size).to(self.device),
             }
 
     def forward(
