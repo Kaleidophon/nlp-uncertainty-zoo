@@ -292,7 +292,7 @@ class Model(ABC):
         summary_writer: SummaryWriter
             Summary writer to track training statistics.
         """
-        epoch_loss = torch.zeros(1)
+        epoch_loss = torch.zeros(1, device=self.device)
         num_batches = len(data_split)
 
         for i, (X, y) in enumerate(data_split):
