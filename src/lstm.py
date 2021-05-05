@@ -130,7 +130,7 @@ class LSTMModule(Module):
 
             dropout_out = torch.bernoulli(
                 torch.ones(batch_size, self.hidden_size) * (1 - self.dropout)
-            )
+            ).to(self.device)
             out = layer_input * dropout_out
             out = self.decoder(out)
             outputs.append(out)
