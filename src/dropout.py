@@ -122,12 +122,13 @@ class VariationalLSTM(Model):
 
         X.to(self.device)
 
-        preds = []
-        for _ in range(num_predictions):
-            preds.append(self.module(X))
+        batch, seq_len, _ = X.shape
+        preds = torch.zeros(batch, seq_len, self.module.output_size)
 
-        preds = torch.stack(preds, dim=0)
-        preds = preds.mean(dim=0)
+        for _ in range(num_predictions):
+            preds += self.module(X)
+
+        preds /= num_predictions
 
         return preds
 

@@ -62,10 +62,11 @@ _TRAIN_PARAMS = {
     },
     "ptb": {
         "variational_lstm": {
-            "weight_decay": 1.15,
+            "weight_decay": 1e-7,
             "lr": 1,
             "num_epochs": 55,
             "early_stopping_pat": 10,
+            "grad_clip": 10,
         }
     },
     "clinc": {
@@ -141,7 +142,7 @@ _MODEL_PARAMS = {
             "dropout": 0.5,  # Medium model Gal & Ghrahramani (2016)
             "vocab_size": 10000,
             "output_size": 10000,
-            "num_predictions": 10,
+            "num_predictions": 100,
         }
     },
     "clinc": {

@@ -9,7 +9,7 @@ from collections import defaultdict
 from datetime import datetime
 import json
 import os
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 
 # EXT
 from codecarbon import OfflineEmissionsTracker
@@ -164,6 +164,7 @@ def evaluate(
     dataset_type = type(dataset).__bases__[0]
     eval_func = EVAL_FUNCS[dataset_type]
     eval_post_func = EVAL_FUNCS_POST[dataset_type]
+    prediction_file = None
 
     if predictions_path is not None:
         prediction_file = codecs.open(predictions_path, "wb", "utf-8")
@@ -171,7 +172,7 @@ def evaluate(
     cum_scores = 0
     for (X, y) in dataset.test:
         num_seqs = X.shape[0]
-        X, y = X.to(model.device), y.to(model.device)
+        X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
 
         scores = eval_func(
@@ -246,16 +247,21 @@ if __name__ == "__main__":
             token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
         )(run_experiments)
 
-    run_experiments(
-        args.models,
-        data,
-        args.runs,
-        args.seed,
-        args.device,
-        args.model_dir,
-        args.result_dir,
-        summary_writer,
-    )
+    try:
+        run_experiments(
+            args.models,
+            data,
+            args.runs,
+            args.seed,
+            args.device,
+            args.model_dir,
+            args.result_dir,
+            summary_writer,
+        )
 
-    if tracker is not None:
-        tracker.stop()
+    except Exception as e:
+        # Save data from emission tracker in any case
+        if tracker is not None:
+            tracker.stop()
+
+        raise e

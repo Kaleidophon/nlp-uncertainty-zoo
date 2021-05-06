@@ -16,6 +16,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.nn.utils import clip_grad_norm_
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
@@ -165,7 +166,6 @@ class Model(ABC):
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         num_epochs = self.train_params["num_epochs"]
-
         best_val_loss = np.inf
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
         num_no_improvements = 0
@@ -292,11 +292,12 @@ class Model(ABC):
         summary_writer: SummaryWriter
             Summary writer to track training statistics.
         """
+        grad_clip = self.train_params.get("grad_clip", np.inf)
         epoch_loss = torch.zeros(1, device=self.device)
         num_batches = len(data_split)
 
         for i, (X, y) in enumerate(data_split):
-            X, y = X.to(self.device), y.to(self.device)
+            X.to(self.device), y.to(self.device)
             global_batch_num = epoch * len(data_split) + i
             batch_loss = self.get_loss(global_batch_num, X, y, summary_writer)
 
@@ -316,6 +317,8 @@ class Model(ABC):
 
             if self.module.training:
                 batch_loss.backward()
+
+                clip_grad_norm_(self.module.parameters(), grad_clip)
                 self.optimizer.step()
                 self.optimizer.zero_grad()
 
