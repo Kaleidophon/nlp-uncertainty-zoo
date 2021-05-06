@@ -22,7 +22,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
 from src.model import Model
-from src.datasets import DataSplit, LanguageModelingDataset, TextDataset
+from src.datasets import LanguageModelingDataset, TextDataset
 from src.config import (
     PREPROCESSING_PARAMS,
     TRAIN_PARAMS,
@@ -41,9 +41,12 @@ EMISSION_DIR = "./emissions"
 
 # Map from dataset class to evaluation function
 EVAL_FUNCS = {
-    LanguageModelingDataset: lambda preds, labels: torch.exp(
-        cross_entropy(preds, labels)
-    ).item()
+    LanguageModelingDataset: lambda preds, labels: cross_entropy(
+        preds, labels, reduction="none"
+    )
+}
+EVAL_FUNCS_POST = {
+    LanguageModelingDataset: lambda raw_score: torch.exp(raw_score).item()
 }
 
 
@@ -119,15 +122,10 @@ def run_experiments(
 
             # Evaluate
             model.module.eval()
-            seqs, preds, labels = get_predictions(model, dataset.test)
-            total_loss = save_predictions(
-                f"{result_dir}/{model_name}_{run+1}_{timestamp}.csv",
-                dataset,
-                seqs,
-                preds,
-                labels,
+            score = evaluate(
+                model, dataset, f"{result_dir}/{model_name}_{run+1}_{timestamp}.csv"
             )
-            scores[model_name].append(total_loss)
+            scores[model_name].append(score)
 
     return json.dumps(
         {
@@ -143,85 +141,57 @@ def run_experiments(
     )
 
 
-def get_predictions(
-    model: Model, test_split: DataSplit
-) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def evaluate(
+    model: Model, dataset: TextDataset, predictions_path: Optional[str] = None
+) -> float:
     """
-    Retrieve the predictions from the models for a test split.
+    Evaluate a model and save predictions (if applicable).
 
     Parameters
     ----------
     model: Model
-        Current model.
-    test_split: DataSplit
-        Test split the model is being evaluated on.
-
-    Returns
-    -------
-    Tuple[torch.Tensor, torch.Tensor]
-        Tuple of predictions and targets as tensors.
-    """
-    batch_seqs, batch_preds, batch_labels = [], [], []
-
-    for (X, y) in test_split:
-        X, y = X.to(model.device), y.to(model.device)
-        batch_seqs.append(X)
-        preds = model.predict(X)
-        batch_preds.append(preds)
-        batch_labels.append(y)
-
-    batch_seqs = torch.cat(batch_seqs, dim=0)
-    batch_preds = torch.cat(batch_preds, dim=0)
-    batch_labels = torch.cat(batch_labels, dim=0)
-
-    return batch_seqs, batch_preds, batch_labels
-
-
-def save_predictions(
-    prediction_path: str,
-    dataset: TextDataset,
-    sequences: torch.LongTensor,
-    predictions: torch.FloatTensor,
-    labels: torch.LongTensor,
-) -> float:
-    """
-    Save predictions to a file.
-
-    Parameters
-    ----------
-    prediction_path: str
-        Path to which predictions should be saved.
+        Model to be evaluated.
     dataset: TextDataset
-        Original dataset.
-    sequences: torch.LongTensor
-        Sequences in test set.
-    predictions: torch.FloatTensor
-        Predictions for sequences in test set.
-    labels: torch.LongTensor
-        Labels for sequences in test set.
+        Dataset the model is being evaluated on.
+    predictions_path: Optional[str]
+        File that predictions are being written to if specified.
 
     Returns
     -------
     float
-        Score on test set.
+        Return score on test set.
     """
-    eval_func = EVAL_FUNCS[type(dataset).__bases__[0]]
+    dataset_type = type(dataset).__bases__[0]
+    eval_func = EVAL_FUNCS[dataset_type]
+    eval_post_func = EVAL_FUNCS_POST[dataset_type]
 
-    with codecs.open(prediction_path, "wb", "utf-8") as prediction_file:
+    if predictions_path is not None:
+        prediction_file = codecs.open(predictions_path, "wb", "utf-8")
+
+    cum_scores = 0
+    for (X, y) in dataset.test:
+        num_seqs = X.shape[0]
+        X, y = X.to(model.device), y.to(model.device)
+        predictions = model.predict(X)
 
         scores = eval_func(
             rearrange(predictions, "s t p -> (s t) p"),
-            rearrange(labels, "s l -> (s l)"),
+            rearrange(y, "s l -> (s l)"),
         )
-        prediction_file.write(f"Total loss: {scores:.4f}\n")
+        scores = rearrange(scores, "(s l) -> s l", s=num_seqs)
 
-        for i in range(sequences.shape[0]):
-            seq, preds, lbls = sequences[i, :], predictions[i, :, :], labels[i, :]
-            original_seq = dataset.t2i.unindex(seq)
-            seq_loss = eval_func(preds, lbls)
-            prediction_file.write(f"{original_seq}\t{seq_loss:.4f}\n")
+        if predictions_path is not None:
+            for s in range(num_seqs):
+                seq, score = dataset.t2i.unindex(X[s, :]), eval_post_func(
+                    scores[s, :].mean()
+                )
+                prediction_file.write(f"{seq}\t{score:.4f}\n")
 
-    return scores
+        cum_scores += scores.mean()
+
+    score = eval_post_func(cum_scores)
+
+    return score
 
 
 if __name__ == "__main__":
