@@ -125,10 +125,11 @@ class VariationalLSTM(Model):
         batch, seq_len = X.shape
         preds = torch.zeros(batch, seq_len, self.module.output_size, device=self.device)
 
-        for _ in range(num_predictions):
-            preds += self.module(X)
+        with torch.no_grad():
+            for _ in range(num_predictions):
+                preds += self.module(X)
 
-        preds /= num_predictions
+            preds /= num_predictions
 
         return preds
 
@@ -248,13 +249,16 @@ class VariationalTransformer(Model):
             num_predictions = self.module.num_predictions
 
         X = X.to(self.device)
-
         batch, seq_len = X.shape
-        preds = torch.zeros(batch, seq_len, self.module.output_size, device=self.device)
 
-        for _ in range(num_predictions):
-            preds += self.module(X)
+        with torch.no_grad():
+            preds = torch.zeros(
+                batch, seq_len, self.module.output_size, device=self.device
+            )
 
-        preds /= num_predictions
+            for _ in range(num_predictions):
+                preds += self.module(X)
+
+            preds /= num_predictions
 
         return preds
