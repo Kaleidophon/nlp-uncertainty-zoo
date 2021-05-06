@@ -172,7 +172,7 @@ def evaluate(
     cum_scores = 0
     for (X, y) in dataset.test:
         num_seqs = X.shape[0]
-        X.to(model.device), y.to(model.device)
+        X, y = X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
 
         scores = eval_func(
