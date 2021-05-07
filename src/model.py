@@ -323,12 +323,10 @@ class Model(ABC):
                     "Batch train loss", batch_loss, global_batch_num
                 )
 
-            if batch_loss == np.inf or np.isnan(batch_loss):
-                raise ValueError(
-                    f"Batch loss became NaN or inf during epoch {epoch + 1}, batch {i + 1}."
-                )
-
             epoch_loss += batch_loss
+
+            if epoch_loss.cpu() == np.inf or np.isnan(epoch_loss.cpu()):
+                raise ValueError(f"Loss became NaN or inf during epoch {epoch + 1}.")
 
             if self.module.training:
                 batch_loss.backward()
