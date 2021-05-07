@@ -225,7 +225,7 @@ class Model(ABC):
                 self,
                 os.path.join(
                     self.full_model_dir,
-                    f"{best_val_loss.item():.2f}_{timestamp}.pt",
+                    f"{best_val_loss:.2f}_{timestamp}.pt",
                 ),
             )
 
