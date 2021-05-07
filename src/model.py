@@ -8,6 +8,8 @@ Define common methods of models. This done by separating the logic into two part
 
 # STD
 from abc import ABC, abstractmethod
+from copy import deepcopy
+from datetime import datetime
 from typing import Dict, Any, Optional
 import os
 
@@ -171,6 +173,7 @@ class Model(ABC):
         num_no_improvements = 0
         total_steps = num_epochs * len(train_data)
         progress_bar = tqdm(total=total_steps) if verbose else None
+        best_model = deepcopy(self)
 
         if valid_data is not None:
             total_steps += num_epochs * len(valid_data)
@@ -204,21 +207,27 @@ class Model(ABC):
 
                 if val_loss < best_val_loss:
                     best_val_loss = best_val_loss
-
-                    if self.model_dir is not None:
-                        torch.save(
-                            self,
-                            os.path.join(
-                                self.full_model_dir,
-                                f"{epoch + 1}_{val_loss.item():.2f}.pt",
-                            ),
-                        )
+                    best_model = deepcopy(self)
 
                 else:
                     num_no_improvements += 1
 
                     if num_no_improvements > early_stopping_pat:
                         break
+
+        # Set current model to best model found
+        self.__dict__.update(best_model.__dict__)
+        del best_model
+
+        if self.model_dir is not None:
+            timestamp = str(datetime.now().strftime("%d-%m-%Y_(%H:%M:%S)"))
+            torch.save(
+                self,
+                os.path.join(
+                    self.full_model_dir,
+                    f"{best_val_loss.item():.2f}_{timestamp}.pt",
+                ),
+            )
 
         # Additional training step, e.g. temperature scaling on val
         if valid_data is not None:

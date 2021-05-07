@@ -170,6 +170,7 @@ def evaluate(
         prediction_file = codecs.open(predictions_path, "wb", "utf-8")
 
     cum_scores = 0
+    norm = 0  # Keep track of the number of tokens evaluated
     for (X, y) in dataset.test:
         num_seqs = X.shape[0]
         X, y = X.to(model.device), y.to(model.device)
@@ -179,6 +180,10 @@ def evaluate(
             rearrange(predictions, "s t p -> (s t) p"),
             rearrange(y, "s l -> (s l)"),
         )
+        cum_scores += scores.sum()
+        norm += scores.shape[0]
+
+        # Reshape into token scores per sequence
         scores = rearrange(scores, "(s l) -> s l", s=num_seqs)
 
         if predictions_path is not None:
@@ -188,9 +193,7 @@ def evaluate(
                 )
                 prediction_file.write(f"{seq}\t{score:.4f}\n")
 
-        cum_scores += scores.mean()
-
-    score = eval_post_func(cum_scores)
+    score = eval_post_func(cum_scores / norm)
 
     return score
 
