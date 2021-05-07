@@ -206,7 +206,7 @@ class Model(ABC):
                     summary_writer.add_scalar("Epoch val loss", val_loss, epoch)
 
                 if val_loss < best_val_loss:
-                    best_val_loss = best_val_loss
+                    best_val_loss = val_loss
                     best_model = deepcopy(self)
 
                 else:
@@ -227,6 +227,7 @@ class Model(ABC):
                     self.full_model_dir,
                     f"{best_val_loss:.2f}_{timestamp}.pt",
                 ),
+                _use_new_zipfile_serialization=False,
             )
 
         # Additional training step, e.g. temperature scaling on val
@@ -320,6 +321,11 @@ class Model(ABC):
             if summary_writer is not None:
                 summary_writer.add_scalar(
                     "Batch train loss", batch_loss, global_batch_num
+                )
+
+            if batch_loss == np.inf or np.isnan(batch_loss):
+                raise ValueError(
+                    f"Batch loss became NaN or inf during epoch {epoch + 1}, batch {i + 1}."
                 )
 
             epoch_loss += batch_loss
@@ -419,5 +425,4 @@ class Model(ABC):
         Model
             Loaded model.
         """
-        with open(model_path, "rb") as pickled_model:
-            return torch.load(pickled_model)
+        return torch.load(model_path)

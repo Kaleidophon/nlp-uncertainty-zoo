@@ -17,7 +17,7 @@ from einops import rearrange
 from knockknock import telegram_sender
 import numpy as np
 import torch
-from torch.nn.functional import cross_entropy
+from torch.nn.functional import nll_loss
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
@@ -41,7 +41,7 @@ EMISSION_DIR = "./emissions"
 
 # Map from dataset class to evaluation function
 EVAL_FUNCS = {
-    LanguageModelingDataset: lambda preds, labels: cross_entropy(
+    LanguageModelingDataset: lambda preds, labels: nll_loss(
         preds, labels, reduction="none"
     )
 }
