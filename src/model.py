@@ -325,7 +325,8 @@ class Model(ABC):
 
             epoch_loss += batch_loss
 
-            if epoch_loss.cpu() == np.inf or np.isnan(epoch_loss.cpu()):
+            check_epoch_loss = epoch_loss.cpu().detach().numpy()
+            if check_epoch_loss == np.inf or np.isnan(check_epoch_loss):
                 raise ValueError(f"Loss became NaN or inf during epoch {epoch + 1}.")
 
             if self.module.training:
