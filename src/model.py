@@ -132,11 +132,7 @@ class Model(ABC):
             lr=self.train_params["lr"],
             weight_decay=self.train_params["weight_decay"],
         )
-        self.scheduler = optim.lr_scheduler.StepLR(
-            self.optimizer,
-            step_size=self.train_params["step_size"],
-            gamma=self.train_params["gamma"],
-        )
+        self.scheduler = None
 
         # Check if model directory exists, if not, create
         if model_dir is not None:
@@ -167,6 +163,13 @@ class Model(ABC):
             Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
+        self.scheduler = optim.lr_scheduler.StepLR(
+            self.optimizer,
+            # step_size = self.train_params["step_size"] epochs
+            step_size=self.train_params["step_size"] * len(train_data),
+            gamma=self.train_params["gamma"],
+        )
+
         num_epochs = self.train_params["num_epochs"]
         best_val_loss = np.inf
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
