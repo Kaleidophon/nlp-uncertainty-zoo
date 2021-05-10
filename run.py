@@ -114,12 +114,11 @@ def run_experiments(
             model = AVAILABLE_MODELS[model_name](
                 model_params, train_params, model_dir=model_dir, device=device
             )
-            # TODO: Debug
-            # model.fit(
-            #    train_data=dataset.train,
-            #    valid_data=dataset.valid,
-            #    summary_writer=summary_writer,
-            # )
+            model.fit(
+                train_data=dataset.train,
+                valid_data=dataset.valid,
+                summary_writer=summary_writer,
+            )
 
             # Evaluate
             model.module.eval()
