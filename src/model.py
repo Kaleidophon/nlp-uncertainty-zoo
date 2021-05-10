@@ -208,7 +208,7 @@ class Model(ABC):
                     summary_writer.add_scalar("Epoch val loss", val_loss, epoch)
 
                 if val_loss < best_val_loss:
-                    best_val_loss = val_loss
+                    best_val_loss = val_loss.item()
                     best_model = deepcopy(self)
 
                 else:
@@ -221,6 +221,11 @@ class Model(ABC):
         self.__dict__.update(best_model.__dict__)
         del best_model
 
+        # Additional training step, e.g. temperature scaling on val
+        if valid_data is not None:
+            self._finetune(valid_data, verbose, summary_writer)
+
+        # Save model if applicable
         if self.model_dir is not None:
             timestamp = str(datetime.now().strftime("%d-%m-%Y_(%H:%M:%S)"))
             torch.save(
@@ -231,10 +236,6 @@ class Model(ABC):
                 ),
                 _use_new_zipfile_serialization=False,
             )
-
-        # Additional training step, e.g. temperature scaling on val
-        if valid_data is not None:
-            self._finetune(valid_data, verbose, summary_writer)
 
         # Make a nice result dict for knockknock
         result_dict = {
