@@ -223,9 +223,6 @@ class Model(ABC):
                     if num_no_improvements > early_stopping_pat:
                         break
 
-            # Update learning rate
-            self.scheduler.step()
-
         # Set current model to best model found, otherwise use last
         if early_stopping:
             self.__dict__.update(best_model.__dict__)
