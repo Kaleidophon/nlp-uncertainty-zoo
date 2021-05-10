@@ -305,7 +305,7 @@ class Model(ABC):
             Summary writer to track training statistics.
         """
         grad_clip = self.train_params.get("grad_clip", np.inf)
-        epoch_loss = torch.zeros(1, device=self.device)
+        epoch_loss = torch.zeros(1)
         num_batches = len(data_split)
 
         for i, (X, y) in enumerate(data_split):
