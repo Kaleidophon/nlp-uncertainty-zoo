@@ -132,7 +132,11 @@ class Model(ABC):
             lr=self.train_params["lr"],
             weight_decay=self.train_params["weight_decay"],
         )
-        self.scheduler = None
+        self.scheduler = optim.lr_scheduler.MultiStepLR(
+            self.optimizer,
+            milestones=self.train_params["milestones"],
+            gamma=self.train_params["gamma"],
+        )
 
         # Check if model directory exists, if not, create
         if model_dir is not None:
@@ -171,13 +175,6 @@ class Model(ABC):
         total_steps = num_epochs * len(train_data)
         progress_bar = tqdm(total=total_steps) if verbose else None
         best_model = deepcopy(self)
-
-        self.scheduler = optim.lr_scheduler.StepLR(
-            self.optimizer,
-            # step_size = self.train_params["step_size"] epochs
-            step_size=self.train_params["step_size"] * len(train_data),
-            gamma=self.train_params["gamma"],
-        )
 
         if valid_data is not None:
             total_steps += num_epochs * len(valid_data)
@@ -222,6 +219,9 @@ class Model(ABC):
 
                     if num_no_improvements > early_stopping_pat:
                         break
+
+            # Update scheduler
+            self.scheduler.step()
 
         # Set current model to best model found, otherwise use last
         if early_stopping:
@@ -333,7 +333,9 @@ class Model(ABC):
                     "Batch train loss", batch_loss, global_batch_num
                 )
                 summary_writer.add_scalar(
-                    "Batch learning rate", self.scheduler.get_lr()[0], global_batch_num
+                    "Batch learning rate",
+                    self.scheduler.get_last_lr()[0],
+                    global_batch_num,
                 )
 
             epoch_loss += batch_loss.cpu().detach()
@@ -347,7 +349,6 @@ class Model(ABC):
                 clip_grad_norm_(self.module.parameters(), grad_clip)
                 self.optimizer.step()
                 self.optimizer.zero_grad()
-                self.scheduler.step()
 
         return epoch_loss
 

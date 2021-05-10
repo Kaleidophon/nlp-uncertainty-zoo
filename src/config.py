@@ -31,7 +31,7 @@ SHARED_PREPROCESSING_PARAMS = {}
 _PREPROCESSING_PARAMS = {
     "wikitext-103": {"batch_size": 64, "sequence_length": 30, "min_freq": 20},
     "ptb": {
-        "batch_size": 20,
+        "batch_size": 32,
         "sequence_length": 35,
         "max_size": 9999,
     },  # - <unk> token
@@ -47,8 +47,8 @@ PREPROCESSING_PARAMS = {
 # TRAINING PARAMETERS
 # Training parameters by dataset and model
 SHARED_TRAIN_PARAMS = {
-    "wikitext-103": {"num_epochs": 1, "step_size": 1, "gamma": 1},
-    "ptb": {"step_size": 1, "gamma": 1},
+    "wikitext-103": {"num_epochs": 1, "gamma": 1},
+    "ptb": {"gamma": 1},
     "clinc": {},
 }
 _TRAIN_PARAMS = {
@@ -69,7 +69,7 @@ _TRAIN_PARAMS = {
             "early_stopping_pat": 10,
             "grad_clip": 10,
             "gamma": 0.74,  # 1.35 ^(-1)
-            "step_size": 10,
+            "milestones": list(range(9, 54, 1)),
         }
     },
     "clinc": {
