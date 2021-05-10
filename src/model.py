@@ -200,7 +200,9 @@ class Model(ABC):
             # Get validation loss
             if valid_data is not None:
                 self.module.eval()
-                val_loss = self._epoch_iter(epoch, valid_data, progress_bar)
+
+                with torch.no_grad():
+                    val_loss = self._epoch_iter(epoch, valid_data, progress_bar)
 
                 if summary_writer is not None:
                     summary_writer.add_scalar("Epoch val loss", val_loss, epoch)
@@ -323,10 +325,9 @@ class Model(ABC):
                     "Batch train loss", batch_loss, global_batch_num
                 )
 
-            epoch_loss += batch_loss
+            epoch_loss += batch_loss.cpu().detach()
 
-            check_epoch_loss = epoch_loss.cpu().detach().numpy()
-            if check_epoch_loss == np.inf or np.isnan(check_epoch_loss):
+            if epoch_loss == np.inf or np.isnan(epoch_loss):
                 raise ValueError(f"Loss became NaN or inf during epoch {epoch + 1}.")
 
             if self.module.training:
