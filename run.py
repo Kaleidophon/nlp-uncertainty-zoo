@@ -17,7 +17,7 @@ from einops import rearrange
 from knockknock import telegram_sender
 import numpy as np
 import torch
-from torch.nn.functional import nll_loss
+from torch.nn.functional import cross_entropy, softmax
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
@@ -41,7 +41,7 @@ EMISSION_DIR = "./emissions"
 
 # Map from dataset class to evaluation function
 EVAL_FUNCS = {
-    LanguageModelingDataset: lambda preds, labels: nll_loss(
+    LanguageModelingDataset: lambda preds, labels: cross_entropy(
         preds, labels, reduction="none"
     )
 }
@@ -114,11 +114,12 @@ def run_experiments(
             model = AVAILABLE_MODELS[model_name](
                 model_params, train_params, model_dir=model_dir, device=device
             )
-            model.fit(
-                train_data=dataset.train,
-                valid_data=dataset.valid,
-                summary_writer=summary_writer,
-            )
+            # TODO: Debug
+            # model.fit(
+            #    train_data=dataset.train,
+            #    valid_data=dataset.valid,
+            #    summary_writer=summary_writer,
+            # )
 
             # Evaluate
             model.module.eval()
@@ -175,6 +176,7 @@ def evaluate(
         num_seqs = X.shape[0]
         X, y = X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
+        predictions = softmax(predictions, dim=-1)
 
         scores = eval_func(
             rearrange(predictions, "s t p -> (s t) p"),
