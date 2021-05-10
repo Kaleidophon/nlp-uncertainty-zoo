@@ -62,6 +62,7 @@ _TRAIN_PARAMS = {
     },
     "ptb": {
         "variational_lstm": {
+            "early_stopping": False,
             "weight_decay": 1e-7,
             "lr": 1,
             "num_epochs": 55,

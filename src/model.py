@@ -170,6 +170,7 @@ class Model(ABC):
         num_epochs = self.train_params["num_epochs"]
         best_val_loss = np.inf
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
+        early_stopping = self.train_params.get("early_stopping", True)
         num_no_improvements = 0
         total_steps = num_epochs * len(train_data)
         progress_bar = tqdm(total=total_steps) if verbose else None
@@ -209,7 +210,9 @@ class Model(ABC):
 
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss.item()
-                    best_model = deepcopy(self)
+
+                    if early_stopping:
+                        best_model = deepcopy(self)
 
                 else:
                     num_no_improvements += 1
@@ -218,8 +221,9 @@ class Model(ABC):
                         break
 
         # Set current model to best model found
-        self.__dict__.update(best_model.__dict__)
-        del best_model
+        if early_stopping:
+            self.__dict__.update(best_model.__dict__)
+            del best_model
 
         # Additional training step, e.g. temperature scaling on val
         if valid_data is not None:
