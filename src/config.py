@@ -139,8 +139,8 @@ _MODEL_PARAMS = {
     "ptb": {
         "variational_lstm": {
             "num_layers": 2,
-            "hidden_size": 1500,
-            "input_size": 1500,
+            "hidden_size": 1250,
+            "input_size": 1250,
             "input_dropout": 0.3,  # Medium model Gal & Ghrahramani (2016)
             "dropout": 0.5,  # Medium model Gal & Ghrahramani (2016)
             "vocab_size": 10000,

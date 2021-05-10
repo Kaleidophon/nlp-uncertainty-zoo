@@ -380,7 +380,7 @@ class Model(ABC):
             Batch loss.
         """
 
-        loss_function = nn.NLLLoss()
+        loss_function = nn.CrossEntropyLoss()
         preds = self.module(X)
         batch_size, sequence_length, output_size = preds.shape
         preds = preds.reshape(batch_size * sequence_length, output_size)
