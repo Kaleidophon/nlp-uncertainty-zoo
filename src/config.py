@@ -31,7 +31,7 @@ SHARED_PREPROCESSING_PARAMS = {}
 _PREPROCESSING_PARAMS = {
     "wikitext-103": {"batch_size": 64, "sequence_length": 30, "min_freq": 20},
     "ptb": {
-        "batch_size": 32,
+        "batch_size": 20,
         "sequence_length": 35,
         "max_size": 9999,
     },  # - <unk> token
@@ -68,6 +68,8 @@ _TRAIN_PARAMS = {
             "num_epochs": 55,
             "early_stopping_pat": 10,
             "grad_clip": 10,
+            "gamma": 0.74,  # 1.35 ^(-1)
+            "step_size": 10,
         }
     },
     "clinc": {
