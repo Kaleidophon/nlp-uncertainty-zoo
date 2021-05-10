@@ -132,12 +132,7 @@ class Model(ABC):
             lr=self.train_params["lr"],
             weight_decay=self.train_params["weight_decay"],
         )
-        self.scheduler = optim.lr_scheduler.StepLR(
-            self.optimizer,
-            # step_size = self.train_params["step_size"] epochs
-            step_size=self.train_params["step_size"],
-            gamma=self.train_params["gamma"],
-        )
+        self.scheduler = None
 
         # Check if model directory exists, if not, create
         if model_dir is not None:
@@ -176,6 +171,13 @@ class Model(ABC):
         total_steps = num_epochs * len(train_data)
         progress_bar = tqdm(total=total_steps) if verbose else None
         best_model = deepcopy(self)
+
+        self.scheduler = optim.lr_scheduler.StepLR(
+            self.optimizer,
+            # step_size = self.train_params["step_size"] epochs
+            step_size=self.train_params["step_size"] * len(train_data),
+            gamma=self.train_params["gamma"],
+        )
 
         if valid_data is not None:
             total_steps += num_epochs * len(valid_data)
@@ -224,7 +226,7 @@ class Model(ABC):
             # Update learning rate
             self.scheduler.step()
 
-        # Set current model to best model found
+        # Set current model to best model found, otherwise use last
         if early_stopping:
             self.__dict__.update(best_model.__dict__)
             del best_model
@@ -345,6 +347,7 @@ class Model(ABC):
                 clip_grad_norm_(self.module.parameters(), grad_clip)
                 self.optimizer.step()
                 self.optimizer.zero_grad()
+                self.scheduler.step()
 
         return epoch_loss
 
