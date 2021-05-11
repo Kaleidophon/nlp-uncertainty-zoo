@@ -17,7 +17,7 @@ from einops import rearrange
 from knockknock import telegram_sender
 import numpy as np
 import torch
-from torch.nn.functional import cross_entropy, softmax
+from torch.nn.functional import cross_entropy
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
@@ -175,7 +175,6 @@ def evaluate(
         num_seqs = X.shape[0]
         X, y = X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
-        predictions = softmax(predictions, dim=-1)
 
         scores = eval_func(
             rearrange(predictions, "s t p -> (s t) p"),
