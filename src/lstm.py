@@ -178,9 +178,7 @@ class LSTMModule(Module):
 
         # Apply dropout masks
         hx = hx * time_mask
-        input_ = (
-            input_ * input_mask if layer > 0 else input_
-        )  # For the first layer, the embedding dropout is used
+        input_ = input_ * input_mask
 
         # Forget gate
         f_g = torch.sigmoid(
