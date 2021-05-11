@@ -66,7 +66,7 @@ _TRAIN_PARAMS = {
             "weight_decay": 1e-7,
             "lr": 1,
             "num_epochs": 55,
-            "early_stopping_pat": 10,
+            # "early_stopping_pat": 10,
             "grad_clip": 10,
             "gamma": 0.74,  # 1.35 ^(-1)
             "milestones": list(range(9, 54, 1)),
