@@ -127,7 +127,8 @@ class Model(ABC):
         self.to(device)
 
         # Initialize optimizer and scheduler
-        self.optimizer = optim.Adam(
+        # TODO: Make optimizer an option
+        self.optimizer = optim.SGD(
             self.module.parameters(),
             lr=self.train_params["lr"],
             weight_decay=self.train_params["weight_decay"],

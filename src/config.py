@@ -142,8 +142,8 @@ _MODEL_PARAMS = {
         # Taken from https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
             "num_layers": 2,
-            "hidden_size": 1250,
-            "input_size": 1250,
+            "hidden_size": 1500,
+            "input_size": 1500,
             "input_dropout": 0.3,  # Medium model Gal & Ghrahramani (2016)
             "dropout": 0.5,  # Medium model Gal & Ghrahramani (2016)
             "vocab_size": 10000,
