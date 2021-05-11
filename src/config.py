@@ -61,6 +61,7 @@ _TRAIN_PARAMS = {
         "ddu_transformer": {"lr": 0.01, "gamma": 0.95},
     },
     "ptb": {
+        # Taken from  https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
             "early_stopping": False,
             "weight_decay": 1e-7,
@@ -70,6 +71,7 @@ _TRAIN_PARAMS = {
             "grad_clip": 10,
             "gamma": 0.74,  # 1.35 ^(-1)
             "milestones": list(range(9, 54, 1)),
+            "init_weight": 0.04,  # Hacky way to include this for the replication, otherwise I'll never use this
         }
     },
     "clinc": {
@@ -137,6 +139,7 @@ _MODEL_PARAMS = {
         },
     },
     "ptb": {
+        # Taken from https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
             "num_layers": 2,
             "hidden_size": 1250,

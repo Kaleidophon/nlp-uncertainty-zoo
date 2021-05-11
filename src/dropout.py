@@ -12,6 +12,7 @@ from typing import Dict, Any, Optional
 
 # EXT
 import torch
+import torch.nn as nn
 
 # PROJECT
 from src.lstm import LSTMModule
@@ -97,6 +98,15 @@ class VariationalLSTM(Model):
             model_dir,
             device,
         )
+
+        # Only for Gal & Ghrahamani replication, I know this isn't pretty
+        if "init_weight" in train_params:
+            init_weight = train_params["init_weight"]
+
+            for module in self.module._modules.values():
+                if isinstance(module, nn.Linear):
+                    module.weight.data.uniform_(-init_weight, init_weight)
+                    module.bias.data.uniform_(-init_weight, init_weight)
 
     def predict(
         self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
