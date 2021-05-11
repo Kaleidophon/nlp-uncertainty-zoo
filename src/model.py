@@ -222,7 +222,7 @@ class Model(ABC):
                         break
 
             # Update scheduler
-            self.scheduler.step()
+            self.scheduler.step(epoch=epoch)
 
         # Set current model to best model found, otherwise use last
         if early_stopping:
