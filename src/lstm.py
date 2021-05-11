@@ -3,6 +3,7 @@ Implement a vanilla LSTM model.
 """
 
 # STD
+import math
 from typing import Optional, Dict, Any
 
 # EXT
@@ -116,9 +117,24 @@ class LSTMModule(Module):
 
         outputs = []
 
+        # Sample types which are going to be zero'ed out
+        batch_types = torch.unique(input_)  # Get all types in current batch
+        num_types = len(batch_types)
+        # Randomly permute indices, get the corresponding token indices and throw away the rest according to
+        # input dropout rate
+        types_to_drop = batch_types[torch.randperm(num_types)][
+            : math.floor(num_types * self.input_dropout)
+        ]
+
         for t in range(sequence_length):
 
             embeddings = self.embeddings(input_[:, t])
+
+            # TODO: Find a more elegant solution for this
+            for i, in_ in enumerate(input_[:, t]):
+                if in_ in types_to_drop:
+                    embeddings[i, :] = 0
+
             layer_input = embeddings.squeeze(0)
 
             for layer in range(self.num_layers):
@@ -177,7 +193,9 @@ class LSTMModule(Module):
 
         # Apply dropout masks
         hx = hx * time_mask
-        input_ = input_ * input_mask
+        input_ = (
+            input_ * input_mask if layer > 0 else input_
+        )  # For the first layer, the embedding dropout is used
 
         # Forget gate
         f_g = torch.sigmoid(

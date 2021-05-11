@@ -31,7 +31,7 @@ SHARED_PREPROCESSING_PARAMS = {}
 _PREPROCESSING_PARAMS = {
     "wikitext-103": {"batch_size": 64, "sequence_length": 30, "min_freq": 20},
     "ptb": {
-        "batch_size": 32,
+        "batch_size": 20,
         "sequence_length": 35,
         "max_size": 9999,
     },  # - <unk> token
@@ -63,15 +63,15 @@ _TRAIN_PARAMS = {
     "ptb": {
         # Taken from  https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
-            "early_stopping": False,
+            "early_stopping": True,
             "weight_decay": 1e-7,
             "lr": 1,
             "num_epochs": 55,
             # "early_stopping_pat": 10,
             "grad_clip": 10,
-            "gamma": 0.74,  # 1.35 ^(-1)
+            "gamma": 0.74,  # 1 / 1.35; in the Gal implementation you divide by gamma
             "milestones": list(range(9, 54, 1)),
-            "init_weight": 0.04,  # Hacky way to include this for the replication, otherwise I'll never use this
+            "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
         }
     },
     "clinc": {
