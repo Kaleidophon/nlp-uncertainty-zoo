@@ -5,6 +5,7 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 # EXT
 from sklearn.utils.fixes import loguniform
 from scipy.stats import uniform
+import torch
 
 # PROJECT
 from src.datasets import Wikitext103Dataset, PennTreebankDataset
@@ -70,7 +71,7 @@ _TRAIN_PARAMS = {
             # "early_stopping_pat": 10,
             "grad_clip": 10,
             "gamma": 0.74,  # 1 / 1.35; in the Gal implementation you divide by gamma
-            "milestones": list(range(13, 54, 1)),
+            "milestones": torch.LongTensor(range(13, 54, 1)),
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
         }
     },

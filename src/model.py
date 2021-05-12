@@ -182,6 +182,7 @@ class Model(ABC):
 
         for epoch in range(self.train_params["num_epochs"]):
             self.module.train()
+
             train_loss = self._epoch_iter(
                 epoch,
                 train_data,
