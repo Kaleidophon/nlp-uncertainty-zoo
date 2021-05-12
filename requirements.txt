@@ -8,3 +8,4 @@ transformers
 token2index
 einops
 datasets
+scikit-learn

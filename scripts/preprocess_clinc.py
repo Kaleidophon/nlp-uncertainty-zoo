@@ -44,7 +44,7 @@ if __name__ == "__main__":
                 )
 
                 with codecs.open(
-                    f"../data/processed/{dataset}/{split}.txt", "wb", "utf-8"
+                    f"../data/processed/{dataset}/{split}.csv", "wb", "utf-8"
                 ) as split_file:
                     for tokenized_sentence, label in zip(tokenized_sentences, labels):
                         split_file.write(f"{' '.join(tokenized_sentence)}\t{label}\n")
