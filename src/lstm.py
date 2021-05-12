@@ -135,7 +135,7 @@ class LSTMModule(Module):
                 ]  # New hidden state becomes input for next layer
                 hidden[layer] = new_hidden  # Store for next step
 
-            dropout_out = torch.bernoulli(mask_tensor * (1 - self.dropout))
+            dropout_out = torch.bernoulli(mask_tensor * (1 - self.input_dropout))
             out = layer_input * dropout_out
             out = self.decoder(out)
             outputs.append(out)
