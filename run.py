@@ -114,7 +114,7 @@ def run_experiments(
             model = AVAILABLE_MODELS[model_name](
                 model_params, train_params, model_dir=model_dir, device=device
             )
-            model.fit(
+            result_dict = model.fit(
                 train_data=dataset.train,
                 valid_data=dataset.valid,
                 summary_writer=summary_writer,
@@ -126,6 +126,17 @@ def run_experiments(
                 model, dataset, f"{result_dir}/{model_name}_{run+1}_{timestamp}.csv"
             )
             scores[model_name].append(score)
+
+            # Add all info to summary writer
+            if summary_writer is not None:
+                summary_writer.add_hparams(
+                    hparam_dict={**model_params, **train_params},
+                    metric_dict={
+                        "train_loss": result_dict["train_loss"],
+                        "best_val_loss": result_dict["best_val_loss"],
+                        "test_score": score,
+                    },
+                )
 
     return json.dumps(
         {
