@@ -65,8 +65,9 @@ class LSTMModule(Module):
         self.decoder = nn.Linear(hidden_size, output_size)
         self.dropout = dropout
         self.input_dropout = input_dropout
-        self._dropout = 0
+        self._dropout = dropout
         self._input_dropout = input_dropout
+        self.last_hidden = None
 
         for layer in range(num_layers):
             self.gates[layer] = {
@@ -85,11 +86,11 @@ class LSTMModule(Module):
 
     def forward(
         self, input_: torch.LongTensor, hidden: Optional[HiddenDict] = None
-    ) -> torch.FloatTensor:
+    ) -> torch.Tensor:
         batch_size, sequence_length = input_.shape
 
         # Initialize hidden activations if not given
-        if hidden is None:
+        if hidden is None and self.last_hidden is None:
             hidden = {
                 layer: (
                     torch.zeros(batch_size, self.hidden_size, device=self.device),
@@ -100,9 +101,7 @@ class LSTMModule(Module):
 
         # Detach hidden activations to limit gradient computations
         else:
-            for hd in hidden.values():
-                hd[0].detach()
-                hd[1].detach()
+            hidden = self.last_hidden if hidden is None else hidden
 
         # Sample all dropout masks used for this batch
         mask_tensor = torch.ones(batch_size, self.hidden_size, device=self.device)
@@ -141,8 +140,14 @@ class LSTMModule(Module):
             outputs.append(out)
 
         outputs = torch.stack(outputs, dim=1)
+        self._assign_last_hidden(hidden)
 
         return outputs
+
+    def _assign_last_hidden(self, hidden: HiddenDict):
+        self.last_hidden = {
+            layer: (h[0].detach(), h[1].detach()) for layer, h in hidden.items()
+        }
 
     def forward_step(
         self,
@@ -212,12 +217,20 @@ class LSTMModule(Module):
         # Manually turn off dropout
         self._dropout, self.dropout = self.dropout, 0
         self._input_dropout, self.input_dropout = self.input_dropout, 0
+
+        # Reset hidden activations
+        self.last_hidden = None
+
         super().eval()
 
     def train(self, *args):
         # Manually reinstate old dropout prob
         self.dropout = self._dropout
         self.input_dropout = self._input_dropout
+
+        # Reset hidden activations
+        self.last_hidden = None
+
         super().train(*args)
 
 
