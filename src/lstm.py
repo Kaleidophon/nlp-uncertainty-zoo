@@ -104,16 +104,23 @@ class LSTMModule(Module):
             hidden = self.last_hidden if hidden is None else hidden
 
         # Sample all dropout masks used for this batch
+        # Save some compute by initializing once
         mask_tensor = torch.ones(batch_size, self.hidden_size, device=self.device)
-        dropout_masks_input = {
-            layer: torch.bernoulli(mask_tensor * (1 - self.input_dropout))
-            for layer in range(self.num_layers)
-        }
-        dropout_masks_time = {
-            layer: torch.bernoulli(mask_tensor * (1 - self.dropout))
-            for layer in range(self.num_layers)
-        }
-        dropout_out = torch.bernoulli(mask_tensor * (1 - self.input_dropout))
+        dropout_masks_input = (
+            {  # Dropout mask applied to input of each layer, same across time steps
+                layer: torch.bernoulli(mask_tensor * (1 - self.input_dropout))
+                for layer in range(self.num_layers)
+            }
+        )
+        dropout_masks_time = (
+            {  # Dropout mask applied between time steps, same for same layer
+                layer: torch.bernoulli(mask_tensor * (1 - self.dropout))
+                for layer in range(self.num_layers)
+            }
+        )
+        dropout_out = torch.bernoulli(
+            mask_tensor * (1 - self.input_dropout)
+        )  # Like input, but before projection layer
 
         outputs = []
 

@@ -137,6 +137,9 @@ def run_experiments(
                         "test_score": score,
                     },
                 )
+                # Reset for potential next run
+                summary_writer.close()
+                summary_writer = SummaryWriter()
 
     return json.dumps(
         {
