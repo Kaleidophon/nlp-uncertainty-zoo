@@ -127,7 +127,7 @@ class LSTMModule(Module):
         # Sample types which are going to be zero'ed out
         types_to_drop = torch.randperm(self.vocab_size)[
             : math.floor(self.vocab_size * self.input_dropout)
-        ]
+        ].to(self.device)
 
         for t in range(sequence_length):
 
