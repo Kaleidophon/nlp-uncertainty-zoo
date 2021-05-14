@@ -33,8 +33,9 @@ class VariationalLSTMModule(LSTMModule):
         input_size: int,
         hidden_size: int,
         output_size: int,
-        input_dropout: float,
-        dropout: float,
+        embedding_dropout: float,
+        layer_dropout: float,
+        time_dropout: float,
         num_predictions: int,
         device: Device,
     ):
@@ -53,11 +54,14 @@ class VariationalLSTMModule(LSTMModule):
             Size of hidden representations.
         output_size: int
             Size of output of model.
-        input_dropout: float
+        embedding_dropout: float
             Dropout on word embeddings. Dropout application corresponds to `Gal & Ghahramani (2016)
             <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
-        dropout: float
-            Dropout rate. Dropout application corresponds to `Gal & Ghahramani (2016)
+        layer_dropout: float
+            Dropout rate between layers. Dropout application corresponds to `Gal & Ghahramani (2016)
+            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
+        time_dropout: float
+            Dropout rate between time steps. Dropout application corresponds to `Gal & Ghahramani (2016)
             <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
         num_predictions: int
             Number of predictions with different dropout masks.
@@ -72,8 +76,9 @@ class VariationalLSTMModule(LSTMModule):
             input_size,
             hidden_size,
             output_size,
-            input_dropout,
-            dropout,
+            embedding_dropout,
+            layer_dropout,
+            time_dropout,
             device,
         )
 

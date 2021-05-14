@@ -145,8 +145,9 @@ _MODEL_PARAMS = {
             "num_layers": 2,
             "hidden_size": 1500,
             "input_size": 1500,
-            "input_dropout": 0.3,  # Medium model Gal & Ghrahramani (2016)
-            "dropout": 0.5,  # Medium model Gal & Ghrahramani (2016)
+            "embedding_dropout": 0.3,  # dropout_x, Large model Gal & Ghrahramani (2016)
+            "layer_dropout": 0.5,  # dropout_i / dropout_o, Large model Gal & Ghrahramani (2016)
+            "time_dropout": 0.3,  # dropout_h, Large model Gal & Ghrahramani (2016)
             "vocab_size": 10000,
             "output_size": 10000,
             "num_predictions": 100,

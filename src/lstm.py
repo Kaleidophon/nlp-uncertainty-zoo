@@ -27,8 +27,9 @@ class LSTMModule(Module):
         input_size: int,
         hidden_size: int,
         output_size: int,
-        input_dropout: float,
-        dropout: float,
+        embedding_dropout: float,
+        layer_dropout: float,
+        time_dropout: float,
         device: Device,
     ):
         """
@@ -46,11 +47,14 @@ class LSTMModule(Module):
             Size of hidden representations.
         output_size: int
             Size of output of model.
-        input_dropout: float
+        embedding_dropout: float
             Dropout on word embeddings. Dropout application corresponds to `Gal & Ghahramani (2016)
             <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
-        dropout: float
-            Dropout rate. Dropout application corresponds to `Gal & Ghahramani (2016)
+        layer_dropout: float
+            Dropout rate between layers. Dropout application corresponds to `Gal & Ghahramani (2016)
+            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
+        time_dropout: float
+            Dropout rate between time steps. Dropout application corresponds to `Gal & Ghahramani (2016)
             <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
         device: Device
             Device the model is located on.
@@ -63,10 +67,12 @@ class LSTMModule(Module):
         self.embeddings = nn.Embedding(vocab_size, input_size)
         self.gates = {}
         self.decoder = nn.Linear(hidden_size, output_size)
-        self.dropout = dropout
-        self.input_dropout = input_dropout
-        self._dropout = dropout
-        self._input_dropout = input_dropout
+        self.embedding_dropout, self._embedding_dropout = (
+            embedding_dropout,
+            embedding_dropout,
+        )
+        self.layer_dropout, self._layer_dropout = layer_dropout, layer_dropout
+        self.time_dropout, self._time_dropout = time_dropout, time_dropout
         self.last_hidden = None
 
         for layer in range(num_layers):
@@ -106,27 +112,23 @@ class LSTMModule(Module):
         # Sample all dropout masks used for this batch
         # Save some compute by initializing once
         mask_tensor = torch.ones(batch_size, self.hidden_size, device=self.device)
-        dropout_masks_input = (
+        dropout_masks_layer = (
             {  # Dropout mask applied to input of each layer, same across time steps
-                layer: torch.bernoulli(mask_tensor * (1 - self.input_dropout))
+                layer: torch.bernoulli(mask_tensor * (1 - self.layer_dropout))
                 for layer in range(self.num_layers)
             }
         )
         dropout_masks_time = (
             {  # Dropout mask applied between time steps, same for same layer
-                layer: torch.bernoulli(mask_tensor * (1 - self.dropout))
+                layer: torch.bernoulli(mask_tensor * (1 - self.time_dropout))
                 for layer in range(self.num_layers)
             }
         )
-        dropout_out = torch.bernoulli(
-            mask_tensor * (1 - self.input_dropout)
-        )  # Like input, but before projection layer
-
         outputs = []
 
         # Sample types which are going to be zero'ed out
         types_to_drop = torch.randperm(self.vocab_size)[
-            : math.floor(self.vocab_size * self.input_dropout)
+            : math.floor(self.vocab_size * self.embedding_dropout)
         ].to(self.device)
 
         for t in range(sequence_length):
@@ -145,16 +147,17 @@ class LSTMModule(Module):
                     layer,
                     hidden[layer],
                     layer_input,
-                    dropout_masks_input[layer],
                     dropout_masks_time[layer],
                 )
                 layer_input = new_hidden[
                     0
                 ]  # New hidden state becomes input for next layer
+                layer_input = (
+                    layer_input * dropout_masks_layer[layer]
+                )  # Apply dropout masks between layers
                 hidden[layer] = new_hidden  # Store for next step
 
-            out = layer_input * dropout_out
-            out = self.decoder(out)
+            out = self.decoder(layer_input)
             outputs.append(out)
 
         outputs = torch.stack(outputs, dim=1)
@@ -172,7 +175,6 @@ class LSTMModule(Module):
         layer: int,
         hidden: HiddenStates,
         input_: torch.FloatTensor,
-        input_mask: torch.FloatTensor,
         time_mask: torch.FloatTensor,
     ) -> HiddenStates:
         """
@@ -187,8 +189,6 @@ class LSTMModule(Module):
             Tuple of hidden and cell state from the previous time step.
         input_: torch.FloatTensor
             Input to the current layer: Either embedding if layer = 0 or hidden state from previous layer.
-        input_mask: torch.FloatTensor
-            Dropout masks applied to the input of the layer.
         time_mask: torch.FloatTensor
             Dropout masks applied on this layer between time steps.
 
@@ -201,7 +201,6 @@ class LSTMModule(Module):
 
         # Apply dropout masks
         hx = hx * time_mask
-        input_ = input_ * input_mask if layer > 0 else input_
 
         # Forget gate
         f_g = torch.sigmoid(
@@ -233,8 +232,9 @@ class LSTMModule(Module):
 
     def eval(self):
         # Manually turn off dropout
-        self._dropout, self.dropout = self.dropout, 0
-        self._input_dropout, self.input_dropout = self.input_dropout, 0
+        self._embedding_dropout, self.embedding_dropout = self.embedding_dropout, 0
+        self._layer_dropout, self.layer_dropout = self.layer_dropout, 0
+        self._time_dropout, self.time_dropout = self.time_dropout, 0
 
         # Reset hidden activations
         self.last_hidden = None
@@ -243,8 +243,9 @@ class LSTMModule(Module):
 
     def train(self, *args):
         # Manually reinstate old dropout prob
-        self.dropout = self._dropout
-        self.input_dropout = self._input_dropout
+        self.embedding_dropout = self.embedding_dropout
+        self.layer_dropout = self._layer_dropout
+        self.time_dropout = self._time_dropout
 
         # Reset hidden activations
         self.last_hidden = None
