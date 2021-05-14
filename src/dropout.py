@@ -139,10 +139,12 @@ class VariationalLSTM(Model):
 
         batch, seq_len = X.shape
         preds = torch.zeros(batch, seq_len, self.module.output_size, device=self.device)
+        # Make sure that the same hidden state from the last batch is used for all forward passes
+        hidden = self.module.last_hidden
 
         with torch.no_grad():
             for _ in range(num_predictions):
-                preds += self.module(X)
+                preds += self.module(X, hidden=hidden)
 
             preds /= num_predictions
 
