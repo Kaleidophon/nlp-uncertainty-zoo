@@ -23,7 +23,8 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 # PROJECT
-from src.datasets import DataSplit
+from src.datasets import DataSplit, TextDataset
+from src.evaluation import evaluate
 from src.types import Device
 
 
@@ -148,8 +149,8 @@ class Model(ABC):
 
     def fit(
         self,
-        train_data: DataSplit,
-        valid_data: Optional[DataSplit] = None,
+        dataset: TextDataset,
+        validate: bool = True,
         verbose: bool = True,
         summary_writer: Optional[SummaryWriter] = None,
     ):
@@ -158,10 +159,10 @@ class Model(ABC):
 
         Parameters
         ----------
-        train_data: DataSplit
-            Training data split.
-        valid_data: Optional[DataSplit]
-            Validation data split.
+        dataset: TextDataset
+            Dataset the model is being trained on.
+        validate: bool
+            Indicate whether model should also be evaluated on the validation set.
         verbose: bool
             Whether to display information about current loss.
         summary_writer: Optional[SummaryWriter]
@@ -173,19 +174,16 @@ class Model(ABC):
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
         early_stopping = self.train_params.get("early_stopping", True)
         num_no_improvements = 0
-        total_steps = num_epochs * len(train_data)
+        total_steps = num_epochs * len(dataset.train)
         progress_bar = tqdm(total=total_steps) if verbose else None
         best_model = deepcopy(self)
-
-        if valid_data is not None:
-            total_steps += num_epochs * len(valid_data)
 
         for epoch in range(self.train_params["num_epochs"]):
             self.module.train()
 
             train_loss = self._epoch_iter(
                 epoch,
-                train_data,
+                dataset.train,
                 progress_bar,
                 summary_writer,
             )
@@ -201,14 +199,14 @@ class Model(ABC):
                 summary_writer.add_scalar("Epoch train loss", train_loss.item(), epoch)
 
             # Get validation loss
-            if valid_data is not None:
+            if validate:
                 self.module.eval()
 
                 with torch.no_grad():
-                    val_loss = self._epoch_iter(epoch, valid_data, progress_bar)
+                    val_loss = evaluate(self, dataset, dataset.valid)
 
                 if summary_writer is not None:
-                    summary_writer.add_scalar("Epoch val loss", val_loss, epoch)
+                    summary_writer.add_scalar("Epoch val score", val_loss, epoch)
 
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss.item()
@@ -231,8 +229,8 @@ class Model(ABC):
             del best_model
 
         # Additional training step, e.g. temperature scaling on val
-        if valid_data is not None:
-            self._finetune(valid_data, verbose, summary_writer)
+        if validate:
+            self._finetune(dataset.valid, verbose, summary_writer)
 
         # Save model if applicable
         if self.model_dir is not None:
