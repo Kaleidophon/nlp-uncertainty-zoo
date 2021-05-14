@@ -209,7 +209,7 @@ class Model(ABC):
                     summary_writer.add_scalar("Epoch val score", val_loss, epoch)
 
                 if val_loss < best_val_loss:
-                    best_val_loss = val_loss.item()
+                    best_val_loss = val_loss
 
                     if early_stopping:
                         best_model = deepcopy(self)
