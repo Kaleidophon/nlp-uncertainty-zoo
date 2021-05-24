@@ -132,7 +132,7 @@ class Model(ABC):
         self.optimizer = optim.SGD(
             self.module.parameters(),
             lr=self.train_params["lr"],
-            weight_decay=self.train_params["weight_decay"],
+            weight_decay=self.train_params.get("weight_decay", 0),
         )
         self.scheduler = optim.lr_scheduler.MultiStepLR(
             self.optimizer,
@@ -145,7 +145,7 @@ class Model(ABC):
             self.full_model_dir = os.path.join(model_dir, model_name)
 
             if not os.path.exists(self.full_model_dir):
-                os.mkdir(self.full_model_dir)
+                os.makedirs(self.full_model_dir)
 
     def fit(
         self,

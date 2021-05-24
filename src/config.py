@@ -8,6 +8,7 @@ from scipy.stats import uniform
 import torch
 
 # PROJECT
+from src.composer import Composer
 from src.datasets import Wikitext103Dataset, PennTreebankDataset
 from src.dropout import VariationalLSTM, VariationalTransformer
 from src.lstm import LSTM
@@ -17,6 +18,7 @@ from src.transformer import Transformer
 # AVAILABLE DATASETS AND MODELS
 AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset, "ptb": PennTreebankDataset}
 AVAILABLE_MODELS = {
+    "composer": Composer,
     "lstm": LSTM,
     "variational_lstm": VariationalLSTM,
     "transformer": Transformer,
@@ -73,6 +75,13 @@ _TRAIN_PARAMS = {
             "gamma": 0.74,  # 1 / 1.35; in the Gal implementation you divide by gamma
             "milestones": torch.LongTensor(range(13, 54, 1)),
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
+        },
+        "composer": {
+            "lr": 0.05,
+            "num_epochs": 55,
+            "grad_clip": 10,
+            "gamma": 0.74,
+            "milestones": torch.LongTensor(range(13, 54, 1))
         }
     },
     "clinc": {
@@ -151,6 +160,16 @@ _MODEL_PARAMS = {
             "vocab_size": 10000,
             "output_size": 10000,
             "num_predictions": 100,
+        },
+        "composer": {
+            "num_layers": 4,
+            "hidden_size": 500,
+            "input_size": 500,
+            "dropout": 0.2,
+            "vocab_size": 10000,
+            "output_size": 10000,
+            "num_operations": 10,
+            "sequence_length": 35
         }
     },
     "clinc": {

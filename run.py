@@ -56,7 +56,7 @@ def run_experiments(
     summary_writer: Optional[SummaryWriter] = None,
 ) -> str:
     """
-    Run experiments. An experiment consists of training evaluating a number of models on a dataset and savng
+    Run experiments. An experiment consists of training evaluating a number of models on a dataset and saving
     the models and model outputs.
 
     Parameters
