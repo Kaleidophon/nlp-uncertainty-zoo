@@ -143,12 +143,10 @@ class VariationalLSTM(Model):
         preds = torch.zeros(
             batch_size, seq_len, self.module.output_size, device=self.device
         )
-        # Make sure that the same hidden state from the last batch is used for all forward passes
 
-        # Init hidden state
-        hidden_states = (
-            self.module.last_hidden_states
-        )  # Continue with hidden states from last batch
+        # Make sure that the same hidden state from the last batch is used for all forward passes
+        # Init hidden state - continue with hidden states from last batch
+        hidden_states = self.module.last_hidden_states
 
         # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
         if hidden_states is None:

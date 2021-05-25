@@ -78,19 +78,24 @@ class SNGPTransformerModule(TransformerModule):
             device,
         )
 
+        for module in self._modules.values():
+            if isinstance(module, nn.Linear):
+                utils.spectral_norm(module)  # Add spectral normalization
+
+        # Random output layer - frozen, not spectrally normalized
         self.output = nn.Linear(self.hidden_size, self.hidden_size)
         # Change init of weights and biases following Liu et al. (2020)
         self.output.weight.data.normal_(0, 1)
         self.output.bias.data.uniform_(0, 2 * math.pi)
 
+        # This layer is frozen right after init
+        self.output.weight.requires_grad = False
+        self.output.bias.requires_grad = False
+
         # TODO: Add length-scale parameter
         self.register_parameter(
             name="Beta", param=nn.Parameter(torch.randn(hidden_size, output_size))
         )
-
-        for module in self._modules.values():
-            if isinstance(module, nn.Linear):
-                utils.spectral_norm(module)  # Add spectral normalization
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)

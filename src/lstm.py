@@ -119,7 +119,7 @@ class LSTMModule(Module):
                 for layer in range(self.num_layers)
             }
         )
-        new_hidden_states = {}
+        new_hidden_states: HiddenDict = {}
         outputs = []
 
         # Sample types which are going to be zero'ed out
@@ -157,7 +157,7 @@ class LSTMModule(Module):
             outputs.append(out)
 
         outputs = torch.stack(outputs, dim=1)
-        self._assign_last_hidden_states(hidden_states)
+        self._assign_last_hidden_states(new_hidden_states)
 
         return outputs
 

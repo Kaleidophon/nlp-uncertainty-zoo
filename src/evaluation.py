@@ -62,7 +62,7 @@ def evaluate(
     cum_scores = 0
     norm = 0  # Keep track of the number of tokens evaluated
     for (X, y) in eval_split:
-        batch_size = X.shape[0]
+        batch_size, seq_len = X.shape
         X, y = X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
 
@@ -71,7 +71,7 @@ def evaluate(
             rearrange(y, "b l -> (b l)"),
         )
         cum_scores += scores.sum()
-        norm += scores.shape[0]
+        norm += batch_size * seq_len
 
         # Reshape into token scores per sequence
         scores = rearrange(scores, "(b l) -> b l", b=batch_size)

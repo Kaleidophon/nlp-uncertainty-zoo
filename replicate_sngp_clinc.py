@@ -55,5 +55,7 @@ if __name__ == "__main__":
     dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "y"])
     dl = DataLoader(dataset["train"], batch_size=32)
 
+    # Init BERT
+
     for batch in dl:
         ...
