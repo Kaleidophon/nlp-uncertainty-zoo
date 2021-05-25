@@ -109,8 +109,10 @@ class VariationalLSTM(Model):
             init_weight = train_params["init_weight"]
 
             for module in self.module._modules.values():
+                module.weight.data.uniform_(-init_weight, init_weight)
+
+                # Naturally, don't init biases when it's the embedding layer
                 if isinstance(module, nn.Linear):
-                    module.weight.data.uniform_(-init_weight, init_weight)
                     module.bias.data.uniform_(-init_weight, init_weight)
 
     def predict(
@@ -137,14 +139,24 @@ class VariationalLSTM(Model):
 
         X = X.to(self.device)
 
-        batch, seq_len = X.shape
-        preds = torch.zeros(batch, seq_len, self.module.output_size, device=self.device)
+        batch_size, seq_len = X.shape
+        preds = torch.zeros(
+            batch_size, seq_len, self.module.output_size, device=self.device
+        )
         # Make sure that the same hidden state from the last batch is used for all forward passes
-        hidden = self.module.last_hidden
+
+        # Init hidden state
+        hidden_states = (
+            self.module.last_hidden_states
+        )  # Continue with hidden states from last batch
+
+        # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
+        if hidden_states is None:
+            hidden_states = self.module.init_hidden_states(batch_size, self.device)
 
         with torch.no_grad():
             for _ in range(num_predictions):
-                preds += self.module(X, hidden=hidden)
+                preds += self.module(X, hidden_states=hidden_states)
 
             preds /= num_predictions
 

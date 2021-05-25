@@ -170,7 +170,7 @@ class Model(ABC):
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         num_epochs = self.train_params["num_epochs"]
-        best_val_loss = np.inf
+        best_val_score = np.inf
         early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
         early_stopping = self.train_params.get("early_stopping", True)
         num_no_improvements = 0
@@ -203,13 +203,13 @@ class Model(ABC):
                 self.module.eval()
 
                 with torch.no_grad():
-                    val_loss = evaluate(self, dataset, dataset.valid)
+                    val_score = evaluate(self, dataset, dataset.valid)
 
                 if summary_writer is not None:
-                    summary_writer.add_scalar("Epoch val score", val_loss, epoch)
+                    summary_writer.add_scalar("Epoch val score", val_score, epoch)
 
-                if val_loss < best_val_loss:
-                    best_val_loss = val_loss
+                if val_score < best_val_score:
+                    best_val_score = val_score
 
                     if early_stopping:
                         best_model = deepcopy(self)
@@ -239,7 +239,7 @@ class Model(ABC):
                 self,
                 os.path.join(
                     self.full_model_dir,
-                    f"{best_val_loss:.2f}_{timestamp}.pt",
+                    f"{best_val_score:.2f}_{timestamp}.pt",
                 ),
                 _use_new_zipfile_serialization=False,
             )
@@ -248,7 +248,7 @@ class Model(ABC):
         result_dict = {
             "model_name": self.model_name,
             "train_loss": train_loss.item(),
-            "best_val_loss": best_val_loss,
+            "best_val_loss": best_val_score,
         }
 
         return result_dict

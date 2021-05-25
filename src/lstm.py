@@ -73,7 +73,7 @@ class LSTMModule(Module):
         )
         self.layer_dropout, self._layer_dropout = layer_dropout, layer_dropout
         self.time_dropout, self._time_dropout = time_dropout, time_dropout
-        self.last_hidden = None
+        self.last_hidden_states = None
 
         for layer in range(num_layers):
             self.gates[layer] = {
@@ -91,23 +91,18 @@ class LSTMModule(Module):
                 self.add_module(f"Layer {layer+1} / {name}", gate)
 
     def forward(
-        self, input_: torch.LongTensor, hidden: Optional[HiddenDict] = None
+        self, input_: torch.LongTensor, hidden_states: Optional[HiddenDict] = None
     ) -> torch.Tensor:
         batch_size, sequence_length = input_.shape
 
         # Initialize hidden activations if not given
-        if hidden is None and self.last_hidden is None:
-            hidden = {
-                layer: (
-                    torch.zeros(batch_size, self.hidden_size, device=self.device),
-                    torch.zeros(batch_size, self.hidden_size, device=self.device),
-                )
-                for layer in range(self.num_layers)
-            }
-
+        if hidden_states is None and self.last_hidden_states is None:
+            hidden_states = self.init_hidden_states(batch_size, self.device)
         # Detach hidden activations to limit gradient computations
         else:
-            hidden = self.last_hidden if hidden is None else hidden
+            hidden_states = (
+                self.last_hidden_states if hidden_states is None else hidden_states
+            )
 
         # Sample all dropout masks used for this batch
         # Save some compute by initializing once
@@ -124,6 +119,7 @@ class LSTMModule(Module):
                 for layer in range(self.num_layers)
             }
         )
+        new_hidden_states = {}
         outputs = []
 
         # Sample types which are going to be zero'ed out
@@ -143,37 +139,50 @@ class LSTMModule(Module):
             layer_input = embeddings.squeeze(0)
 
             for layer in range(self.num_layers):
-                new_hidden = self.forward_step(
+                new_hidden_state = self.forward_step(
                     layer,
-                    hidden[layer],
+                    hidden_states[layer],
                     layer_input,
                     dropout_masks_time[layer],
                 )
-                layer_input = new_hidden[
+                layer_input = new_hidden_state[
                     0
                 ]  # New hidden state becomes input for next layer
                 layer_input = (
                     layer_input * dropout_masks_layer[layer]
                 )  # Apply dropout masks between layers
-                hidden[layer] = new_hidden  # Store for next step
+                new_hidden_states[layer] = new_hidden_state  # Store for next step
 
             out = self.decoder(layer_input)
             outputs.append(out)
 
         outputs = torch.stack(outputs, dim=1)
-        self._assign_last_hidden(hidden)
+        self._assign_last_hidden_states(hidden_states)
 
         return outputs
 
-    def _assign_last_hidden(self, hidden: HiddenDict):
-        self.last_hidden = {
+    # TODO: Add doc here
+    def _assign_last_hidden_states(self, hidden: HiddenDict):
+        self.last_hidden_states = {
             layer: (h[0].detach(), h[1].detach()) for layer, h in hidden.items()
         }
+
+    # TODO: Add doc here
+    def init_hidden_states(self, batch_size: int, device: Device) -> HiddenDict:
+        hidden = {
+            layer: (
+                torch.zeros(batch_size, self.hidden_size, device=device),
+                torch.zeros(batch_size, self.hidden_size, device=device),
+            )
+            for layer in range(self.num_layers)
+        }
+
+        return hidden
 
     def forward_step(
         self,
         layer: int,
-        hidden: HiddenStates,
+        hidden_state: HiddenStates,
         input_: torch.FloatTensor,
         time_mask: torch.FloatTensor,
     ) -> HiddenStates:
@@ -185,7 +194,7 @@ class LSTMModule(Module):
         ----------
         layer: int
             Current layer number.
-        hidden: HiddenStates
+        hidden_state: HiddenStates
             Tuple of hidden and cell state from the previous time step.
         input_: torch.FloatTensor
             Input to the current layer: Either embedding if layer = 0 or hidden state from previous layer.
@@ -197,7 +206,7 @@ class LSTMModule(Module):
         HiddenStates
             New hidden and cell state for this layer.
         """
-        hx, cx = hidden
+        hx, cx = hidden_state
 
         # Apply dropout masks
         hx = hx * time_mask
@@ -237,7 +246,7 @@ class LSTMModule(Module):
         self._time_dropout, self.time_dropout = self.time_dropout, 0
 
         # Reset hidden activations
-        self.last_hidden = None
+        self.last_hidden_states = None
 
         super().eval()
 
@@ -248,7 +257,7 @@ class LSTMModule(Module):
         self.time_dropout = self._time_dropout
 
         # Reset hidden activations
-        self.last_hidden = None
+        self.last_hidden_states = None
 
         super().train(*args)
 

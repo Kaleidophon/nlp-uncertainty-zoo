@@ -62,22 +62,22 @@ def evaluate(
     cum_scores = 0
     norm = 0  # Keep track of the number of tokens evaluated
     for (X, y) in eval_split:
-        num_seqs = X.shape[0]
+        batch_size = X.shape[0]
         X, y = X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
 
         scores = eval_func(
-            rearrange(predictions, "s t p -> (s t) p"),
-            rearrange(y, "s l -> (s l)"),
+            rearrange(predictions, "b t p -> (b t) p"),
+            rearrange(y, "b l -> (b l)"),
         )
         cum_scores += scores.sum()
         norm += scores.shape[0]
 
         # Reshape into token scores per sequence
-        scores = rearrange(scores, "(s l) -> s l", s=num_seqs)
+        scores = rearrange(scores, "(b l) -> b l", b=batch_size)
 
         if predictions_path is not None:
-            for s in range(num_seqs):
+            for s in range(batch_size):
                 seq, score = dataset.t2i.unindex(X[s, :]), eval_post_func(
                     scores[s, :].mean()
                 )
