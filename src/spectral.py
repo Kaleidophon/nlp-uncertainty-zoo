@@ -25,6 +25,50 @@ from src.model import Model
 from src.types import Device
 
 
+class SNGPOutputModule(nn.Module):
+    def __init__(
+        self,
+        hidden_size: int,
+        output_size: int,
+        scaling_coefficient: float,
+        beta_length_scale: float,
+    ):
+        super().__init__()
+
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.scaling_coefficent = scaling_coefficient
+        self.beta_length_scale = beta_length_scale
+
+        # ### Init parameters
+
+        # Random, frozen output layer
+        self.output = nn.Linear(self.hidden_size, self.output_size)
+        # Change init of weights and biases following Liu et al. (2020)
+        self.output.weight.data.normal_(0, 1)
+        self.output.bias.data.uniform_(0, 2 * math.pi)
+
+        # This layer is frozen right after init
+        self.output.weight.requires_grad = False
+        self.output.bias.requires_grad = False
+
+        # Bundle all beta_k vectors in a matrix
+        self.register_parameter(
+            name="Beta",
+            param=nn.Parameter(
+                torch.randn(output_size, output_size) * beta_length_scale
+            ),
+        )
+
+    def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
+        Phi = math.sqrt(2 / self.output_size) * torch.cos(
+            self.output(-x)
+        )  # Gives a output_size x 1 vector
+        out = self.Beta @ Phi  # output_size x 1
+
+        return out
+
+
 class SNGPTransformerModule(TransformerModule):
     """
     Implementation of a spectral-normalized Gaussian Process transformer.
@@ -40,6 +84,9 @@ class SNGPTransformerModule(TransformerModule):
         dropout: float,
         num_heads: int,
         sequence_length: int,
+        spectral_norm_upper_bound: float,
+        scaling_coefficent: float,
+        beta_length_scale: float,
         device: Device,
     ):
         """
@@ -78,24 +125,10 @@ class SNGPTransformerModule(TransformerModule):
             device,
         )
 
+        # TODO: Incorporate upper bound
         for module in self._modules.values():
             if isinstance(module, nn.Linear):
                 utils.spectral_norm(module)  # Add spectral normalization
-
-        # Random output layer - frozen, not spectrally normalized
-        self.output = nn.Linear(self.hidden_size, self.hidden_size)
-        # Change init of weights and biases following Liu et al. (2020)
-        self.output.weight.data.normal_(0, 1)
-        self.output.bias.data.uniform_(0, 2 * math.pi)
-
-        # This layer is frozen right after init
-        self.output.weight.requires_grad = False
-        self.output.bias.requires_grad = False
-
-        # TODO: Add length-scale parameter
-        self.register_parameter(
-            name="Beta", param=nn.Parameter(torch.randn(hidden_size, output_size))
-        )
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
@@ -104,12 +137,6 @@ class SNGPTransformerModule(TransformerModule):
 
         out = self.encoder(embeddings)
         out = self.output_dropout(out)
-
-        # TODO: Add projection layer (which is not learned?)
-        # TODO: Add input layer normalization with 128 (?)
-
-        Phi = math.sqrt(2 / self.hidden_size) * torch.cos(self.output(-out))
-        out = Phi @ self.Beta
 
         return out
 
