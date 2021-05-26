@@ -100,12 +100,10 @@ def run_experiments(
             model = AVAILABLE_MODELS[model_name](
                 model_params, train_params, model_dir=model_dir, device=device
             )
-            # TODO: Debug
-            result_dict = {}
-            # result_dict = model.fit(
-            #    dataset=dataset,
-            #    summary_writer=summary_writer,
-            # )
+            result_dict = model.fit(
+                dataset=dataset,
+                summary_writer=summary_writer,
+            )
 
             # Evaluate
             model.module.eval()
