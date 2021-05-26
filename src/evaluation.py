@@ -70,8 +70,16 @@ def evaluate(
             rearrange(predictions, "b t p -> (b t) p"),
             rearrange(y, "b l -> (b l)"),
         )
+
+        # Mask <unk> tokens
+        not_unk_mask = (y != dataset.t2i["<unk>"]).long()
+        num_batch_tokens = torch.flatten(
+            not_unk_mask
+        ).sum()  # Number of tokens in current batch which are not <unk>
+        scores *= rearrange(not_unk_mask, "b l -> (b l)")
+
         cum_scores += scores.sum()
-        norm += batch_size * seq_len
+        norm += num_batch_tokens
 
         # Reshape into token scores per sequence
         scores = rearrange(scores, "(b l) -> b l", b=batch_size)
@@ -79,7 +87,7 @@ def evaluate(
         if predictions_path is not None:
             for s in range(batch_size):
                 seq, score = dataset.t2i.unindex(X[s, :]), eval_post_func(
-                    scores[s, :].mean()
+                    scores[s, :].sum() / not_unk_mask[s, :].sum()
                 )
                 prediction_file.write(f"{seq}\t{score:.4f}\n")
 

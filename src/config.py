@@ -36,8 +36,8 @@ _PREPROCESSING_PARAMS = {
     "ptb": {
         "batch_size": 20,
         "sequence_length": 35,
-        "max_size": 9999,
-    },  # - <unk> token
+        "max_size": 10000,
+    },
     "clinc": {"sequence_length": 32},
 }
 
@@ -81,8 +81,8 @@ _TRAIN_PARAMS = {
             "num_epochs": 55,
             "grad_clip": 10,
             "gamma": 0.74,
-            "milestones": torch.LongTensor(range(13, 54, 1))
-        }
+            "milestones": torch.LongTensor(range(13, 54, 1)),
+        },
     },
     "clinc": {
         "sngp_transformer": {
@@ -169,8 +169,8 @@ _MODEL_PARAMS = {
             "vocab_size": 10000,
             "output_size": 10000,
             "num_operations": 10,
-            "sequence_length": 35
-        }
+            "sequence_length": 35,
+        },
     },
     "clinc": {
         "sngp_transformer": {

@@ -135,7 +135,7 @@ class VariationalLSTM(Model):
             Predictions.
         """
         if num_predictions is None:
-            num_predictions = self.module.num_predictions
+            num_predictions = self.module.num_prediction
 
         X = X.to(self.device)
 
