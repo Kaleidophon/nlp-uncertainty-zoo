@@ -110,7 +110,7 @@ class LSTMModule(Module):
         dropout_masks_layer = (
             {  # Dropout mask applied to input of each layer, same across time steps
                 layer: torch.bernoulli(mask_tensor * (1 - self.layer_dropout))
-                for layer in range(self.num_layers + 1)
+                for layer in range(self.num_layers)
             }
         )
         dropout_masks_time = (
@@ -122,27 +122,23 @@ class LSTMModule(Module):
         new_hidden_states: HiddenDict = {}
         outputs = []
 
-        # TODO: Remove?
         # Sample types which are going to be zero'ed out
-        # types_to_drop = torch.randperm(self.vocab_size)[
-        #    : math.floor(self.vocab_size * self.embedding_dropout)
-        # ].to(self.device)
+        types_to_drop = torch.randperm(self.vocab_size)[
+            : math.floor(self.vocab_size * self.embedding_dropout)
+        ].to(self.device)
 
         for t in range(sequence_length):
 
             embeddings = self.embeddings(input_[:, t])
 
             # TODO: Find a more elegant solution for this
-            # for i, in_ in enumerate(input_[:, t]):
-            #    if in_ in types_to_drop:
-            #        embeddings[i, :] = 0
+            for i, in_ in enumerate(input_[:, t]):
+                if in_ in types_to_drop:
+                    embeddings[i, :] = 0
 
             layer_input = embeddings.squeeze(0)
 
             for layer in range(self.num_layers):
-                layer_input = (
-                    layer_input * dropout_masks_layer[layer]
-                )  # Apply dropout masks between layers
 
                 new_hidden_state = self.forward_step(
                     layer,
@@ -153,11 +149,11 @@ class LSTMModule(Module):
                 layer_input = new_hidden_state[
                     0
                 ]  # New hidden state becomes input for next layer
+                layer_input = (
+                    layer_input * dropout_masks_layer[layer]
+                )  # Apply dropout masks between layers
                 new_hidden_states[layer] = new_hidden_state  # Store for next step
 
-            layer_input = (
-                layer_input * dropout_masks_layer[self.num_layers]
-            )  # Apply dropout masks between layers
             out = self.decoder(layer_input)
             outputs.append(out)
 
