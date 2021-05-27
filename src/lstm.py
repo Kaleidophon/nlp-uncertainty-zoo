@@ -127,7 +127,8 @@ class LSTMModule(Module):
         #    : math.floor(self.vocab_size * self.embedding_dropout)
         # ].to(self.device)
         dropout_mask_embedding = torch.bernoulli(
-            torch.ones(batch_size, self.input_size) * (1 - self.embedding_dropout)
+            torch.ones(batch_size, self.input_size, device=self.device)
+            * (1 - self.embedding_dropout)
         )
 
         for t in range(sequence_length):
