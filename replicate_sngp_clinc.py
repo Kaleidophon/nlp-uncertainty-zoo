@@ -7,9 +7,11 @@ Script used to replicate the experiments of spectral-normalized Gaussian Process
 from sklearn.preprocessing import LabelEncoder
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torch.nn.utils.spectral_norm import SpectralNorm
 from transformers import BertModel, BertTokenizer
 
 # PROJECT
+from src.spectral import SNGPModule
 from datasets import load_dataset
 
 # CONST
@@ -17,7 +19,20 @@ CLINC_DIR = "./data/processed/clinc"
 
 
 class SNGPBert(nn.Module):
-    ...
+    def __int__(
+        self,
+        hidden_size: int,
+        output_size: int,
+        spectral_norm_upper_bound: float,
+        scaling_coefficient: float,
+        beta_length_scale: float,
+    ):
+        self.sngp_layer = SNGPModule(
+            hidden_size, output_size, scaling_coefficient, beta_length_scale
+        )
+        self.bert = BertModel()
+
+        # TODO: Manually implement spectral norm hook
 
 
 if __name__ == "__main__":

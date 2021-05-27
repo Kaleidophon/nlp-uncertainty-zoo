@@ -123,18 +123,21 @@ class LSTMModule(Module):
         outputs = []
 
         # Sample types which are going to be zero'ed out
-        types_to_drop = torch.randperm(self.vocab_size)[
-            : math.floor(self.vocab_size * self.embedding_dropout)
-        ].to(self.device)
+        # types_to_drop = torch.randperm(self.vocab_size)[
+        #    : math.floor(self.vocab_size * self.embedding_dropout)
+        # ].to(self.device)
+        dropout_mask_embedding = torch.bernoulli(
+            torch.ones(batch_size, self.input_size) * (1 - self.embedding_dropout)
+        )
 
         for t in range(sequence_length):
 
-            embeddings = self.embeddings(input_[:, t])
+            embeddings = self.embeddings(input_[:, t]) * dropout_mask_embedding
 
             # TODO: Find a more elegant solution for this
-            for i, in_ in enumerate(input_[:, t]):
-                if in_ in types_to_drop:
-                    embeddings[i, :] = 0
+            # for i, in_ in enumerate(input_[:, t]):
+            #    if in_ in types_to_drop:
+            #        embeddings[i, :] = 0
 
             layer_input = embeddings.squeeze(0)
 

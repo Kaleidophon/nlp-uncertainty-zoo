@@ -13,6 +13,7 @@ import math
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.nn.utils as utils
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
@@ -25,11 +26,13 @@ from src.model import Model
 from src.types import Device
 
 
-class SNGPOutputModule(nn.Module):
+# TODO: Document this shit
+class SNGPModule(nn.Module):
     def __init__(
         self,
         hidden_size: int,
         output_size: int,
+        rigde_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
     ):
@@ -37,7 +40,8 @@ class SNGPOutputModule(nn.Module):
 
         self.hidden_size = hidden_size
         self.output_size = output_size
-        self.scaling_coefficent = scaling_coefficient
+        self.ridge_factor = rigde_factor
+        self.scaling_coefficient = scaling_coefficient
         self.beta_length_scale = beta_length_scale
 
         # ### Init parameters
@@ -60,11 +64,25 @@ class SNGPOutputModule(nn.Module):
             ),
         )
 
-    def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
+        # Initialize inverse of sigma hat, one matrix per class
+        self.sigma_hat_inv = (
+            torch.randn(output_size, output_size, output_size) * self.ridge_factor
+        )
+
+    def forward(
+        self, x: torch.FloatTensor, update_sigma_hat_inv: bool = False
+    ) -> torch.FloatTensor:
         Phi = math.sqrt(2 / self.output_size) * torch.cos(
             self.output(-x)
-        )  # Gives a output_size x 1 vector
-        out = self.Beta @ Phi  # output_size x 1
+        )  # batch_size x output_size
+        out = Phi @ self.Beta  # Logits: batch_size x output_size
+
+        if update_sigma_hat_inv:
+            probs = F.softmax(out, dim=-1)
+            self.sigma_hat_inv = (
+                self.scaling_coefficient * self.sigma_hat_inv + torch.einsum()
+            )
+            out = probs  # TODO
 
         return out
 
@@ -85,7 +103,7 @@ class SNGPTransformerModule(TransformerModule):
         num_heads: int,
         sequence_length: int,
         spectral_norm_upper_bound: float,
-        scaling_coefficent: float,
+        scaling_coefficient: float,
         beta_length_scale: float,
         device: Device,
     ):
