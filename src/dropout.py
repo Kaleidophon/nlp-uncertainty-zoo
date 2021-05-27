@@ -108,12 +108,13 @@ class VariationalLSTM(Model):
         if "init_weight" in train_params:
             init_weight = train_params["init_weight"]
 
-            for module in self.module._modules.values():
-                module.weight.data.uniform_(-init_weight, init_weight)
+            for name, module in self.module._modules.items():
 
-                # Naturally, don't init biases when it's the embedding layer
-                if isinstance(module, nn.Linear):
-                    module.bias.data.uniform_(-init_weight, init_weight)
+                if name not in ("embeddings", "decoder"):
+                    module.weight.data.uniform_(-init_weight, init_weight)
+
+                    if module.bias is not None:
+                        module.bias.data.uniform_(-init_weight, init_weight)
 
     def predict(
         self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs

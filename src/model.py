@@ -13,7 +13,8 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 import os
 
-# EXT
+# EX
+from einops import rearrange
 import numpy as np
 import torch
 import torch.nn as nn
@@ -382,11 +383,11 @@ class Model(ABC):
 
         loss_function = nn.CrossEntropyLoss()
         preds = self.module(X)
-        batch_size, sequence_length, output_size = preds.shape
-        preds = preds.reshape(batch_size * sequence_length, output_size)
-        y = y.reshape(batch_size * sequence_length)
 
-        loss = loss_function(preds, y)
+        loss = loss_function(
+            rearrange(preds, "b t p -> (b t) p"),
+            rearrange(y, "b l -> (b l)"),
+        )
 
         return loss
 
