@@ -85,4 +85,8 @@ def evaluate(
 
     score = eval_post_func(cum_scores / norm)
 
+    if predictions_path is not None:
+        prediction_file.write(f"Total score: {score:.4f}\n")
+        prediction_file.close()
+
     return score

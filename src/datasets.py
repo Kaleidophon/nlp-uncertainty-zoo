@@ -66,6 +66,7 @@ class TextDataset(ABC):
         batch_size: int,
         batch_style: str = "padding",
         sequence_length: Optional[int] = None,
+        add_eos_token: bool = True,
         **indexing_params: Dict[str, Any],
     ):
         """
@@ -87,6 +88,8 @@ class TextDataset(ABC):
             'padding'.
         sequence_length: Optional[int]
             Maximum length for padding if batch_style='padding'. No padding if max_length=None, which is the default.
+        add_eos_token: bool
+            Indicate whether an <eos> token should be added. Default is True.
         indexing_params: Dict[str, Any]
             Parameters for t2i.T2I indexing class.
         """
@@ -101,6 +104,7 @@ class TextDataset(ABC):
         self.indexing_params = indexing_params
         self.batch_style = batch_style
         self.sequence_length = sequence_length
+        self.add_eos_token = add_eos_token
 
         # Splits
         self._train = None
@@ -240,7 +244,12 @@ class TextDataset(ABC):
                 map(
                     torch.LongTensor,
                     self.t2i(
-                        sequences,
+                        [
+                            sequence + f" {self.t2i[self.t2i.eos_token]}"
+                            if self.add_eos_token
+                            else ""
+                            for sequence in sequences
+                        ],
                         pad_to=self.sequence_length
                         if self.sequence_length is not None
                         else "max",
@@ -264,7 +273,19 @@ class TextDataset(ABC):
             )
 
         elif self.batch_style == "continuous":
-            indexed_sequences = list(map(torch.LongTensor, self.t2i(sequences)))
+            indexed_sequences = list(
+                map(
+                    torch.LongTensor,
+                    self.t2i(
+                        [
+                            sequence + f" {self.t2i[self.t2i.eos_token]}"
+                            if self.add_eos_token
+                            else ""
+                            for sequence in sequences
+                        ]
+                    ),
+                )
+            )
 
             if self.sequence_length is None:
                 self.sequence_length = max(len(seq) for seq in indexed_sequences)
