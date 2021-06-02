@@ -313,7 +313,7 @@ class TextDataset(ABC):
             num_batches = math.ceil(num_batched_steps / self.sequence_length)
             batched_sequences = [
                 raw_batches[
-                    :, n * self.sequence_length : (n + 1) * self.sequence_length + 1
+                    :, n * self.sequence_length : (n + 1) * self.sequence_length
                 ]
                 for n in range(num_batches)
             ]
