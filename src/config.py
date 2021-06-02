@@ -36,7 +36,7 @@ _PREPROCESSING_PARAMS = {
     "ptb": {
         "batch_size": 20,
         "sequence_length": 35,
-        "max_size": 10000,
+        # "max_size": 10000,  # PTB has exactly 10000 types
     },
     "clinc": {"sequence_length": 32},
 }
@@ -157,8 +157,8 @@ _MODEL_PARAMS = {
             "embedding_dropout": 0.3,  # dropout_x, Large model Gal & Ghrahramani (2016)
             "layer_dropout": 0.5,  # dropout_i / dropout_o, Large model Gal & Ghrahramani (2016)
             "time_dropout": 0.3,  # dropout_h, Large model Gal & Ghrahramani (2016)
-            "vocab_size": 10000,
-            "output_size": 10000,
+            "vocab_size": 10001,
+            "output_size": 10001,
             "num_predictions": 100,
         },
         "composer": {
@@ -166,8 +166,8 @@ _MODEL_PARAMS = {
             "hidden_size": 500,
             "input_size": 500,
             "dropout": 0.2,
-            "vocab_size": 10000,
-            "output_size": 10000,
+            "vocab_size": 10001,
+            "output_size": 10001,
             "num_operations": 10,
             "sequence_length": 35,
         },

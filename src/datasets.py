@@ -245,9 +245,9 @@ class TextDataset(ABC):
                     torch.LongTensor,
                     self.t2i(
                         [
-                            sequence + f" {self.t2i[self.t2i.eos_token]}"
-                            if self.add_eos_token
-                            else ""
+                            # Add <eos> if necessary before indexing
+                            sequence
+                            + (f" {self.t2i.eos_token}" if self.add_eos_token else "")
                             for sequence in sequences
                         ],
                         pad_to=self.sequence_length
@@ -278,9 +278,9 @@ class TextDataset(ABC):
                     torch.LongTensor,
                     self.t2i(
                         [
-                            sequence + f" {self.t2i[self.t2i.eos_token]}"
-                            if self.add_eos_token
-                            else ""
+                            # Add <eos> if necessary before indexing
+                            sequence
+                            + (f" {self.t2i.eos_token}" if self.add_eos_token else "")
                             for sequence in sequences
                         ]
                     ),
