@@ -37,6 +37,7 @@ class SNGPModule(nn.Module):
         rigde_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
+        num_predictions: int,
     ):
         super().__init__()
 
@@ -45,6 +46,7 @@ class SNGPModule(nn.Module):
         self.ridge_factor = rigde_factor
         self.scaling_coefficient = scaling_coefficient
         self.beta_length_scale = beta_length_scale
+        self.num_predictions = num_predictions
 
         # ### Init parameters
 
@@ -70,9 +72,11 @@ class SNGPModule(nn.Module):
 
         # Initialize inverse of sigma hat, one matrix per class
         self.sigma_hat_inv = (
-            torch.randn(output_size, output_size, output_size) * self.ridge_factor
+            torch.stack([torch.eye(output_size) for _ in range(output_size)], dim=0)
+            * self.ridge_factor
         )
         self.sigma_hat = torch.zeros(output_size, output_size, output_size)
+        self.inversed_sigma = False
 
     def forward(
         self, x: torch.FloatTensor, update_sigma_hat_inv: bool = False
@@ -80,10 +84,10 @@ class SNGPModule(nn.Module):
         Phi = math.sqrt(2 / self.output_size) * torch.cos(
             self.output(-x)
         )  # batch_size x output_size
-        out = Phi @ self.Beta  # Logits: batch_size x output_size
+        logits = Phi @ self.Beta  # Logits: batch_size x output_size
 
         if update_sigma_hat_inv:
-            probs = F.softmax(out, dim=-1)
+            probs = F.softmax(logits, dim=-1)
             # Phi.T @ Phi: output_size x output_size
 
             for k in range(self.output_size):
@@ -95,11 +99,50 @@ class SNGPModule(nn.Module):
                     probs[:, k] * (1 - probs[:, k]) * Phi.T @ Phi
                 )
 
+        return logits
+
+    def predict(self, x: torch.FloatTensor, num_predictions: Optional[int] = None):
+
+        assert (
+            self.inversed_sigma
+        ), "Sigma_hat matrix hasn't been inverted yet. Use invert_sigma_hat()."
+
+        if num_predictions is None:
+            num_predictions = self.num_predictions
+
+        Phi = math.sqrt(2 / self.output_size) * torch.cos(
+            self.output(-x)
+        )  # batch_size x output_size
+        post_mean = (
+            Phi @ self.Beta
+        )  # batch_size x output_size, here the logits are actually the posterior mean
+
+        # Compute posterior variance
+        # Okay, so this is a bit insane. Here we have three components:
+        #   * Phi: batch_size x classes
+        #   * sigma_hat: output_size x output_size x output_size (m is given as an alternative identifier for classes
+        #     so that the right dimensions are multiplied)
+        #   * Transposed Phi: classes x batch_size
+        # Thus, this single impression gives us the posterior variance for every class for every instance in the batch
+        # in ONE, readable (!) line.
+        post_var = torch.einsum("bk,mkk,kb->bm", Phi, self.sigma_hat, Phi.T)
+
+        out = 0
+        for _ in range(num_predictions):
+            # Now actually sample logits from posterior
+            logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8))
+            preds = torch.softmax(logits, dim=-1)
+            out += preds
+
+        out /= num_predictions
+
         return out
 
     def invert_sigma_hat(self):
         for k in range(self.output_size):
             self.sigma_hat[k, :, :] = linalg.inv(self.sigma_hat_inv[k, :, :])
+
+        self.inversed_sigma = True
 
 
 class SNGPTransformerModule(TransformerModule):

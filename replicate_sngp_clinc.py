@@ -3,6 +3,9 @@ Script used to replicate the experiments of spectral-normalized Gaussian Process
 `Liu et al. (2020) <https://arxiv.org/pdf/2006.10108.pdf>`_.
 """
 
+# STD
+from typing import Optional
+
 # EXT
 from sklearn.preprocessing import LabelEncoder
 import torch.nn as nn
@@ -32,6 +35,7 @@ WEIGHT_DECAY = 0
 EPOCHS = 40
 LEARNING_RATE = 5e-5
 WARMUP_PROP = 0.1
+NUM_PREDICTIONS = 10
 
 
 class SNGPBert(nn.Module):
@@ -43,6 +47,7 @@ class SNGPBert(nn.Module):
         ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
+        num_predictions: int,
     ):
         super().__init__()
 
@@ -53,8 +58,10 @@ class SNGPBert(nn.Module):
             ridge_factor,
             scaling_coefficient,
             beta_length_scale,
+            num_predictions,
         )
         self.bert = BertModel.from_pretrained(BERT_MODEL)
+        self.output_size = output_size
 
         # Spectral norm initialization
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
@@ -68,6 +75,7 @@ class SNGPBert(nn.Module):
 
         # Misc.
         self.last_epoch = False
+        self.num_predictions = num_predictions
 
     def forward(self, x: torch.LongTensor, attention_mask: torch.FloatTensor):
         pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
@@ -77,8 +85,22 @@ class SNGPBert(nn.Module):
 
         return out
 
-    def predict(self):
-        ...  # TODO: Implement
+    def predict(
+        self,
+        x: torch.LongTensor,
+        attention_mask: torch.FloatTensor,
+        num_predictions: Optional[int] = None,
+    ):
+
+        if num_predictions is None:
+            num_predictions = self.num_predictions
+
+        pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
+            "pooler_output"
+        ]
+        out = self.sngp_layer.predict(pooler_output, num_predictions=num_predictions)
+
+        return out
 
     def spectral_normalization(self):
         # For BERT, only apply to pooler layer following Liu et al. (2020)
@@ -141,6 +163,7 @@ if __name__ == "__main__":
         ridge_factor=RIDGE_FACTOR,
         scaling_coefficient=SCALING_COEFFICIENT,
         beta_length_scale=BETA_LENGTH_SCALE,
+        num_predictions=NUM_PREDICTIONS,
     )
 
     # TODO: Init summary writer
@@ -172,6 +195,11 @@ if __name__ == "__main__":
                 batch["input_ids"],
                 batch["y"],
             )
+
+            # TODO: Debug
+            sngp_bert.sngp_layer.invert_sigma_hat()
+            out = sngp_bert.predict(input_ids, attention_mask)
+
             out = sngp_bert(input_ids, attention_mask)
             loss = loss_func(out, labels)
             print("Loss: ", loss)
