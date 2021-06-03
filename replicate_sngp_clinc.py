@@ -7,9 +7,10 @@ Script used to replicate the experiments of spectral-normalized Gaussian Process
 from sklearn.preprocessing import LabelEncoder
 import torch.nn as nn
 import torch
+import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.nn.utils.spectral_norm import SpectralNorm
-from transformers import BertModel, BertTokenizer
+from transformers import BertModel, BertTokenizer, get_linear_schedule_with_warmup
 
 # PROJECT
 from src.spectral import SNGPModule
@@ -29,6 +30,8 @@ SCALING_COEFFICIENT = 0.999
 BETA_LENGTH_SCALE = 2
 WEIGHT_DECAY = 0
 EPOCHS = 40
+LEARNING_RATE = 5e-5
+WARMUP_PROP = 0.1
 
 
 class SNGPBert(nn.Module):
@@ -129,7 +132,6 @@ if __name__ == "__main__":
         batched=True,
     )
     dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "y"])
-    dl = DataLoader(dataset["train"], batch_size=32)
 
     # Init SNGP-BERT
     sngp_bert = SNGPBert(
@@ -143,15 +145,26 @@ if __name__ == "__main__":
 
     # TODO: Init summary writer
     # TODO: Init knockknockbot
-    # TODO: Init adam
-    # TODO: Implement parameter adjustment
+    # TODO: Move all tensors / model to correct device
+
+    # Init optimizer, loss
+    steps_per_epoch = len(dataset["train"])
+    optimizer = optim.Adam(
+        sngp_bert.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY
+    )
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=steps_per_epoch * EPOCHS * WARMUP_PROP,
+        num_training_steps=steps_per_epoch * EPOCHS,
+    )
+    loss_func = nn.CrossEntropyLoss()
 
     for epoch in range(EPOCHS):
+        dl = DataLoader(dataset["train"], batch_size=32)
+
         for batch in dl:
             # During the last epochs, update sigma_hat_inv matrix
-            # TODO: Debug
-            # sngp_bert.last_epoch = epoch == EPOCHS - 1
-            sngp_bert.last_epoch = True
+            sngp_bert.last_epoch = epoch == EPOCHS - 1
 
             # Forward pass
             attention_mask, input_ids, labels = (
@@ -160,11 +173,19 @@ if __name__ == "__main__":
                 batch["y"],
             )
             out = sngp_bert(input_ids, attention_mask)
+            loss = loss_func(out, labels)
+            print("Loss: ", loss)
 
+            # Backward pass
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+            optimizer.zero_grad()
+
+            # Spectral normalization
             sngp_bert.spectral_normalization()
 
-            # if epoch == EPOCHS - 1:
-            # TODO: Debug
-            sngp_bert.sngp_layer.invert_sigma_hat()
+            if epoch == EPOCHS - 1:
+                sngp_bert.sngp_layer.invert_sigma_hat()
 
     # TODO: Implement eval
