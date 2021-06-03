@@ -6,6 +6,7 @@ Script used to replicate the experiments of spectral-normalized Gaussian Process
 # EXT
 from sklearn.preprocessing import LabelEncoder
 import torch.nn as nn
+import torch
 from torch.utils.data import DataLoader
 from torch.nn.utils.spectral_norm import SpectralNorm
 from transformers import BertModel, BertTokenizer
@@ -16,23 +17,70 @@ from datasets import load_dataset
 
 # CONST
 CLINC_DIR = "./data/processed/clinc"
+BERT_MODEL = "bert-base-uncased"
+
+# HYPERPARAMETERS
+HIDDEN_SIZE = 2048
+OUTPUT_SIZE = 150
+BATCH_SIZE = 32
+SPECTRAL_NORM_UPPER_BOUND = 0.95
+RIDGE_FACTOR = 0.001
+SCALING_COEFFICIENT = 0.999
+BETA_LENGTH_SCALE = 2
+WEIGHT_DECAY = 0
 
 
 class SNGPBert(nn.Module):
-    def __int__(
+    def __init__(
         self,
         hidden_size: int,
         output_size: int,
         spectral_norm_upper_bound: float,
+        ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
     ):
+        super().__init__()
         self.sngp_layer = SNGPModule(
-            hidden_size, output_size, scaling_coefficient, beta_length_scale
+            hidden_size,
+            output_size,
+            ridge_factor,
+            scaling_coefficient,
+            beta_length_scale,
         )
-        self.bert = BertModel()
+        self.bert = BertModel.from_pretrained(BERT_MODEL)
+        self.spectral_norm_upper_bound = spectral_norm_upper_bound
+        self.spectral_norm = SpectralNorm.apply(
+            self.bert.pooler.dense,
+            name="weight",
+            n_power_iterations=1,
+            dim=0,
+            eps=1e-12,
+        )
 
-        # TODO: Manually implement spectral norm hook
+    def forward(self, x: torch.LongTensor, attention_mask: torch.FloatTensor):
+        _, pooler_output = self.bert(x, attention_mask)
+        out = self.sngp_layer(pooler_output)
+
+        return out
+
+    def spectral_normalization(self):
+        # For BERT, only apply to pooler layer following Liu et al. (2020)
+        pooler = self.bert.pooler.dense
+        old_weight = pooler.weight.clone()
+        normalized_weight = self.spectral_norm.compute_weight(
+            pooler, do_power_iteration=True
+        )
+        u, v = pooler.weight_u.unsqueeze(1), pooler.weight_v.unsqueeze(1)
+        lambda_ = u.T @ pooler.weight @ v  # Compute spectral norm for weight matrix
+
+        if lambda_ > self.spectral_norm_upper_bound:
+            self.bert.pooler.dense.weight = (
+                self.spectral_norm_upper_bound * normalized_weight
+            )
+
+        else:
+            self.bert.pooler.dense_weight = old_weight
 
 
 if __name__ == "__main__":
@@ -62,7 +110,7 @@ if __name__ == "__main__":
     )
 
     # Load tokenizer
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    tokenizer = BertTokenizer.from_pretrained(BERT_MODEL)
     dataset = dataset.map(
         lambda e: tokenizer(e["sentence"], truncation=True, padding="max_length"),
         batched=True,
@@ -70,7 +118,15 @@ if __name__ == "__main__":
     dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "y"])
     dl = DataLoader(dataset["train"], batch_size=32)
 
-    # Init BERT
+    # Init SNGP-BERT
+    sngp_bert = SNGPBert(
+        hidden_size=HIDDEN_SIZE,
+        output_size=OUTPUT_SIZE,
+        spectral_norm_upper_bound=SPECTRAL_NORM_UPPER_BOUND,
+        ridge_factor=RIDGE_FACTOR,
+        scaling_coefficient=SCALING_COEFFICIENT,
+        beta_length_scale=BETA_LENGTH_SCALE,
+    )
 
     for batch in dl:
-        ...
+        sngp_bert.spectral_normalization()
