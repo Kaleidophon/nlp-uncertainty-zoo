@@ -10,11 +10,13 @@ this module implements a mixin enabling spectral normalization and, inheriting f
 import math
 
 # EXT
+from einops import reduce
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.utils as utils
+import torch.linalg as linalg
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from typing import Dict, Any, Optional
@@ -56,7 +58,7 @@ class SNGPModule(nn.Module):
         self.output.weight.requires_grad = False
         self.output.bias.requires_grad = False
 
-        # Bundle all beta_k vectors in a matrix
+        # Bundle all beta_k vectors into a matrix
         self.register_parameter(
             name="Beta",
             param=nn.Parameter(
@@ -64,10 +66,13 @@ class SNGPModule(nn.Module):
             ),
         )
 
+        # TODO: Add option for random untrained projection layer
+
         # Initialize inverse of sigma hat, one matrix per class
         self.sigma_hat_inv = (
             torch.randn(output_size, output_size, output_size) * self.ridge_factor
         )
+        self.sigma_hat = torch.zeros(output_size, output_size, output_size)
 
     def forward(
         self, x: torch.FloatTensor, update_sigma_hat_inv: bool = False
@@ -79,12 +84,22 @@ class SNGPModule(nn.Module):
 
         if update_sigma_hat_inv:
             probs = F.softmax(out, dim=-1)
-            self.sigma_hat_inv = (
-                self.scaling_coefficient * self.sigma_hat_inv + torch.einsum()
-            )
-            out = probs  # TODO
+            # Phi.T @ Phi: output_size x output_size
+
+            for k in range(self.output_size):
+                self.sigma_hat_inv[
+                    k, :, :
+                ] = self.scaling_coefficient * self.sigma_hat_inv[k, :, :] + (
+                    1 - self.scaling_coefficient
+                ) * torch.mean(
+                    probs[:, k] * (1 - probs[:, k]) * Phi.T @ Phi
+                )
 
         return out
+
+    def invert_sigma_hat(self):
+        for k in range(self.output_size):
+            self.sigma_hat[k, :, :] = linalg.inv(self.sigma_hat_inv[k, :, :])
 
 
 class SNGPTransformerModule(TransformerModule):
@@ -131,6 +146,8 @@ class SNGPTransformerModule(TransformerModule):
         device: Device
             Device the model is located on.
         """
+        # TODO: Update this chord according to neew SNGP layer
+
         super().__init__(
             num_layers,
             vocab_size,
@@ -142,11 +159,6 @@ class SNGPTransformerModule(TransformerModule):
             sequence_length,
             device,
         )
-
-        # TODO: Incorporate upper bound
-        for module in self._modules.values():
-            if isinstance(module, nn.Linear):
-                utils.spectral_norm(module)  # Add spectral normalization
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)

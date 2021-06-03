@@ -20,7 +20,7 @@ CLINC_DIR = "./data/processed/clinc"
 BERT_MODEL = "bert-base-uncased"
 
 # HYPERPARAMETERS
-HIDDEN_SIZE = 2048
+HIDDEN_SIZE = 768
 OUTPUT_SIZE = 150
 BATCH_SIZE = 32
 SPECTRAL_NORM_UPPER_BOUND = 0.95
@@ -28,6 +28,7 @@ RIDGE_FACTOR = 0.001
 SCALING_COEFFICIENT = 0.999
 BETA_LENGTH_SCALE = 2
 WEIGHT_DECAY = 0
+EPOCHS = 40
 
 
 class SNGPBert(nn.Module):
@@ -41,6 +42,8 @@ class SNGPBert(nn.Module):
         beta_length_scale: float,
     ):
         super().__init__()
+
+        # Model initialization
         self.sngp_layer = SNGPModule(
             hidden_size,
             output_size,
@@ -49,6 +52,8 @@ class SNGPBert(nn.Module):
             beta_length_scale,
         )
         self.bert = BertModel.from_pretrained(BERT_MODEL)
+
+        # Spectral norm initialization
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.spectral_norm = SpectralNorm.apply(
             self.bert.pooler.dense,
@@ -58,11 +63,19 @@ class SNGPBert(nn.Module):
             eps=1e-12,
         )
 
+        # Misc.
+        self.last_epoch = False
+
     def forward(self, x: torch.LongTensor, attention_mask: torch.FloatTensor):
-        _, pooler_output = self.bert(x, attention_mask)
-        out = self.sngp_layer(pooler_output)
+        pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
+            "pooler_output"
+        ]
+        out = self.sngp_layer(pooler_output, update_sigma_hat_inv=self.last_epoch)
 
         return out
+
+    def predict(self):
+        ...  # TODO: Implement
 
     def spectral_normalization(self):
         # For BERT, only apply to pooler layer following Liu et al. (2020)
@@ -128,5 +141,30 @@ if __name__ == "__main__":
         beta_length_scale=BETA_LENGTH_SCALE,
     )
 
-    for batch in dl:
-        sngp_bert.spectral_normalization()
+    # TODO: Init summary writer
+    # TODO: Init knockknockbot
+    # TODO: Init adam
+    # TODO: Implement parameter adjustment
+
+    for epoch in range(EPOCHS):
+        for batch in dl:
+            # During the last epochs, update sigma_hat_inv matrix
+            # TODO: Debug
+            # sngp_bert.last_epoch = epoch == EPOCHS - 1
+            sngp_bert.last_epoch = True
+
+            # Forward pass
+            attention_mask, input_ids, labels = (
+                batch["attention_mask"],
+                batch["input_ids"],
+                batch["y"],
+            )
+            out = sngp_bert(input_ids, attention_mask)
+
+            sngp_bert.spectral_normalization()
+
+            # if epoch == EPOCHS - 1:
+            # TODO: Debug
+            sngp_bert.sngp_layer.invert_sigma_hat()
+
+    # TODO: Implement eval
