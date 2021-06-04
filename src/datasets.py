@@ -169,6 +169,29 @@ class TextDataset(ABC):
 
         return self._test
 
+    def get_split(self, split: str) -> DataSplit:
+        """
+        Get a custom split of a dataset.
+
+        Parameters
+        ----------
+        split: str
+            Name of custom split.
+
+        Returns
+        -------
+        DataSplit
+            Return custom split.
+        """
+        # If train split hasn't been created yet, do that first to maintain consistent indexing
+        if self._train is None:
+            self.train
+
+        if not hasattr(self, f"_{split}"):
+            setattr(self, f"_{split}", self._load(split))
+
+        return getattr(self, f"_{split}")
+
     def _load(self, split: str) -> DataSplit:
         """
         Load a data split as well as index and batch it. If the split is not "train" and the training split hasn't been
@@ -184,8 +207,6 @@ class TextDataset(ABC):
         Dataset
             Return the loaded split.
         """
-        assert split in ("train", "test", "valid")
-
         split_paths = os.path.join(self.data_dir, self.name, self.splits[split])
 
         with codecs.open(split_paths, "rb", "utf-8") as file:

@@ -7,6 +7,8 @@ Script used to replicate the experiments of spectral-normalized Gaussian Process
 from typing import Optional
 
 # EXT
+import numpy as np
+from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import LabelEncoder
 import torch.nn as nn
 import torch
@@ -102,6 +104,22 @@ class SNGPBert(nn.Module):
 
         return out
 
+    def get_uncertainty(
+        self,
+        x: torch.LongTensor,
+        attention_mask: torch.FloatTensor,
+        num_predictions: Optional[int] = None,
+    ):
+        if num_predictions is None:
+            num_predictions = self.num_predictions
+
+        pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
+            "pooler_output"
+        ]
+        uncertainties = self.sngp_layer.dempster_shafer(pooler_output, num_predictions)
+
+        return uncertainties
+
     def spectral_normalization(self):
         # For BERT, only apply to pooler layer following Liu et al. (2020)
         pooler = self.bert.pooler.dense
@@ -130,6 +148,7 @@ if __name__ == "__main__":
             "train": f"{CLINC_DIR}/train.csv",
             "valid": f"{CLINC_DIR}/val.csv",
             "test": f"{CLINC_DIR}/test.csv",
+            "oos_test": f"{CLINC_DIR}/oos_test.csv",
         },
         delimiter="\t",
         column_names=["sentence", "label"],
@@ -137,7 +156,10 @@ if __name__ == "__main__":
 
     # Encode labels
     classes = (
-        dataset["train"]["label"] + dataset["valid"]["label"] + dataset["test"]["label"]
+        dataset["train"]["label"]
+        + dataset["valid"]["label"]
+        + dataset["test"]["label"]
+        + ["oos"]
     )
     label_encoder = LabelEncoder()
     label_encoder.fit(classes)
@@ -169,6 +191,9 @@ if __name__ == "__main__":
     # TODO: Init summary writer
     # TODO: Init knockknockbot
     # TODO: Move all tensors / model to correct device
+    # TODO: Implement training over multiple seeds
+
+    # ### Training ###
 
     # Init optimizer, loss
     steps_per_epoch = len(dataset["train"])
@@ -196,10 +221,6 @@ if __name__ == "__main__":
                 batch["y"],
             )
 
-            # TODO: Debug
-            sngp_bert.sngp_layer.invert_sigma_hat()
-            out = sngp_bert.predict(input_ids, attention_mask)
-
             out = sngp_bert(input_ids, attention_mask)
             loss = loss_func(out, labels)
             print("Loss: ", loss)
@@ -216,4 +237,54 @@ if __name__ == "__main__":
             if epoch == EPOCHS - 1:
                 sngp_bert.sngp_layer.invert_sigma_hat()
 
-    # TODO: Implement eval
+    # ### Eval ###
+    uncertainties_id, uncertainties_ood = [], []
+
+    # Evaluate accuracy on test set
+    with torch.no_grad():
+        dl_test = DataLoader(dataset["test"], batch_size=32)
+        total, correct = 0, 0
+
+        for batch in dl_test:
+            attention_mask, input_ids, labels = (
+                batch["attention_mask"],
+                batch["input_ids"],
+                batch["y"],
+            )
+
+            # Get predictions for accuracy
+            out = sngp_bert.predict(input_ids, attention_mask)
+            preds = torch.argmax(out, dim=-1)
+            total += preds.shape[0]
+            correct = (preds == labels).long().sum()
+
+            # Get uncertainties for ID samples
+            uncertainties = sngp_bert.get_uncertainty(input_ids, attention_mask)
+            uncertainties_id.append(uncertainties)
+
+        accuracy = correct / total
+
+    # Evaluate OOD detection performance
+    with torch.no_grad():
+        dl_ood = DataLoader(dataset["oos_test"], batch_size=32)
+
+        for batch in dl_ood:
+            attention_mask, input_ids, labels = (
+                batch["attention_mask"],
+                batch["input_ids"],
+                batch["y"],
+            )
+
+            # Get uncertainties for ID samples
+            uncertainties = sngp_bert.get_uncertainty(input_ids, attention_mask)
+            uncertainties_ood.append(uncertainties)
+
+    # Eval uncertainties using AUROC
+    uncertainties_id = torch.cat(uncertainties_id, dim=0)
+    uncertainties_ood = torch.cat(uncertainties_ood, dim=0)
+    # Create "labels": 1 for ID, 0 for OOD
+    ood_labels = [0] * uncertainties_id.shape[0] + [1] * uncertainties_ood.shape[0]
+    uncertainties = np.concatenate(
+        [uncertainties_id.numpy(), uncertainties_ood.numpy()], axis=0
+    )
+    ood_auroc = roc_auc_score(ood_labels, uncertainties)

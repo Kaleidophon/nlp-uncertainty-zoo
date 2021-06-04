@@ -138,6 +138,42 @@ class SNGPModule(nn.Module):
 
         return out
 
+    def dempster_shafer(
+        self, x: torch.FloatTensor, num_predictions: Optional[int] = None
+    ):
+        if num_predictions is None:
+            num_predictions = self.num_predictions
+
+        Phi = math.sqrt(2 / self.output_size) * torch.cos(
+            self.output(-x)
+        )  # batch_size x output_size
+        post_mean = (
+            Phi @ self.Beta
+        )  # batch_size x output_size, here the logits are actually the posterior mean
+
+        # Compute posterior variance
+        # Okay, so this is a bit insane. Here we have three components:
+        #   * Phi: batch_size x classes
+        #   * sigma_hat: output_size x output_size x output_size (m is given as an alternative identifier for classes
+        #     so that the right dimensions are multiplied)
+        #   * Transposed Phi: classes x batch_size
+        # Thus, this single impression gives us the posterior variance for every class for every instance in the batch
+        # in ONE, readable (!) line.
+        post_var = torch.einsum("bk,mkk,kb->bm", Phi, self.sigma_hat, Phi.T)
+
+        logits = 0
+        for _ in range(num_predictions):
+            # Now actually sample logits from posterior
+            logits += torch.normal(post_mean, torch.sqrt(post_var + 1e-8))
+
+        logits /= num_predictions
+        # Compute dempster-shafer metric
+        uncertainty = self.output_size / (
+            self.output_size + torch.exp(logits).sum(dim=1)
+        )
+
+        return uncertainty
+
     def invert_sigma_hat(self):
         for k in range(self.output_size):
             self.sigma_hat[k, :, :] = linalg.inv(self.sigma_hat_inv[k, :, :])
