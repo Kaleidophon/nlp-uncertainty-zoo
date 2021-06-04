@@ -4,9 +4,15 @@ Script used to replicate the experiments of spectral-normalized Gaussian Process
 """
 
 # STD
+import argparse
+from datetime import datetime
+import json
+import os
 from typing import Optional
 
 # EXT
+from codecarbon import OfflineEmissionsTracker
+from knockknock import telegram_sender
 import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import LabelEncoder
@@ -14,16 +20,21 @@ import torch.nn as nn
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from torch.nn.utils.spectral_norm import SpectralNorm
 from transformers import BertModel, BertTokenizer, get_linear_schedule_with_warmup
 
 # PROJECT
 from src.spectral import SNGPModule
+from src.types import Device
 from datasets import load_dataset
+from secret import COUNTRY_CODE, TELEGRAM_CHAT_ID, TELEGRAM_API_TOKEN
 
 # CONST
 CLINC_DIR = "./data/processed/clinc"
 BERT_MODEL = "bert-base-uncased"
+SEED = 123
+EMISSION_DIR = "./emissions"
 
 # HYPERPARAMETERS
 HIDDEN_SIZE = 768
@@ -38,6 +49,159 @@ EPOCHS = 40
 LEARNING_RATE = 5e-5
 WARMUP_PROP = 0.1
 NUM_PREDICTIONS = 10
+
+
+def run_replication(num_runs: int, device: Device):
+    accuracies, ood_aurocs = [], []
+
+    for _ in range(num_runs):
+        summary_writer = SummaryWriter()
+
+        # ### Training ###
+        # Init optimizer, loss
+        steps_per_epoch = len(dataset["train"])
+        optimizer = optim.Adam(
+            sngp_bert.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY
+        )
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=steps_per_epoch * EPOCHS * WARMUP_PROP,
+            num_training_steps=steps_per_epoch * EPOCHS,
+        )
+        loss_func = nn.CrossEntropyLoss()
+
+        for epoch in range(EPOCHS):
+            dl = DataLoader(dataset["train"], batch_size=32)
+
+            for batch_num, batch in enumerate(dl):
+                global_batch_num = epoch * len(dl) + batch_num
+
+                # During the last epochs, update sigma_hat_inv matrix
+                sngp_bert.last_epoch = epoch == EPOCHS - 1
+
+                # Forward pass
+                attention_mask, input_ids, labels = (
+                    batch["attention_mask"],
+                    batch["input_ids"],
+                    batch["y"],
+                )
+
+                out = sngp_bert(input_ids, attention_mask)
+                loss = loss_func(out, labels)
+
+                # Backward pass
+                loss.backward()
+                optimizer.step()
+                scheduler.step()
+                optimizer.zero_grad()
+
+                # Spectral normalization
+                sngp_bert.spectral_normalization()
+
+                if epoch == EPOCHS - 1:
+                    sngp_bert.sngp_layer.invert_sigma_hat()
+
+                # Save training stats
+                summary_writer.add_scalar(
+                    "Batch train loss", loss.cpu().detach(), global_batch_num
+                )
+                summary_writer.add_scalar(
+                    "Batch learning rate",
+                    scheduler.get_last_lr()[0],
+                    global_batch_num,
+                )
+
+        # ### Eval ###
+        uncertainties_id, uncertainties_ood = [], []
+
+        # Evaluate accuracy on test set
+        with torch.no_grad():
+            dl_test = DataLoader(dataset["test"], batch_size=32)
+            total, correct = 0, 0
+
+            for batch in dl_test:
+                attention_mask, input_ids, labels = (
+                    batch["attention_mask"],
+                    batch["input_ids"],
+                    batch["y"],
+                )
+
+                # Get predictions for accuracy
+                out = sngp_bert.predict(input_ids, attention_mask)
+                preds = torch.argmax(out, dim=-1)
+                total += preds.shape[0]
+                correct = (preds == labels).long().sum()
+
+                # Get uncertainties for ID samples
+                uncertainties = sngp_bert.get_uncertainty(input_ids, attention_mask)
+                uncertainties_id.append(uncertainties)
+
+            accuracy = correct / total
+
+            summary_writer.add_scalar("Accuracy", accuracy)
+            accuracies.append(accuracy)
+
+        # Evaluate OOD detection performance
+        with torch.no_grad():
+            dl_ood = DataLoader(dataset["oos_test"], batch_size=32)
+
+            for batch in dl_ood:
+                attention_mask, input_ids, labels = (
+                    batch["attention_mask"],
+                    batch["input_ids"],
+                    batch["y"],
+                )
+
+                # Get uncertainties for ID samples
+                uncertainties = sngp_bert.get_uncertainty(input_ids, attention_mask)
+                uncertainties_ood.append(uncertainties)
+
+        # Eval uncertainties using AUROC
+        uncertainties_id = torch.cat(uncertainties_id, dim=0)
+        uncertainties_ood = torch.cat(uncertainties_ood, dim=0)
+        # Create "labels": 1 for ID, 0 for OOD
+        ood_labels = [0] * uncertainties_id.shape[0] + [1] * uncertainties_ood.shape[0]
+        uncertainties = np.concatenate(
+            [uncertainties_id.numpy(), uncertainties_ood.numpy()], axis=0
+        )
+        ood_auroc = roc_auc_score(ood_labels, uncertainties)
+        summary_writer.add_scalar("ROC-AUC", ood_auroc)
+        ood_aurocs.append(ood_auroc)
+
+        # Add statistics to run
+        summary_writer.add_hparams(
+            hparam_dict={
+                "hidden_size": HIDDEN_SIZE,
+                "output_size": OUTPUT_SIZE,
+                "batch_size": BATCH_SIZE,
+                "spectral_norm_upperbound": SPECTRAL_NORM_UPPER_BOUND,
+                "ridge_factor": RIDGE_FACTOR,
+                "scaling_coefficient": SCALING_COEFFICIENT,
+                "beta_length_scale": BETA_LENGTH_SCALE,
+                "weight_decay": WEIGHT_DECAY,
+                "epochs": EPOCHS,
+                "learning_rate": LEARNING_RATE,
+                "warmup_prop": WARMUP_PROP,
+                "num_predictions": NUM_PREDICTIONS,
+            },
+            metric_dict={
+                "accuracy": np.mean(accuracies),
+                "ood_auc_roc": np.mean(ood_aurocs),
+            },
+        )
+        # Reset for potential next run
+        summary_writer.close()
+
+    return json.dumps(
+        {
+            "dataset": "CLINC",
+            "runs": num_runs,
+            "accuracy": f"{np.mean(accuracies):.2f} ±{np.std(accuracies):.2f}",
+            "ood_auc_roc": f"{np.mean(ood_aurocs):.2f} ±{np.std(ood_aurocs):.2f}",
+        },
+        indent=4,
+        ensure_ascii=False,
+    )
 
 
 class SNGPBert(nn.Module):
@@ -140,6 +304,14 @@ class SNGPBert(nn.Module):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--emission-dir", type=str, default=EMISSION_DIR)
+    parser.add_argument("--track-emissions", action="store_true")
+    parser.add_argument("--device", type=str, default="cpu")
+    parser.add_argument("--runs", type=int, default=4)
+    parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument("--knock", action="store_true", default=False)
+    args = parser.parse_args()
 
     # Load dataset
     dataset = load_dataset(
@@ -188,103 +360,35 @@ if __name__ == "__main__":
         num_predictions=NUM_PREDICTIONS,
     )
 
-    # TODO: Init summary writer
-    # TODO: Init knockknockbot
+    # Init emission tracking, summary writer, etc.
+    if args.track_emissions:
+        timestamp = str(datetime.now().strftime("%d-%m-%Y (%H:%M:%S)"))
+        emissions_path = os.path.join(args.emission_dir, timestamp)
+        os.mkdir(emissions_path)
+        tracker = OfflineEmissionsTracker(
+            project_name="nlp-uncertainty-zoo-experiments",
+            country_iso_code=COUNTRY_CODE,
+            output_dir=emissions_path,
+        )
+        tracker.start()
+
+        # Apply decorator
+        if args.knock:
+            run_experiments = telegram_sender(
+                token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
+            )(run_replication)
+
+    try:
+        np.random.seed(args.seed)
+        torch.manual_seed(args.seed)
+
+        run_replication(args.runs, args.device)
+
+    except Exception as e:
+        # Save data from emission tracker in any case
+        if tracker is not None:
+            tracker.stop()
+
+        raise e
+
     # TODO: Move all tensors / model to correct device
-    # TODO: Implement training over multiple seeds
-
-    # ### Training ###
-
-    # Init optimizer, loss
-    steps_per_epoch = len(dataset["train"])
-    optimizer = optim.Adam(
-        sngp_bert.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY
-    )
-    scheduler = get_linear_schedule_with_warmup(
-        optimizer,
-        num_warmup_steps=steps_per_epoch * EPOCHS * WARMUP_PROP,
-        num_training_steps=steps_per_epoch * EPOCHS,
-    )
-    loss_func = nn.CrossEntropyLoss()
-
-    for epoch in range(EPOCHS):
-        dl = DataLoader(dataset["train"], batch_size=32)
-
-        for batch in dl:
-            # During the last epochs, update sigma_hat_inv matrix
-            sngp_bert.last_epoch = epoch == EPOCHS - 1
-
-            # Forward pass
-            attention_mask, input_ids, labels = (
-                batch["attention_mask"],
-                batch["input_ids"],
-                batch["y"],
-            )
-
-            out = sngp_bert(input_ids, attention_mask)
-            loss = loss_func(out, labels)
-            print("Loss: ", loss)
-
-            # Backward pass
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
-            optimizer.zero_grad()
-
-            # Spectral normalization
-            sngp_bert.spectral_normalization()
-
-            if epoch == EPOCHS - 1:
-                sngp_bert.sngp_layer.invert_sigma_hat()
-
-    # ### Eval ###
-    uncertainties_id, uncertainties_ood = [], []
-
-    # Evaluate accuracy on test set
-    with torch.no_grad():
-        dl_test = DataLoader(dataset["test"], batch_size=32)
-        total, correct = 0, 0
-
-        for batch in dl_test:
-            attention_mask, input_ids, labels = (
-                batch["attention_mask"],
-                batch["input_ids"],
-                batch["y"],
-            )
-
-            # Get predictions for accuracy
-            out = sngp_bert.predict(input_ids, attention_mask)
-            preds = torch.argmax(out, dim=-1)
-            total += preds.shape[0]
-            correct = (preds == labels).long().sum()
-
-            # Get uncertainties for ID samples
-            uncertainties = sngp_bert.get_uncertainty(input_ids, attention_mask)
-            uncertainties_id.append(uncertainties)
-
-        accuracy = correct / total
-
-    # Evaluate OOD detection performance
-    with torch.no_grad():
-        dl_ood = DataLoader(dataset["oos_test"], batch_size=32)
-
-        for batch in dl_ood:
-            attention_mask, input_ids, labels = (
-                batch["attention_mask"],
-                batch["input_ids"],
-                batch["y"],
-            )
-
-            # Get uncertainties for ID samples
-            uncertainties = sngp_bert.get_uncertainty(input_ids, attention_mask)
-            uncertainties_ood.append(uncertainties)
-
-    # Eval uncertainties using AUROC
-    uncertainties_id = torch.cat(uncertainties_id, dim=0)
-    uncertainties_ood = torch.cat(uncertainties_ood, dim=0)
-    # Create "labels": 1 for ID, 0 for OOD
-    ood_labels = [0] * uncertainties_id.shape[0] + [1] * uncertainties_ood.shape[0]
-    uncertainties = np.concatenate(
-        [uncertainties_id.numpy(), uncertainties_ood.numpy()], axis=0
-    )
-    ood_auroc = roc_auc_score(ood_labels, uncertainties)
