@@ -38,7 +38,7 @@ EMISSION_DIR = "./emissions"
 
 # HYPERPARAMETERS
 HIDDEN_SIZE = 768
-OUTPUT_SIZE = 150
+OUTPUT_SIZE = 151
 BATCH_SIZE = 32
 SPECTRAL_NORM_UPPER_BOUND = 0.95
 RIDGE_FACTOR = 0.001
@@ -71,7 +71,7 @@ def run_replication(num_runs: int, device: Device):
         loss_func = nn.CrossEntropyLoss()
 
         for epoch in range(EPOCHS):
-            dl = DataLoader(dataset["train"], batch_size=32)
+            dl = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
 
             for batch_num, batch in enumerate(dl):
                 global_batch_num = epoch * len(dl) + batch_num
@@ -122,7 +122,7 @@ def run_replication(num_runs: int, device: Device):
 
         # Evaluate accuracy on test set
         with torch.no_grad():
-            dl_test = DataLoader(dataset["test"], batch_size=32)
+            dl_test = DataLoader(dataset["test"], batch_size=BATCH_SIZE)
             total, correct = 0, 0
 
             for batch in dl_test:
@@ -155,7 +155,7 @@ def run_replication(num_runs: int, device: Device):
 
         # Evaluate OOD detection performance
         with torch.no_grad():
-            dl_ood = DataLoader(dataset["oos_test"], batch_size=32)
+            dl_ood = DataLoader(dataset["oos_test"], batch_size=BATCH_SIZE)
 
             for batch in dl_ood:
                 attention_mask, input_ids, labels = (
@@ -338,6 +338,10 @@ if __name__ == "__main__":
     parser.add_argument("--knock", action="store_true", default=False)
     args = parser.parse_args()
 
+    # Set seeds
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
     # Load dataset
     dataset = load_dataset(
         "csv",
@@ -405,9 +409,6 @@ if __name__ == "__main__":
             )(run_replication)
 
     try:
-        np.random.seed(args.seed)
-        torch.manual_seed(args.seed)
-
         run_replication(args.runs, args.device)
 
     except Exception as e:
