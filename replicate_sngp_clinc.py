@@ -92,6 +92,7 @@ def run_replication(num_runs: int, device: Device):
                 )
 
                 out = sngp_bert(input_ids, attention_mask)
+                del input_ids, attention_mask  # Desperately try to save memory
                 loss = loss_func(out, labels)
 
                 # Backward pass
@@ -99,11 +100,11 @@ def run_replication(num_runs: int, device: Device):
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()
-                sngp_bert.sngp_layer.invert_sigma_hat()
 
                 # Spectral normalization
                 sngp_bert.spectral_normalization()
 
+                # Invert sigma matrix during last epoch
                 if epoch == EPOCHS - 1:
                     sngp_bert.sngp_layer.invert_sigma_hat()
 
