@@ -38,8 +38,10 @@ class SNGPModule(nn.Module):
         scaling_coefficient: float,
         beta_length_scale: float,
         num_predictions: int,
+        device: Device,
     ):
         super().__init__()
+        self.device = device
 
         self.hidden_size = hidden_size
         self.output_size = output_size
@@ -64,7 +66,7 @@ class SNGPModule(nn.Module):
         self.register_parameter(
             name="Beta",
             param=nn.Parameter(
-                torch.randn(output_size, output_size) * beta_length_scale
+                torch.randn(output_size, output_size, device=device) * beta_length_scale
             ),
         )
 
@@ -74,8 +76,10 @@ class SNGPModule(nn.Module):
         self.sigma_hat_inv = (
             torch.stack([torch.eye(output_size) for _ in range(output_size)], dim=0)
             * self.ridge_factor
+        ).to(device)
+        self.sigma_hat = torch.zeros(
+            output_size, output_size, output_size, device=device
         )
-        self.sigma_hat = torch.zeros(output_size, output_size, output_size)
         self.inversed_sigma = False
 
     def forward(

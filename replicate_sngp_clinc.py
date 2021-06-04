@@ -85,6 +85,11 @@ def run_replication(num_runs: int, device: Device):
                     batch["input_ids"],
                     batch["y"],
                 )
+                attention_mask, input_ids, labels = (
+                    attention_mask.to(device),
+                    input_ids.to(device),
+                    labels.to(device),
+                )
 
                 out = sngp_bert(input_ids, attention_mask)
                 loss = loss_func(out, labels)
@@ -94,6 +99,7 @@ def run_replication(num_runs: int, device: Device):
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()
+                sngp_bert.sngp_layer.invert_sigma_hat()
 
                 # Spectral normalization
                 sngp_bert.spectral_normalization()
@@ -125,6 +131,11 @@ def run_replication(num_runs: int, device: Device):
                     batch["input_ids"],
                     batch["y"],
                 )
+                attention_mask, input_ids, labels = (
+                    attention_mask.to(device),
+                    input_ids.to(device),
+                    labels.to(device),
+                )
 
                 # Get predictions for accuracy
                 out = sngp_bert.predict(input_ids, attention_mask)
@@ -137,6 +148,7 @@ def run_replication(num_runs: int, device: Device):
                 uncertainties_id.append(uncertainties)
 
             accuracy = correct / total
+            accuracy = accuracy.cpu().item()
 
             summary_writer.add_scalar("Accuracy", accuracy)
             accuracies.append(accuracy)
@@ -151,9 +163,15 @@ def run_replication(num_runs: int, device: Device):
                     batch["input_ids"],
                     batch["y"],
                 )
+                attention_mask, input_ids, labels = (
+                    attention_mask.to(device),
+                    input_ids.to(device),
+                    labels.to(device),
+                )
 
                 # Get uncertainties for ID samples
                 uncertainties = sngp_bert.get_uncertainty(input_ids, attention_mask)
+                uncertainties = uncertainties.cpu().detach()
                 uncertainties_ood.append(uncertainties)
 
         # Eval uncertainties using AUROC
@@ -162,7 +180,11 @@ def run_replication(num_runs: int, device: Device):
         # Create "labels": 1 for ID, 0 for OOD
         ood_labels = [0] * uncertainties_id.shape[0] + [1] * uncertainties_ood.shape[0]
         uncertainties = np.concatenate(
-            [uncertainties_id.numpy(), uncertainties_ood.numpy()], axis=0
+            [
+                uncertainties_id.cpu().detach().numpy(),
+                uncertainties_ood.cpu().detach().numpy(),
+            ],
+            axis=0,
         )
         ood_auroc = roc_auc_score(ood_labels, uncertainties)
         summary_writer.add_scalar("ROC-AUC", ood_auroc)
@@ -214,8 +236,10 @@ class SNGPBert(nn.Module):
         scaling_coefficient: float,
         beta_length_scale: float,
         num_predictions: int,
+        device: Device,
     ):
         super().__init__()
+        self.device = device
 
         # Model initialization
         self.sngp_layer = SNGPModule(
@@ -225,8 +249,9 @@ class SNGPBert(nn.Module):
             scaling_coefficient,
             beta_length_scale,
             num_predictions,
+            device,
         )
-        self.bert = BertModel.from_pretrained(BERT_MODEL)
+        self.bert = BertModel.from_pretrained(BERT_MODEL).to(device)
         self.output_size = output_size
 
         # Spectral norm initialization
@@ -358,7 +383,8 @@ if __name__ == "__main__":
         scaling_coefficient=SCALING_COEFFICIENT,
         beta_length_scale=BETA_LENGTH_SCALE,
         num_predictions=NUM_PREDICTIONS,
-    )
+        device=args.device,
+    ).to(args.device)
 
     # Init emission tracking, summary writer, etc.
     if args.track_emissions:
@@ -390,5 +416,3 @@ if __name__ == "__main__":
             tracker.stop()
 
         raise e
-
-    # TODO: Move all tensors / model to correct device
