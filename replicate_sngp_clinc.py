@@ -400,7 +400,7 @@ if __name__ == "__main__":
 
         # Apply decorator
         if args.knock:
-            run_experiments = telegram_sender(
+            run_replication = telegram_sender(
                 token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
             )(run_replication)
 
