@@ -10,13 +10,10 @@ this module implements a mixin enabling spectral normalization and, inheriting f
 import math
 
 # EXT
-from einops import reduce
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.nn.utils as utils
-import torch.linalg as linalg
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from typing import Dict, Any, Optional
@@ -180,7 +177,7 @@ class SNGPModule(nn.Module):
 
     def invert_sigma_hat(self):
         for k in range(self.output_size):
-            self.sigma_hat[k, :, :] = linalg.inv(self.sigma_hat_inv[k, :, :])
+            self.sigma_hat[k, :, :] = torch.inverse(self.sigma_hat_inv[k, :, :])
 
         self.inversed_sigma = True
 
