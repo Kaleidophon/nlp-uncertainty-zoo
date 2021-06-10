@@ -52,6 +52,21 @@ NUM_PREDICTIONS = 10
 
 
 def run_replication(num_runs: int, device: Device):
+    """
+    Run replication of CLINC experiments of `Liu et al. (2020) <https://arxiv.org/pdf/2006.10108.pdf>`_.
+
+    Parameters
+    ----------
+    num_runs: int
+        Number of random seeds that should be tried.
+    device: Device
+        Device the replication is performed on.
+
+    Returns
+    -------
+    str
+        String with results for knockknock.
+    """
     accuracies, ood_aurocs = [], []
 
     for _ in range(num_runs):
@@ -228,6 +243,10 @@ def run_replication(num_runs: int, device: Device):
 
 
 class SNGPBert(nn.Module):
+    """
+    Definition of a BERT model with a custom SNGP output layer.
+    """
+
     def __init__(
         self,
         hidden_size: int,
@@ -239,6 +258,30 @@ class SNGPBert(nn.Module):
         num_predictions: int,
         device: Device,
     ):
+        """
+        Initialize a SNGP-Bert.
+
+        Parameters
+        ----------
+        hidden_size: int
+            Hidden size of last Bert layer.
+        output_size: int
+            Size of output layer, so number of classes.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their lambda parameter surpasses it.
+        ridge_factor: float
+            Factor that identity sigma hat matrices of the SNGP layer are multiplied by.
+        scaling_coefficient: float
+            Momentum factor that is used when updating the sigma hat matrix of the SNGP layer during the last training
+            epoch.
+        beta_length_scale: float
+            Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
+            initialized from.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+        device: Device
+            Device the replication is performed on.
+        """
         super().__init__()
         self.device = device
 
@@ -270,6 +313,21 @@ class SNGPBert(nn.Module):
         self.num_predictions = num_predictions
 
     def forward(self, x: torch.LongTensor, attention_mask: torch.FloatTensor):
+        """
+        Forward pass of the model, used during training.
+
+        Parameters
+        ----------
+        x: torch.LongTensor
+            Input to the model, containing all token IDs of the current batch.
+        attention_mask: torch.FloatTensor
+            Attention mask for Bert for the current batch.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for the sequences of the current batch.
+        """
         pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
             "pooler_output"
         ]
@@ -283,7 +341,23 @@ class SNGPBert(nn.Module):
         attention_mask: torch.FloatTensor,
         num_predictions: Optional[int] = None,
     ):
+        """
+        Make predictions for data points.
 
+        Parameters
+        ----------
+        x: torch.LongTensor
+            Input to the model, containing all token IDs of the current batch.
+        attention_mask: torch.FloatTensor
+            Attention mask for Bert for the current batch.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Class probabilities for the sequences of the current batch.
+        """
         if num_predictions is None:
             num_predictions = self.num_predictions
 
@@ -300,6 +374,23 @@ class SNGPBert(nn.Module):
         attention_mask: torch.FloatTensor,
         num_predictions: Optional[int] = None,
     ):
+        """
+        Get uncertainty scores for the current batch, using the Dempster-Shafer metric.
+
+        Parameters
+        ----------
+        x: torch.LongTensor
+            Input to the model, containing all token IDs of the current batch.
+        attention_mask: torch.FloatTensor
+            Attention mask for Bert for the current batch.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Uncertainty scores for the current batch.
+        """
         if num_predictions is None:
             num_predictions = self.num_predictions
 
@@ -311,7 +402,10 @@ class SNGPBert(nn.Module):
         return uncertainties
 
     def spectral_normalization(self):
-        # For BERT, only apply to pooler layer following Liu et al. (2020)
+        """
+        Apply spectral normalization to the Bert pooling layer, but only when lambda exceeds spectral_norm_upper_bound.
+        """
+        # For Bert, only apply to pooler layer following Liu et al. (2020)
         pooler = self.bert.pooler.dense
         old_weight = pooler.weight.clone()
         normalized_weight = self.spectral_norm.compute_weight(

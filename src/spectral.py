@@ -25,24 +25,51 @@ from src.model import Model
 from src.types import Device
 
 
-# TODO: Document this shit
 class SNGPModule(nn.Module):
+    """
+    Spectral-normalized Gaussian Process output layer, as presented in
+    `Liu et al. (2020) <https://arxiv.org/pdf/2006.10108.pdf>`_. Requires underlying model to contain residual
+    connections in order to maintain bi-Lipschitz constraint.
+    """
+
     def __init__(
         self,
         hidden_size: int,
         output_size: int,
-        rigde_factor: float,
+        ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
         num_predictions: int,
         device: Device,
     ):
+        """
+        Initialize a SNGP output layer.
+
+        Parameters
+        ----------
+        hidden_size: int
+            Hidden size of last Bert layer.
+        output_size: int
+            Size of output layer, so number of classes.
+        ridge_factor: float
+            Factor that identity sigma hat matrices of the SNGP layer are multiplied by.
+        scaling_coefficient: float
+            Momentum factor that is used when updating the sigma hat matrix of the SNGP layer during the last training
+            epoch.
+        beta_length_scale: float
+            Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
+            initialized from.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+        device: Device
+            Device the replication is performed on.
+        """
         super().__init__()
         self.device = device
 
         self.hidden_size = hidden_size
         self.output_size = output_size
-        self.ridge_factor = rigde_factor
+        self.ridge_factor = ridge_factor
         self.scaling_coefficient = scaling_coefficient
         self.beta_length_scale = beta_length_scale
         self.num_predictions = num_predictions
@@ -82,6 +109,21 @@ class SNGPModule(nn.Module):
     def forward(
         self, x: torch.FloatTensor, update_sigma_hat_inv: bool = False
     ) -> torch.FloatTensor:
+        """
+        Forward pass for SNGP layer.
+
+        Parameters
+        ----------
+        x: torch.FloatTensor
+            Last hidden state of underlying model.
+        update_sigma_hat_inv: bool
+            Indicate whether the inverted sigma hat matrix should be updated (only during last training epoch).
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for the current batch.
+        """
         Phi = math.sqrt(2 / self.output_size) * torch.cos(
             self.output(-x)
         )  # batch_size x output_size
@@ -103,6 +145,22 @@ class SNGPModule(nn.Module):
         return logits
 
     def predict(self, x: torch.FloatTensor, num_predictions: Optional[int] = None):
+        """
+        Get predictions for the current batch.
+
+        Parameters
+        ----------
+        x: torch.FloatTensor
+            Last hidden state of underlying model.
+        num_predictions: Optional[int]
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction. If None, number
+            specified during initialization is used.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Class probabilities for current batch.
+        """
 
         assert (
             self.inversed_sigma
@@ -142,6 +200,22 @@ class SNGPModule(nn.Module):
     def dempster_shafer(
         self, x: torch.FloatTensor, num_predictions: Optional[int] = None
     ):
+        """
+        Get uncertainty scores for the current batch, using the Dempster-Shafer metric.
+
+        Parameters
+        ----------
+        x: torch.LongTensor
+            Input to the model, containing all token IDs of the current batch.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction. If None, number
+            specified during initialization is used.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Uncertainty scores for the current batch.
+        """
         if num_predictions is None:
             num_predictions = self.num_predictions
 
