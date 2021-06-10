@@ -135,29 +135,29 @@ def run_replication(num_runs: int, device: Device):
                     global_batch_num,
                 )
 
-                # ### Validation ###
-                with torch.no_grad():
-                    dl_valid = DataLoader(dataset["valid"], batch_size=BATCH_SIZE)
+            # ### Validation ###
+            with torch.no_grad():
+                dl_valid = DataLoader(dataset["valid"], batch_size=BATCH_SIZE)
 
-                    for batch in dl_valid:
-                        attention_mask, input_ids, labels = (
-                            batch["attention_mask"],
-                            batch["input_ids"],
-                            batch["y"],
-                        )
-                        attention_mask, input_ids, labels = (
-                            attention_mask.to(device),
-                            input_ids.to(device),
-                            labels.to(device),
-                        )
+                for batch in dl_valid:
+                    attention_mask, input_ids, labels = (
+                        batch["attention_mask"],
+                        batch["input_ids"],
+                        batch["y"],
+                    )
+                    attention_mask, input_ids, labels = (
+                        attention_mask.to(device),
+                        input_ids.to(device),
+                        labels.to(device),
+                    )
 
-                        out = sngp_bert(input_ids, attention_mask)
-                        del input_ids, attention_mask  # Desperately try to save memory
-                        val_loss = loss_func(out, labels)
+                    out = sngp_bert(input_ids, attention_mask)
+                    del input_ids, attention_mask  # Desperately try to save memory
+                    val_loss = loss_func(out, labels)
 
-                        summary_writer.add_scalar(
-                            "Epoch val loss", val_loss.cpu().detach(), epoch
-                        )
+                    summary_writer.add_scalar(
+                        "Epoch val loss", val_loss.cpu().detach(), epoch
+                    )
 
             # Reset dataloader
             dl = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
