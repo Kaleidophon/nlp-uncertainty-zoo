@@ -83,6 +83,24 @@ class VariationalLSTMModule(LSTMModule):
         )
 
 
+# TODO: This is all experimental
+class VariationalLSTMModule2(nn.LSTM):
+    def __init__(
+        self,
+        num_layers: int,
+        vocab_size: int,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        embedding_dropout: float,
+        layer_dropout: float,
+        time_dropout: float,
+        num_predictions: int,
+        device: Device,
+    ):
+        super().__init__()
+
+
 class VariationalLSTM(Model):
     """
     Module for the variational LSTM.

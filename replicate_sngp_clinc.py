@@ -138,6 +138,7 @@ def run_replication(num_runs: int, device: Device):
             # ### Validation ###
             with torch.no_grad():
                 dl_valid = DataLoader(dataset["valid"], batch_size=BATCH_SIZE)
+                val_loss = 0
 
                 for batch in dl_valid:
                     attention_mask, input_ids, labels = (
@@ -153,11 +154,11 @@ def run_replication(num_runs: int, device: Device):
 
                     out = sngp_bert(input_ids, attention_mask)
                     del input_ids, attention_mask  # Desperately try to save memory
-                    val_loss = loss_func(out, labels)
+                    val_loss += loss_func(out, labels)
 
-                    summary_writer.add_scalar(
-                        "Epoch val loss", val_loss.cpu().detach(), epoch
-                    )
+                summary_writer.add_scalar(
+                    "Epoch val loss", val_loss.cpu().detach(), epoch
+                )
 
             # Reset dataloader
             dl = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
