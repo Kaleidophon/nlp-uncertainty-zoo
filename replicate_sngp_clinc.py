@@ -73,8 +73,11 @@ def run_replication(num_runs: int, device: Device):
         summary_writer = SummaryWriter()
 
         # ### Training ###
+        # Init dataloader
+        dl = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
+
         # Init optimizer, loss
-        steps_per_epoch = len(dataset["train"])
+        steps_per_epoch = len(dl)
         optimizer = optim.Adam(
             sngp_bert.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY
         )
@@ -86,10 +89,9 @@ def run_replication(num_runs: int, device: Device):
         loss_func = nn.CrossEntropyLoss()
 
         for epoch in range(EPOCHS):
-            dl = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
 
             for batch_num, batch in enumerate(dl):
-                global_batch_num = epoch * len(dl) + batch_num
+                global_batch_num = epoch * steps_per_epoch + batch_num
 
                 # During the last epochs, update sigma_hat_inv matrix
                 sngp_bert.last_epoch = epoch == EPOCHS - 1
@@ -132,6 +134,33 @@ def run_replication(num_runs: int, device: Device):
                     scheduler.get_last_lr()[0],
                     global_batch_num,
                 )
+
+                # ### Validation ###
+                with torch.no_grad():
+                    dl_valid = DataLoader(dataset["valid"], batch_size=BATCH_SIZE)
+
+                    for batch in dl_valid:
+                        attention_mask, input_ids, labels = (
+                            batch["attention_mask"],
+                            batch["input_ids"],
+                            batch["y"],
+                        )
+                        attention_mask, input_ids, labels = (
+                            attention_mask.to(device),
+                            input_ids.to(device),
+                            labels.to(device),
+                        )
+
+                        out = sngp_bert(input_ids, attention_mask)
+                        del input_ids, attention_mask  # Desperately try to save memory
+                        val_loss = loss_func(out, labels)
+
+                        summary_writer.add_scalar(
+                            "Epoch val loss", val_loss.cpu().detach(), epoch
+                        )
+
+            # Reset dataloader
+            dl = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
 
         # ### Eval ###
         uncertainties_id, uncertainties_ood = [], []
