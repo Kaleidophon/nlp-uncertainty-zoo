@@ -8,7 +8,7 @@ models:
 """
 
 # STD
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 # EXT
 import torch
@@ -83,8 +83,26 @@ class VariationalLSTMModule(LSTMModule):
         )
 
 
-# TODO: This is all experimental
-class VariationalLSTMModule2(nn.LSTM):
+# TODO: This is all experimental, remove if shit
+class VariationalDropout(nn.Module):
+    def __init__(self, dropout: float, size: Tuple[int, ...], device: Device):
+        super().__init__()
+        self.dropout = dropout
+        self.size = size
+        self.device = device
+        self.mask = None
+        self.sample()
+
+    def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
+        return x * self.mask
+
+    def sample(self):
+        self.mask = torch.bernoulli(
+            torch.ones(*self.size, device=self.device) * 1 - self.dropout
+        )
+
+
+class VariationalLSTMModule2(nn.Module):
     def __init__(
         self,
         num_layers: int,
@@ -99,6 +117,33 @@ class VariationalLSTMModule2(nn.LSTM):
         device: Device,
     ):
         super().__init__()
+        self.lstm_layers = [
+            nn.LSTMCell(
+                in_size,
+                hidden_size,
+            ).to(device)
+            for in_size in [input_size] + [hidden_size] * (num_layers - 1)
+        ]
+        self.embeddings = nn.Embedding(vocab_size, input_size)
+        self.decoder = nn.Linear(hidden_size, output_size)
+        self.num_predictions = num_predictions
+
+        # TODO: Init embedding modules
+        self.dropout = {
+            "embedding": VariationalDropout(embedding_dropout),
+            "layer": VariationalDropout(layer_dropout),
+            "time": VariationalDropout(time_dropout),
+        }
+
+    def forward(
+        self,
+        input_: torch.LongTensor,
+        hidden_states: Optional[torch.FloatTensor] = None,
+    ):
+        embeddings = self.embeddings(input_)
+        embeddings = self.embedding_dropout(embeddings)
+
+        # TODO: Finish forward pass
 
 
 class VariationalLSTM(Model):

@@ -177,14 +177,11 @@ class SNGPModule(nn.Module):
         )  # batch_size x output_size, here the logits are actually the posterior mean
 
         # Compute posterior variance
-        # Okay, so this is a bit insane. Here we have three components:
-        #   * Phi: batch_size x classes
-        #   * sigma_hat: output_size x output_size x output_size (m is given as an alternative identifier for classes
-        #     so that the right dimensions are multiplied)
-        #   * Transposed Phi: classes x batch_size
-        # Thus, this single impression gives us the posterior variance for every class for every instance in the batch
-        # in ONE, readable (!) line.
-        post_var = torch.einsum("bk,mkk,kb->bm", Phi, self.sigma_hat, Phi.T)
+        post_var = torch.zeros(
+            Phi.shape[0], self.output_size
+        )  # batch_size x output_size
+        for k in range(self.output_size):
+            post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
 
         out = 0
         for _ in range(num_predictions):
@@ -227,14 +224,11 @@ class SNGPModule(nn.Module):
         )  # batch_size x output_size, here the logits are actually the posterior mean
 
         # Compute posterior variance
-        # Okay, so this is a bit insane. Here we have three components:
-        #   * Phi: batch_size x classes
-        #   * sigma_hat: output_size x output_size x output_size (m is given as an alternative identifier for classes
-        #     so that the right dimensions are multiplied)
-        #   * Transposed Phi: classes x batch_size
-        # Thus, this single impression gives us the posterior variance for every class for every instance in the batch
-        # in ONE, readable (!) line.
-        post_var = torch.einsum("bk,mkk,kb->bm", Phi, self.sigma_hat, Phi.T)
+        post_var = torch.zeros(
+            Phi.shape[0], self.output_size
+        )  # batch_size x output_size
+        for k in range(self.output_size):
+            post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
 
         logits = 0
         for _ in range(num_predictions):
@@ -300,7 +294,7 @@ class SNGPTransformerModule(TransformerModule):
         device: Device
             Device the model is located on.
         """
-        # TODO: Update this chord according to neew SNGP layer
+        # TODO: Update this according to new SNGP layer
 
         super().__init__(
             num_layers,
