@@ -14,7 +14,7 @@ from typing import Optional
 from codecarbon import OfflineEmissionsTracker
 from knockknock import telegram_sender
 import numpy as np
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import precision_recall_curve, roc_auc_score
 from sklearn.preprocessing import LabelEncoder
 import torch.nn as nn
 import torch
@@ -408,7 +408,7 @@ def run_replication(
                 uncertainties = uncertainties.cpu().detach()
                 uncertainties_ood.append(uncertainties)
 
-        # Eval uncertainties using AUROC
+        # Eval uncertainties using AU
         uncertainties_id = torch.cat(uncertainties_id, dim=0)
         uncertainties_ood = torch.cat(uncertainties_ood, dim=0)
         # Create "labels": 1 for ID, 0 for OOD
@@ -421,7 +421,9 @@ def run_replication(
             axis=0,
         )
         ood_auroc = roc_auc_score(ood_labels, uncertainties)
-        summary_writer.add_scalar("ROC-AUC", ood_auroc)
+        ood_aupr = precision_recall_curve(ood_labels, uncertainties, pos_label=1)
+        summary_writer.add_scalar("AUROC", ood_auroc)
+        summary_writer.add_scalar("AUPE", ood_aupr)
         ood_aurocs.append(ood_auroc)
 
         # Add statistics to run
