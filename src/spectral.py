@@ -178,7 +178,7 @@ class SNGPModule(nn.Module):
 
         # Compute posterior variance
         post_var = torch.zeros(
-            Phi.shape[0], self.output_size
+            Phi.shape[0], self.output_size, device=self.device
         )  # batch_size x output_size
         for k in range(self.output_size):
             post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
@@ -225,7 +225,7 @@ class SNGPModule(nn.Module):
 
         # Compute posterior variance
         post_var = torch.zeros(
-            Phi.shape[0], self.output_size
+            Phi.shape[0], self.output_size, device=self.device
         )  # batch_size x output_size
         for k in range(self.output_size):
             post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
