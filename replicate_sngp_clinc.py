@@ -421,9 +421,9 @@ def run_replication(
             axis=0,
         )
         ood_auroc = roc_auc_score(ood_labels, uncertainties)
-        ood_aupr = precision_recall_curve(ood_labels, uncertainties, pos_label=1)
+        # ood_aupr = precision_recall_curve(ood_labels, uncertainties, pos_label=1)
         summary_writer.add_scalar("AUROC", ood_auroc)
-        summary_writer.add_scalar("AUPE", ood_aupr)
+        # summary_writer.add_scalar("AUPE", ood_aupr)
         ood_aurocs.append(ood_auroc)
 
         # Add statistics to run
