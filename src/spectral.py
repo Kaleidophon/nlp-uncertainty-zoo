@@ -35,6 +35,7 @@ class SNGPModule(nn.Module):
     def __init__(
         self,
         hidden_size: int,
+        last_layer_size: int,
         output_size: int,
         ridge_factor: float,
         scaling_coefficient: float,
@@ -49,7 +50,9 @@ class SNGPModule(nn.Module):
         Parameters
         ----------
         hidden_size: int
-            Hidden size of last Bert layer.
+            Hidden size of last regular network layer.
+        last_layer_size: int
+            Size of last layer before output layer. Called D_L in the original paper.
         output_size: int
             Size of output layer, so number of classes.
         ridge_factor: float
@@ -72,6 +75,7 @@ class SNGPModule(nn.Module):
         self.device = device
 
         self.hidden_size = hidden_size
+        self.last_layer_size = last_layer_size
         self.output_size = output_size
         self.ridge_factor = ridge_factor
         self.scaling_coefficient = scaling_coefficient
@@ -82,7 +86,7 @@ class SNGPModule(nn.Module):
         # ### Init parameters
 
         # Random, frozen output layer
-        self.output = nn.Linear(self.hidden_size, self.output_size)
+        self.output = nn.Linear(self.hidden_size, self.last_layer_size)
         # Change init of weights and biases following Liu et al. (2020)
         self.output.weight.data.normal_(0, 1)
         self.output.bias.data.uniform_(0, 2 * math.pi)
@@ -95,11 +99,10 @@ class SNGPModule(nn.Module):
         self.register_parameter(
             name="Beta",
             param=nn.Parameter(
-                torch.randn(output_size, output_size, device=device) * beta_length_scale
+                torch.randn(last_layer_size, output_size, device=device)
+                * beta_length_scale
             ),
         )
-
-        # TODO: Add option for random untrained projection layer
 
         # Initialize inverse of sigma hat, one matrix per class
         self.sigma_hat_inv = (
@@ -129,7 +132,7 @@ class SNGPModule(nn.Module):
         torch.FloatTensor
             Logits for the current batch.
         """
-        Phi = math.sqrt(2 / self.output_size) * torch.cos(
+        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
             self.output(-x)
         )  # batch_size x output_size
         logits = Phi @ self.Beta  # Logits: batch_size x output_size
@@ -174,7 +177,7 @@ class SNGPModule(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
-        Phi = math.sqrt(2 / self.output_size) * torch.cos(
+        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
             self.output(-x)
         )  # batch_size x output_size
         post_mean = (
@@ -231,7 +234,7 @@ class SNGPModule(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
-        Phi = math.sqrt(2 / self.output_size) * torch.cos(
+        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
             self.output(-x)
         )  # batch_size x output_size
         post_mean = (
@@ -245,15 +248,18 @@ class SNGPModule(nn.Module):
         for k in range(self.output_size):
             post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
 
-        logits = 0
+        final_logits = 0
         for _ in range(num_predictions):
             # Now actually sample logits from posterior
-            logits += torch.normal(post_mean, torch.sqrt(post_var + 1e-8))
+            logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8))
+            logits_scale = torch.sqrt(1 + post_var * self.gp_mean_field_factor)
+            logits /= logits_scale
+            final_logits += logits
 
-        logits /= num_predictions
+        final_logits /= num_predictions
         # Compute dempster-shafer metric
         uncertainty = self.output_size / (
-            self.output_size + torch.exp(logits).sum(dim=1)
+            self.output_size + torch.exp(final_logits).sum(dim=1)
         )
 
         return uncertainty

@@ -34,13 +34,14 @@ from secret import COUNTRY_CODE, TELEGRAM_CHAT_ID, TELEGRAM_API_TOKEN
 # CONST
 CLINC_DIR = "./data/processed/clinc"
 BERT_MODEL = "bert-base-uncased"
-SEED = 123
+SEED = 1024
 EMISSION_DIR = "./emissions"
 SUMMARY_WRITER = None
 GLOBAL_BATCH_NUM = None
 
 # HYPERPARAMETERS
 HIDDEN_SIZE = 768
+LAST_LAYER_SIZE = 2048
 OUTPUT_SIZE = 151
 BATCH_SIZE = 32
 SPECTRAL_NORM_UPPER_BOUND = 0.95
@@ -63,6 +64,7 @@ class SNGPBert(nn.Module):
     def __init__(
         self,
         hidden_size: int,
+        last_layer_size: int,
         output_size: int,
         spectral_norm_upper_bound: float,
         ridge_factor: float,
@@ -79,6 +81,8 @@ class SNGPBert(nn.Module):
         ----------
         hidden_size: int
             Hidden size of last Bert layer.
+        last_layer_size: int
+            Size of last layer before output layer. Called D_L in the original paper.
         output_size: int
             Size of output layer, so number of classes.
         spectral_norm_upper_bound: float
@@ -105,6 +109,7 @@ class SNGPBert(nn.Module):
         # Model initialization
         self.sngp_layer = SNGPModule(
             hidden_size,
+            last_layer_size,
             output_size,
             ridge_factor,
             scaling_coefficient,
@@ -116,6 +121,7 @@ class SNGPBert(nn.Module):
         self.bert = BertModel.from_pretrained(BERT_MODEL).to(device)
         self.layer_norm = nn.LayerNorm([hidden_size])
         self.output_size = output_size
+        self.last_layer_size = last_layer_size
 
         # Spectral norm initialization
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
@@ -247,6 +253,11 @@ class SNGPBert(nn.Module):
         u, v = pooler.weight_u.unsqueeze(1), pooler.weight_v.unsqueeze(1)
         lambda_ = u.T @ pooler.weight @ v  # Compute spectral norm for weight matrix
 
+        # TODO: Debug: Track spectral norm
+        global SUMMARY_WRITER, GLOBAL_BATCH_NUM
+        if SUMMARY_WRITER is not None:
+            SUMMARY_WRITER.add_scalar("Spectral norm", lambda_, GLOBAL_BATCH_NUM)
+
         if lambda_ > self.spectral_norm_upper_bound:
             self.bert.pooler.dense.weight = (
                 self.spectral_norm_upper_bound * normalized_weight
@@ -254,11 +265,6 @@ class SNGPBert(nn.Module):
 
         else:
             self.bert.pooler.dense_weight = old_weight
-
-        # Track spectral norm
-        global SUMMARY_WRITER, GLOBAL_BATCH_NUM
-        if SUMMARY_WRITER is not None:
-            SUMMARY_WRITER.add_scalar("Spectral norm", lambda_, GLOBAL_BATCH_NUM)
 
 
 def run_replication(
@@ -547,6 +553,7 @@ if __name__ == "__main__":
     # Init SNGP-BERT
     sngp_bert = SNGPBert(
         hidden_size=HIDDEN_SIZE,
+        last_layer_size=LAST_LAYER_SIZE,
         output_size=OUTPUT_SIZE,
         spectral_norm_upper_bound=SPECTRAL_NORM_UPPER_BOUND,
         ridge_factor=RIDGE_FACTOR,
