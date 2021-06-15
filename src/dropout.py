@@ -8,7 +8,7 @@ models:
 """
 
 # STD
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional
 
 # EXT
 import torch
@@ -18,7 +18,7 @@ import torch.nn as nn
 from src.lstm import LSTMModule
 from src.model import Model
 from src.transformer import TransformerModule
-from src.types import Device
+from src.types import Device, HiddenDict
 
 
 class VariationalLSTMModule(LSTMModule):
@@ -85,20 +85,22 @@ class VariationalLSTMModule(LSTMModule):
 
 # TODO: This is all experimental, remove if shit
 class VariationalDropout(nn.Module):
-    def __init__(self, dropout: float, size: Tuple[int, ...], device: Device):
+    def __init__(self, dropout: float, input_dim: int, device: Device):
         super().__init__()
         self.dropout = dropout
-        self.size = size
+        self.input_dim = input_dim
         self.device = device
         self.mask = None
         self.sample()
 
     def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
-        return x * self.mask
+        batch_size = x.shape[0]
+
+        return x * self.mask.repeat(batch_size, 1)
 
     def sample(self):
         self.mask = torch.bernoulli(
-            torch.ones(*self.size, device=self.device) * 1 - self.dropout
+            torch.ones(1, self.input_dim, device=self.device) * 1 - self.dropout
         )
 
 
@@ -117,6 +119,13 @@ class VariationalLSTMModule2(nn.Module):
         device: Device,
     ):
         super().__init__()
+        self.num_layers = num_layers
+        self.vocab_size = vocab_size
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.device = device
+
         self.lstm_layers = [
             nn.LSTMCell(
                 in_size,
@@ -128,22 +137,79 @@ class VariationalLSTMModule2(nn.Module):
         self.decoder = nn.Linear(hidden_size, output_size)
         self.num_predictions = num_predictions
 
-        # TODO: Init embedding modules
-        self.dropout = {
-            "embedding": VariationalDropout(embedding_dropout),
-            "layer": VariationalDropout(layer_dropout),
-            "time": VariationalDropout(time_dropout),
+        self.dropout_modules = {
+            "embedding": VariationalDropout(embedding_dropout, input_size, device),
+            "layer": VariationalDropout(layer_dropout, hidden_size, device),
+            "time": VariationalDropout(time_dropout, hidden_size, device),
         }
+
+        self.last_hidden_states = None
 
     def forward(
         self,
         input_: torch.LongTensor,
         hidden_states: Optional[torch.FloatTensor] = None,
     ):
-        embeddings = self.embeddings(input_)
-        embeddings = self.embedding_dropout(embeddings)
+        batch_size, sequence_length = input_.shape
+        outputs = []
+        new_hidden_states: HiddenDict = {}
 
-        # TODO: Finish forward pass
+        # Initialize hidden activations if not given
+        if hidden_states is None and self.last_hidden_states is None:
+            hidden_states = self.init_hidden_states(batch_size, self.device)
+        # Detach hidden activations to limit gradient computations
+        else:
+            hidden_states = (
+                self.last_hidden_states if hidden_states is None else hidden_states
+            )
+
+        self.sample_masks()
+
+        for t in range(sequence_length):
+
+            embeddings = self.embeddings(input_[:, t])
+            layer_input = self.dropout_modules["embedding"](embeddings)
+
+            for layer, cell in enumerate(self.lstm_layers):
+                hx, cx = cell(
+                    layer_input,  # Hidden state of last layer
+                    (
+                        self.dropout_modules["time"](hidden_states[layer][0]),
+                        hidden_states[layer][1],
+                    ),  # Cell and hidden state state of last time step
+                )
+                layer_input = self.dropout_modules["layer"](hx)
+                new_hidden_states[layer] = (hx, cx)
+
+            outputs.append(self.decoder(layer_input))
+            hidden_states = new_hidden_states
+
+        outputs = torch.stack(outputs, dim=1)
+        self._assign_last_hidden_states(hidden_states)
+
+        return outputs
+
+    # TODO: Add doc here
+    def _assign_last_hidden_states(self, hidden: HiddenDict):
+        self.last_hidden_states = {
+            layer: (h[0].detach(), h[1].detach()) for layer, h in hidden.items()
+        }
+
+    # TODO: Add doc here
+    def init_hidden_states(self, batch_size: int, device: Device) -> HiddenDict:
+        hidden = {
+            layer: (
+                torch.zeros(batch_size, self.hidden_size, device=device),
+                torch.zeros(batch_size, self.hidden_size, device=device),
+            )
+            for layer in range(self.num_layers)
+        }
+
+        return hidden
+
+    def sample_masks(self):
+        for dropout_module in self.dropout_modules.values():
+            dropout_module.sample()
 
 
 class VariationalLSTM(Model):
@@ -161,6 +227,85 @@ class VariationalLSTM(Model):
         super().__init__(
             "variational_lstm",
             VariationalLSTMModule,
+            model_params,
+            train_params,
+            model_dir,
+            device,
+        )
+
+        # Only for Gal & Ghrahamani replication, I know this isn't pretty
+        if "init_weight" in train_params:
+            init_weight = train_params["init_weight"]
+
+            for name, module in self.module._modules.items():
+
+                if name not in ("embeddings", "decoder"):
+                    module.weight.data.uniform_(-init_weight, init_weight)
+
+                    if module.bias is not None:
+                        module.bias.data.uniform_(-init_weight, init_weight)
+
+    def predict(
+        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
+    ) -> torch.Tensor:
+        """
+        Make a prediction for some input.
+
+        Parameters
+        ----------
+        X: torch.Tensor
+            Input data points.
+        num_predictions: int
+            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
+            If None, the attribute of the same name set during initialization is used.
+
+        Returns
+        -------
+        torch.Tensor
+            Predictions.
+        """
+        if num_predictions is None:
+            num_predictions = self.module.num_predictions
+
+        X = X.to(self.device)
+
+        batch_size, seq_len = X.shape
+        preds = torch.zeros(
+            batch_size, seq_len, self.module.output_size, device=self.device
+        )
+
+        # Make sure that the same hidden state from the last batch is used for all forward passes
+        # Init hidden state - continue with hidden states from last batch
+        hidden_states = self.module.last_hidden_states
+
+        # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
+        if hidden_states is None:
+            hidden_states = self.module.init_hidden_states(batch_size, self.device)
+
+        with torch.no_grad():
+            for _ in range(num_predictions):
+                preds += self.module(X, hidden_states=hidden_states)
+
+            preds /= num_predictions
+
+        return preds
+
+
+class VariationalLSTM2(Model):
+    """
+    Module for the variational LSTM.
+    """
+
+    def __init__(
+        self,
+        model_params: Dict[str, Any],
+        train_params: Dict[str, Any],
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
+    ):
+        super().__init__(
+            "variational_lstm2",
+            VariationalLSTMModule2,
             model_params,
             train_params,
             model_dir,

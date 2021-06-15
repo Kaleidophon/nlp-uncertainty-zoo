@@ -10,7 +10,7 @@ import torch
 # PROJECT
 from src.composer import Composer
 from src.datasets import Wikitext103Dataset, PennTreebankDataset
-from src.dropout import VariationalLSTM, VariationalTransformer
+from src.dropout import VariationalLSTM, VariationalTransformer, VariationalLSTM2
 from src.lstm import LSTM
 from src.spectral import SNGPTransformer, DDUTransformer
 from src.transformer import Transformer
@@ -21,6 +21,7 @@ AVAILABLE_MODELS = {
     "composer": Composer,
     "lstm": LSTM,
     "variational_lstm": VariationalLSTM,
+    "variational_lstm2": VariationalLSTM2,
     "transformer": Transformer,
     "variational_transformer": VariationalTransformer,
     "sngp_transformer": SNGPTransformer,
@@ -66,6 +67,17 @@ _TRAIN_PARAMS = {
     "ptb": {
         # Taken from  https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
+            "early_stopping": True,
+            "weight_decay": 1e-7,
+            "lr": 1,
+            "num_epochs": 55,
+            # "early_stopping_pat": 10,
+            "grad_clip": 10,
+            "gamma": 0.74,  # 1 / 1.35; in the Gal implementation you divide by gamma
+            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
+        },
+        "variational_lstm2": {
             "early_stopping": True,
             "weight_decay": 1e-7,
             "lr": 1,
@@ -151,6 +163,17 @@ _MODEL_PARAMS = {
     "ptb": {
         # Taken from https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
+            "num_layers": 2,
+            "hidden_size": 1500,
+            "input_size": 1500,
+            "embedding_dropout": 0.3,  # dropout_x, Large model Gal & Ghrahramani (2016)
+            "layer_dropout": 0.5,  # dropout_i / dropout_o, Large model Gal & Ghrahramani (2016)
+            "time_dropout": 0.3,  # dropout_h, Large model Gal & Ghrahramani (2016)
+            "vocab_size": 10001,
+            "output_size": 10001,
+            "num_predictions": 1000,
+        },
+        "variational_lstm2": {
             "num_layers": 2,
             "hidden_size": 1500,
             "input_size": 1500,
