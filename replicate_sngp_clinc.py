@@ -16,6 +16,7 @@ from knockknock import telegram_sender
 import numpy as np
 from sklearn.metrics import precision_recall_curve, roc_auc_score
 from sklearn.preprocessing import LabelEncoder
+from torch import softmax
 import torch.nn as nn
 import torch
 import torch.optim as optim
@@ -35,6 +36,8 @@ CLINC_DIR = "./data/processed/clinc"
 BERT_MODEL = "bert-base-uncased"
 SEED = 123
 EMISSION_DIR = "./emissions"
+SUMMARY_WRITER = None
+GLOBAL_BATCH_NUM = None
 
 # HYPERPARAMETERS
 HIDDEN_SIZE = 768
@@ -49,6 +52,7 @@ EPOCHS = 40
 LEARNING_RATE = 5e-5
 WARMUP_PROP = 0.1
 NUM_PREDICTIONS = 10
+GP_MEAN_FIELD_FACTOR = 0.1
 
 
 class SNGPBert(nn.Module):
@@ -64,6 +68,7 @@ class SNGPBert(nn.Module):
         ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
+        gp_mean_field_factor: float,
         num_predictions: int,
         device: Device,
     ):
@@ -86,6 +91,9 @@ class SNGPBert(nn.Module):
         beta_length_scale: float
             Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
             initialized from.
+        gp_mean_field_factor: float
+            Multiplicative factor used in the mean-field approcimation for the posterior mean of the softmax
+            Gaussian process, based on `Lu et al. (2021) <https://arxiv.org/pdf/2006.07584.pdf>'_.
         num_predictions: int
             Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
         device: Device
@@ -101,10 +109,12 @@ class SNGPBert(nn.Module):
             ridge_factor,
             scaling_coefficient,
             beta_length_scale,
+            gp_mean_field_factor,
             num_predictions,
             device,
         )
         self.bert = BertModel.from_pretrained(BERT_MODEL).to(device)
+        self.layer_norm = nn.LayerNorm([hidden_size])
         self.output_size = output_size
 
         # Spectral norm initialization
@@ -140,6 +150,8 @@ class SNGPBert(nn.Module):
         pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
             "pooler_output"
         ]
+        pooler_output = self.layer_norm(pooler_output)
+
         out = self.sngp_layer(pooler_output, update_sigma_hat_inv=self.last_epoch)
 
         return out
@@ -173,7 +185,17 @@ class SNGPBert(nn.Module):
         pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
             "pooler_output"
         ]
+        pooler_output = self.layer_norm(pooler_output)
+
         out = self.sngp_layer.predict(pooler_output, num_predictions=num_predictions)
+
+        # TODO: Debug
+        # Track entropy of output distribution
+        global SUMMARY_WRITER, GLOBAL_BATCH_NUM
+        if SUMMARY_WRITER is not None:
+            probs = softmax(out, dim=-1)
+            entropy = torch.mean(-(torch.log(probs) * probs).sum(dim=1))
+            SUMMARY_WRITER.add_scalar("Entropy", entropy, GLOBAL_BATCH_NUM)
 
         return out
 
@@ -206,6 +228,8 @@ class SNGPBert(nn.Module):
         pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
             "pooler_output"
         ]
+        pooler_output = self.layer_norm(pooler_output)
+
         uncertainties = self.sngp_layer.dempster_shafer(pooler_output, num_predictions)
 
         return uncertainties
@@ -231,6 +255,11 @@ class SNGPBert(nn.Module):
         else:
             self.bert.pooler.dense_weight = old_weight
 
+        # Track spectral norm
+        global SUMMARY_WRITER, GLOBAL_BATCH_NUM
+        if SUMMARY_WRITER is not None:
+            SUMMARY_WRITER.add_scalar("Spectral norm", lambda_, GLOBAL_BATCH_NUM)
+
 
 def run_replication(
     sngp_bert: SNGPBert, dataset: Dataset, num_runs: int, device: Device
@@ -255,10 +284,11 @@ def run_replication(
     str
         String with results for knockknock.
     """
+    global SUMMARY_WRITER, GLOBAL_BATCH_NUM  # TODO: Debug
     accuracies, ood_aurocs = [], []
 
     for _ in range(num_runs):
-        summary_writer = SummaryWriter()
+        summary_writer = SUMMARY_WRITER = SummaryWriter()
 
         # ### Training ###
         # Init dataloader
@@ -282,7 +312,9 @@ def run_replication(
             sngp_bert.last_epoch = epoch == EPOCHS - 1
 
             for batch_num, batch in enumerate(dl):
-                global_batch_num = epoch * steps_per_epoch + batch_num
+                global_batch_num = GLOBAL_BATCH_NUM = (
+                    epoch * steps_per_epoch + batch_num
+                )  # TODO: Debug
 
                 # Forward pass
                 attention_mask, input_ids, labels = (
@@ -520,6 +552,7 @@ if __name__ == "__main__":
         ridge_factor=RIDGE_FACTOR,
         scaling_coefficient=SCALING_COEFFICIENT,
         beta_length_scale=BETA_LENGTH_SCALE,
+        gp_mean_field_factor=GP_MEAN_FIELD_FACTOR,
         num_predictions=NUM_PREDICTIONS,
         device=args.device,
     ).to(args.device)

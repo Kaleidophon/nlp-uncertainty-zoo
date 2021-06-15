@@ -39,6 +39,7 @@ class SNGPModule(nn.Module):
         ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
+        gp_mean_field_factor: float,
         num_predictions: int,
         device: Device,
     ):
@@ -59,6 +60,9 @@ class SNGPModule(nn.Module):
         beta_length_scale: float
             Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
             initialized from.
+        gp_mean_field_factor: float
+            Multiplicative factor used in the mean-field approcimation for the posterior mean of the softmax
+            Gaussian process, based on `Lu et al. (2021) <https://arxiv.org/pdf/2006.07584.pdf>'_.
         num_predictions: int
             Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
         device: Device
@@ -72,6 +76,7 @@ class SNGPModule(nn.Module):
         self.ridge_factor = ridge_factor
         self.scaling_coefficient = scaling_coefficient
         self.beta_length_scale = beta_length_scale
+        self.gp_mean_field_factor = gp_mean_field_factor
         self.num_predictions = num_predictions
 
         # ### Init parameters
@@ -187,6 +192,16 @@ class SNGPModule(nn.Module):
         for _ in range(num_predictions):
             # Now actually sample logits from posterior
             logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8))
+
+            logits_scale = torch.sqrt(1 + post_var * self.gp_mean_field_factor)
+            logits /= logits_scale
+
+            # Adjust logits with mean field factor like done in implementation
+            # here: https://github.com/google/uncertainty-baselines/blob/e854dfad5637cfae3561b67654c9c42ccabbe845/baseli
+            # nes/clinc_intent/sngp.py#L408 and here: https://github.com/google/edward2/blob/89b59c1f3310266b0eaf175a7a
+            # 28b048c727aaa2/edward2/tensorflow/layers/utils.py#L394
+            # and originally based on this (https://arxiv.org/pdf/2006.07584.pdf) paper.
+
             preds = torch.softmax(logits, dim=-1)
             out += preds
 
