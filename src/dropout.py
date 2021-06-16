@@ -91,16 +91,17 @@ class VariationalDropout(nn.Module):
         self.input_dim = input_dim
         self.device = device
         self.mask = None
-        self.sample()
 
     def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
-        batch_size = x.shape[0]
+        if self.mask is None:
+            raise ValueError("Dropout mask hasn't been sampled yet. Use .sample().")
 
-        return x * self.mask.repeat(batch_size, 1)
+        return x * self.mask
 
-    def sample(self):
+    def sample(self, batch_size: int):
         self.mask = torch.bernoulli(
-            torch.ones(1, self.input_dim, device=self.device) * 1 - self.dropout
+            torch.ones(batch_size, self.input_dim, device=self.device)
+            * (1 - self.dropout)
         )
 
 
@@ -163,7 +164,7 @@ class VariationalLSTMModule2(nn.Module):
                 self.last_hidden_states if hidden_states is None else hidden_states
             )
 
-        self.sample_masks()
+        self.sample_masks(batch_size)
 
         for t in range(sequence_length):
 
@@ -207,9 +208,9 @@ class VariationalLSTMModule2(nn.Module):
 
         return hidden
 
-    def sample_masks(self):
+    def sample_masks(self, batch_size: int):
         for dropout_module in self.dropout_modules.values():
-            dropout_module.sample()
+            dropout_module.sample(batch_size)
 
 
 class VariationalLSTM(Model):
