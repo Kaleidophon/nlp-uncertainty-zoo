@@ -331,7 +331,7 @@ class TextDataset(ABC):
             # Evenly divide the data across the bsz batches.
             raw_batches = indexed_sequences.view(self.batch_size, -1).t().contiguous()
 
-            num_batches = math.ceil(num_batched_steps / self.sequence_length)
+            num_batches = math.floor(num_batched_steps / self.sequence_length)
             batched_sequences = [
                 raw_batches[
                     n
