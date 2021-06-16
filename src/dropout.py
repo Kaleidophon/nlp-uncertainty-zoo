@@ -127,13 +127,15 @@ class VariationalLSTMModule2(nn.Module):
         self.output_size = output_size
         self.device = device
 
-        self.lstm_layers = [
-            nn.LSTMCell(
-                in_size,
-                hidden_size,
-            ).to(device)
-            for in_size in [input_size] + [hidden_size] * (num_layers - 1)
-        ]
+        self.lstm_layers = nn.ModuleList(
+            [
+                nn.LSTMCell(
+                    in_size,
+                    hidden_size,
+                ).to(device)
+                for in_size in [input_size] + [hidden_size] * (num_layers - 1)
+            ]
+        )
         self.embeddings = nn.Embedding(vocab_size, input_size)
         self.decoder = nn.Linear(hidden_size, output_size)
         self.num_predictions = num_predictions
@@ -164,7 +166,7 @@ class VariationalLSTMModule2(nn.Module):
                 self.last_hidden_states if hidden_states is None else hidden_states
             )
 
-        self.sample_masks(batch_size)
+        self.sample_masks(batch_size)  # Sample dropout masks used throughout this batch
 
         for t in range(sequence_length):
 
@@ -313,17 +315,15 @@ class VariationalLSTM2(Model):
             device,
         )
 
-        # Only for Gal & Ghrahamani replication, I know this isn't pretty
+        # Only for Gal & Ghahramani replication, I know this isn't pretty
         if "init_weight" in train_params:
             init_weight = train_params["init_weight"]
 
-            for name, module in self.module._modules.items():
-
-                if name not in ("embeddings", "decoder"):
-                    module.weight.data.uniform_(-init_weight, init_weight)
-
-                    if module.bias is not None:
-                        module.bias.data.uniform_(-init_weight, init_weight)
+            for cell in self.module.lstm_layers:
+                cell.weight_hh.data.uniform_(-init_weight, init_weight)
+                cell.weight_ih.data.uniform_(-init_weight, init_weight)
+                cell.bias_hh.data.uniform_(-init_weight, init_weight)
+                cell.bias_ih.data.uniform_(-init_weight, init_weight)
 
     def predict(
         self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs

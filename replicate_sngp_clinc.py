@@ -195,14 +195,6 @@ class SNGPBert(nn.Module):
 
         out = self.sngp_layer.predict(pooler_output, num_predictions=num_predictions)
 
-        # TODO: Debug
-        # Track entropy of output distribution
-        global SUMMARY_WRITER, GLOBAL_BATCH_NUM
-        if SUMMARY_WRITER is not None:
-            probs = softmax(out, dim=-1)
-            entropy = torch.mean(-(torch.log(probs) * probs).sum(dim=1))
-            SUMMARY_WRITER.add_scalar("Entropy", entropy, GLOBAL_BATCH_NUM)
-
         return out
 
     def get_uncertainty(
