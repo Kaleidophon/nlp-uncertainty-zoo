@@ -8,7 +8,7 @@ import codecs
 # EXT
 from einops import rearrange
 import torch
-from torch.nn.functional import cross_entropy
+from torch.nn.functional import nll_loss
 from typing import Optional
 
 # PROJECT
@@ -17,8 +17,8 @@ from src.datasets import LanguageModelingDataset, TextDataset, DataSplit
 
 # Map from dataset class to evaluation function
 EVAL_FUNCS = {
-    LanguageModelingDataset: lambda preds, labels: cross_entropy(
-        preds, labels, reduction="none"
+    LanguageModelingDataset: lambda preds, labels: nll_loss(
+        torch.log(preds), labels, reduction="none"
     )
 }
 EVAL_FUNCS_POST = {

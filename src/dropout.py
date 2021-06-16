@@ -13,6 +13,7 @@ from typing import Dict, Any, Optional
 # EXT
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 # PROJECT
 from src.lstm import LSTMModule
@@ -287,7 +288,7 @@ class VariationalLSTM(Model):
 
         with torch.no_grad():
             for _ in range(num_predictions):
-                preds += self.module(X, hidden_states=hidden_states)
+                preds += F.softmax(self.module(X, hidden_states=hidden_states), dim=-1)
 
             preds /= num_predictions
 
@@ -364,7 +365,7 @@ class VariationalLSTM2(Model):
 
         with torch.no_grad():
             for _ in range(num_predictions):
-                preds += self.module(X, hidden_states=hidden_states)
+                preds += F.softmax(self.module(X, hidden_states=hidden_states), dim=-1)
 
             preds /= num_predictions
 
