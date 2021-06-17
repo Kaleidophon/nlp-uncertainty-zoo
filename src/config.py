@@ -70,7 +70,7 @@ _TRAIN_PARAMS = {
             "early_stopping": True,
             "weight_decay": 1e-7,
             "lr": 1,
-            "num_epochs": 55,
+            "num_epochs": 30,  # Changed from 55 in original
             # "early_stopping_pat": 10,
             "grad_clip": 10,
             "gamma": 0.74,  # 1 / 1.35; in the Gal implementation you divide by gamma
@@ -81,7 +81,7 @@ _TRAIN_PARAMS = {
             "early_stopping": True,
             "weight_decay": 1e-7,
             "lr": 1,
-            "num_epochs": 55,
+            "num_epochs": 30,  # Changed from 55 in original
             # "early_stopping_pat": 10,
             "grad_clip": 10,
             "gamma": 0.74,  # 1 / 1.35; in the Gal implementation you divide by gamma
