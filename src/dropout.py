@@ -102,8 +102,8 @@ class VariationalLSTMModule(nn.Module):
         self.num_predictions = num_predictions
 
         self.dropout_modules = {
-            # "embedding": VariationalDropout(embedding_dropout, input_size, device),
-            "embedding": EmbeddingDropout(embedding_dropout, vocab_size, device),
+            "embedding": VariationalDropout(embedding_dropout, input_size, device),
+            # "embedding": EmbeddingDropout(embedding_dropout, vocab_size, device),
             "layer": VariationalDropout(layer_dropout, hidden_size, device),
             "time": VariationalDropout(time_dropout, hidden_size, device),
         }
@@ -127,14 +127,15 @@ class VariationalLSTMModule(nn.Module):
             hidden_states = (
                 self.last_hidden_states if hidden_states is None else hidden_states
             )
+        hidden_states = self._detach_hidden(hidden_states)
 
         self.sample_masks(batch_size)  # Sample dropout masks used throughout this batch
 
         for t in range(sequence_length):
 
             embeddings = self.embeddings(input_[:, t])
-            # layer_input = self.dropout_modules["embedding"](embeddings)
-            layer_input = self.dropout_modules["embedding"](embeddings, input_[:, t])
+            layer_input = self.dropout_modules["embedding"](embeddings)
+            # layer_input = self.dropout_modules["embedding"](embeddings, input_[:, t])
 
             for layer, cell in enumerate(self.lstm_layers):
                 hx, cx = cell(
@@ -157,8 +158,11 @@ class VariationalLSTMModule(nn.Module):
 
     # TODO: Add doc here
     def _assign_last_hidden_states(self, hidden: HiddenDict):
-        self.last_hidden_states = {
-            layer: (h[0].detach(), h[1].detach()) for layer, h in hidden.items()
+        self.last_hidden_states = {layer: (h[0], h[1]) for layer, h in hidden.items()}
+
+    def _detach_hidden(self, hidden: HiddenDict):
+        return {
+            layer: (hid[0].detach(), hid[1].detach()) for layer, hid in hidden.items()
         }
 
     # TODO: Add doc here
