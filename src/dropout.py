@@ -8,6 +8,7 @@ models:
 """
 
 # STD
+import math
 from typing import Dict, Any, Optional
 
 # EXT
@@ -16,75 +17,34 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # PROJECT
-from src.lstm import LSTMModule
 from src.model import Model
 from src.transformer import TransformerModule
 from src.types import Device, HiddenDict
 
-
-class VariationalLSTMModule(LSTMModule):
-    """
-    Implementation of variational LSTM by `(Gal & Ghrahramani, 2016b) <https://arxiv.org/pdf/1512.05287.pdf>`.
-    """
-
-    def __init__(
-        self,
-        num_layers: int,
-        vocab_size: int,
-        input_size: int,
-        hidden_size: int,
-        output_size: int,
-        embedding_dropout: float,
-        layer_dropout: float,
-        time_dropout: float,
-        num_predictions: int,
-        device: Device,
-    ):
-        """
-        Initialize a LSTM.
-
-        Parameters
-        ----------
-        num_layers: int
-            Number of model layers.
-        vocab_size: int
-            Vocabulary size.
-        input_size: int
-            Dimensionality of input to model.
-        hidden_size: int
-            Size of hidden representations.
-        output_size: int
-            Size of output of model.
-        embedding_dropout: float
-            Dropout on word embeddings. Dropout application corresponds to `Gal & Ghahramani (2016)
-            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
-        layer_dropout: float
-            Dropout rate between layers. Dropout application corresponds to `Gal & Ghahramani (2016)
-            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
-        time_dropout: float
-            Dropout rate between time steps. Dropout application corresponds to `Gal & Ghahramani (2016)
-            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
-        num_predictions: int
-            Number of predictions with different dropout masks.
-        device: Device
-            Device the model is located on.
-        """
-        self.num_predictions = num_predictions
-
-        super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            embedding_dropout,
-            layer_dropout,
-            time_dropout,
-            device,
-        )
+# TODO: Add missing docstrings
 
 
-# TODO: This is all experimental, remove if shit
+class EmbeddingDropout(nn.Module):
+    def __init__(self, dropout: float, vocab_size: int, device: Device):
+        super().__init__()
+        self.vocab_size = vocab_size
+        self.dropout = dropout
+        self.device = device
+        self.types_to_drop = None
+
+    def forward(self, embeddings: torch.FloatTensor, input_: torch.LongTensor):
+        for i, in_ in enumerate(input_):
+            if in_ in self.types_to_drop:
+                embeddings[i, :] = 0
+
+        return embeddings
+
+    def sample(self, *args):
+        self.types_to_drop = torch.randperm(self.vocab_size)[
+            : math.floor(self.vocab_size * self.dropout)
+        ].to(self.device)
+
+
 class VariationalDropout(nn.Module):
     def __init__(self, dropout: float, input_dim: int, device: Device):
         super().__init__()
@@ -106,7 +66,7 @@ class VariationalDropout(nn.Module):
         )
 
 
-class VariationalLSTMModule2(nn.Module):
+class VariationalLSTMModule(nn.Module):
     def __init__(
         self,
         num_layers: int,
@@ -142,7 +102,8 @@ class VariationalLSTMModule2(nn.Module):
         self.num_predictions = num_predictions
 
         self.dropout_modules = {
-            "embedding": VariationalDropout(embedding_dropout, input_size, device),
+            # "embedding": VariationalDropout(embedding_dropout, input_size, device),
+            "embedding": EmbeddingDropout(embedding_dropout, vocab_size, device),
             "layer": VariationalDropout(layer_dropout, hidden_size, device),
             "time": VariationalDropout(time_dropout, hidden_size, device),
         }
@@ -172,7 +133,8 @@ class VariationalLSTMModule2(nn.Module):
         for t in range(sequence_length):
 
             embeddings = self.embeddings(input_[:, t])
-            layer_input = self.dropout_modules["embedding"](embeddings)
+            # layer_input = self.dropout_modules["embedding"](embeddings)
+            layer_input = self.dropout_modules["embedding"](embeddings, input_[:, t])
 
             for layer, cell in enumerate(self.lstm_layers):
                 hx, cx = cell(
@@ -231,85 +193,6 @@ class VariationalLSTM(Model):
         super().__init__(
             "variational_lstm",
             VariationalLSTMModule,
-            model_params,
-            train_params,
-            model_dir,
-            device,
-        )
-
-        # Only for Gal & Ghrahamani replication, I know this isn't pretty
-        if "init_weight" in train_params:
-            init_weight = train_params["init_weight"]
-
-            for name, module in self.module._modules.items():
-
-                if name not in ("embeddings", "decoder"):
-                    module.weight.data.uniform_(-init_weight, init_weight)
-
-                    if module.bias is not None:
-                        module.bias.data.uniform_(-init_weight, init_weight)
-
-    def predict(
-        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
-    ) -> torch.Tensor:
-        """
-        Make a prediction for some input.
-
-        Parameters
-        ----------
-        X: torch.Tensor
-            Input data points.
-        num_predictions: int
-            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
-            If None, the attribute of the same name set during initialization is used.
-
-        Returns
-        -------
-        torch.Tensor
-            Predictions.
-        """
-        if num_predictions is None:
-            num_predictions = self.module.num_predictions
-
-        X = X.to(self.device)
-
-        batch_size, seq_len = X.shape
-        preds = torch.zeros(
-            batch_size, seq_len, self.module.output_size, device=self.device
-        )
-
-        # Make sure that the same hidden state from the last batch is used for all forward passes
-        # Init hidden state - continue with hidden states from last batch
-        hidden_states = self.module.last_hidden_states
-
-        # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
-        if hidden_states is None:
-            hidden_states = self.module.init_hidden_states(batch_size, self.device)
-
-        with torch.no_grad():
-            for _ in range(num_predictions):
-                preds += F.softmax(self.module(X, hidden_states=hidden_states), dim=-1)
-
-            preds /= num_predictions
-
-        return preds
-
-
-class VariationalLSTM2(Model):
-    """
-    Module for the variational LSTM.
-    """
-
-    def __init__(
-        self,
-        model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
-        model_dir: Optional[str] = None,
-        device: Device = "cpu",
-    ):
-        super().__init__(
-            "variational_lstm2",
-            VariationalLSTMModule2,
             model_params,
             train_params,
             model_dir,
