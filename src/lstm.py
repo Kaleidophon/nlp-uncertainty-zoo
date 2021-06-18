@@ -96,6 +96,14 @@ class LSTM(Model):
             "lstm", LSTMModule, model_params, train_params, model_dir, device
         )
 
+        # Only for Zaremba et al. / Gal & Ghahramani replication, I know this isn't pretty
+        if "init_weight" in train_params:
+            init_weight = train_params["init_weight"]
+
+            for layer_weights in self.module.lstm.all_weights:
+                for param in layer_weights:
+                    param.data.uniform_(-init_weight, init_weight)
+
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         out = super().predict(X)
         preds = F.softmax(out, dim=-1)
