@@ -89,6 +89,7 @@ class Module(ABC, nn.Module):
         pass
 
 
+# TODO: Use meta-programming to create Model subclasses?
 class Model(ABC):
     """
     Abstract model class. It is a wrapper that defines data loading, batching, training and evaluation loops, so that

@@ -11,6 +11,7 @@ import torch
 from src.composer import Composer
 from src.datasets import Wikitext103Dataset, PennTreebankDataset
 from src.dropout import VariationalTransformer, VariationalLSTM
+from src.lstm import LSTM
 from src.spectral import SNGPTransformer, DDUTransformer
 from src.transformer import Transformer
 
@@ -18,7 +19,7 @@ from src.transformer import Transformer
 AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset, "ptb": PennTreebankDataset}
 AVAILABLE_MODELS = {
     "composer": Composer,
-    #  "lstm": LSTM,  # TODO: Replace by torch LSTM class
+    "lstm": LSTM,
     "variational_lstm": VariationalLSTM,
     "transformer": Transformer,
     "variational_transformer": VariationalTransformer,
@@ -63,6 +64,17 @@ _TRAIN_PARAMS = {
         "ddu_transformer": {"lr": 0.01, "gamma": 0.95},
     },
     "ptb": {
+        "lstm": {
+            "early_stopping": True,
+            "weight_decay": 1e-7,
+            "lr": 1,
+            "num_epochs": 30,  # Changed from 55 in original
+            # "early_stopping_pat": 10,
+            "grad_clip": 10,
+            "gamma": 0.74,  # 1 / 1.35; in the Gal implementation you divide by gamma
+            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
+        },
         # Taken from  https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
             "early_stopping": True,
@@ -148,6 +160,14 @@ _MODEL_PARAMS = {
         },
     },
     "ptb": {
+        "lstm": {
+            "num_layers": 2,
+            "hidden_size": 1500,
+            "input_size": 1500,
+            "dropout": 0.5,
+            "vocab_size": 10001,
+            "output_size": 10001,
+        },
         # Taken from https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
             "num_layers": 2,
