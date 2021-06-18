@@ -129,9 +129,12 @@ class VariationalLSTMModule(nn.Module):
             )
         hidden_states = self._detach_hidden(hidden_states)
 
-        self.sample_masks(batch_size)  # Sample dropout masks used throughout this batch
-
         for t in range(sequence_length):
+
+            # TODO: Debug: Resample masks at every time step
+            self.sample_masks(
+                batch_size
+            )  # Sample dropout masks used throughout this batch
 
             embeddings = self.embeddings(input_[:, t])
             layer_input = self.dropout_modules["embedding"](embeddings)
