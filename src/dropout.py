@@ -24,6 +24,7 @@ from src.types import Device, HiddenDict
 # TODO: Add missing docstrings
 
 
+# TODO: Remove this
 class EmbeddingDropout(nn.Module):
     def __init__(self, dropout: float, vocab_size: int, device: Device):
         super().__init__()
@@ -102,10 +103,18 @@ class VariationalLSTMModule(nn.Module):
         self.num_predictions = num_predictions
 
         self.dropout_modules = {
-            "embedding": VariationalDropout(embedding_dropout, input_size, device),
+            "embedding": [
+                VariationalDropout(embedding_dropout, input_size, device)
+            ],  # Use list here for consistency
             # "embedding": EmbeddingDropout(embedding_dropout, vocab_size, device),
-            "layer": VariationalDropout(layer_dropout, hidden_size, device),
-            "time": VariationalDropout(time_dropout, hidden_size, device),
+            "layer": [
+                VariationalDropout(layer_dropout, hidden_size, device)
+                for _ in range(num_layers)
+            ],
+            "time": [
+                VariationalDropout(time_dropout, hidden_size, device)
+                for _ in range(num_layers)
+            ],
         }
 
         self.last_hidden_states = None
@@ -117,7 +126,6 @@ class VariationalLSTMModule(nn.Module):
     ):
         batch_size, sequence_length = input_.shape
         outputs = []
-        new_hidden_states: HiddenDict = {}
 
         # Initialize hidden activations if not given
         if hidden_states is None and self.last_hidden_states is None:
@@ -127,32 +135,33 @@ class VariationalLSTMModule(nn.Module):
             hidden_states = (
                 self.last_hidden_states if hidden_states is None else hidden_states
             )
-        hidden_states = self._detach_hidden(hidden_states)
+
+        # Sample dropout masks used throughout this batch
+        self.sample_masks(batch_size)
 
         for t in range(sequence_length):
 
-            # TODO: Debug: Resample masks at every time step
-            self.sample_masks(
-                batch_size
-            )  # Sample dropout masks used throughout this batch
-
             embeddings = self.embeddings(input_[:, t])
-            layer_input = self.dropout_modules["embedding"](embeddings)
+            layer_input = self.dropout_modules["embedding"][0](embeddings)
             # layer_input = self.dropout_modules["embedding"](embeddings, input_[:, t])
 
             for layer, cell in enumerate(self.lstm_layers):
                 hx, cx = cell(
                     layer_input,  # Hidden state of last layer
                     (
-                        self.dropout_modules["time"](hidden_states[layer][0]),
+                        self.dropout_modules["time"][layer](hidden_states[layer][0]),
                         hidden_states[layer][1],
-                    ),  # Cell and hidden state state of last time step
+                    ),  # Hidden and cell state state of last time step
                 )
-                layer_input = self.dropout_modules["layer"](hx)
-                new_hidden_states[layer] = (hx, cx)
+                layer_input = self.dropout_modules["layer"][layer](
+                    hx
+                )  # This becomes the input to the next layer
+                hidden_states[layer] = (
+                    hx,
+                    cx,
+                )  # This becomes the input for the next time step
 
             outputs.append(self.decoder(layer_input))
-            hidden_states = new_hidden_states
 
         outputs = torch.stack(outputs, dim=1)
         self._assign_last_hidden_states(hidden_states)
@@ -161,11 +170,8 @@ class VariationalLSTMModule(nn.Module):
 
     # TODO: Add doc here
     def _assign_last_hidden_states(self, hidden: HiddenDict):
-        self.last_hidden_states = {layer: (h[0], h[1]) for layer, h in hidden.items()}
-
-    def _detach_hidden(self, hidden: HiddenDict):
-        return {
-            layer: (hid[0].detach(), hid[1].detach()) for layer, hid in hidden.items()
+        self.last_hidden_states = {
+            layer: (h[0].detach(), h[1].detach()) for layer, h in hidden.items()
         }
 
     # TODO: Add doc here
@@ -181,8 +187,11 @@ class VariationalLSTMModule(nn.Module):
         return hidden
 
     def sample_masks(self, batch_size: int):
-        for dropout_module in self.dropout_modules.values():
-            dropout_module.sample(batch_size)
+        # Iterate over type of dropout modules ("layer", "time", "embedding")
+        for dropout_modules in self.dropout_modules.values():
+            # Iterate over all dropout modules of one type (across different layers)
+            for layer_module in dropout_modules:
+                layer_module.sample(batch_size)
 
 
 class VariationalLSTM(Model):
