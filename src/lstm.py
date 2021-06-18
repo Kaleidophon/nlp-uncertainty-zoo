@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, Tuple
 # EXT
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 # PROJECT
 from src.model import Model, Module
@@ -94,3 +95,9 @@ class LSTM(Model):
         super().__init__(
             "lstm", LSTMModule, model_params, train_params, model_dir, device
         )
+
+    def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+        out = super().predict(X)
+        preds = F.softmax(out, dim=-1)
+
+        return preds

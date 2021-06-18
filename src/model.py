@@ -183,12 +183,14 @@ class Model(ABC):
         for epoch in range(self.train_params["num_epochs"]):
             self.module.train()
 
-            train_loss = self._epoch_iter(
-                epoch,
-                dataset.train,
-                progress_bar,
-                summary_writer,
-            )
+            # TODO: Debug
+            # train_loss = self._epoch_iter(
+            #    epoch,
+            #    dataset.train,
+            #    progress_bar,
+            #    summary_writer,
+            # )
+            train_loss = torch.zeros(1)
 
             # Update progress bar and summary writer
             if verbose:
