@@ -64,7 +64,7 @@ class VariationalDropout(nn.Module):
         self.mask = torch.bernoulli(
             torch.ones(batch_size, self.input_dim, device=self.device)
             * (1 - self.dropout)
-        )
+        ) / (1 - self.dropout)
 
 
 class VariationalLSTMModule(nn.Module):

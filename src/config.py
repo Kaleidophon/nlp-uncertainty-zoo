@@ -162,8 +162,8 @@ _MODEL_PARAMS = {
     "ptb": {
         "lstm": {
             "num_layers": 2,
-            "hidden_size": 1500,
-            "input_size": 1500,
+            "hidden_size": 650,
+            "input_size": 650,
             "dropout": 0.5,
             "vocab_size": 10001,
             "output_size": 10001,
