@@ -8,8 +8,7 @@ models:
 """
 
 # STD
-import math
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 # EXT
 import torch
@@ -24,47 +23,72 @@ from src.types import Device, HiddenDict
 # TODO: Add missing docstrings
 
 
-# TODO: Remove this
-class EmbeddingDropout(nn.Module):
-    def __init__(self, dropout: float, vocab_size: int, device: Device):
+class CustomLSTMCell(nn.Module):
+    def __init__(self, input_size: int, hidden_size: int):
         super().__init__()
-        self.vocab_size = vocab_size
-        self.dropout = dropout
-        self.device = device
-        self.types_to_drop = None
 
-    def forward(self, embeddings: torch.FloatTensor, input_: torch.LongTensor):
-        for i, in_ in enumerate(input_):
-            if in_ in self.types_to_drop:
-                embeddings[i, :] = 0
+        self.input_size = input_size
+        self.hidden_size = hidden_size
 
-        return embeddings
+        # Define gates
+        self.x_input = nn.Linear(input_size, hidden_size)
+        self.x_forget = nn.Linear(input_size, hidden_size)
+        self.x_cell = nn.Linear(input_size, hidden_size)
+        self.x_output = nn.Linear(input_size, hidden_size)
+        # Only init one bias term per layer
+        self.h_input = nn.Linear(hidden_size, hidden_size, bias=False)
+        self.h_forget = nn.Linear(hidden_size, hidden_size, bias=False)
+        self.h_cell = nn.Linear(hidden_size, hidden_size, bias=False)
+        self.h_output = nn.Linear(hidden_size, hidden_size, bias=False)
 
-    def sample(self, *args):
-        self.types_to_drop = torch.randperm(self.vocab_size)[
-            : math.floor(self.vocab_size * self.dropout)
-        ].to(self.device)
+    def forward(
+        self,
+        x: torch.FloatTensor,
+        hx: torch.FloatTensor,
+        cx: torch.FloatTensor,
+        mask_x: torch.FloatTensor,
+        mask_h: torch.FloatTensor,
+    ) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
+        mask_fx, mask_ix, mask_ox, mask_cx = torch.split(mask_x, self.input_size, dim=1)
+        mask_fh, mask_ih, mask_oh, mask_ch = torch.split(
+            mask_h, self.hidden_size, dim=1
+        )
+
+        # Forget gate
+        f_g = torch.sigmoid(self.x_forget(x * mask_fx) + self.h_forget(hx * mask_fh))
+
+        # Input gate
+        i_g = torch.sigmoid(self.x_input(x * mask_ix) + self.h_input(hx * mask_ih))
+
+        # Output gate
+        o_g = torch.sigmoid(self.x_output(x * mask_ox) + self.h_output(hx * mask_oh))
+
+        # Intermediate cell state
+        c_tilde_g = torch.tanh(self.x_cell(x * mask_cx) + self.h_cell(x * mask_ch))
+
+        # New cell state
+        cx = f_g * cx + i_g * c_tilde_g
+
+        # New hidden state
+        hx = o_g * torch.tanh(cx)
+
+        return hx, cx
 
 
-class VariationalDropout(nn.Module):
+class VariationalDropout:
     def __init__(self, dropout: float, input_dim: int, device: Device):
-        super().__init__()
         self.dropout = dropout
         self.input_dim = input_dim
         self.device = device
         self.mask = None
-
-    def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
-        if self.mask is None:
-            raise ValueError("Dropout mask hasn't been sampled yet. Use .sample().")
-
-        return x * self.mask
 
     def sample(self, batch_size: int):
         self.mask = torch.bernoulli(
             torch.ones(batch_size, self.input_dim, device=self.device)
             * (1 - self.dropout)
         ) / (1 - self.dropout)
+
+        return self.mask
 
 
 class VariationalLSTMModule(nn.Module):
@@ -91,7 +115,7 @@ class VariationalLSTMModule(nn.Module):
 
         self.lstm_layers = nn.ModuleList(
             [
-                nn.LSTMCell(
+                CustomLSTMCell(
                     in_size,
                     hidden_size,
                 ).to(device)
@@ -103,16 +127,18 @@ class VariationalLSTMModule(nn.Module):
         self.num_predictions = num_predictions
 
         self.dropout_modules = {
-            "embedding": [
-                VariationalDropout(embedding_dropout, input_size, device)
-            ],  # Use list here for consistency
-            # "embedding": EmbeddingDropout(embedding_dropout, vocab_size, device),
             "layer": [
-                VariationalDropout(layer_dropout, hidden_size, device)
-                for _ in range(num_layers)
+                VariationalDropout(dropout, size, device)
+                for dropout, size in zip(
+                    [embedding_dropout]
+                    + [layer_dropout]
+                    * num_layers,  # Use different rate after embeddings
+                    [hidden_size * 4] * num_layers
+                    + [hidden_size],  # We don't have gates in the last layer
+                )
             ],
             "time": [
-                VariationalDropout(time_dropout, hidden_size, device)
+                VariationalDropout(time_dropout, hidden_size * 4, device)
                 for _ in range(num_layers)
             ],
         }
@@ -137,30 +163,29 @@ class VariationalLSTMModule(nn.Module):
             )
 
         # Sample dropout masks used throughout this batch
-        self.sample_masks(batch_size)
+        dropout_masks = self.sample_masks(batch_size)
 
         for t in range(sequence_length):
 
-            embeddings = self.embeddings(input_[:, t])
-            layer_input = self.dropout_modules["embedding"][0](embeddings)
+            layer_input = self.embeddings(input_[:, t])
             # layer_input = self.dropout_modules["embedding"](embeddings, input_[:, t])
 
             for layer, cell in enumerate(self.lstm_layers):
                 hx, cx = cell(
                     layer_input,  # Hidden state of last layer
-                    (
-                        self.dropout_modules["time"][layer](hidden_states[layer][0]),
-                        hidden_states[layer][1],
-                    ),  # Hidden and cell state state of last time step
+                    *hidden_states[
+                        layer
+                    ],  # Hidden and cell state of previous time step
+                    mask_x=dropout_masks["layer"][layer],
+                    mask_h=dropout_masks["time"][layer]
                 )
-                layer_input = self.dropout_modules["layer"][layer](
-                    hx
-                )  # This becomes the input to the next layer
+                layer_input = hx  # This becomes the input for the next layer
                 hidden_states[layer] = (
                     hx,
                     cx,
                 )  # This becomes the input for the next time step
 
+            layer_input *= dropout_masks["layer"][self.num_layers]
             outputs.append(self.decoder(layer_input))
 
         outputs = torch.stack(outputs, dim=1)
@@ -187,11 +212,15 @@ class VariationalLSTMModule(nn.Module):
         return hidden
 
     def sample_masks(self, batch_size: int):
-        # Iterate over type of dropout modules ("layer", "time", "embedding")
-        for dropout_modules in self.dropout_modules.values():
-            # Iterate over all dropout modules of one type (across different layers)
-            for layer_module in dropout_modules:
-                layer_module.sample(batch_size)
+        return {
+            dropout_type: {
+                layer: layer_module.sample(batch_size)
+                # Iterate over all dropout modules of one type (across different layers)
+                for layer, layer_module in enumerate(dropout_modules)
+            }
+            # Iterate over type of dropout modules ("layer", "time")
+            for dropout_type, dropout_modules in self.dropout_modules.items()
+        }
 
 
 class VariationalLSTM(Model):
@@ -220,10 +249,8 @@ class VariationalLSTM(Model):
             init_weight = train_params["init_weight"]
 
             for cell in self.module.lstm_layers:
-                cell.weight_hh.data.uniform_(-init_weight, init_weight)
-                cell.weight_ih.data.uniform_(-init_weight, init_weight)
-                cell.bias_hh.data.uniform_(-init_weight, init_weight)
-                cell.bias_ih.data.uniform_(-init_weight, init_weight)
+                for param in cell.parameters():
+                    param.data.uniform_(-init_weight, init_weight)
 
     def predict(
         self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
