@@ -295,7 +295,9 @@ def run_replication(
         # Init optimizer, loss
         steps_per_epoch = len(dl)
         optimizer = optim.Adam(
-            sngp_bert.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY
+            filter(lambda p: p.requires_grad, sngp_bert.parameters()),
+            lr=LEARNING_RATE,
+            weight_decay=WEIGHT_DECAY,
         )
         scheduler = get_linear_schedule_with_warmup(
             optimizer,
@@ -316,14 +318,9 @@ def run_replication(
 
                 # Forward pass
                 attention_mask, input_ids, labels = (
-                    batch["attention_mask"],
-                    batch["input_ids"],
-                    batch["y"],
-                )
-                attention_mask, input_ids, labels = (
-                    attention_mask.to(device),
-                    input_ids.to(device),
-                    labels.to(device),
+                    batch["attention_mask"].to(device),
+                    batch["input_ids"].to(device),
+                    batch["y"].to(device),
                 )
 
                 out = sngp_bert(input_ids, attention_mask)
@@ -363,14 +360,9 @@ def run_replication(
 
                 for batch in dl_valid:
                     attention_mask, input_ids, labels = (
-                        batch["attention_mask"],
-                        batch["input_ids"],
-                        batch["y"],
-                    )
-                    attention_mask, input_ids, labels = (
-                        attention_mask.to(device),
-                        input_ids.to(device),
-                        labels.to(device),
+                        batch["attention_mask"].to(device),
+                        batch["input_ids"].to(device),
+                        batch["y"].to(device),
                     )
 
                     out = sngp_bert(input_ids, attention_mask)
@@ -391,14 +383,9 @@ def run_replication(
 
             for batch in dl_test:
                 attention_mask, input_ids, labels = (
-                    batch["attention_mask"],
-                    batch["input_ids"],
-                    batch["y"],
-                )
-                attention_mask, input_ids, labels = (
-                    attention_mask.to(device),
-                    input_ids.to(device),
-                    labels.to(device),
+                    batch["attention_mask"].to(device),
+                    batch["input_ids"].to(device),
+                    batch["y"].to(device),
                 )
 
                 # Get predictions for accuracy
