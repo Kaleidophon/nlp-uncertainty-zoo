@@ -80,12 +80,12 @@ _TRAIN_PARAMS = {
             "early_stopping": True,
             "weight_decay": 1e-7,
             "lr": 1,
-            "num_epochs": 30,  # Changed from 55 in original
+            "num_epochs": 39,  # Changed from 55 in original
             # "early_stopping_pat": 10,
-            "grad_clip": 10,
-            "gamma": 0.74,  # 1 / 1.35; in the Gal implementation you divide by gamma
-            "milestones": torch.LongTensor(range(13, 54, 1)),
-            "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
+            "grad_clip": 5,
+            "gamma": 0.8333,  # 1 / 1.2; in the Gal implementation you divide by gamma
+            "milestones": torch.LongTensor(range(5, 38, 1)),
+            "init_weight": 0.05,  # Hacky way to include this for replication, this prob. won't be used anywhere else
         },
         "composer": {
             "lr": 0.05,
