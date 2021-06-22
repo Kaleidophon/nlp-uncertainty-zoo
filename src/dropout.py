@@ -36,10 +36,10 @@ class CustomLSTMCell(nn.Module):
         self.x_cell = nn.Linear(input_size, hidden_size)
         self.x_output = nn.Linear(input_size, hidden_size)
         # Only init one bias term per layer
-        self.h_input = nn.Linear(hidden_size, hidden_size, bias=False)
-        self.h_forget = nn.Linear(hidden_size, hidden_size, bias=False)
-        self.h_cell = nn.Linear(hidden_size, hidden_size, bias=False)
-        self.h_output = nn.Linear(hidden_size, hidden_size, bias=False)
+        self.h_input = nn.Linear(hidden_size, hidden_size)
+        self.h_forget = nn.Linear(hidden_size, hidden_size)
+        self.h_cell = nn.Linear(hidden_size, hidden_size)
+        self.h_output = nn.Linear(hidden_size, hidden_size)
 
     def forward(
         self,
@@ -64,7 +64,7 @@ class CustomLSTMCell(nn.Module):
         o_g = torch.sigmoid(self.x_output(x * mask_ox) + self.h_output(hx * mask_oh))
 
         # Intermediate cell state
-        c_tilde_g = torch.tanh(self.x_cell(x * mask_cx) + self.h_cell(x * mask_ch))
+        c_tilde_g = torch.tanh(self.x_cell(x * mask_cx) + self.h_cell(hx * mask_ch))
 
         # New cell state
         cx = f_g * cx + i_g * c_tilde_g
@@ -168,7 +168,6 @@ class VariationalLSTMModule(nn.Module):
         for t in range(sequence_length):
 
             layer_input = self.embeddings(input_[:, t])
-            # layer_input = self.dropout_modules["embedding"](embeddings, input_[:, t])
 
             for layer, cell in enumerate(self.lstm_layers):
                 hx, cx = cell(
@@ -185,7 +184,9 @@ class VariationalLSTMModule(nn.Module):
                     cx,
                 )  # This becomes the input for the next time step
 
-            layer_input *= dropout_masks["layer"][self.num_layers]
+            layer_input *= dropout_masks["layer"][
+                self.num_layers
+            ]  # Last dropout mask before output layer
             outputs.append(self.decoder(layer_input))
 
         outputs = torch.stack(outputs, dim=1)
