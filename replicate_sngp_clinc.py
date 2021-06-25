@@ -119,7 +119,7 @@ class SNGPBert(nn.Module):
             device,
         )
         self.bert = BertModel.from_pretrained(BERT_MODEL).to(device)
-        self.layer_norm = nn.LayerNorm([hidden_size])
+        self.layer_norm = nn.LayerNorm([hidden_size], elementwise_affine=False)
         self.output_size = output_size
         self.last_layer_size = last_layer_size
 
