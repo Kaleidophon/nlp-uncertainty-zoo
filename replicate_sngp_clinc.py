@@ -36,8 +36,6 @@ CLINC_DIR = "./data/processed/clinc"
 BERT_MODEL = "bert-base-uncased"
 SEED = 123
 EMISSION_DIR = "./emissions"
-SUMMARY_WRITER = None
-GLOBAL_BATCH_NUM = None
 
 # HYPERPARAMETERS
 HIDDEN_SIZE = 768
@@ -48,7 +46,7 @@ SPECTRAL_NORM_UPPER_BOUND = 0.95
 RIDGE_FACTOR = 0.001
 SCALING_COEFFICIENT = 0.999
 BETA_LENGTH_SCALE = 2
-WEIGHT_DECAY = 0
+WEIGHT_DECAY = 0.01
 EPOCHS = 40
 LEARNING_RATE = 5e-5
 WARMUP_PROP = 0.1
@@ -119,7 +117,7 @@ class SNGPBert(nn.Module):
             device,
         )
         self.bert = BertModel.from_pretrained(BERT_MODEL).to(device)
-        self.layer_norm = nn.LayerNorm([hidden_size], elementwise_affine=False)
+        self.layer_norm = nn.LayerNorm([hidden_size])
         self.output_size = output_size
         self.last_layer_size = last_layer_size
 
@@ -153,12 +151,11 @@ class SNGPBert(nn.Module):
         torch.FloatTensor
             Logits for the sequences of the current batch.
         """
-        pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
-            "pooler_output"
-        ]
-        pooler_output = self.layer_norm(pooler_output)
+        return_dict = self.bert.forward(x, attention_mask, return_dict=True)
+        cls_activations = return_dict["last_hidden_state"][:, 0, :]
+        out = self.layer_norm(cls_activations)
 
-        out = self.sngp_layer(pooler_output, update_sigma_hat_inv=self.last_epoch)
+        out = self.sngp_layer(out, update_sigma_hat_inv=self.last_epoch)
 
         return out
 
