@@ -106,11 +106,11 @@ class SNGPModule(nn.Module):
 
         # Initialize inverse of sigma hat, one matrix per class
         self.sigma_hat_inv = (
-            torch.stack([torch.eye(output_size) for _ in range(output_size)], dim=0)
+            torch.stack([torch.eye(last_layer_size) for _ in range(output_size)], dim=0)
             * self.ridge_factor
         ).to(device)
         self.sigma_hat = torch.zeros(
-            output_size, output_size, output_size, device=device
+            output_size, last_layer_size, last_layer_size, device=device
         )
         self.inversed_sigma = False
 
@@ -134,21 +134,26 @@ class SNGPModule(nn.Module):
         """
         Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
             self.output(-x)
-        )  # batch_size x output_size
-        logits = Phi @ self.Beta  # Logits: batch_size x output_size
+        )  # batch_size x last_layer_size
+        # Logits: batch_size x last_layer_size @ last_layer_size x output_size -> batch_size x output_size
+        logits = Phi @ self.Beta
 
         if update_sigma_hat_inv:
-            probs = F.softmax(logits, dim=-1)
-            # Phi.T @ Phi: output_size x output_size
+            probs = F.softmax(logits, dim=-1)  # batch_size x output_size
+            Phi = Phi.unsqueeze(2)  # Make it batch_size x last_layer_size x 1
 
-            for k in range(self.output_size):
-                self.sigma_hat_inv[
-                    k, :, :
-                ] = self.scaling_coefficient * self.sigma_hat_inv[k, :, :] + (
-                    1 - self.scaling_coefficient
-                ) * torch.mean(
-                    probs[:, k] * (1 - probs[:, k]) * Phi.T @ Phi
-                )
+            # Vectorized version of eq. 9
+            # P: probs * (1 - probs): batch_size x num_classes
+            # PhiPhi: bo1,b1o->boo: Outer product along batch_dimension;
+            # b: batch_size; o, p: last_layer_size; s: 1
+            # Results in num_classes x last_layer_size x last_layer_size tensor to update sigma_hat_inv
+            P = (probs * (1 - probs)).T
+            PhiPhi = torch.einsum("bos,bsp->bop", Phi, torch.transpose(Phi, 1, 2))
+            new_sigma_hat = torch.einsum("kb,bop->kop", P, PhiPhi)
+            self.sigma_hat_inv = (
+                self.scaling_coefficient * self.sigma_hat_inv
+                + (1 - self.scaling_coefficient) * new_sigma_hat
+            )
 
         return logits
 
@@ -179,17 +184,16 @@ class SNGPModule(nn.Module):
 
         Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
             self.output(-x)
-        )  # batch_size x output_size
+        )  # batch_size x last_layer_size
         post_mean = (
             Phi @ self.Beta
         )  # batch_size x output_size, here the logits are actually the posterior mean
 
         # Compute posterior variance
-        post_var = torch.zeros(
-            Phi.shape[0], self.output_size, device=self.device
-        )  # batch_size x output_size
-        for k in range(self.output_size):
-            post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
+        Phi = Phi.unsqueeze(2)  # Make it batch_size x last_layer_size x 1
+        # Instance-wise outer-product: batch_size x last_layer_size x last_layer_size
+        PhiPhi = torch.einsum("bos,bsp->bop", Phi, torch.transpose(Phi, 1, 2))
+        post_var = torch.einsum("bop,pok->bk", PhiPhi, self.sigma_hat.T)
 
         out = 0
         for _ in range(num_predictions):

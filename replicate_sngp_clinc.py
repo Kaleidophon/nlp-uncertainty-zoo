@@ -34,7 +34,7 @@ from secret import COUNTRY_CODE, TELEGRAM_CHAT_ID, TELEGRAM_API_TOKEN
 # CONST
 CLINC_DIR = "./data/processed/clinc"
 BERT_MODEL = "bert-base-uncased"
-SEED = 1024
+SEED = 123
 EMISSION_DIR = "./emissions"
 SUMMARY_WRITER = None
 GLOBAL_BATCH_NUM = None
@@ -245,11 +245,6 @@ class SNGPBert(nn.Module):
         u, v = pooler.weight_u.unsqueeze(1), pooler.weight_v.unsqueeze(1)
         lambda_ = u.T @ pooler.weight @ v  # Compute spectral norm for weight matrix
 
-        # TODO: Debug: Track spectral norm
-        global SUMMARY_WRITER, GLOBAL_BATCH_NUM
-        if SUMMARY_WRITER is not None:
-            SUMMARY_WRITER.add_scalar("Spectral norm", lambda_, GLOBAL_BATCH_NUM)
-
         if lambda_ > self.spectral_norm_upper_bound:
             self.bert.pooler.dense.weight = (
                 self.spectral_norm_upper_bound * normalized_weight
@@ -282,11 +277,10 @@ def run_replication(
     str
         String with results for knockknock.
     """
-    global SUMMARY_WRITER, GLOBAL_BATCH_NUM  # TODO: Debug
     accuracies, ood_aurocs = [], []
 
     for _ in range(num_runs):
-        summary_writer = SUMMARY_WRITER = SummaryWriter()
+        summary_writer = SummaryWriter()
 
         # ### Training ###
         # Init dataloader
@@ -312,9 +306,7 @@ def run_replication(
             sngp_bert.last_epoch = epoch == EPOCHS - 1
 
             for batch_num, batch in enumerate(dl):
-                global_batch_num = GLOBAL_BATCH_NUM = (
-                    epoch * steps_per_epoch + batch_num
-                )  # TODO: Debug
+                global_batch_num = epoch * steps_per_epoch + batch_num
 
                 # Forward pass
                 attention_mask, input_ids, labels = (
