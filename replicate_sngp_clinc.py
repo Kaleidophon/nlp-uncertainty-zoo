@@ -121,8 +121,10 @@ class SNGPBert(nn.Module):
         self.output_size = output_size
         self.last_layer_size = last_layer_size
 
-        # Init custom pooler without tanh activations
+        # Init custom pooler without tanh activations, copy Bert parameters
         self.custom_bert_pooler = nn.Linear(hidden_size, hidden_size)
+        self.custom_bert_pooler.weight = self.bert.pooler.dense.weight
+        self.custom_bert_pooler.bias = self.bert.pooler.dense.bias
 
         # Spectral norm initialization
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
@@ -247,12 +249,12 @@ class SNGPBert(nn.Module):
         lambda_ = u.T @ pooler.weight @ v  # Compute spectral norm for weight matrix
 
         if lambda_ > self.spectral_norm_upper_bound:
-            self.bert.pooler.dense.weight = (
+            self.custom_bert_pooler.weight = (
                 self.spectral_norm_upper_bound * normalized_weight
             )
 
         else:
-            self.bert.pooler.dense_weight = old_weight
+            self.custom_bert_pooler.weight = old_weight
 
 
 def run_replication(
