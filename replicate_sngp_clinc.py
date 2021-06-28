@@ -41,14 +41,16 @@ EMISSION_DIR = "./emissions"
 HIDDEN_SIZE = 768
 LAST_LAYER_SIZE = 2048
 OUTPUT_SIZE = 151
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 SPECTRAL_NORM_UPPER_BOUND = 0.95
 RIDGE_FACTOR = 0.001
 SCALING_COEFFICIENT = 0.999
 BETA_LENGTH_SCALE = 2
 WEIGHT_DECAY = 0.01
 EPOCHS = 40
-LEARNING_RATE = 5e-5
+# Adjust learning rate based on proposed batch size, which is unfortunately too large to fit into my GPU memory
+# https://github.com/google/uncertainty-baselines/blob/5b8e7179593551792a8bbd477300c772e7c080ed/baselines/clinc_intent/sngp.py#L129
+LEARNING_RATE = 5e-5 * (BATCH_SIZE / 128)
 WARMUP_PROP = 0.1
 NUM_PREDICTIONS = 10
 GP_MEAN_FIELD_FACTOR = 0.1
