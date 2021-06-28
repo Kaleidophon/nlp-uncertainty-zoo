@@ -121,10 +121,13 @@ class SNGPBert(nn.Module):
         self.output_size = output_size
         self.last_layer_size = last_layer_size
 
+        # Init custom pooler without tanh activations
+        self.custom_bert_pooler = nn.Linear(hidden_size, hidden_size)
+
         # Spectral norm initialization
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.spectral_norm = SpectralNorm.apply(
-            self.bert.pooler.dense,
+            self.custom_bert_pooler,
             name="weight",
             n_power_iterations=1,
             dim=0,
@@ -153,7 +156,8 @@ class SNGPBert(nn.Module):
         """
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
-        out = self.layer_norm(cls_activations)
+        out = self.custom_bert_pooler(cls_activations)
+        out = self.layer_norm(out)
 
         out = self.sngp_layer(out, update_sigma_hat_inv=self.last_epoch)
 
@@ -185,12 +189,12 @@ class SNGPBert(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
-        pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
-            "pooler_output"
-        ]
-        pooler_output = self.layer_norm(pooler_output)
+        return_dict = self.bert.forward(x, attention_mask, return_dict=True)
+        cls_activations = return_dict["last_hidden_state"][:, 0, :]
+        out = self.custom_bert_pooler(cls_activations)
+        out = self.layer_norm(out)
 
-        out = self.sngp_layer.predict(pooler_output, num_predictions=num_predictions)
+        out = self.sngp_layer.predict(out, num_predictions=num_predictions)
 
         return out
 
@@ -234,8 +238,8 @@ class SNGPBert(nn.Module):
         Apply spectral normalization to the Bert pooling layer, but only when lambda exceeds spectral_norm_upper_bound.
         """
         # For Bert, only apply to pooler layer following Liu et al. (2020)
-        pooler = self.bert.pooler.dense
-        old_weight = pooler.weight.clone()
+        pooler = self.custom_bert_pooler
+        old_weight = pooler.weight_orig.clone()
         normalized_weight = self.spectral_norm.compute_weight(
             pooler, do_power_iteration=True
         )
@@ -362,6 +366,8 @@ def run_replication(
                     "Epoch val loss", val_loss.cpu().detach(), epoch
                 )
 
+        del dl, dataset["train"], dataset["valid"]
+
         # ### Eval ###
         uncertainties_id, uncertainties_ood = [], []
 
@@ -393,6 +399,8 @@ def run_replication(
             summary_writer.add_scalar("Accuracy", accuracy)
             accuracies.append(accuracy)
 
+        del dl_test, dataset["test"]
+
         # Evaluate OOD detection performance
         with torch.no_grad():
             dl_ood = DataLoader(dataset["oos_test"], batch_size=BATCH_SIZE)
@@ -413,6 +421,8 @@ def run_replication(
                 uncertainties = sngp_bert.get_uncertainty(input_ids, attention_mask)
                 uncertainties = uncertainties.cpu().detach()
                 uncertainties_ood.append(uncertainties)
+
+        del dl_ood, dataset["oos_test"]
 
         # Eval uncertainties using AU
         uncertainties_id = torch.cat(uncertainties_id, dim=0)
