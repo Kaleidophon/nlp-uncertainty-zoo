@@ -126,7 +126,6 @@ class SNGPBert(nn.Module):
         # TODO: Debug: vanilla output layer
         self.output = nn.Linear(hidden_size, output_size)
 
-        """
         # Init custom pooler without tanh activations, copy Bert parameters
         self.custom_bert_pooler = nn.Linear(hidden_size, hidden_size)
         self.custom_bert_pooler.weight = self.bert.pooler.dense.weight
@@ -142,6 +141,8 @@ class SNGPBert(nn.Module):
             eps=1e-12,
         )
 
+        # TODO: Debug
+        """
         # Misc.
         self.last_epoch = False
         self.num_predictions = num_predictions
@@ -165,12 +166,12 @@ class SNGPBert(nn.Module):
         """
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
+        out = self.custom_bert_pooler(cls_activations)
 
         # TODO: Debug: Vanilla output layer
-        out = self.output(cls_activations)
+        out = self.output(out)
 
         """
-        out = self.custom_bert_pooler(cls_activations)
         out = self.layer_norm(out)
 
         out = self.sngp_layer(out, update_sigma_hat_inv=self.last_epoch)
@@ -206,17 +207,16 @@ class SNGPBert(nn.Module):
 
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
+        out = self.custom_bert_pooler(cls_activations)
 
         # TODO: Debug: Vanilla output layer
         import torch.nn.functional as F
 
-        out = self.output(cls_activations)
+        out = self.output(out)
         out = F.softmax(out, dim=-1)
 
         """
-        out = self.custom_bert_pooler(cls_activations)
         out = self.layer_norm(out)
-
         out = self.sngp_layer.predict(out, num_predictions=num_predictions)
         """
 
@@ -250,16 +250,16 @@ class SNGPBert(nn.Module):
 
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
+        out = self.custom_bert_pooler(cls_activations)
 
         # TODO: Debug: Just vanilla max prob
         import torch.nn.functional as F
 
-        out = self.output(cls_activations)
+        out = self.output(out)
         out = F.softmax(out, dim=-1)
         uncertainties = 1 - torch.max(out, dim=-1)[0]
 
         """
-        out = self.custom_bert_pooler(cls_activations)
         out = self.layer_norm(out)
 
         uncertainties = self.sngp_layer.dempster_shafer(out, num_predictions)
@@ -361,8 +361,7 @@ def run_replication(
                 optimizer.zero_grad()
 
                 # Spectral normalization
-                # TODO: Debug
-                # sngp_bert.spectral_normalization()
+                sngp_bert.spectral_normalization()
 
                 # Save training stats
                 summary_writer.add_scalar(
