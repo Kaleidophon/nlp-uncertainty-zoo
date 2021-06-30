@@ -361,7 +361,8 @@ def run_replication(
                 optimizer.zero_grad()
 
                 # Spectral normalization
-                sngp_bert.spectral_normalization()
+                # TODO: Debug
+                # sngp_bert.spectral_normalization()
 
                 # Save training stats
                 summary_writer.add_scalar(
@@ -374,8 +375,9 @@ def run_replication(
                 )
 
             # Invert sigma matrix after the end of the last epoch
-            if epoch == EPOCHS - 1:
-                sngp_bert.sngp_layer.invert_sigma_hat()
+            # TODO: Debug
+            # if epoch == EPOCHS - 1:
+            #    sngp_bert.sngp_layer.invert_sigma_hat()
 
             # Reset dataloader
             dl = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
