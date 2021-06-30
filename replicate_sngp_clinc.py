@@ -123,6 +123,10 @@ class SNGPBert(nn.Module):
         self.output_size = output_size
         self.last_layer_size = last_layer_size
 
+        # TODO: Debug: vanilla output layer
+        self.output = nn.Linear(hidden_size, output_size)
+
+        """
         # Init custom pooler without tanh activations, copy Bert parameters
         self.custom_bert_pooler = nn.Linear(hidden_size, hidden_size)
         self.custom_bert_pooler.weight = self.bert.pooler.dense.weight
@@ -141,6 +145,7 @@ class SNGPBert(nn.Module):
         # Misc.
         self.last_epoch = False
         self.num_predictions = num_predictions
+        """
 
     def forward(self, x: torch.LongTensor, attention_mask: torch.FloatTensor):
         """
@@ -160,10 +165,16 @@ class SNGPBert(nn.Module):
         """
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
+
+        # TODO: Debug: Vanilla output layer
+        out = self.output(cls_activations)
+
+        """
         out = self.custom_bert_pooler(cls_activations)
         out = self.layer_norm(out)
 
         out = self.sngp_layer(out, update_sigma_hat_inv=self.last_epoch)
+        """
 
         return out
 
@@ -195,10 +206,19 @@ class SNGPBert(nn.Module):
 
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
+
+        # TODO: Debug: Vanilla output layer
+        import torch.nn.functional as F
+
+        out = self.output(cls_activations)
+        out = F.softmax(out, dim=-1)
+
+        """
         out = self.custom_bert_pooler(cls_activations)
         out = self.layer_norm(out)
 
         out = self.sngp_layer.predict(out, num_predictions=num_predictions)
+        """
 
         return out
 
@@ -228,12 +248,22 @@ class SNGPBert(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
-        pooler_output = self.bert.forward(x, attention_mask, return_dict=True)[
-            "pooler_output"
-        ]
-        pooler_output = self.layer_norm(pooler_output)
+        return_dict = self.bert.forward(x, attention_mask, return_dict=True)
+        cls_activations = return_dict["last_hidden_state"][:, 0, :]
 
-        uncertainties = self.sngp_layer.dempster_shafer(pooler_output, num_predictions)
+        # TODO: Debug: Just vanilla max prob
+        import torch.nn.functional as F
+
+        out = self.output(cls_activations)
+        out = F.softmax(out, dim=-1)
+        uncertainties = 1 - torch.max(out, dim=-1)[0]
+
+        """
+        out = self.custom_bert_pooler(cls_activations)
+        out = self.layer_norm(out)
+
+        uncertainties = self.sngp_layer.dempster_shafer(out, num_predictions)
+        """
 
         return uncertainties
 
