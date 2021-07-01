@@ -322,7 +322,7 @@ def run_replication(
                 out = sngp_bert(input_ids, attention_mask)
                 del input_ids, attention_mask  # Desperately try to save memory
                 loss = loss_func(out, labels)
-                loss += 1 / 2 * torch.norm(sngp_bert.sngp_layer.Beta)
+                loss += WEIGHT_DECAY / 2 * torch.norm(sngp_bert.sngp_layer.Beta)
 
                 # Backward pass
                 loss.backward()
