@@ -132,11 +132,9 @@ class SNGPModule(nn.Module):
         torch.FloatTensor
             Logits for the current batch.
         """
-        # TODO: Debug: Ablate part of output layer
-        # Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
-        #    self.output(-x)
-        # )  # batch_size x last_layer_size
-        Phi = self.output(-x)
+        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
+            self.output(-x)
+        )  # batch_size x last_layer_size
         # Logits: batch_size x last_layer_size @ last_layer_size x output_size -> batch_size x output_size
         logits = Phi @ self.Beta
 
@@ -184,11 +182,9 @@ class SNGPModule(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
-        # TODO: Debug: Ablate part of output layer
-        # Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
-        #    self.output(-x)
-        # )  # batch_size x last_layer_size
-        Phi = self.output(-x)
+        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
+            self.output(-x)
+        )  # batch_size x last_layer_size
         post_mean = (
             Phi @ self.Beta
         )  # batch_size x output_size, here the logits are actually the posterior mean
@@ -242,11 +238,9 @@ class SNGPModule(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
-        # TODO: Debug: Ablate part of output layer
-        # Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
-        #    self.output(-x)
-        # )  # batch_size x last_layer_size
-        Phi = self.output(-x)
+        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
+            self.output(-x)
+        )  # batch_size x last_layer_size
         post_mean = (
             Phi @ self.Beta
         )  # batch_size x output_size, here the logits are actually the posterior mean
