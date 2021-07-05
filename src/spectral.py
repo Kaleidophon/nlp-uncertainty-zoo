@@ -86,23 +86,18 @@ class SNGPModule(nn.Module):
         # ### Init parameters
 
         # Random, frozen output layer
-        self.output = nn.Linear(self.hidden_size, self.last_layer_size)
+        self.output = nn.Linear(self.hidden_size, self.last_layer_size, bias=False)
         # Change init of weights and biases following Liu et al. (2020)
         self.output.weight.data.normal_(0, 1)
-        self.output.bias.data.uniform_(0, 2 * math.pi)
+        # self.output.bias.data.uniform_(0, 2 * math.pi)  TODO: Debug
 
         # This layer is frozen right after init
         self.output.weight.requires_grad = False
-        self.output.bias.requires_grad = False
+        # self.output.bias.requires_grad = False  TODO: Debug
 
         # Bundle all beta_k vectors into a matrix
-        self.register_parameter(
-            name="Beta",
-            param=nn.Parameter(
-                torch.randn(last_layer_size, output_size, device=device)
-                * beta_length_scale
-            ),
-        )
+        self.Beta = nn.Linear(last_layer_size, output_size, bias=False)
+        self.Beta.weight.data.normal_(0, beta_length_scale)
 
         # Initialize inverse of sigma hat, one matrix per class
         self.sigma_hat_inv = (
@@ -136,7 +131,7 @@ class SNGPModule(nn.Module):
             self.output(-x)
         )  # batch_size x last_layer_size
         # Logits: batch_size x last_layer_size @ last_layer_size x output_size -> batch_size x output_size
-        logits = Phi @ self.Beta
+        logits = self.Beta(Phi)
 
         if update_sigma_hat_inv:
             with torch.no_grad():
@@ -185,8 +180,8 @@ class SNGPModule(nn.Module):
         Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
             self.output(-x)
         )  # batch_size x last_layer_size
-        post_mean = (
-            Phi @ self.Beta
+        post_mean = self.Beta(
+            Phi
         )  # batch_size x output_size, here the logits are actually the posterior mean
 
         # Compute posterior variance
@@ -241,8 +236,8 @@ class SNGPModule(nn.Module):
         Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
             self.output(-x)
         )  # batch_size x last_layer_size
-        post_mean = (
-            Phi @ self.Beta
+        post_mean = self.Beta(
+            Phi
         )  # batch_size x output_size, here the logits are actually the posterior mean
 
         # Compute posterior variance

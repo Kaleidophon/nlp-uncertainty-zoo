@@ -243,19 +243,18 @@ class SNGPBert(nn.Module):
         # For Bert, only apply to pooler layer following Liu et al. (2020)
         pooler = self.custom_bert_pooler
         old_weight = pooler.weight_orig.clone()
-        normalized_weight = self.spectral_norm.compute_weight(
-            pooler, do_power_iteration=True
-        )
+        self.spectral_norm.compute_weight(pooler, do_power_iteration=True)
         u, v = pooler.weight_u.unsqueeze(1), pooler.weight_v.unsqueeze(1)
         lambda_ = u.T @ pooler.weight @ v  # Compute spectral norm for weight matrix
 
-        if lambda_ > self.spectral_norm_upper_bound:
-            self.custom_bert_pooler.weight = (
-                self.spectral_norm_upper_bound * normalized_weight
-            )
+        with torch.no_grad():
+            if lambda_ > self.spectral_norm_upper_bound:
+                self.custom_bert_pooler.weight = (
+                    self.spectral_norm_upper_bound * old_weight / lambda_
+                )
 
-        else:
-            self.custom_bert_pooler.weight = old_weight
+            else:
+                self.custom_bert_pooler.weight = old_weight
 
 
 def run_replication(
@@ -322,7 +321,7 @@ def run_replication(
                 out = sngp_bert(input_ids, attention_mask)
                 del input_ids, attention_mask  # Desperately try to save memory
                 loss = loss_func(out, labels)
-                loss += WEIGHT_DECAY / 2 * torch.norm(sngp_bert.sngp_layer.Beta)
+                loss += WEIGHT_DECAY / 2 * torch.norm(sngp_bert.sngp_layer.Beta.weight)
 
                 # Backward pass
                 loss.backward()
@@ -331,8 +330,7 @@ def run_replication(
                 optimizer.zero_grad()
 
                 # Spectral normalization
-                # TODO: Debug
-                # sngp_bert.spectral_normalization()
+                sngp_bert.spectral_normalization()
 
                 # Save training stats
                 summary_writer.add_scalar(
