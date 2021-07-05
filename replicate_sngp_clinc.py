@@ -128,7 +128,6 @@ class SNGPBert(nn.Module):
         self.custom_bert_pooler.weight = self.bert.pooler.dense.weight
         self.custom_bert_pooler.bias = self.bert.pooler.dense.bias
 
-        """
         # Spectral norm initialization
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.spectral_norm = SpectralNorm.apply(
@@ -138,7 +137,6 @@ class SNGPBert(nn.Module):
             dim=0,
             eps=1e-12,
         )
-        """
 
         # Misc.
         self.last_epoch = False
