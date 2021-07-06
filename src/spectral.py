@@ -8,6 +8,7 @@ this module implements a mixin enabling spectral normalization and, inheriting f
 
 # STD
 import math
+from typing import Tuple
 
 # EXT
 import numpy as np
@@ -86,18 +87,19 @@ class SNGPModule(nn.Module):
         # ### Init parameters
 
         # Random, frozen output layer
-        self.output = nn.Linear(self.hidden_size, self.last_layer_size, bias=False)
+        self.output = nn.Linear(self.hidden_size, self.last_layer_size)
         # Change init of weights and biases following Liu et al. (2020)
         self.output.weight.data.normal_(0, 1)
-        # self.output.bias.data.uniform_(0, 2 * math.pi)  TODO: Debug
+        self.output.bias.data.uniform_(0, 2 * math.pi)
 
         # This layer is frozen right after init
         self.output.weight.requires_grad = False
-        # self.output.bias.requires_grad = False  TODO: Debug
+        self.output.bias.requires_grad = False
 
         # Bundle all beta_k vectors into a matrix
-        self.Beta = nn.Linear(last_layer_size, output_size, bias=False)
+        self.Beta = nn.Linear(last_layer_size, output_size)
         self.Beta.weight.data.normal_(0, beta_length_scale)
+        self.Beta.bias.data = torch.zeros(output_size)
 
         # Initialize inverse of sigma hat, one matrix per class
         self.sigma_hat_inv = (
@@ -108,6 +110,17 @@ class SNGPModule(nn.Module):
             output_size, last_layer_size, last_layer_size, device=device
         )
         self.inversed_sigma = False
+
+    def _get_features(
+        self, x: torch.FloatTensor
+    ) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
+        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
+            self.output(-x)
+        )  # batch_size x last_layer_size
+        # Logits: batch_size x last_layer_size @ last_layer_size x output_size -> batch_size x output_size
+        post_mean = self.Beta(Phi)
+
+        return post_mean, Phi
 
     def forward(
         self, x: torch.FloatTensor, update_sigma_hat_inv: bool = False
@@ -127,11 +140,7 @@ class SNGPModule(nn.Module):
         torch.FloatTensor
             Logits for the current batch.
         """
-        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
-            self.output(-x)
-        )  # batch_size x last_layer_size
-        # Logits: batch_size x last_layer_size @ last_layer_size x output_size -> batch_size x output_size
-        logits = self.Beta(Phi)
+        logits, Phi = self._get_features(x)
 
         if update_sigma_hat_inv:
             with torch.no_grad():
@@ -177,12 +186,7 @@ class SNGPModule(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
-        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
-            self.output(-x)
-        )  # batch_size x last_layer_size
-        post_mean = self.Beta(
-            Phi
-        )  # batch_size x output_size, here the logits are actually the posterior mean
+        post_mean, Phi = self._get_features(x)
 
         # Compute posterior variance
         Phi = Phi.unsqueeze(2)  # Make it batch_size x last_layer_size x 1
@@ -233,12 +237,7 @@ class SNGPModule(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
-        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
-            self.output(-x)
-        )  # batch_size x last_layer_size
-        post_mean = self.Beta(
-            Phi
-        )  # batch_size x output_size, here the logits are actually the posterior mean
+        post_mean, Phi = self._get_features(x)
 
         # Compute posterior variance
         post_var = torch.zeros(
