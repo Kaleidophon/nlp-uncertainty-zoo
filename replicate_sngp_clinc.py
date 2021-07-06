@@ -228,7 +228,7 @@ class SNGPBert(nn.Module):
 
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
-        out = torch.tang(self.custom_bert_pooler(cls_activations))
+        out = torch.tanh(self.custom_bert_pooler(cls_activations))
         out = self.layer_norm(out)
         uncertainties = self.sngp_layer.dempster_shafer(out, num_predictions)
 
