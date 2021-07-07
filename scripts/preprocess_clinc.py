@@ -28,8 +28,11 @@ if __name__ == "__main__":
             for split, sentences in data.items():
                 tokenized_sentences, labels = zip(
                     *[
-                        (tokenizer.tokenize(sentence[0]), sentence[1])
-                        for sentence in sentences
+                        (
+                            tokenizer.tokenize(sentence),
+                            label.replace("oos", "change_accent"),
+                        )
+                        for sentence, label in sentences
                     ]
                 )
 

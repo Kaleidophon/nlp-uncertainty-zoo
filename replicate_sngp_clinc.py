@@ -369,6 +369,32 @@ def run_replication(
 
         del dl, dataset["train"], dataset["valid"]
 
+        # TODO: Debug: Eval model on *train* set
+        train_accuracies = []
+        with torch.no_grad():
+            dl_train = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
+            total, correct = 0, 0
+
+            for batch in dl_train:
+                attention_mask, input_ids, labels = (
+                    batch["attention_mask"].to(device),
+                    batch["input_ids"].to(device),
+                    batch["y"].to(device),
+                )
+
+                # Get predictions for accuracy
+                out = sngp_bert.predict(input_ids, attention_mask)
+                preds = torch.argmax(out, dim=-1)
+                total += preds.shape[0]
+                correct += (preds == labels).long().sum()
+
+            accuracy = correct / total
+            accuracy = accuracy.cpu().item()
+            train_accuracies.append(accuracy)
+
+        del dataset["train"]
+        # TODO: End Debug
+
         # ### Eval ###
         uncertainties_id, uncertainties_ood = [], []
 
@@ -472,6 +498,7 @@ def run_replication(
             "dataset": "CLINC",
             "runs": num_runs,
             "accuracy": f"{np.mean(accuracies):.2f} ±{np.std(accuracies):.2f}",
+            "train_accuracy": f"{np.mean(train_accuracies):.2f} ±{np.std(train_accuracies):.2f}",  # TODO: Debug
             "ood_auc_roc": f"{np.mean(ood_aurocs):.2f} ±{np.std(ood_aurocs):.2f}",
         },
         indent=4,
@@ -507,11 +534,12 @@ if __name__ == "__main__":
     )
 
     # Encode labels
-    classes = (
-        dataset["train"]["label"]
-        + dataset["valid"]["label"]
-        + dataset["test"]["label"]
-        + ["oos"]
+    classes = list(
+        set(
+            dataset["train"]["label"]
+            + dataset["valid"]["label"]
+            + dataset["test"]["label"]
+        )
     )
     label_encoder = LabelEncoder()
     label_encoder.fit(classes)
