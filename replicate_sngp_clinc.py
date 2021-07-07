@@ -128,6 +128,9 @@ class SNGPBert(nn.Module):
         self.custom_bert_pooler.weight = self.bert.pooler.dense.weight
         self.custom_bert_pooler.bias = self.bert.pooler.dense.bias
 
+        # TODO: Debug
+        self.output_layer = nn.Linear(hidden_size, output_size)
+
         # Spectral norm initialization
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.spectral_norm = SpectralNorm.apply(
@@ -161,8 +164,13 @@ class SNGPBert(nn.Module):
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
         out = torch.tanh(self.custom_bert_pooler(cls_activations))
+
+        # TODO: Debug
+        out = self.output_layer(out)
+        """
         out = self.layer_norm(out)
         out = self.sngp_layer(out, update_sigma_hat_inv=self.last_epoch)
+        """
 
         return out
 
@@ -195,8 +203,16 @@ class SNGPBert(nn.Module):
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
         out = torch.tanh(self.custom_bert_pooler(cls_activations))
+
+        # TODO: Debug
+        out = self.output_layer(out)
+        import torch.nn.functional as F
+
+        out = F.softmax(out, dim=-1)
+        """
         out = self.layer_norm(out)
         out = self.sngp_layer.predict(out, num_predictions=num_predictions)
+        """
 
         return out
 
@@ -229,8 +245,18 @@ class SNGPBert(nn.Module):
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
         out = torch.tanh(self.custom_bert_pooler(cls_activations))
+
+        # TODO: Debug
+        out = self.output_layer(out)
+        import torch.nn.functional as F
+
+        out = F.softmax(out, dim=-1)
+        uncertainties = 1 - torch.max(out, dim=-1)[0]
+
+        """
         out = self.layer_norm(out)
         uncertainties = self.sngp_layer.dempster_shafer(out, num_predictions)
+        """
 
         return uncertainties
 
@@ -304,7 +330,7 @@ def run_replication(
         for epoch in range(EPOCHS):
 
             # During the last epochs, update sigma_hat_inv matrix
-            sngp_bert.last_epoch = epoch == EPOCHS - 1
+            # sngp_bert.last_epoch = epoch == EPOCHS - 1  # TODO: Debug
 
             for batch_num, batch in enumerate(dl):
                 global_batch_num = epoch * steps_per_epoch + batch_num
@@ -319,7 +345,8 @@ def run_replication(
                 out = sngp_bert(input_ids, attention_mask)
                 del input_ids, attention_mask  # Desperately try to save memory
                 loss = loss_func(out, labels)
-                loss += WEIGHT_DECAY / 2 * torch.norm(sngp_bert.sngp_layer.Beta.weight)
+                # TODO: Debug
+                # loss += WEIGHT_DECAY / 2 * torch.norm(sngp_bert.sngp_layer.Beta.weight)
 
                 # Backward pass
                 loss.backward()
@@ -328,7 +355,8 @@ def run_replication(
                 optimizer.zero_grad()
 
                 # Spectral normalization
-                sngp_bert.spectral_normalization()
+                # TODO: Debug
+                # sngp_bert.spectral_normalization()
 
                 # Save training stats
                 summary_writer.add_scalar(
@@ -341,8 +369,11 @@ def run_replication(
                 )
 
             # Invert sigma matrix after the end of the last epoch
+            # TODO: Debug
+            """
             if epoch == EPOCHS - 1:
                 sngp_bert.sngp_layer.invert_sigma_hat()
+            """
 
             # Reset dataloader
             dl = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
