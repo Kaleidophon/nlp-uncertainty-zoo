@@ -130,7 +130,7 @@ class SNGPBert(nn.Module):
 
         # TODO: Debug
         self.output_layer = nn.Linear(hidden_size, output_size)
-
+        """
         # Spectral norm initialization
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.spectral_norm = SpectralNorm.apply(
@@ -140,6 +140,7 @@ class SNGPBert(nn.Module):
             dim=0,
             eps=1e-12,
         )
+        """
 
         # Misc.
         self.last_epoch = False
@@ -398,7 +399,7 @@ def run_replication(
                     "Epoch val loss", val_loss.cpu().detach(), epoch
                 )
 
-        del dl, dataset["train"], dataset["valid"]
+        del dl, dataset["valid"]  # TODO: Debug del dataset["train"]
 
         # TODO: Debug: Eval model on *train* set
         train_accuracies = []
@@ -423,7 +424,7 @@ def run_replication(
             accuracy = accuracy.cpu().item()
             train_accuracies.append(accuracy)
 
-        del dataset["train"]
+        del dl_train, dataset["train"]
         # TODO: End Debug
 
         # ### Eval ###
