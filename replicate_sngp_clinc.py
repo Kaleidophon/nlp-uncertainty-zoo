@@ -164,10 +164,10 @@ class SNGPBert(nn.Module):
         """
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
-        out = torch.tanh(self.custom_bert_pooler(cls_activations))
+        # out = torch.tanh(self.custom_bert_pooler(cls_activations))
 
         # TODO: Debug
-        out = self.output_layer(out)
+        out = self.output_layer(cls_activations)
         """
         out = self.layer_norm(out)
         out = self.sngp_layer(out, update_sigma_hat_inv=self.last_epoch)
@@ -203,10 +203,10 @@ class SNGPBert(nn.Module):
 
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
-        out = torch.tanh(self.custom_bert_pooler(cls_activations))
+        # out = torch.tanh(self.custom_bert_pooler(cls_activations))
 
         # TODO: Debug
-        out = self.output_layer(out)
+        out = self.output_layer(cls_activations)
         import torch.nn.functional as F
 
         out = F.softmax(out, dim=-1)
@@ -245,10 +245,10 @@ class SNGPBert(nn.Module):
 
         return_dict = self.bert.forward(x, attention_mask, return_dict=True)
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
-        out = torch.tanh(self.custom_bert_pooler(cls_activations))
+        # out = torch.tanh(self.custom_bert_pooler(cls_activations))
 
         # TODO: Debug
-        out = self.output_layer(out)
+        out = self.output_layer(cls_activations)
         import torch.nn.functional as F
 
         out = F.softmax(out, dim=-1)
