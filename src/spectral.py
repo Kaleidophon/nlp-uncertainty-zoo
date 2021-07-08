@@ -149,13 +149,13 @@ class SNGPModule(nn.Module):
 
                 # Vectorized version of eq. 9
                 # P: probs * (1 - probs): batch_size x num_classes
-                # PhiPhi: bo1,b1o->boo: Outer product along batch_dimension;
+                # PhiPhi: bos,bso->boo: Outer product along batch_dimension;
                 # b: batch_size; o, p: last_layer_size; s: 1
                 # Results in num_classes x last_layer_size x last_layer_size tensor to update sigma_hat_inv
                 P = (probs * (1 - probs)).T
                 PhiPhi = torch.einsum("bos,bsp->bop", Phi, torch.transpose(Phi, 1, 2))
-                self.sigma_hat_inv *= self.scaling_coefficient
-                self.sigma_hat += (1 - self.scaling_coefficient) * torch.einsum(
+                self.sigma_hat_inv *= 1 - self.scaling_coefficient
+                self.sigma_hat += self.scaling_coefficient * torch.einsum(
                     "kb,bop->kop", P, PhiPhi
                 )
 

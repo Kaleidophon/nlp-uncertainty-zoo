@@ -196,13 +196,7 @@ class SNGPBert(nn.Module):
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
         out = torch.tanh(self.custom_bert_pooler(cls_activations))
         out = self.layer_norm(out)
-        out = self.sngp_layer(out, update_sigma_hat_inv=False)  # TODO: Debug
-
-        import torch.nn.functional as F
-
-        out = F.softmax(out, dim=-1)
-        # TODO: Debug
-        # out = self.sngp_layer.predict(out, num_predictions=num_predictions)
+        out = self.sngp_layer.predict(out, num_predictions=num_predictions)
 
         return out
 
@@ -236,17 +230,7 @@ class SNGPBert(nn.Module):
         cls_activations = return_dict["last_hidden_state"][:, 0, :]
         out = torch.tanh(self.custom_bert_pooler(cls_activations))
         out = self.layer_norm(out)
-        out = self.sngp_layer(out, update_sigma_hat_inv=False)  # TODO: Debug
-
-        import torch.nn.functional as F
-
-        out = F.softmax(out, dim=-1)
-        uncertainties = 1 - torch.max(out, dim=-1)[0]
-
-        """
-        out = self.layer_norm(out)
         uncertainties = self.sngp_layer.dempster_shafer(out, num_predictions)
-        """
 
         return uncertainties
 
