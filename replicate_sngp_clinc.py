@@ -50,7 +50,7 @@ WEIGHT_DECAY = 0.01
 EPOCHS = 40
 # Adjust learning rate based on proposed batch size, which is unfortunately too large to fit into my GPU memory
 # https://github.com/google/uncertainty-baselines/blob/5b8e7179593551792a8bbd477300c772e7c080ed/baselines/clinc_intent/sngp.py#L129
-LEARNING_RATE = 5e-5 * (BATCH_SIZE / 128)
+LEARNING_RATE = 5e-5  # * (BATCH_SIZE / 128) TODO: Debug
 WARMUP_PROP = 0.1
 NUM_PREDICTIONS = 10
 GP_MEAN_FIELD_FACTOR = 0.1
