@@ -89,7 +89,7 @@ class SNGPModule(nn.Module):
         # Random, frozen output layer
         self.output = nn.Linear(self.hidden_size, self.last_layer_size)
         # Change init of weights and biases following Liu et al. (2020)
-        self.output.weight.data.normal_(0, 1)  # TODO: Debug: best variance was 0.05
+        self.output.weight.data.normal_(0, 0.05)
         self.output.bias.data.uniform_(0, 2 * math.pi)
 
         # This layer is frozen right after init
@@ -114,6 +114,19 @@ class SNGPModule(nn.Module):
     def _get_features(
         self, x: torch.FloatTensor
     ) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
+        """
+        Get posterior mean / logits and Phi feature matrix given an input.
+
+        Parameters
+        ----------
+        x: torch.FloatTensor
+            Last hidden state of underlying model.
+
+        Returns
+        -------
+        Tuple[torch.FloatTensor, torch.FloatTensor]
+            Tensors of posterior mean and Phi matrix.
+        """
         Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
             self.output(-x)
         )  # batch_size x last_layer_size

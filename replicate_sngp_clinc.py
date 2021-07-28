@@ -14,9 +14,8 @@ from typing import Optional
 from codecarbon import OfflineEmissionsTracker
 from knockknock import telegram_sender
 import numpy as np
-from sklearn.metrics import precision_recall_curve, roc_auc_score
+from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import LabelEncoder
-from torch import softmax
 import torch.nn as nn
 import torch
 import torch.optim as optim
@@ -53,7 +52,7 @@ EPOCHS = 40
 LEARNING_RATE = 5e-5 * (BATCH_SIZE / 128)
 WARMUP_PROP = 0.1
 NUM_PREDICTIONS = 10
-GP_MEAN_FIELD_FACTOR = 1  # TODO: Best value was 0.1
+GP_MEAN_FIELD_FACTOR = 0.1
 
 
 class SNGPBert(nn.Module):
@@ -367,33 +366,7 @@ def run_replication(
                     "Epoch val loss", val_loss.cpu().detach(), epoch
                 )
 
-        del dl, dataset["valid"]  # TODO: Debug del dataset["train"]
-
-        # TODO: Debug: Eval model on *train* set
-        train_accuracies = []
-        with torch.no_grad():
-            dl_train = DataLoader(dataset["train"], batch_size=BATCH_SIZE)
-            total, correct = 0, 0
-
-            for batch in dl_train:
-                attention_mask, input_ids, labels = (
-                    batch["attention_mask"].to(device),
-                    batch["input_ids"].to(device),
-                    batch["y"].to(device),
-                )
-
-                # Get predictions for accuracy
-                out = sngp_bert.predict(input_ids, attention_mask)
-                preds = torch.argmax(out, dim=-1)
-                total += preds.shape[0]
-                correct += (preds == labels).long().sum()
-
-            accuracy = correct / total
-            accuracy = accuracy.cpu().item()
-            train_accuracies.append(accuracy)
-
-        del dl_train, dataset["train"]
-        # TODO: End Debug
+        del dl, dataset["valid"], dataset["train"]
 
         # ### Eval ###
         uncertainties_id, uncertainties_ood = [], []
@@ -464,9 +437,7 @@ def run_replication(
             axis=0,
         )
         ood_auroc = roc_auc_score(ood_labels, uncertainties)
-        # ood_aupr = precision_recall_curve(ood_labels, uncertainties, pos_label=1)
         summary_writer.add_scalar("AUROC", ood_auroc)
-        # summary_writer.add_scalar("AUPE", ood_aupr)
         ood_aurocs.append(ood_auroc)
 
         # Add statistics to run
@@ -498,7 +469,6 @@ def run_replication(
             "dataset": "CLINC",
             "runs": num_runs,
             "accuracy": f"{np.mean(accuracies):.2f} ±{np.std(accuracies):.2f}",
-            "train_accuracy": f"{np.mean(train_accuracies):.2f} ±{np.std(train_accuracies):.2f}",  # TODO: Debug
             "ood_auc_roc": f"{np.mean(ood_aurocs):.2f} ±{np.std(ood_aurocs):.2f}",
         },
         indent=4,
