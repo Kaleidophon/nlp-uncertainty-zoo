@@ -15,6 +15,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils.spectral_norm import SpectralNorm
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from typing import Dict, Any, Optional
@@ -275,7 +276,10 @@ class SNGPModule(nn.Module):
 
         return uncertainty
 
-    def invert_sigma_hat(self):
+    def invert_sigma_hat(self) -> None:
+        """
+        Invert the sigma hat matrix. Because its one matrix per class, we invert one slice of a tensor here at a time.
+        """
         for k in range(self.output_size):
             self.sigma_hat[k, :, :] = torch.inverse(self.sigma_hat_inv[k, :, :])
 
@@ -293,13 +297,18 @@ class SNGPTransformerModule(TransformerModule):
         vocab_size: int,
         input_size: int,
         hidden_size: int,
+        last_layer_size: int,
         output_size: int,
+        input_dropout: float,
         dropout: float,
         num_heads: int,
         sequence_length: int,
         spectral_norm_upper_bound: float,
+        ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
+        gp_mean_field_factor: float,
+        num_predictions: int,
         device: Device,
     ):
         """
@@ -317,28 +326,75 @@ class SNGPTransformerModule(TransformerModule):
             Size of hidden representations.
         output_size: int
             Size of output of model.
+        last_layer_size: int
+            Size of last layer before output layer. Called D_L in the original paper.
+        input_dropout: float
+            Input dropout added to embeddings.
         dropout: float
             Dropout rate.
         num_heads: int
             Number of self-attention heads per layer.
         sequence_length: int
             Maximum sequence length in dataset. Used to initialize positional embeddings.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+        ridge_factor: float
+            Factor that identity sigma hat matrices of the SNGP layer are multiplied by.
+        scaling_coefficient: float
+            Momentum factor that is used when updating the sigma hat matrix of the SNGP layer during the last training
+            epoch.
+        beta_length_scale: float
+            Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
+            initialized from.
+        gp_mean_field_factor: float
+            Multiplicative factor used in the mean-field approcimation for the posterior mean of the softmax
+            Gaussian process, based on `Lu et al. (2021) <https://arxiv.org/pdf/2006.07584.pdf>'_.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
         device: Device
             Device the model is located on.
         """
-        # TODO: Update this according to new SNGP layer
-
         super().__init__(
             num_layers,
             vocab_size,
             input_size,
             hidden_size,
             output_size,
+            input_dropout,
             dropout,
             num_heads,
             sequence_length,
             device,
         )
+
+        self.sngp_layer = SNGPModule(
+            hidden_size,
+            last_layer_size,
+            output_size,
+            ridge_factor,
+            scaling_coefficient,
+            beta_length_scale,
+            gp_mean_field_factor,
+            num_predictions,
+            device,
+        )
+        self.num_predictions = num_predictions
+        self.layer_norm = nn.LayerNorm([hidden_size])
+        self.spectral_norm_upper_bound = spectral_norm_upper_bound
+
+        # Initialize spectral norms for all linear layers
+        self.spectral_norms = [
+            (
+                module,
+                SpectralNorm.apply(
+                    module, name="weight", n_power_iterations=1, dim=0, eps=1e-12
+                ),
+            )
+            for module in self.modules()
+            if isinstance(module, nn.Linear)
+        ]
+
+        # TODO: Add spectral norm for all layers / how to integrate into training loop?
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
@@ -347,8 +403,28 @@ class SNGPTransformerModule(TransformerModule):
 
         out = self.encoder(embeddings)
         out = self.output_dropout(out)
+        out = self.layer_norm(out)
+        out = self.sngp_layer(out)
 
         return out
+
+    @staticmethod
+    def apply_spectral_norm(
+        layer: torch.nn.Linear,
+        spectral_norm: SpectralNorm,
+        spectral_norm_upper_bound: float,
+    ) -> None:
+        old_weight = layer.weight_orig.clone()
+        spectral_norm.compute_weight(layer, do_power_iteration=True)
+        u, v = layer.weight_u.unsqueeze(1), layer.weight_v.unsqueeze(1)
+        lambda_ = u.T @ layer.weight @ v  # Compute spectral norm for weight matrix
+
+        with torch.no_grad():
+            if lambda_ > spectral_norm_upper_bound:
+                layer.weight = spectral_norm_upper_bound * old_weight / lambda_
+
+            else:
+                layer.weight = old_weight
 
 
 class SNGPTransformer(Model):
@@ -375,12 +451,86 @@ class SNGPTransformer(Model):
             [
                 {"params": default_model_params, "lr": train_params["lr"]},
                 {
-                    "params": [self.module.Beta],
+                    "params": [self.module.sngp_layer.Beta.weight],
                     "lr": train_params["lr"],
                     "weight_decay": train_params["weight_decay"],
                 },
             ]
         )
+
+    def _epoch_iter(
+        self,
+        epoch: int,
+        data_split: DataSplit,
+        progress_bar: Optional[tqdm] = None,
+        summary_writer: Optional[SummaryWriter] = None,
+    ) -> torch.Tensor:
+        """
+        Perform one training epoch.
+
+        Parameters
+        ----------
+        epoch: int
+            Number of the current epoch.
+        data_split: DataSplit
+            Current data split.
+        progress_bar: Optional[tqdm]
+            Progress bar used to display information about current run.
+        summary_writer: SummaryWriter
+            Summary writer to track training statistics.
+        """
+
+        # TODO: Debug
+        epoch_loss = 0
+        """
+        epoch_loss = super()._epoch_iter(
+            epoch,
+            data_split,
+            progress_bar,
+            summary_writer
+        )
+        """
+
+        for module, spectral_norm in self.module.spectral_norms:
+            self.module.apply_spectral_norm(
+                module, spectral_norm, self.module.spectral_norm_upper_bound
+            )
+
+        return epoch_loss
+
+    def predict(
+        self, X: torch.Tensor, *args, num_predictions: Optional[int] = None
+    ) -> torch.Tensor:
+        """
+        Make a prediction for some input.
+
+        Parameters
+        ----------
+        X: torch.Tensor
+            Input data points.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+
+        Returns
+        -------
+        torch.Tensor
+            Predictions.
+        """
+        if num_predictions is None:
+            num_predictions = self.num_predictions
+
+        X = X.to(self.device)
+
+        word_embeddings = self.module.word_embeddings(X)
+        embeddings = self.module.pos_embeddings(word_embeddings)
+        embeddings = self.module.input_dropout(embeddings)
+
+        out = self.module.encoder(embeddings)
+        out = self.module.output_dropout(out)
+        out = self.module.layer_norm(out)
+        out = self.module.sngp_layer.predict(out, num_predictions=num_predictions)
+
+        return out
 
 
 class DDUTransformerModule(TransformerModule):
@@ -420,6 +570,7 @@ class DDUTransformerModule(TransformerModule):
         device: Device
             Device the model is located on.
         """
+        # TODO: Refactor or use code by authors
         super().__init__(
             num_layers,
             vocab_size,
@@ -455,6 +606,7 @@ class DDUTransformer(Model):
             device,
         )
 
+    # TODO: Refactor or use code by authors
     def _finetune(
         self,
         data_split: DataSplit,

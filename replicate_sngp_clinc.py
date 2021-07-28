@@ -85,7 +85,7 @@ class SNGPBert(nn.Module):
         output_size: int
             Size of output layer, so number of classes.
         spectral_norm_upper_bound: float
-            Set a limit when weight matrices will be spectrally normalized if their lambda parameter surpasses it.
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
         ridge_factor: float
             Factor that identity sigma hat matrices of the SNGP layer are multiplied by.
         scaling_coefficient: float

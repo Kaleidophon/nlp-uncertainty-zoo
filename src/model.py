@@ -136,11 +136,14 @@ class Model(ABC):
             lr=self.train_params["lr"],
             weight_decay=self.train_params.get("weight_decay", 0),
         )
+        # TODO: Make scheduler an option
+        """
         self.scheduler = optim.lr_scheduler.MultiStepLR(
             self.optimizer,
             milestones=self.train_params["milestones"],
             gamma=self.train_params["gamma"],
         )
+        """
 
         # Check if model directory exists, if not, create
         if model_dir is not None:
