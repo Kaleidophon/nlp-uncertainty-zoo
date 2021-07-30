@@ -12,10 +12,7 @@ import torch.nn.functional as F
 
 # PROJECT
 from src.model import Model, Module
-from src.types import Device
-
-
-# TODO: Document
+from src.types import Device, HiddenDict
 
 
 class LSTMModule(Module):
@@ -33,6 +30,26 @@ class LSTMModule(Module):
         dropout: float,
         device: Device,
     ):
+        """
+        Initialize an LSTM.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of layers.
+        vocab_size: int
+            Number of input vocabulary.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        output_size: int
+            Number of classes.
+        dropout: float
+            Dropout probability.
+        device: Device
+            Device the model should be moved to.
+        """
         super().__init__(
             num_layers, vocab_size, input_size, hidden_size, output_size, device
         )
@@ -51,8 +68,24 @@ class LSTMModule(Module):
     def forward(
         self,
         input_: torch.LongTensor,
-        hidden_states: Optional[Tuple[torch.FloatTensor, torch.FloatTensor]] = None,
+        hidden_states: Optional[HiddenDict] = None,
     ) -> torch.FloatTensor:
+        """
+        The forward pass of the model.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Current batch in the form of one-hot encodings.
+        hidden_states: Optional[HiddenDict]
+            Dictionary of hidden and cell states by layer to initialize the model with at the first time step. If None,
+            they will be initialized with zero vectors or the ones stored under last_hidden_states if available.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Tensor of unnormalized output distributions for the current batch.
+        """
         batch_size, sequence_length = input_.shape
 
         # Initialize hidden activations if not given
@@ -78,6 +111,17 @@ class LSTMModule(Module):
         return out
 
     def init_hidden_states(self, batch_size: int, device: Device):
+        """
+        Initialize all the hidden and cell states by zero vectors, for instance in the beginning of the training or
+        after switching from test to training or vice versa.
+
+        Parameters
+        ----------
+        batch_size: int
+            Size of current batch.
+        device: Device
+            Device of the model.
+        """
         return (
             torch.zeros(self.num_layers, batch_size, self.hidden_size, device=device),
             torch.zeros(self.num_layers, batch_size, self.hidden_size, device=device),

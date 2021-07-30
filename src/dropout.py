@@ -20,10 +20,13 @@ from src.model import Model
 from src.transformer import TransformerModule
 from src.types import Device, HiddenDict
 
-# TODO: Add missing docstrings
-
 
 class VariationalDropout(nn.Module):
+    """
+    Variational Dropout module. In comparison to the default PyTorch module, this one only changes the dropout mask when
+    sample() is called.
+    """
+
     def __init__(self, dropout: float, input_dim: int, device: Device):
         super().__init__()
         self.dropout = dropout
@@ -38,6 +41,14 @@ class VariationalDropout(nn.Module):
         return x * self.mask
 
     def sample(self, batch_size: int):
+        """
+        Sample a new dropout mask for a batch of specified size.
+
+        Parameters
+        ----------
+        batch_size: int
+            Size of current batch.
+        """
         self.mask = torch.bernoulli(
             torch.ones(batch_size, self.input_dim, device=self.device)
             * (1 - self.dropout)
@@ -45,6 +56,15 @@ class VariationalDropout(nn.Module):
 
 
 class VariationalLSTMModule(nn.Module):
+    """
+    Variational LSTM as described in `Gal & Ghrahramani (2016b) <https://arxiv.org/pdf/1512.05287.pdf>`, where the same
+    dropout mask is being reused throughout a batch for connection of the same type.
+
+    The only difference compared to the original implementation is that the embedding dropout works like normal dropout,
+    not dropping out specific types. This was observed to yield minor improvement during experiments and simplified the
+    implementation.
+    """
+
     def __init__(
         self,
         num_layers: int,
@@ -58,6 +78,32 @@ class VariationalLSTMModule(nn.Module):
         num_predictions: int,
         device: Device,
     ):
+        """
+        Initialize a variational LSTM.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of layers.
+        vocab_size: int
+            Number of input vocabulary.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        output_size: int
+            Number of classes.
+        embedding_dropout: float
+            Dropout probability for the input embeddings.
+        layer_dropout: float
+            Dropout probability for hidden states between layers.
+        time_dropout: float
+            Dropout probability for hidden states between time steps.
+        num_predictions: int
+            Number of predictions (forward passes) used to make predictions.
+        device: Device
+            Device the model should be moved to.
+        """
         super().__init__()
         self.num_layers = num_layers
         self.vocab_size = vocab_size
@@ -83,7 +129,6 @@ class VariationalLSTMModule(nn.Module):
             "embedding": [
                 VariationalDropout(embedding_dropout, input_size, device)
             ],  # Use list here for consistency
-            # "embedding": EmbeddingDropout(embedding_dropout, vocab_size, device),
             "layer": [
                 VariationalDropout(layer_dropout, hidden_size, device)
                 for _ in range(num_layers)
@@ -99,8 +144,24 @@ class VariationalLSTMModule(nn.Module):
     def forward(
         self,
         input_: torch.LongTensor,
-        hidden_states: Optional[torch.FloatTensor] = None,
+        hidden_states: Optional[HiddenDict] = None,
     ):
+        """
+        The forward pass of the model.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Current batch in the form of one-hot encodings.
+        hidden_states: Optional[HiddenDict]
+            Dictionary of hidden and cell states by layer to initialize the model with at the first time step. If None,
+            they will be initialized with zero vectors or the ones stored under last_hidden_states if available.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Tensor of unnormalized output distributions for the current batch.
+        """
         batch_size, sequence_length = input_.shape
         outputs = []
 
@@ -145,14 +206,31 @@ class VariationalLSTMModule(nn.Module):
 
         return outputs
 
-    # TODO: Add doc here
     def _assign_last_hidden_states(self, hidden: HiddenDict):
+        """
+        Assign hidden states at the end of a batch to an internal variable, detaching them from the computational graph.
+
+        Parameters
+        ----------
+        hidden: HiddenDict
+            Dictionary of hidden and cell states by layer.
+        """
         self.last_hidden_states = {
             layer: (h[0].detach(), h[1].detach()) for layer, h in hidden.items()
         }
 
-    # TODO: Add doc here
     def init_hidden_states(self, batch_size: int, device: Device) -> HiddenDict:
+        """
+        Initialize all the hidden and cell states by zero vectors, for instance in the beginning of the training or
+        after switching from test to training or vice versa.
+
+        Parameters
+        ----------
+        batch_size: int
+            Size of current batch.
+        device: Device
+            Device of the model.
+        """
         hidden = {
             layer: (
                 torch.zeros(batch_size, self.hidden_size, device=device),
@@ -164,6 +242,14 @@ class VariationalLSTMModule(nn.Module):
         return hidden
 
     def sample_masks(self, batch_size: int):
+        """
+        Sample masks for the current batch.
+
+        Parameters
+        ----------
+        batch_size: int
+            Size of the current batch.
+        """
         # Iterate over type of dropout modules ("layer", "time", "embedding")
         for dropout_modules in self.dropout_modules.values():
             # Iterate over all dropout modules of one type (across different layers)

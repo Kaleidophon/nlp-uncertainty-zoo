@@ -9,3 +9,4 @@ token2index
 einops
 datasets
 scikit-learn
+git+https://github.com/y0ast/DUE.git

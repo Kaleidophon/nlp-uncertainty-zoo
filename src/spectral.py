@@ -11,6 +11,10 @@ import math
 from typing import Tuple
 
 # EXT
+from due.dkl import GP, initial_values_for_GP
+from einops import rearrange
+from gpytorch.likelihoods import SoftmaxLikelihood
+from gpytorch.mlls import VariationalELBO
 import numpy as np
 import torch
 import torch.nn as nn
@@ -479,17 +483,9 @@ class SNGPTransformer(Model):
         summary_writer: SummaryWriter
             Summary writer to track training statistics.
         """
-
-        # TODO: Debug
-        epoch_loss = 0
-        """
         epoch_loss = super()._epoch_iter(
-            epoch,
-            data_split,
-            progress_bar,
-            summary_writer
+            epoch, data_split, progress_bar, summary_writer
         )
-        """
 
         for module, spectral_norm in self.module.spectral_norms:
             self.module.apply_spectral_norm(
@@ -531,6 +527,118 @@ class SNGPTransformer(Model):
         out = self.module.sngp_layer.predict(out, num_predictions=num_predictions)
 
         return out
+
+
+class DUETransformerModule(TransformerModule):
+    # TODO: Implemenent core model logic
+    # TODO: Implement spectral norm kinda like in the SNGP case
+    # TODO: Implement spectral norm for batch norm
+
+    def __init__(
+        self,
+        num_layers: int,
+        vocab_size: int,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        input_dropout: float,
+        dropout: float,
+        num_heads: int,
+        sequence_length: int,
+        num_predictions: int,
+        num_inducing_points: int,
+        spectral_norm_upper_bound: float,
+        kernel_type: str,
+        device: Device,
+    ):
+        super().__init__(
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            input_dropout,
+            dropout,
+            num_heads,
+            sequence_length,
+            device,
+        )
+
+        self.num_predictions = num_predictions
+        self.num_inducing_points = num_inducing_points
+        self.spectral_norm_upper_bound = spectral_norm_upper_bound
+        self.kernel_type = kernel_type
+
+        # TODO: How to add training data here in the most elegant way? Format is
+        initial_inducing_points, initial_length_scale = initial_values_for_GP(
+            None, self.model, n_inducing_points=num_inducing_points
+        )
+
+        self.gp = GP(
+            num_outputs=output_size,
+            initial_lengthscale=initial_length_scale,
+            initial_inducing_points=initial_inducing_points,
+            kernel=self.kernel_type,
+        )
+        self.likelihood = SoftmaxLikelihood(
+            num_classes=self.output_size, mixing_weights=False
+        )
+        self.loss_function = VariationalELBO(
+            self.likelihood, self.gp, num_data=None
+        )  # TODO: Add training data size
+
+
+class DUETransformer(Model):
+    def __init__(
+        self,
+        model_params: Dict[str, Any],
+        train_params: Dict[str, Any],
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
+    ):
+        super().__init__(
+            "ddu_transformer",
+            DUETransformerModule,
+            model_params,
+            train_params,
+            model_dir,
+            device,
+        )
+
+    def get_loss(
+        self,
+        n_batch: int,
+        X: torch.Tensor,
+        y: torch.Tensor,
+        summary_writer: Optional[SummaryWriter] = None,
+    ) -> torch.Tensor:
+        """
+        Get loss for a single batch. This uses the Variational ELBO instead of a cross-entropy loss.
+
+        Parameters
+        ----------
+        n_batch: int
+            Number of the current batch.
+        X: torch.Tensor
+            Batch input.
+        y: torch.Tensor
+            Batch labels.
+        summary_writer: SummaryWriter
+            Summary writer to track training statistics.
+
+        Returns
+        -------
+        torch.Tensor
+            Batch loss.
+        """
+        preds = self.module(X)
+
+        loss = self.module.loss_function(
+            rearrange(preds, "b t p -> (b t) p"),
+            rearrange(y, "b l -> (b l)"),
+        )
+
+        return loss
 
 
 class DDUTransformerModule(TransformerModule):

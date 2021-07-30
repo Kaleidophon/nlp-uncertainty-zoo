@@ -89,7 +89,6 @@ class Module(ABC, nn.Module):
         pass
 
 
-# TODO: Use meta-programming to create Model subclasses?
 class Model(ABC):
     """
     Abstract model class. It is a wrapper that defines data loading, batching, training and evaluation loops, so that
@@ -130,20 +129,20 @@ class Model(ABC):
         self.to(device)
 
         # Initialize optimizer and scheduler
-        # TODO: Make optimizer an option
-        self.optimizer = optim.SGD(
+        optimizer_class = self.train_params.get("optimizer_class", optim.Adam)
+        self.optimizer = optimizer_class(
             self.module.parameters(),
             lr=self.train_params["lr"],
             weight_decay=self.train_params.get("weight_decay", 0),
         )
-        # TODO: Make scheduler an option
-        """
-        self.scheduler = optim.lr_scheduler.MultiStepLR(
-            self.optimizer,
-            milestones=self.train_params["milestones"],
-            gamma=self.train_params["gamma"],
-        )
-        """
+
+        self.scheduler = None
+        if "milestones" in self.train_params and "gamma" in self.train_params:
+            self.scheduler = optim.lr_scheduler.MultiStepLR(
+                self.optimizer,
+                milestones=self.train_params["milestones"],
+                gamma=self.train_params["gamma"],
+            )
 
         # Check if model directory exists, if not, create
         if model_dir is not None:
@@ -226,7 +225,8 @@ class Model(ABC):
                         break
 
             # Update scheduler
-            self.scheduler.step(epoch=epoch)
+            if self.scheduler:
+                self.scheduler.step(epoch=epoch)
 
         # Set current model to best model found, otherwise use last
         if early_stopping:

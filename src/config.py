@@ -6,6 +6,7 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 from sklearn.utils.fixes import loguniform
 from scipy.stats import uniform
 import torch
+import torch.optim as optim
 
 # PROJECT
 from src.composer import Composer
@@ -74,6 +75,7 @@ _TRAIN_PARAMS = {
             "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma
             "milestones": torch.LongTensor(range(13, 54, 1)),
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
+            "optimizer_class": optim.SGD,
         },
         # Taken from  https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
