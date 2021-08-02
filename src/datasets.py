@@ -19,6 +19,8 @@ from torch.utils.data import Dataset
 # PROJECT
 from src.types import BatchedSequences, Device
 
+# TODO: Add support for sequence classification
+
 
 class DataSplit(Dataset):
     """

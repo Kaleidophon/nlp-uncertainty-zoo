@@ -11,8 +11,9 @@ import math
 from typing import Tuple
 
 # EXT
-from due.dkl import GP, initial_values_for_GP
+from due.dkl import GP, _get_initial_inducing_points, _get_initial_lengthscale
 from einops import rearrange
+import gpytorch
 from gpytorch.likelihoods import SoftmaxLikelihood
 from gpytorch.mlls import VariationalELBO
 import numpy as np
@@ -25,7 +26,7 @@ from tqdm import tqdm
 from typing import Dict, Any, Optional
 
 # PROJECT
-from src.datasets import DataSplit
+from src.datasets import DataSplit, TextDataset
 from src.transformer import TransformerModule
 from src.model import Model
 from src.types import Device
@@ -530,7 +531,7 @@ class SNGPTransformer(Model):
 
 
 class DUETransformerModule(TransformerModule):
-    # TODO: Implemenent core model logic
+    # TODO: Documentation
     # TODO: Implement spectral norm kinda like in the SNGP case
     # TODO: Implement spectral norm for batch norm
 
@@ -569,23 +570,62 @@ class DUETransformerModule(TransformerModule):
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.kernel_type = kernel_type
 
-        # TODO: How to add training data here in the most elegant way? Format is
-        initial_inducing_points, initial_length_scale = initial_values_for_GP(
-            None, self.model, n_inducing_points=num_inducing_points
+        self.gp = None
+        self.likelihood = None
+        self.loss_function = None
+
+    # TODO: Debug
+    def init_gp(self, train_data: DataSplit, num_batches: int = 10):
+        """
+        Initialize the Gaussian Process layer together with the likelihood and loss function.
+
+        Parameters
+        ----------
+        train_data: DataSplit
+            Training split.
+        num_batches: int
+            Number of batches being sampled to initialize the GP inducing points and length scale.
+        """
+        # Essentially do the same as in due.dkl.initial_values_for_GP, but with a sequential dataset
+        sampled_batch_idx = torch.randperm(len(train_data))[:num_batches]
+
+        # Extract feature representations for sampled batches
+        batch_representations = []
+
+        with torch.no_grad():
+            for batch_idx in sampled_batch_idx:
+                X = train_data[batch_idx][0].to(self.device)
+                batch_representations.append(self._get_hidden(X))
+
+        representations = torch.cat(batch_representations, dim=0)
+        representations = rearrange(representations, "b s h -> b (s h)")
+
+        initial_inducing_points = _get_initial_inducing_points(
+            representations, self.num_inducing_points
         )
+        initial_length_scale = _get_initial_lengthscale(representations)
 
         self.gp = GP(
-            num_outputs=output_size,
-            initial_lengthscale=initial_length_scale,
-            initial_inducing_points=initial_inducing_points,
+            num_outputs=self.output_size,
+            initial_lengthscale=initial_length_scale.double(),
+            initial_inducing_points=initial_inducing_points.double(),
             kernel=self.kernel_type,
         )
         self.likelihood = SoftmaxLikelihood(
             num_classes=self.output_size, mixing_weights=False
         )
         self.loss_function = VariationalELBO(
-            self.likelihood, self.gp, num_data=None
-        )  # TODO: Add training data size
+            self.likelihood, self.gp, num_data=len(train_data)
+        )
+
+    def forward(self, input_: torch.LongTensor):
+        out = self._get_hidden(input_)
+        out = self.output_dropout(out)
+        out = rearrange(out, "b s h -> b (s h)")
+        out = self.gp(out)
+        out = rearrange(out, "b (s h) -> b s h", s=self.sequence_length)
+
+        return out
 
 
 class DUETransformer(Model):
@@ -604,6 +644,43 @@ class DUETransformer(Model):
             model_dir,
             device,
         )
+
+    def fit(
+        self,
+        dataset: TextDataset,
+        validate: bool = True,
+        verbose: bool = True,
+        summary_writer: Optional[SummaryWriter] = None,
+    ):
+        """
+        Fit the model to training data.
+
+        Parameters
+        ----------
+        dataset: TextDataset
+            Dataset the model is being trained on.
+        validate: bool
+            Indicate whether model should also be evaluated on the validation set.
+        verbose: bool
+            Whether to display information about current loss.
+        summary_writer: Optional[SummaryWriter]
+            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
+            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        """
+        # Retrieve inducing points and length scale from training set to initialize the GP
+        self.module.init_gp(dataset.train)
+
+        return super().fit(dataset, validate, verbose, summary_writer)
+
+    def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+
+        with torch.no_grad(), gpytorch.settings.num_likelihood_samples(
+            self.module.num_predictions
+        ):
+            out = self.module(X)
+            out = self.module.likelihood(out).mean(dim=0)
+
+        return out
 
     def get_loss(
         self,

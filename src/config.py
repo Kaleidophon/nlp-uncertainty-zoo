@@ -13,7 +13,7 @@ from src.composer import Composer
 from src.datasets import Wikitext103Dataset, PennTreebankDataset
 from src.dropout import VariationalTransformer, VariationalLSTM
 from src.lstm import LSTM
-from src.spectral import SNGPTransformer, DDUTransformer
+from src.spectral import SNGPTransformer, DDUTransformer, DUETransformer
 from src.transformer import Transformer
 
 # AVAILABLE DATASETS AND MODELS
@@ -26,6 +26,7 @@ AVAILABLE_MODELS = {
     "variational_transformer": VariationalTransformer,
     "sngp_transformer": SNGPTransformer,
     "ddu_transformer": DDUTransformer,
+    "due_transformer": DUETransformer,
 }
 
 # PREPROCESSING PARAMETERS
@@ -96,6 +97,10 @@ _TRAIN_PARAMS = {
             "gamma": 0.74,
             "milestones": torch.LongTensor(range(13, 54, 1)),
         },
+        "due_transformer": {
+            "lr": 5e-5,
+            "num_epochs": 40,
+        },
     },
     "clinc": {
         "sngp_transformer": {
@@ -103,7 +108,7 @@ _TRAIN_PARAMS = {
             "length_scale": 2,
             "weight_decay": 0.1,
             "num_epochs": 40,
-        }
+        },
     },
 }
 TRAIN_PARAMS = {
@@ -200,6 +205,21 @@ _MODEL_PARAMS = {
             "num_operations": 10,
             "sequence_length": 35,
         },
+        "due_transformer": {
+            "num_layers": 6,
+            "hidden_size": 768,
+            "num_heads": 10,
+            "vocab_size": 10001,
+            "output_size": 10,  # TODO: Debug
+            "input_dropout": 0.3,
+            "dropout": 0.3,
+            "num_predictions": 4,
+            "num_inducing_points": 20,
+            "spectral_norm_upper_bound": 0.95,
+            "kernel_type": "Matern32",
+            "input_size": 500,
+            "sequence_length": 35,
+        },
     },
     "clinc": {
         "sngp_transformer": {
@@ -207,7 +227,7 @@ _MODEL_PARAMS = {
             "hidden_size": 768,
             "num_heads": 12,
             "vocab_size": 10000,
-        }
+        },
     },
 }
 MODEL_PARAMS = {
