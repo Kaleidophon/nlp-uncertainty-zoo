@@ -10,14 +10,18 @@ import torch.optim as optim
 
 # PROJECT
 from src.composer import Composer
-from src.datasets import Wikitext103Dataset, PennTreebankDataset
+from src.datasets import Wikitext103Dataset, PennTreebankDataset, ClincDataset
 from src.dropout import VariationalTransformer, VariationalLSTM
 from src.lstm import LSTM
 from src.spectral import SNGPTransformer, DDUTransformer, DUETransformer
 from src.transformer import Transformer
 
 # AVAILABLE DATASETS AND MODELS
-AVAILABLE_DATASETS = {"wikitext-103": Wikitext103Dataset, "ptb": PennTreebankDataset}
+AVAILABLE_DATASETS = {
+    "wikitext-103": Wikitext103Dataset,
+    "ptb": PennTreebankDataset,
+    "clinc": ClincDataset,
+}
 AVAILABLE_MODELS = {
     "composer": Composer,
     "lstm": LSTM,
@@ -40,7 +44,7 @@ _PREPROCESSING_PARAMS = {
         "sequence_length": 35,
         # "max_size": 10000,  # PTB has exactly 10000 types
     },
-    "clinc": {"sequence_length": 32},
+    "clinc": {"batch_size": 32, "sequence_length": 32},
 }
 
 # Update shared preprocessing params wth dataset-specific params
@@ -97,16 +101,16 @@ _TRAIN_PARAMS = {
             "gamma": 0.74,
             "milestones": torch.LongTensor(range(13, 54, 1)),
         },
-        "due_transformer": {
-            "lr": 5e-5,
-            "num_epochs": 40,
-        },
     },
     "clinc": {
         "sngp_transformer": {
             "lr": 5e-5,
             "length_scale": 2,
             "weight_decay": 0.1,
+            "num_epochs": 40,
+        },
+        "due_transformer": {
+            "lr": 5e-5,
             "num_epochs": 40,
         },
     },
@@ -166,13 +170,6 @@ _MODEL_PARAMS = {
             "gp_mean_field_factor": 0.1,
             "num_predictions": 10,
         },
-        "ddu_transformer": {
-            "num_layers": 6,
-            "input_dropout": 0.2,
-            "dropout": 0.2,
-            "num_heads": 5,
-            "sequence_length": 30,
-        },
     },
     "ptb": {
         "lstm": {
@@ -205,12 +202,20 @@ _MODEL_PARAMS = {
             "num_operations": 10,
             "sequence_length": 35,
         },
+    },
+    "clinc": {
+        "sngp_transformer": {
+            "num_layers": 12,
+            "hidden_size": 768,
+            "num_heads": 12,
+            "vocab_size": 10000,
+        },
         "due_transformer": {
             "num_layers": 6,
             "hidden_size": 768,
             "num_heads": 10,
             "vocab_size": 10001,
-            "output_size": 10,  # TODO: Debug
+            "output_size": 151,  # TODO: Debug
             "input_dropout": 0.3,
             "dropout": 0.3,
             "num_predictions": 4,
@@ -219,14 +224,6 @@ _MODEL_PARAMS = {
             "kernel_type": "Matern32",
             "input_size": 500,
             "sequence_length": 35,
-        },
-    },
-    "clinc": {
-        "sngp_transformer": {
-            "num_layers": 12,
-            "hidden_size": 768,
-            "num_heads": 12,
-            "vocab_size": 10000,
         },
     },
 }

@@ -12,14 +12,13 @@ from random import shuffle
 from typing import Dict, Optional, Any, List, Tuple
 
 # EXT
+from sklearn.preprocessing import LabelEncoder
 from t2i import T2I
 import torch
 from torch.utils.data import Dataset
 
 # PROJECT
 from src.types import BatchedSequences, Device
-
-# TODO: Add support for sequence classification
 
 
 class DataSplit(Dataset):
@@ -69,6 +68,7 @@ class TextDataset(ABC):
         batch_style: str = "padding",
         sequence_length: Optional[int] = None,
         add_eos_token: bool = True,
+        is_sequence_classification: bool = False,
         **indexing_params: Dict[str, Any],
     ):
         """
@@ -92,6 +92,9 @@ class TextDataset(ABC):
             Maximum length for padding if batch_style='padding'. No padding if max_length=None, which is the default.
         add_eos_token: bool
             Indicate whether an <eos> token should be added. Default is True.
+        is_sequence_classification: bool
+            Add info on whether a dataset task is sequence classification. If so, the label will be extracted by
+            splitting each line by the tab character and using the last split part as the label.
         indexing_params: Dict[str, Any]
             Parameters for t2i.T2I indexing class.
         """
@@ -107,6 +110,8 @@ class TextDataset(ABC):
         self.batch_style = batch_style
         self.sequence_length = sequence_length
         self.add_eos_token = add_eos_token
+        self.is_sequence_classification = is_sequence_classification
+        self.label_encoder = LabelEncoder()
 
         # Splits
         self._train = None
@@ -212,16 +217,26 @@ class TextDataset(ABC):
         split_paths = os.path.join(self.data_dir, self.name, self.splits[split])
 
         with codecs.open(split_paths, "rb", "utf-8") as file:
-            sequences = [line.strip() for line in file.readlines()]
+            if self.is_sequence_classification:
+                sequences, sequence_labels = list(
+                    zip(*[line.strip().split("\t") for line in file.readlines()])
+                )
+
+            else:
+                sequences, sequence_labels = [
+                    line.strip() for line in file.readlines()
+                ], None
 
         # Initialize indexing
         if split == "train" and self.t2i is None:
             self.t2i = T2I.build(sequences, **self.indexing_params)
 
-        return self._batch(split, sequences)
+            if self.is_sequence_classification:
+                self.label_encoder.fit(sequence_labels)
 
-    @abstractmethod
-    def _get_labels(
+        return self._batch(split, sequences, sequence_labels)
+
+    def _get_language_modelling_targets(
         self, split: str, batched_sequences: BatchedSequences
     ) -> Tuple[BatchedSequences, List[torch.LongTensor]]:
         """
@@ -241,7 +256,12 @@ class TextDataset(ABC):
         """
         pass
 
-    def _batch(self, split: str, sequences: List[str]) -> DataSplit:
+    def _batch(
+        self,
+        split: str,
+        sequences: List[str],
+        sequence_labels: Optional[List[str]] = None,
+    ) -> DataSplit:
         """
         Index and batch sequences based on batching style specified by batch_style. If batch_style="padding", one batch
         instance will correspond to a single sequences padded up to a certain length either specified by sequence_length
@@ -253,6 +273,9 @@ class TextDataset(ABC):
             Data split to be batched.
         sequences: List[str]
             List of sequences in split as strings.
+        sequence_labels: Optional[List[str]]
+            List of labels for every sequence in the dataset. Only relevant if is_sequence_classification = True,
+            otherwise None.
 
         Returns
         -------
@@ -285,7 +308,7 @@ class TextDataset(ABC):
 
             # Filter out sequences which are too long
             indexed_sequences = filter(
-                lambda seq: len(seq) < self.sequence_length - 2, indexed_sequences
+                lambda seq: len(seq) <= self.sequence_length, indexed_sequences
             )
 
             batched_sequences = torch.stack(
@@ -295,7 +318,20 @@ class TextDataset(ABC):
                 batched_sequences, split_size_or_sections=self.batch_size, dim=0
             )
 
+            sequence_labels = torch.LongTensor(
+                self.label_encoder.transform(sequence_labels)
+            )
+            batched_labels = torch.split(
+                sequence_labels, split_size_or_sections=self.batch_size
+            )
+
         elif self.batch_style == "continuous":
+
+            if self.is_sequence_classification:
+                raise ValueError(
+                    "Dataset cannot consist of continuous batches and be a sequence classification task."
+                )
+
             indexed_sequences = list(
                 map(
                     torch.LongTensor,
@@ -344,7 +380,9 @@ class TextDataset(ABC):
                 for n in range(num_batches)
             ]
 
-        batched_sequences, batched_labels = self._get_labels(split, batched_sequences)
+            batched_sequences, batched_labels = self._get_language_modelling_targets(
+                split, batched_sequences
+            )
 
         # Batches of (sequences, labels)
         return DataSplit(list(zip(batched_sequences, batched_labels)))
@@ -355,7 +393,7 @@ class LanguageModelingDataset(TextDataset):
     A superclass for language modeling datasets.
     """
 
-    def _get_labels(
+    def _get_language_modelling_targets(
         self,
         split: str,
         batched_sequences: BatchedSequences,
@@ -432,5 +470,34 @@ class PennTreebankDataset(LanguageModelingDataset):
             batch_size=batch_size,
             batch_style="continuous",
             sequence_length=sequence_length,
+            **indexing_params,
+        )
+
+
+class ClincDataset(TextDataset):
+    """
+    Dataset class for the CLINC OOS dataset.
+    """
+
+    def __init__(
+        self,
+        data_dir: str,
+        batch_size: int,
+        sequence_length: int,
+        **indexing_params: Dict[str, Any],
+    ):
+        super().__init__(
+            name="clinc",
+            data_dir=data_dir,
+            splits={
+                "train": "train.csv",
+                "valid": "val.csv",
+                "test": "test.csv",
+                "oos_test": "oos_test.csv",
+            },
+            batch_size=batch_size,
+            batch_style="padding",
+            sequence_length=sequence_length,
+            is_sequence_classification=True,
             **indexing_params,
         )
