@@ -3,7 +3,7 @@ Module to implement data reading and batching functionalities.
 """
 
 # STD
-from abc import ABC, abstractmethod
+from abc import ABC
 import codecs
 from copy import deepcopy
 import math
@@ -284,6 +284,8 @@ class TextDataset(ABC):
         """
         batched_sequences = None
 
+        # Pad sequences up to a certain length, with one single sequence per batch instance - this style is commonly
+        # used for sequence prediction or seq2seq tasks.
         if self.batch_style == "padding":
 
             indexed_sequences = list(
@@ -325,6 +327,7 @@ class TextDataset(ABC):
                 sequence_labels, split_size_or_sections=self.batch_size
             )
 
+        # Continuous batching style used for language modelling - sequences can continue over batch boundaries
         elif self.batch_style == "continuous":
 
             if self.is_sequence_classification:

@@ -76,6 +76,7 @@ class VariationalLSTMModule(nn.Module):
         layer_dropout: float,
         time_dropout: float,
         num_predictions: int,
+        is_sequence_classifier: bool,
         device: Device,
     ):
         """
@@ -101,6 +102,9 @@ class VariationalLSTMModule(nn.Module):
             Dropout probability for hidden states between time steps.
         num_predictions: int
             Number of predictions (forward passes) used to make predictions.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
         device: Device
             Device the model should be moved to.
         """
@@ -110,6 +114,7 @@ class VariationalLSTMModule(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.output_size = output_size
+        self.is_sequence_classifier = is_sequence_classifier
         self.device = device
 
         self.lstm_layers = nn.ModuleList(
@@ -203,6 +208,10 @@ class VariationalLSTMModule(nn.Module):
 
         outputs = torch.stack(outputs, dim=1)
         self._assign_last_hidden_states(hidden_states)
+
+        # Only use last output
+        if self.is_sequence_classifier:
+            outputs = outputs[:, -1, :]
 
         return outputs
 

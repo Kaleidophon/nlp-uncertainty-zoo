@@ -41,6 +41,7 @@ class Module(ABC, nn.Module):
         input_size: int,
         hidden_size: int,
         output_size: int,
+        is_sequence_classifier: bool,
         device: Device,
         **build_params,
     ):
@@ -59,6 +60,11 @@ class Module(ABC, nn.Module):
             Size of hidden representations.
         output_size: int
             Size of output of model.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        device: Device
+            The device the model is located on.
         build_params: Dict[str, Any]
             Dictionary containing additional parameters used to set up the architecture.
         """
@@ -67,6 +73,7 @@ class Module(ABC, nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.output_size = output_size
+        self.is_sequence_classifier = is_sequence_classifier
         self.device = device
 
         super().__init__()

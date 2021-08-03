@@ -3,7 +3,7 @@ Implement a simple vanilla LSTM.
 """
 
 # STD
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional
 
 # EXT
 import torch
@@ -28,6 +28,7 @@ class LSTMModule(Module):
         hidden_size: int,
         output_size: int,
         dropout: float,
+        is_sequence_classifier: bool,
         device: Device,
     ):
         """
@@ -47,6 +48,9 @@ class LSTMModule(Module):
             Number of classes.
         dropout: float
             Dropout probability.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
         device: Device
             Device the model should be moved to.
         """
@@ -61,6 +65,7 @@ class LSTMModule(Module):
         )
         self.dropout = nn.Dropout(dropout)
         self.output = nn.Linear(hidden_size, output_size)
+        self.is_sequence_classifier = is_sequence_classifier
 
         # Misc.
         self.last_hidden_states = None
@@ -103,6 +108,11 @@ class LSTMModule(Module):
         out, (hidden_states, cell_states) = self.lstm(
             embeddings, (hidden_states, cell_states)
         )
+
+        # Only use last hidden state for prediction
+        if self.is_sequence_classifier:
+            out = out[:, -1, :]
+
         out = self.dropout(out)
         out = self.output(out)
 

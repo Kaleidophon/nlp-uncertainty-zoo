@@ -314,6 +314,7 @@ class SNGPTransformerModule(TransformerModule):
         beta_length_scale: float,
         gp_mean_field_factor: float,
         num_predictions: int,
+        is_sequence_classifier: bool,
         device: Device,
     ):
         """
@@ -356,6 +357,9 @@ class SNGPTransformerModule(TransformerModule):
             Gaussian process, based on `Lu et al. (2021) <https://arxiv.org/pdf/2006.07584.pdf>'_.
         num_predictions: int
             Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
         device: Device
             Device the model is located on.
         """
@@ -369,6 +373,7 @@ class SNGPTransformerModule(TransformerModule):
             dropout,
             num_heads,
             sequence_length,
+            is_sequence_classifier,
             device,
         )
 
@@ -550,6 +555,7 @@ class DUETransformerModule(TransformerModule):
         num_inducing_points: int,
         spectral_norm_upper_bound: float,
         kernel_type: str,
+        is_sequence_classifier: bool,
         device: Device,
     ):
         super().__init__(
@@ -562,6 +568,7 @@ class DUETransformerModule(TransformerModule):
             dropout,
             num_heads,
             sequence_length,
+            is_sequence_classifier,
             device,
         )
 
@@ -729,6 +736,7 @@ class DDUTransformerModule(TransformerModule):
         dropout: float,
         num_heads: int,
         sequence_length: int,
+        is_sequence_classifier: bool,
         device: Device,
     ):
         """
@@ -752,6 +760,9 @@ class DDUTransformerModule(TransformerModule):
             Number of self-attention heads per layer.
         sequence_length: int
             Maximum sequence length in dataset. Used to initialize positional embeddings.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
         device: Device
             Device the model is located on.
         """
@@ -765,6 +776,7 @@ class DDUTransformerModule(TransformerModule):
             dropout,
             num_heads,
             sequence_length,
+            is_sequence_classifier,
             device,
         )
 
@@ -791,7 +803,7 @@ class DDUTransformer(Model):
             device,
         )
 
-    # TODO: Refactor or use code by authors
+    # TODO: Use code by authors: https://github.com/omegafragger/DDU/blob/main/utils/gmm_utils.py
     def _finetune(
         self,
         data_split: DataSplit,

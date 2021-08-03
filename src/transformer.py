@@ -31,6 +31,7 @@ class TransformerModule(Module):
         dropout: float,
         num_heads: int,
         sequence_length: int,
+        is_sequence_classifier: bool,
         device: Device,
     ):
         """
@@ -57,12 +58,21 @@ class TransformerModule(Module):
             Number of self-attention heads per layer.
         sequence_length: int
             Maximum sequence length in dataset. Used to initialize positional embeddings.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
         device: Device
             Device the model is located on.
         """
 
         super().__init__(
-            num_layers, vocab_size, input_size, hidden_size, output_size, device
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            is_sequence_classifier,
+            device,
         )
 
         self.dropout = dropout
@@ -87,6 +97,9 @@ class TransformerModule(Module):
         hidden = self._get_hidden(input_)
         out = self.output_dropout(hidden)
         out = self.output(out)
+
+        if self.is_sequence_classifier:
+            out = out[:, -1, :]
 
         return out
 
