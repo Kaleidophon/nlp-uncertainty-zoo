@@ -3,6 +3,8 @@ Implement transformer models that use spectral normalization to meet the bi-Lips
 this module implements a mixin enabling spectral normalization and, inheriting from that, the following two models:
 
 * Spectral-normalized Gaussian Process (SNGP) Transformer (`Liu et al., 2020 <https://arxiv.org/pdf/2006.10108.pdf>`)
+* Deterministic Uncertainty Estimation (DUE) Transformer
+(`Van Amersfoort et al., 2021 <https://arxiv.org/pdf/2102.11409.pdf>`)
 * Deep Deterministic Uncertainty (DDU) Transformer (`Mukhoti et al., 2021 <https://arxiv.org/pdf/2102.11582.pdf>`)
 """
 
@@ -12,6 +14,7 @@ from typing import Tuple
 
 # EXT
 from due.dkl import GP, _get_initial_inducing_points, _get_initial_lengthscale
+from due.layers.spectral_norm_fc import spectral_norm_fc
 from einops import rearrange
 import gpytorch
 from gpytorch.likelihoods import SoftmaxLikelihood
@@ -20,7 +23,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.utils.spectral_norm import SpectralNorm
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from typing import Dict, Any, Optional
@@ -291,7 +293,51 @@ class SNGPModule(nn.Module):
         self.inversed_sigma = True
 
 
-class SNGPTransformerModule(TransformerModule):
+class SpectralTransformerModule(TransformerModule):
+    """
+    Implementation of a spectral-normalized transformer. Used as a base for models like SNGP, DUE and DDU.
+    """
+
+    def __init__(
+        self,
+        num_layers: int,
+        vocab_size: int,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        input_dropout: float,
+        dropout: float,
+        num_heads: int,
+        sequence_length: int,
+        spectral_norm_upper_bound: float,
+        is_sequence_classifier: bool,
+        device: Device,
+    ):
+        super().__init__(
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            input_dropout,
+            dropout,
+            num_heads,
+            sequence_length,
+            is_sequence_classifier,
+            device,
+        )
+
+        # Add spectral normalization
+        for module_name, module in self.named_modules():
+            if isinstance(module, nn.Linear):
+                setattr(
+                    self,
+                    module_name,
+                    spectral_norm_fc(module, coeff=spectral_norm_upper_bound),
+                )
+
+
+class SNGPTransformerModule(SpectralTransformerModule):
     """
     Implementation of a spectral-normalized Gaussian Process transformer.
     """
@@ -373,6 +419,7 @@ class SNGPTransformerModule(TransformerModule):
             dropout,
             num_heads,
             sequence_length,
+            spectral_norm_upper_bound,
             is_sequence_classifier,
             device,
         )
@@ -390,21 +437,6 @@ class SNGPTransformerModule(TransformerModule):
         )
         self.num_predictions = num_predictions
         self.layer_norm = nn.LayerNorm([hidden_size])
-        self.spectral_norm_upper_bound = spectral_norm_upper_bound
-
-        # Initialize spectral norms for all linear layers
-        self.spectral_norms = [
-            (
-                module,
-                SpectralNorm.apply(
-                    module, name="weight", n_power_iterations=1, dim=0, eps=1e-12
-                ),
-            )
-            for module in self.modules()
-            if isinstance(module, nn.Linear)
-        ]
-
-        # TODO: Add spectral norm for all layers / how to integrate into training loop?
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
@@ -417,24 +449,6 @@ class SNGPTransformerModule(TransformerModule):
         out = self.sngp_layer(out)
 
         return out
-
-    @staticmethod
-    def apply_spectral_norm(
-        layer: torch.nn.Linear,
-        spectral_norm: SpectralNorm,
-        spectral_norm_upper_bound: float,
-    ) -> None:
-        old_weight = layer.weight_orig.clone()
-        spectral_norm.compute_weight(layer, do_power_iteration=True)
-        u, v = layer.weight_u.unsqueeze(1), layer.weight_v.unsqueeze(1)
-        lambda_ = u.T @ layer.weight @ v  # Compute spectral norm for weight matrix
-
-        with torch.no_grad():
-            if lambda_ > spectral_norm_upper_bound:
-                layer.weight = spectral_norm_upper_bound * old_weight / lambda_
-
-            else:
-                layer.weight = old_weight
 
 
 class SNGPTransformer(Model):
@@ -467,38 +481,6 @@ class SNGPTransformer(Model):
                 },
             ]
         )
-
-    def _epoch_iter(
-        self,
-        epoch: int,
-        data_split: DataSplit,
-        progress_bar: Optional[tqdm] = None,
-        summary_writer: Optional[SummaryWriter] = None,
-    ) -> torch.Tensor:
-        """
-        Perform one training epoch.
-
-        Parameters
-        ----------
-        epoch: int
-            Number of the current epoch.
-        data_split: DataSplit
-            Current data split.
-        progress_bar: Optional[tqdm]
-            Progress bar used to display information about current run.
-        summary_writer: SummaryWriter
-            Summary writer to track training statistics.
-        """
-        epoch_loss = super()._epoch_iter(
-            epoch, data_split, progress_bar, summary_writer
-        )
-
-        for module, spectral_norm in self.module.spectral_norms:
-            self.module.apply_spectral_norm(
-                module, spectral_norm, self.module.spectral_norm_upper_bound
-            )
-
-        return epoch_loss
 
     def predict(
         self, X: torch.Tensor, *args, num_predictions: Optional[int] = None
@@ -535,7 +517,7 @@ class SNGPTransformer(Model):
         return out
 
 
-class DUETransformerModule(TransformerModule):
+class DUETransformerModule(SpectralTransformerModule):
     # TODO: Documentation
     # TODO: Implement spectral norm kinda like in the SNGP case
     # TODO: Implement spectral norm for batch norm
@@ -569,6 +551,7 @@ class DUETransformerModule(TransformerModule):
             dropout,
             num_heads,
             sequence_length,
+            spectral_norm_upper_bound,
             is_sequence_classifier,
             device,
         )
@@ -732,7 +715,7 @@ class DUETransformer(Model):
         return loss
 
 
-class DDUTransformerModule(TransformerModule):
+class DDUTransformerModule(SpectralTransformerModule):
     def __init__(
         self,
         num_layers: int,
@@ -743,6 +726,7 @@ class DDUTransformerModule(TransformerModule):
         dropout: float,
         num_heads: int,
         sequence_length: int,
+        spectral_norm_upper_bound: float,
         is_sequence_classifier: bool,
         device: Device,
     ):
@@ -783,6 +767,7 @@ class DDUTransformerModule(TransformerModule):
             dropout,
             num_heads,
             sequence_length,
+            spectral_norm_upper_bound,
             is_sequence_classifier,
             device,
         )
