@@ -12,7 +12,7 @@ from torch.nn.functional import nll_loss
 from typing import Optional
 
 # PROJECT
-from src.datasets import LanguageModelingDataset, TextDataset, DataSplit
+from nlp_uncertainty_zoo.datasets import LanguageModelingDataset, TextDataset, DataSplit
 
 
 # Map from dataset class to evaluation function

@@ -9,12 +9,16 @@ import torch
 import torch.optim as optim
 
 # PROJECT
-from src.composer import Composer
-from src.datasets import Wikitext103Dataset, PennTreebankDataset, ClincDataset
-from src.dropout import VariationalTransformer, VariationalLSTM
-from src.lstm import LSTM
-from src.spectral import SNGPTransformer, DDUTransformer, DUETransformer
-from src.transformer import Transformer
+from nlp_uncertainty_zoo.composer import Composer
+from nlp_uncertainty_zoo.datasets import (
+    Wikitext103Dataset,
+    PennTreebankDataset,
+    ClincDataset,
+)
+from nlp_uncertainty_zoo.dropout import VariationalTransformer, VariationalLSTM
+from nlp_uncertainty_zoo.lstm import LSTM
+from nlp_uncertainty_zoo.spectral import SNGPTransformer, DDUTransformer, DUETransformer
+from nlp_uncertainty_zoo.transformer import Transformer
 
 # AVAILABLE DATASETS AND MODELS
 AVAILABLE_DATASETS = {

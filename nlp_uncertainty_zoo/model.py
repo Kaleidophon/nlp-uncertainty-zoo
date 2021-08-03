@@ -24,9 +24,9 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 # PROJECT
-from src.datasets import DataSplit, TextDataset
-from src.evaluation import evaluate
-from src.types import Device
+from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
+from nlp_uncertainty_zoo.evaluation import evaluate
+from nlp_uncertainty_zoo.types import Device
 
 
 class Module(ABC, nn.Module):

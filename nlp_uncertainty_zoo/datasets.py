@@ -18,7 +18,7 @@ import torch
 from torch.utils.data import Dataset
 
 # PROJECT
-from src.types import BatchedSequences, Device
+from nlp_uncertainty_zoo.types import BatchedSequences, Device
 
 
 class DataSplit(Dataset):

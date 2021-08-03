@@ -18,16 +18,16 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
-from src.datasets import TextDataset
-from src.evaluation import evaluate
-from src.config import (
+from nlp_uncertainty_zoo.datasets import TextDataset
+from nlp_uncertainty_zoo.evaluation import evaluate
+from nlp_uncertainty_zoo.config import (
     PREPROCESSING_PARAMS,
     TRAIN_PARAMS,
     MODEL_PARAMS,
     AVAILABLE_DATASETS,
     AVAILABLE_MODELS,
 )
-from src.types import Device
+from nlp_uncertainty_zoo.types import Device
 
 # CONST
 SEED = 123
@@ -183,7 +183,7 @@ if __name__ == "__main__":
         emissions_path = os.path.join(args.emission_dir, timestamp)
         os.mkdir(emissions_path)
         tracker = OfflineEmissionsTracker(
-            project_name="nlp-uncertainty-zoo-experiments",
+            project_name="nlp_uncertainty_zoo-experiments",
             country_iso_code=COUNTRY_CODE,
             output_dir=emissions_path,
         )

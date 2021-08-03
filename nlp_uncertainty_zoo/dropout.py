@@ -16,9 +16,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # PROJECT
-from src.model import Model
-from src.transformer import TransformerModule
-from src.types import Device, HiddenDict
+from nlp_uncertainty_zoo.model import Model
+from nlp_uncertainty_zoo.transformer import TransformerModule
+from nlp_uncertainty_zoo.types import Device, HiddenDict
 
 
 class VariationalDropout(nn.Module):

@@ -25,8 +25,8 @@ from torch.nn.utils.spectral_norm import SpectralNorm
 from transformers import BertModel, BertTokenizer, get_linear_schedule_with_warmup
 
 # PROJECT
-from src.spectral import SNGPModule
-from src.types import Device
+from nlp_uncertainty_zoo.spectral import SNGPModule
+from nlp_uncertainty_zoo.types import Device
 from datasets import load_dataset, Dataset
 from secret import COUNTRY_CODE, TELEGRAM_CHAT_ID, TELEGRAM_API_TOKEN
 
@@ -547,7 +547,7 @@ if __name__ == "__main__":
         emissions_path = os.path.join(args.emission_dir, timestamp)
         os.mkdir(emissions_path)
         tracker = OfflineEmissionsTracker(
-            project_name="nlp-uncertainty-zoo-experiments",
+            project_name="nlp_uncertainty_zoo-experiments",
             country_iso_code=COUNTRY_CODE,
             output_dir=emissions_path,
         )

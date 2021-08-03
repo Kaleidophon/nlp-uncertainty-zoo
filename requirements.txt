@@ -9,4 +9,5 @@ token2index
 einops
 datasets
 scikit-learn
+tqdm
 git+https://github.com/y0ast/DUE.git

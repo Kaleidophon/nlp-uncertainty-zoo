@@ -18,7 +18,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 # PROJECT
-from src.config import (
+from nlp_uncertainty_zoo.config import (
     AVAILABLE_MODELS,
     AVAILABLE_DATASETS,
     PREPROCESSING_PARAMS,
@@ -159,7 +159,8 @@ def sample_hyperparameters(
 ) -> List[Dict[str, Union[int, float]]]:
     """
     Sample the hyperparameters for different runs of the same model. The distributions parameters are sampled from are
-    defined in src.config.PARAM_SEARCH and the number of evaluations per model type in src.config.NUM_EVALS.
+    defined in nlp_uncertainty_zoo.config.PARAM_SEARCH and the number of evaluations per model type in
+    nlp_uncertainty_zoo.config.NUM_EVALS.
 
     Parameters
     ----------
@@ -240,7 +241,7 @@ if __name__ == "__main__":
         emissions_path = os.path.join(args.emission_dir, timestamp)
         os.mkdir(emissions_path)
         tracker = OfflineEmissionsTracker(
-            project_name="nlp-uncertainty-zoo-hyperparameters",
+            project_name="nlp_uncertainty_zoo-hyperparameters",
             country_iso_code=COUNTRY_CODE,
             output_dir=emissions_path,
         )

@@ -28,10 +28,10 @@ from tqdm import tqdm
 from typing import Dict, Any, Optional
 
 # PROJECT
-from src.datasets import DataSplit, TextDataset
-from src.transformer import TransformerModule
-from src.model import Model
-from src.types import Device
+from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
+from nlp_uncertainty_zoo.transformer import TransformerModule
+from nlp_uncertainty_zoo.model import Model
+from nlp_uncertainty_zoo.types import Device
 
 
 class SNGPModule(nn.Module):
