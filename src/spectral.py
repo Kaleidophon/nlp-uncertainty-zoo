@@ -518,9 +518,10 @@ class SNGPTransformer(Model):
 
 
 class DUETransformerModule(SpectralTransformerModule):
-    # TODO: Documentation
-    # TODO: Implement spectral norm kinda like in the SNGP case
-    # TODO: Implement spectral norm for batch norm
+    """
+    Implementation of Deterministic Uncertainty Estimation (DUE) Transformer by
+    `Van Amersfoort et al., 2021 <https://arxiv.org/pdf/2102.11409.pdf>`.
+    """
 
     def __init__(
         self,
@@ -541,6 +542,39 @@ class DUETransformerModule(SpectralTransformerModule):
         is_sequence_classifier: bool,
         device: Device,
     ):
+        """
+        Initialize a DDU transformer.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of model layers.
+        vocab_size: int
+            Vocabulary size.
+        input_size: int
+            Dimensionality of input to model.
+        hidden_size: int
+            Size of hidden representations.
+        output_size: int
+            Size of output of model.
+        input_dropout: float
+            Input dropout added to embeddings.
+        dropout: float
+            Dropout rate.
+        num_heads: int
+            Number of self-attention heads per layer.
+        sequence_length: int
+            Maximum sequence length in dataset. Used to initialize positional embeddings.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+        kernel_type: str
+            Define the type of kernel used. Can be one of {'RBF', 'Matern12', 'Matern32', 'Matern52', 'RQ'}.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
             num_layers,
             vocab_size,
@@ -709,13 +743,17 @@ class DUETransformer(Model):
             Batch loss.
         """
         preds = self.module(X)
-
         loss = self.module.loss_function(preds, y)
 
         return loss
 
 
 class DDUTransformerModule(SpectralTransformerModule):
+    """
+    Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by
+    `Mukhoti et al., 2021 <https://arxiv.org/pdf/2102.11582.pdf>`.
+    """
+
     def __init__(
         self,
         num_layers: int,
@@ -731,7 +769,7 @@ class DDUTransformerModule(SpectralTransformerModule):
         device: Device,
     ):
         """
-        Initialize a transformer.
+        Initialize a DDU transformer.
 
         Parameters
         ----------
@@ -757,7 +795,6 @@ class DDUTransformerModule(SpectralTransformerModule):
         device: Device
             Device the model is located on.
         """
-        # TODO: Refactor or use code by authors
         super().__init__(
             num_layers,
             vocab_size,
@@ -795,7 +832,6 @@ class DDUTransformer(Model):
             device,
         )
 
-    # TODO: Use code by authors: https://github.com/omegafragger/DDU/blob/main/utils/gmm_utils.py
     def _finetune(
         self,
         data_split: DataSplit,
