@@ -6,7 +6,7 @@ from nlp_uncertainty_zoo.dropout import (
     VariationalTransformer,
     VariationalTransformerModule,
 )
-from nlp_uncertainty_zoo.lstm import LSTM, LSTMModule
+from nlp_uncertainty_zoo.lstm import LSTM, LSTMModule, LSTMEnsembleModule, LSTMEnsemble
 from nlp_uncertainty_zoo.spectral import (
     SNGPModule,
     SNGPTransformer,

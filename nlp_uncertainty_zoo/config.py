@@ -16,7 +16,7 @@ from nlp_uncertainty_zoo.datasets import (
     ClincDataset,
 )
 from nlp_uncertainty_zoo.dropout import VariationalTransformer, VariationalLSTM
-from nlp_uncertainty_zoo.lstm import LSTM
+from nlp_uncertainty_zoo.lstm import LSTM, LSTMEnsemble
 from nlp_uncertainty_zoo.spectral import SNGPTransformer, DDUTransformer, DUETransformer
 from nlp_uncertainty_zoo.transformer import Transformer
 
@@ -29,6 +29,7 @@ AVAILABLE_DATASETS = {
 AVAILABLE_MODELS = {
     "composer": Composer,
     "lstm": LSTM,
+    "lstm_ensemble": LSTMEnsemble,
     "variational_lstm": VariationalLSTM,
     "transformer": Transformer,
     "variational_transformer": VariationalTransformer,
@@ -75,6 +76,18 @@ _TRAIN_PARAMS = {
     },
     "ptb": {
         "lstm": {
+            "early_stopping": True,
+            "weight_decay": 0,
+            "lr": 1,
+            "num_epochs": 40,  # Changed from 55 in original
+            # "early_stopping_pat": 10,
+            "grad_clip": 10,
+            "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma
+            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
+            "optimizer_class": optim.SGD,
+        },
+        "lstm_ensemble": {
             "early_stopping": True,
             "weight_decay": 0,
             "lr": 1,
@@ -183,6 +196,17 @@ _MODEL_PARAMS = {
             "dropout": 0.5,
             "vocab_size": 10001,
             "output_size": 10001,
+            "is_sequence_classifier": False,
+        },
+        "lstm_ensemble": {
+            "num_layers": 2,
+            "hidden_size": 650,
+            "input_size": 650,
+            "dropout": 0.5,
+            "vocab_size": 10001,
+            "output_size": 10001,
+            "ensemble_size": 10,
+            "is_sequence_classifier": False,
         },
         # Taken from https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {

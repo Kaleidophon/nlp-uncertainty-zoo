@@ -55,7 +55,13 @@ class LSTMModule(Module):
             Device the model should be moved to.
         """
         super().__init__(
-            num_layers, vocab_size, input_size, hidden_size, output_size, device
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            is_sequence_classifier,
+            device,
         )
 
         # Initialize modules
@@ -157,6 +163,112 @@ class LSTM(Model):
             for layer_weights in self.module.lstm.all_weights:
                 for param in layer_weights:
                     param.data.uniform_(-init_weight, init_weight)
+
+    def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+        out = super().predict(X)
+        preds = F.softmax(out, dim=-1)
+
+        return preds
+
+
+class LSTMEnsembleModule(nn.Module):
+    """
+    Implementation for an ensemble of LSTMs.
+    """
+
+    def __init__(
+        self,
+        num_layers: int,
+        vocab_size: int,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        dropout: float,
+        ensemble_size: int,
+        is_sequence_classifier: bool,
+        device: Device,
+    ):
+        """
+        Initialize an LSTM.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of layers.
+        vocab_size: int
+            Number of input vocabulary.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        output_size: int
+            Number of classes.
+        dropout: float
+            Dropout probability.
+        ensemble_size: int
+            Number of members in the ensemble.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        device: Device
+            Device the model should be moved to.
+        """
+        super().__init__()
+
+        self.ensemble_members = nn.ModuleList(
+            [
+                LSTMModule(
+                    num_layers,
+                    vocab_size,
+                    input_size,
+                    hidden_size,
+                    output_size,
+                    dropout,
+                    is_sequence_classifier,
+                    device,
+                )
+                for _ in range(ensemble_size)
+            ]
+        )
+
+    def _get_predictions(self, input_: torch.LongTensor):
+        return torch.stack([member(input_) for member in self.ensemble_members], dim=1)
+
+    def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        preds = self._get_predictions(input_)
+        preds = torch.mean(preds, dim=1)
+
+        return preds
+
+    def to(self, device: Device):
+        """
+        Move model to another device.
+
+        Parameters
+        ----------
+        device: Device
+            Device the model should be moved to.
+        """
+        for member in self.ensemble_members:
+            member.to(device)
+
+
+class LSTMEnsemble(Model):
+    def __init__(
+        self,
+        model_params: Dict[str, Any],
+        train_params: Dict[str, Any],
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
+    ):
+        super().__init__(
+            "lstm_ensemble",
+            LSTMEnsembleModule,
+            model_params,
+            train_params,
+            model_dir,
+            device,
+        )
 
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         out = super().predict(X)
