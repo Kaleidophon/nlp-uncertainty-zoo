@@ -220,10 +220,12 @@ _MODEL_PARAMS = {
             "dropout": 0.3,
             "num_predictions": 4,
             "num_inducing_points": 20,
+            "num_inducing_samples": 1000,
             "spectral_norm_upper_bound": 0.95,
             "kernel_type": "Matern32",
             "input_size": 500,
             "sequence_length": 35,
+            "is_sequence_classifier": True,
         },
     },
 }

@@ -552,6 +552,7 @@ class DUETransformerModule(TransformerModule):
         num_heads: int,
         sequence_length: int,
         num_predictions: int,
+        num_inducing_samples: int,
         num_inducing_points: int,
         spectral_norm_upper_bound: float,
         kernel_type: str,
@@ -573,6 +574,7 @@ class DUETransformerModule(TransformerModule):
         )
 
         self.num_predictions = num_predictions
+        self.num_inducing_samples = num_inducing_samples
         self.num_inducing_points = num_inducing_points
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.kernel_type = kernel_type
@@ -581,8 +583,7 @@ class DUETransformerModule(TransformerModule):
         self.likelihood = None
         self.loss_function = None
 
-    # TODO: Debug
-    def init_gp(self, train_data: DataSplit, num_batches: int = 10):
+    def init_gp(self, train_data: DataSplit, num_instances: int = 1000):
         """
         Initialize the Gaussian Process layer together with the likelihood and loss function.
 
@@ -590,9 +591,14 @@ class DUETransformerModule(TransformerModule):
         ----------
         train_data: DataSplit
             Training split.
-        num_batches: int
-            Number of batches being sampled to initialize the GP inducing points and length scale.
+        num_instances: int
+            Number of instances being sampled to initialize the GP inducing points and length scale.
         """
+        # Compute how many batches need to be sampled to initialize the inducing points when using batches of
+        # batch_size and length sequence_length
+        batch_size = train_data[0][0].shape[0]
+        num_batches = math.ceil(num_instances / (batch_size * self.sequence_length))
+
         # Essentially do the same as in due.dkl.initial_values_for_GP, but with a sequential dataset
         sampled_batch_idx = torch.randperm(len(train_data))[:num_batches]
 
@@ -605,17 +611,17 @@ class DUETransformerModule(TransformerModule):
                 batch_representations.append(self._get_hidden(X))
 
         representations = torch.cat(batch_representations, dim=0)
-        representations = rearrange(representations, "b s h -> b (s h)")
+        representations = rearrange(representations, "b s h -> (b s) h")
 
         initial_inducing_points = _get_initial_inducing_points(
-            representations, self.num_inducing_points
+            representations.numpy(), self.num_inducing_points
         )
         initial_length_scale = _get_initial_lengthscale(representations)
 
         self.gp = GP(
             num_outputs=self.output_size,
-            initial_lengthscale=initial_length_scale.double(),
-            initial_inducing_points=initial_inducing_points.double(),
+            initial_lengthscale=initial_length_scale,
+            initial_inducing_points=initial_inducing_points,
             kernel=self.kernel_type,
         )
         self.likelihood = SoftmaxLikelihood(
@@ -628,9 +634,13 @@ class DUETransformerModule(TransformerModule):
     def forward(self, input_: torch.LongTensor):
         out = self._get_hidden(input_)
         out = self.output_dropout(out)
-        out = rearrange(out, "b s h -> b (s h)")
+
+        if self.is_sequence_classifier:
+            out = out[:, 0, :]
+            out = torch.tanh(self.pooler(out)).unsqueeze(1)
+
+        out = rearrange(out, "b s h -> (b s) h").float()
         out = self.gp(out)
-        out = rearrange(out, "b (s h) -> b s h", s=self.sequence_length)
 
         return out
 
@@ -717,10 +727,7 @@ class DUETransformer(Model):
         """
         preds = self.module(X)
 
-        loss = self.module.loss_function(
-            rearrange(preds, "b t p -> (b t) p"),
-            rearrange(y, "b l -> (b l)"),
-        )
+        loss = self.module.loss_function(preds, y)
 
         return loss
 

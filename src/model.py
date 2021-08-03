@@ -344,11 +344,13 @@ class Model(ABC):
                 summary_writer.add_scalar(
                     "Batch train loss", batch_loss, global_batch_num
                 )
-                summary_writer.add_scalar(
-                    "Batch learning rate",
-                    self.scheduler.get_last_lr()[0],
-                    global_batch_num,
-                )
+
+                if self.scheduler is not None:
+                    summary_writer.add_scalar(
+                        "Batch learning rate",
+                        self.scheduler.get_last_lr()[0],
+                        global_batch_num,
+                    )
 
             epoch_loss += batch_loss.cpu().detach()
 

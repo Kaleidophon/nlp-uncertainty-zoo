@@ -83,14 +83,15 @@ class TransformerModule(Module):
         self.word_embeddings = nn.Embedding(vocab_size, input_size)
         self.pos_embeddings = PositionalEmbedding(sequence_length, input_size)
 
-        self.pooler = nn.Linear(hidden_size, hidden_size)
-        self.output = nn.Linear(hidden_size, output_size)
+        self.pooler = nn.Linear(input_size, input_size)
+        self.output = nn.Linear(input_size, output_size)
 
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=input_size,
             nhead=self.num_heads,
             dim_feedforward=hidden_size,
             dropout=dropout,
+            batch_first=True,
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
@@ -100,7 +101,7 @@ class TransformerModule(Module):
 
         if self.is_sequence_classifier:
             out = out[:, 0, :]
-            out = torch.tanh(self.pooler(out))
+            out = torch.tanh(self.pooler(out)).unsqueeze(1)
 
         out = self.output(out)
 
