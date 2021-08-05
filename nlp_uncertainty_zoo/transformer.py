@@ -96,23 +96,45 @@ class TransformerModule(Module):
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
-        hidden = self._get_hidden(input_)
+        hidden = self.get_hidden(input_)
         out = self.output_dropout(hidden)
 
         if self.is_sequence_classifier:
-            out = out[:, 0, :]
-            out = torch.tanh(self.pooler(out)).unsqueeze(1)
+            out = self.get_sequence_representation(out)
 
         out = self.output(out)
 
         return out
 
-    def _get_hidden(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def get_hidden(self, input_: torch.LongTensor) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
         embeddings = self.pos_embeddings(word_embeddings)
         embeddings = self.input_dropout(embeddings)
 
         hidden = self.encoder(embeddings)
+
+        return hidden
+
+    def get_sequence_representation(
+        self, hidden: torch.FloatTensor
+    ) -> torch.FloatTensor:
+        """
+        Define how the representation for an entire sequence is extracted from a number of hidden states. This is
+        relevant in sequence classification. In this case this is done by using the first hidden state and adding a
+        pooler layer.
+
+        Parameters
+        ----------
+        hidden: torch.FloatTensor
+            Hidden states of a model for a sequence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        hidden = hidden[:, 0, :]
+        hidden = torch.tanh(self.pooler(hidden)).unsqueeze(1)
 
         return hidden
 

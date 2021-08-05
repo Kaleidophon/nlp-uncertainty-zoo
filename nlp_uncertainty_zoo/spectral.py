@@ -24,7 +24,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm
 from typing import Dict, Any, Optional
 
 # PROJECT
@@ -444,6 +443,10 @@ class SNGPTransformerModule(SpectralTransformerModule):
         embeddings = self.input_dropout(embeddings)
 
         out = self.encoder(embeddings)
+
+        if self.is_sequence_classifier:
+            out = self.get_sequence_representation(out)
+
         out = self.output_dropout(out)
         out = self.layer_norm(out)
         out = self.sngp_layer(out)
@@ -501,7 +504,7 @@ class SNGPTransformer(Model):
             Predictions.
         """
         if num_predictions is None:
-            num_predictions = self.num_predictions
+            num_predictions = self.module.num_predictions
 
         X = X.to(self.device)
 
@@ -625,7 +628,7 @@ class DUETransformerModule(SpectralTransformerModule):
         with torch.no_grad():
             for batch_idx in sampled_batch_idx:
                 X = train_data[batch_idx][0].to(self.device)
-                batch_representations.append(self._get_hidden(X))
+                batch_representations.append(self.get_hidden(X))
 
         representations = torch.cat(batch_representations, dim=0)
         representations = rearrange(representations, "b s h -> (b s) h")
@@ -649,12 +652,11 @@ class DUETransformerModule(SpectralTransformerModule):
         )
 
     def forward(self, input_: torch.LongTensor):
-        out = self._get_hidden(input_)
+        out = self.get_hidden(input_)
         out = self.output_dropout(out)
 
         if self.is_sequence_classifier:
-            out = out[:, 0, :]
-            out = torch.tanh(self.pooler(out)).unsqueeze(1)
+            out = self.get_sequence_representation(out)
 
         out = rearrange(out, "b s h -> (b s) h").float()
         out = self.gp(out)
@@ -761,6 +763,7 @@ class DDUTransformerModule(SpectralTransformerModule):
         input_size: int,
         hidden_size: int,
         output_size: int,
+        input_dropout: float,
         dropout: float,
         num_heads: int,
         sequence_length: int,
@@ -783,6 +786,8 @@ class DDUTransformerModule(SpectralTransformerModule):
             Size of hidden representations.
         output_size: int
             Size of output of model.
+        input_dropout: float
+            Input dropout added to embeddings.
         dropout: float
             Dropout rate.
         num_heads: int
@@ -801,6 +806,7 @@ class DDUTransformerModule(SpectralTransformerModule):
             input_size,
             hidden_size,
             output_size,
+            input_dropout,
             dropout,
             num_heads,
             sequence_length,
@@ -810,9 +816,92 @@ class DDUTransformerModule(SpectralTransformerModule):
         )
 
         # Parameters for Gaussian Discriminant Analysis
-        self.mu = torch.zeros(output_size, hidden_size)
-        self.Sigma = torch.zeros(output_size, hidden_size, hidden_size)
-        self.num_classes = torch.zeros(output_size)
+        self.mu = torch.zeros(output_size, input_size)
+        self.Sigma = torch.stack(
+            [torch.eye(input_size, input_size) for _ in range(self.output_size)]
+        )
+        self.determinants = torch.zeros(output_size)
+
+    def gmm_fit(self, data_split: DataSplit) -> None:
+        """
+        Fit a Gaussian mixture model on the feature representations of the trained model.
+
+        Parameters
+        ----------
+        data_split: DataSplit
+            Data split used for fitting, usually the training or validation split.
+        """
+        with torch.no_grad():
+            hiddens, labels = [], []
+
+            for i, (X, y) in enumerate(data_split):
+
+                hidden = self.get_hidden(X)
+                hidden = (
+                    self.get_sequence_representation(hidden).squeeze(1)
+                    if self.is_sequence_classifier
+                    else torch.flatten(hidden, end_dim=1)
+                )
+                y = torch.flatten(y)
+                hiddens.append(hidden)
+                labels.append(y)
+
+            hiddens = torch.cat(hiddens, dim=0)
+            labels = torch.cat(labels, dim=0)
+
+            for cls in labels.unique():
+                num_batch_classes = (labels == cls).long().sum()
+
+                if num_batch_classes == 0:
+                    continue
+
+                self.mu[cls] = hiddens[labels == cls].mean(dim=0)
+                self.Sigma[cls] = torch.FloatTensor(
+                    np.cov(hiddens[labels == cls].T.numpy())
+                ) * (num_batch_classes - 1)
+
+                self.determinants[cls] = torch.det(
+                    self.Sigma[cls, :, :]
+                )  # Compute determinant
+                self.Sigma[cls, :, :] = torch.linalg.inv(self.Sigma[cls, :, :])
+
+    def gmm_predict(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Make a prediction with the Gaussian mixture Model for a batch of inputs.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Batch of inputs in the form of indexed tokens.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Probability of the input under every mixture component, with one component per class.
+        """
+        batch_size = input_.shape[0]
+        hidden = self.get_hidden(input_)  # batch_size x seq_length x input_size
+        hidden = (
+            self.get_sequence_representation(hidden).squeeze(1)
+            if self.is_sequence_classifier
+            else rearrange(hidden, "b s i -> (b s) i")
+        )
+
+        hidden = hidden.unsqueeze(1)  # (batch_size x seq_length) x 1 x input_size
+        hidden = hidden.repeat(1, self.output_size, 1)
+        diff = hidden - self.mu  # (batch_size x seq_length) x output_size x input_size
+        diff_t = rearrange(diff, "b o i -> b i o")
+
+        probs = (
+            1
+            / (2 * math.pi * self.determinants + 1e-6)
+            * torch.exp(
+                -0.5 * torch.einsum("boi,oii,bio->bo", diff, self.Sigma, diff_t)
+            )
+        )  # (batch_size x seq_length) x output_size
+        probs = rearrange(probs, "(b s) o -> b s o", b=batch_size)
+
+        return probs
 
 
 class DDUTransformer(Model):
@@ -852,28 +941,5 @@ class DDUTransformer(Model):
             Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        progress_bar = tqdm(total=len(data_split)) if verbose else None
         self.module.eval()  # Disable dropout
-
-        with torch.no_grad():
-            for i, (X, y) in enumerate(data_split):
-
-                hidden = self.module._get_hidden(X)
-                hidden, y = torch.flatten(hidden, end_dim=1), torch.flatten(y)
-
-                for cls in y.unique():
-                    num_batch_classes = (y == cls).long().sum()
-                    self.module.num_classes[cls] += num_batch_classes
-                    self.module.mu[cls] += hidden[y == cls].sum(dim=0)
-                    self.module.Sigma[cls] += torch.FloatTensor(
-                        np.cov(hidden[y == cls].T.numpy())
-                    ) * (num_batch_classes - 1)
-
-                if verbose:
-                    progress_bar.set_description(
-                        f"Fitting GDA (Batch {i+1}/{len(data_split)})"
-                    )
-                    progress_bar.update(1)
-
-            self.module.mu = self.module.mu / self.module.num_classes.unsqueeze(1)
-            self.module.Sigma = self.module.Sigma / self.module.num_classes.sum()
+        self.module.gmm_fit(data_split)

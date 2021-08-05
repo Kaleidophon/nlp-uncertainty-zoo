@@ -95,6 +95,27 @@ class Module(ABC, nn.Module):
         """
         pass
 
+    @abstractmethod
+    def get_sequence_representation(
+        self, hidden: torch.FloatTensor
+    ) -> torch.FloatTensor:
+        """
+        Define how the representation for an entire sequence is extracted from a number of hidden states. This is
+        relevant in sequence classification. For example, this could be the last hidden state for a unidirectional LSTM
+        or the first hidden state for a transformer, adding a pooler layer.
+
+        Parameters
+        ----------
+        hidden: torch.FloatTensor
+            Hidden states of a model for a sequence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        pass
+
 
 class Model(ABC):
     """
@@ -329,6 +350,7 @@ class Model(ABC):
         num_batches = len(data_split)
 
         for i, (X, y) in enumerate(data_split):
+
             X, y = X.to(self.device), y.to(self.device)
             global_batch_num = epoch * len(data_split) + i
             batch_loss = self.get_loss(global_batch_num, X, y, summary_writer)
@@ -399,7 +421,9 @@ class Model(ABC):
 
         loss = loss_function(
             rearrange(preds, "b t p -> (b t) p"),
-            rearrange(y, "b l -> (b l)"),
+            rearrange(y, "b l -> (b l)")
+            if not self.module.is_sequence_classifier
+            else y,
         )
 
         return loss

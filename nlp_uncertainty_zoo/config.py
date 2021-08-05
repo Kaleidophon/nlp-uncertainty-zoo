@@ -130,6 +130,10 @@ _TRAIN_PARAMS = {
             "lr": 5e-5,
             "num_epochs": 40,
         },
+        "ddu_transformer": {
+            "lr": 5e-5,
+            "num_epochs": 40,
+        },
     },
 }
 TRAIN_PARAMS = {
@@ -243,7 +247,7 @@ _MODEL_PARAMS = {
             "hidden_size": 768,
             "num_heads": 10,
             "vocab_size": 10001,
-            "output_size": 151,  # TODO: Debug
+            "output_size": 151,
             "input_dropout": 0.3,
             "dropout": 0.3,
             "num_predictions": 4,
@@ -254,6 +258,19 @@ _MODEL_PARAMS = {
             "input_size": 500,
             "sequence_length": 35,
             "is_sequence_classifier": True,
+        },
+        "ddu_transformer": {
+            "num_layers": 6,
+            "hidden_size": 768,
+            "num_heads": 10,
+            "vocab_size": 10001,
+            "output_size": 151,
+            "input_dropout": 0.3,
+            "dropout": 0.3,
+            "input_size": 500,
+            "sequence_length": 35,
+            "is_sequence_classifier": True,
+            "spectral_norm_upper_bound": 0.95,
         },
     },
 }
