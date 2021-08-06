@@ -211,7 +211,7 @@ class VariationalLSTMModule(nn.Module):
 
         # Only use last output
         if self.is_sequence_classifier:
-            outputs = outputs[:, -1, :]
+            outputs = self.get_sequence_representation(outputs)
 
         return outputs
 
@@ -249,6 +249,46 @@ class VariationalLSTMModule(nn.Module):
         }
 
         return hidden
+
+    def get_sequence_representation(
+        self, hidden: torch.FloatTensor
+    ) -> torch.FloatTensor:
+        """
+        Define how the representation for an entire sequence is extracted from a number of hidden states. This is
+        relevant in sequence classification. For example, this could be the last hidden state for a unidirectional LSTM
+        or the first hidden state for a transformer, adding a pooler layer.
+
+        Parameters
+        ----------
+        hidden: torch.FloatTensor
+            Hidden states of a model for a sequence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        return hidden[:, -1, :]
+
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        out = self.forward(input_)
+
+        return out
 
     def sample_masks(self, batch_size: int):
         """
@@ -360,6 +400,7 @@ class VariationalTransformerModule(TransformerModule):
         num_heads: int,
         sequence_length: int,
         num_predictions: int,
+        is_sequence_classifier: bool,
         device: Device,
     ):
         """
@@ -388,6 +429,9 @@ class VariationalTransformerModule(TransformerModule):
             Maximum sequence length in dataset. Used to initialize positional embeddings.
         num_predictions: int
             Number of predictions with different dropout masks.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
         device: Device
             Device the model is located on.
         """
@@ -404,8 +448,31 @@ class VariationalTransformerModule(TransformerModule):
             dropout,
             num_heads,
             sequence_length,
+            is_sequence_classifier,
             device,
         )
+
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        logits = torch.stack(
+            [self.get_logits(input_) for _ in range(self.num_predictions)], dim=1
+        )
+
+        return logits
 
     def eval(self, *args):
         super().eval()

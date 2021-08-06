@@ -25,6 +25,7 @@ from tqdm import tqdm
 
 # PROJECT
 from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
+import nlp_uncertainty_zoo.metrics as metrics
 from nlp_uncertainty_zoo.evaluation import evaluate
 from nlp_uncertainty_zoo.types import Device
 
@@ -76,6 +77,13 @@ class Module(ABC, nn.Module):
         self.is_sequence_classifier = is_sequence_classifier
         self.device = device
 
+        self.single_prediction_uncertainty_metrics = {
+            "max_prob": metrics.max_prob,
+            "predictive_entropy": metrics.predictive_entropy,
+            "dempster_shafer": metrics.dempster_shafer,
+        }
+        self.multi_prediction_uncertainty_metrics = {}
+
         super().__init__()
 
     @abstractmethod
@@ -92,6 +100,25 @@ class Module(ABC, nn.Module):
         -------
         torch.FloatTensor
             Output predictions for input.
+        """
+        pass
+
+    @abstractmethod
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
         """
         pass
 
@@ -115,6 +142,43 @@ class Module(ABC, nn.Module):
             Representation for the current sequence.
         """
         pass
+
+    def get_uncertainty(
+        self, input_: torch.LongTensor, metric_name: str
+    ) -> torch.FloatTensor:
+        """
+        Get the uncertainty scores for the current batch.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+        metric_name: str
+            Name of uncertainty metric being used.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Uncertainty scores for the current batch.
+        """
+        logits = self.get_logits(input_)
+
+        with torch.no_grad():
+            if metric_name in self.single_prediction_uncertainty_metrics:
+
+                # When model produces multiple predictions, average over them
+                if logits.shape == 4:
+                    logits = logits.mean(dim=1)
+
+                return self.single_prediction_uncertainty_metrics[metric_name](logits)
+
+            elif metric_name in self.multi_prediction_uncertainty_metrics:
+                return self.multi_prediction_uncertainty_metrics[metric_name](logits)
+
+            else:
+                raise LookupError(
+                    f"Unknown metric '{metric_name}' for class '{self.__class__.__name__}'."
+                )
 
 
 class Model(ABC):

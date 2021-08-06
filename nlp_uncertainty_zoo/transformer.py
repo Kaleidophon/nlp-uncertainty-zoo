@@ -115,6 +115,24 @@ class TransformerModule(Module):
 
         return hidden
 
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        return self.forward(input_)
+
     def get_sequence_representation(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:

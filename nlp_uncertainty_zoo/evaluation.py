@@ -14,7 +14,7 @@ from typing import Optional
 # PROJECT
 from nlp_uncertainty_zoo.datasets import LanguageModelingDataset, TextDataset, DataSplit
 
-
+# TODO: Implement eval for sequence classification
 # Map from dataset class to evaluation function
 EVAL_FUNCS = {
     LanguageModelingDataset: lambda preds, labels: nll_loss(

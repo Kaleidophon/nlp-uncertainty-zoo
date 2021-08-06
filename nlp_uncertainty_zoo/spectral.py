@@ -28,8 +28,9 @@ from typing import Dict, Any, Optional
 
 # PROJECT
 from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
+import nlp_uncertainty_zoo.metrics as metrics
 from nlp_uncertainty_zoo.transformer import TransformerModule
-from nlp_uncertainty_zoo.model import Model
+from nlp_uncertainty_zoo.model import Model, Module
 from nlp_uncertainty_zoo.types import Device
 
 
@@ -235,11 +236,10 @@ class SNGPModule(nn.Module):
 
         return out
 
-    def dempster_shafer(
-        self, x: torch.FloatTensor, num_predictions: Optional[int] = None
-    ):
+    def get_logits(self, x: torch.FloatTensor, num_predictions: Optional[int] = None):
         """
-        Get uncertainty scores for the current batch, using the Dempster-Shafer metric.
+        Get the logits for an input. Results in a tensor of size batch_size x num_predictions x seq_len x output_size
+        depending on the model type.
 
         Parameters
         ----------
@@ -252,8 +252,10 @@ class SNGPModule(nn.Module):
         Returns
         -------
         torch.FloatTensor
-            Uncertainty scores for the current batch.
+            Logits for the current batch.
         """
+        batch_size, seq_len, _ = x.shape
+
         if num_predictions is None:
             num_predictions = self.num_predictions
 
@@ -266,21 +268,15 @@ class SNGPModule(nn.Module):
         for k in range(self.output_size):
             post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
 
-        final_logits = 0
-        for _ in range(num_predictions):
+        all_logits = torch.zeros(batch_size, num_predictions, self.output_size)
+        for i in range(num_predictions):
             # Now actually sample logits from posterior
             logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8))
             logits_scale = torch.sqrt(1 + post_var * self.gp_mean_field_factor)
             logits /= logits_scale
-            final_logits += logits
+            all_logits[:, i, :] = logits
 
-        final_logits /= num_predictions
-        # Compute dempster-shafer metric
-        uncertainty = self.output_size / (
-            self.output_size + torch.exp(final_logits).sum(dim=1)
-        )
-
-        return uncertainty
+        return all_logits
 
     def invert_sigma_hat(self) -> None:
         """
@@ -437,7 +433,20 @@ class SNGPTransformerModule(SpectralTransformerModule):
         self.num_predictions = num_predictions
         self.layer_norm = nn.LayerNorm([hidden_size])
 
+        self.multi_prediction_uncertainty_metrics.update(
+            {
+                "variance": metrics.variance,
+                "mutual_information": metrics.mutual_information,
+            }
+        )
+
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        out = self.get_hidden(input_)
+        out = self.sngp_layer(out)
+
+        return out
+
+    def get_hidden(self, input_: torch.LongTensor) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
         embeddings = self.pos_embeddings(word_embeddings)
         embeddings = self.input_dropout(embeddings)
@@ -449,7 +458,27 @@ class SNGPTransformerModule(SpectralTransformerModule):
 
         out = self.output_dropout(out)
         out = self.layer_norm(out)
-        out = self.sngp_layer(out)
+
+        return out
+
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        out = self.get_hidden(input_)
+        out = self.sngp_layer.get_logits(out, num_predictions=self.num_predictions)
 
         return out
 
@@ -603,6 +632,13 @@ class DUETransformerModule(SpectralTransformerModule):
         self.likelihood = None
         self.loss_function = None
 
+        self.multi_prediction_uncertainty_metrics.update(
+            {
+                "variance": metrics.variance,
+                "mutual_information": metrics.mutual_information,
+            }
+        )
+
     def init_gp(self, train_data: DataSplit, num_instances: int = 1000):
         """
         Initialize the Gaussian Process layer together with the likelihood and loss function.
@@ -662,6 +698,44 @@ class DUETransformerModule(SpectralTransformerModule):
         out = self.gp(out)
 
         return out
+
+    def get_hidden(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        out = self.get_hidden(input_)
+        out = self.output_dropout(out)
+
+        if self.is_sequence_classifier:
+            out = self.get_sequence_representation(out)
+
+        return out
+
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        out = self.get_hidden(input_)
+        batch_size = out.shape[0]
+        out = rearrange(out, "b s h -> (b s) h").float()
+        mvn = self.gp(out)
+        predictions = mvn.sample(
+            sample_shape=torch.Size(
+                (batch_size, self.num_predictions, self.output_size)
+            )
+        )
+        predictions = rearrange(predictions, "(b s) n h -> b n s h", b=batch_size)
+
+        return predictions
 
 
 class DUETransformer(Model):
@@ -902,6 +976,31 @@ class DDUTransformerModule(SpectralTransformerModule):
         probs = rearrange(probs, "(b s) o -> b s o", b=batch_size)
 
         return probs
+
+    def get_uncertainty(
+        self, input_: torch.LongTensor, metric_name: str
+    ) -> torch.FloatTensor:
+        """
+        Get the uncertainty scores for the current batch.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+        metric_name: str
+            Name of uncertainty metric being used.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Uncertainty scores for the current batch.
+        """
+        if metric_name == "log_prob":
+            with torch.no_grad():
+                return self.gmm_predict(input_)
+
+        else:
+            super().get_uncertainty(input_, metric_name)
 
 
 class DDUTransformer(Model):

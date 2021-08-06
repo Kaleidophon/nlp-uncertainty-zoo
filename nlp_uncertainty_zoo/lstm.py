@@ -117,12 +117,52 @@ class LSTMModule(Module):
 
         # Only use last hidden state for prediction
         if self.is_sequence_classifier:
-            out = out[:, -1, :]
+            out = self.get_sequence_representation(out)
 
         out = self.dropout(out)
         out = self.output(out)
 
         self.last_hidden_states = hidden_states.detach(), cell_states.detach()
+
+        return out
+
+    def get_sequence_representation(
+        self, hidden: torch.FloatTensor
+    ) -> torch.FloatTensor:
+        """
+        Define how the representation for an entire sequence is extracted from a number of hidden states. This is
+        relevant in sequence classification. For example, this could be the last hidden state for a unidirectional LSTM
+        or the first hidden state for a transformer, adding a pooler layer.
+
+        Parameters
+        ----------
+        hidden: torch.FloatTensor
+            Hidden states of a model for a sequence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        return hidden[:, -1, :]
+
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        out = self.forward(input_)
 
         return out
 
