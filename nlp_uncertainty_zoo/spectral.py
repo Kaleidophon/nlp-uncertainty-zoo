@@ -778,7 +778,7 @@ class DUETransformer(Model):
         with torch.no_grad():
             out = self.module(X)
             out = self.module.likelihood(out)
-            out = out.logits.mean(dim=1)
+            out = out.logits.mean(dim=0)
 
         return out
 
