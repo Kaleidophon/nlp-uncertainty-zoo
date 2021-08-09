@@ -135,7 +135,7 @@ _TRAIN_PARAMS = {
     },
     "clinc": {
         "sngp_transformer": {
-            "lr": 5e-5,
+            "lr": 5e-3,
             "length_scale": 2,
             "weight_decay": 0.1,
             "num_epochs": 40,
@@ -148,7 +148,7 @@ _TRAIN_PARAMS = {
             },
         },
         "due_transformer": {
-            "lr": 5e-5,
+            "lr": 5e-3,
             "num_epochs": 40,
             "scheduler_class": transformers.get_linear_schedule_with_warmup,
             "scheduler_step_or_epoch": "step",

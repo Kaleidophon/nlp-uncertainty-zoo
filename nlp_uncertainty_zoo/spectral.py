@@ -629,6 +629,8 @@ class DUETransformerModule(SpectralTransformerModule):
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.kernel_type = kernel_type
 
+        self.layer_norm = nn.LayerNorm([input_size])
+
         self.gp = None
         self.likelihood = None
         self.loss_function = None
@@ -697,6 +699,7 @@ class DUETransformerModule(SpectralTransformerModule):
         if self.is_sequence_classifier:
             out = self.get_sequence_representation(out)
 
+        out = self.layer_norm(out)
         out = rearrange(out, "b s h -> (b s) h").float()
         mvn = self.gp(out)
 
