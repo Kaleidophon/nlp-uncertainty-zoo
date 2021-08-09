@@ -36,13 +36,19 @@ MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
 EMISSION_DIR = "./emissions"
 
+# GLOBALS
+SECRET_IMPORTED = False
+
+# TODO: Track learning rate
+# TODO: Add triangular scheduler as config option
+
 try:
     from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID, COUNTRY_CODE
 
+    SECRET_IMPORTED = True
+
 except ImportError:
-    raise ImportError(
-        "secret.py wasn't found, please rename secret_template.py and fill in the information."
-    )
+    pass
 
 
 def run_experiments(
@@ -191,6 +197,13 @@ if __name__ == "__main__":
 
     # Apply decorator
     if args.knock:
+        global SECRET_IMPORTED
+
+        if not SECRET_IMPORTED:
+            raise ImportError(
+                "secret.py wasn't found, please rename secret_template.py and fill in the information."
+            )
+
         run_experiments = telegram_sender(
             token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
         )(run_experiments)
