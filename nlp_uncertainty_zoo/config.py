@@ -87,6 +87,7 @@ _TRAIN_PARAMS = {
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
             "optimizer_class": optim.SGD,
             "scheduler_class": scheduler.MultiStepLR,
+            "scheduler_step_or_epoch": "epoch",
             "scheduler_kwargs": {
                 "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
                 "milestones": torch.LongTensor(range(13, 54, 1)),
@@ -102,6 +103,7 @@ _TRAIN_PARAMS = {
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
             "optimizer_class": optim.SGD,
             "scheduler_class": scheduler.MultiStepLR,
+            "scheduler_step_or_epoch": "epoch",
             "scheduler_kwargs": {
                 "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
                 "milestones": torch.LongTensor(range(13, 54, 1)),
@@ -117,6 +119,7 @@ _TRAIN_PARAMS = {
             "grad_clip": 10,
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
             "scheduler_class": scheduler.MultiStepLR,
+            "scheduler_step_or_epoch": "epoch",
             "scheduler_kwargs": {
                 "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
                 "milestones": torch.LongTensor(range(13, 54, 1)),
@@ -137,6 +140,7 @@ _TRAIN_PARAMS = {
             "weight_decay": 0.1,
             "num_epochs": 40,
             "scheduler_class": transformers.get_linear_schedule_with_warmup,
+            "scheduler_step_or_epoch": "step",
             "scheduler_kwargs": {
                 # Warmup prob: 0.1, training steps: 469
                 "num_warmup_steps": 469 * 40 * 0.1,
@@ -147,6 +151,7 @@ _TRAIN_PARAMS = {
             "lr": 5e-5,
             "num_epochs": 40,
             "scheduler_class": transformers.get_linear_schedule_with_warmup,
+            "scheduler_step_or_epoch": "step",
             "scheduler_kwargs": {
                 # Warmup prob: 0.1, training steps: 469
                 "num_warmup_steps": 469 * 40 * 0.1,

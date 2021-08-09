@@ -75,12 +75,11 @@ def evaluate(
         X, y = X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
 
-        scores = eval_func(
-            rearrange(predictions, "b t p -> (b t) p"),
-            rearrange(y, "b l -> (b l)")
-            if dataset_type == LanguageModelingDataset
-            else y,
-        )
+        if dataset_type == LanguageModelingDataset:
+            predictions = rearrange(predictions, "b t p -> (b t) p")
+            y = rearrange(y, "b l -> (b l)")
+
+        scores = eval_func(predictions, y)
         cum_scores += scores.sum()
         norm += batch_size * seq_len
 

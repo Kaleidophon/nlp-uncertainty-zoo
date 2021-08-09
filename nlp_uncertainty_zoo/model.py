@@ -321,7 +321,10 @@ class Model(ABC):
                         break
 
             # Update scheduler
-            if self.scheduler:
+            if (
+                self.scheduler
+                and self.train_params.get("scheduler_step_or_epoch", "") == "epoch"
+            ):
                 self.scheduler.step(epoch=epoch)
 
         # Set current model to best model found, otherwise use last
@@ -449,10 +452,15 @@ class Model(ABC):
 
             if self.module.training:
                 batch_loss.backward()
-
                 clip_grad_norm_(self.module.parameters(), grad_clip)
                 self.optimizer.step()
                 self.optimizer.zero_grad()
+
+                if (
+                    self.scheduler is not None
+                    and self.train_params.get("scheduler_step_or_epoch", "") == "step"
+                ):
+                    self.scheduler.step()
 
         return epoch_loss
 
