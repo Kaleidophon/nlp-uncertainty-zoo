@@ -683,21 +683,16 @@ class DUETransformerModule(SpectralTransformerModule):
             kernel=self.kernel_type,
         ).to(self.device)
         self.likelihood = SoftmaxLikelihood(
-            num_classes=self.output_size, mixing_weights=False
+            num_features=self.input_size,
+            num_classes=self.output_size,
+            mixing_weights=False,
         ).to(self.device)
         self.loss_function = VariationalELBO(
             self.likelihood, self.gp, num_data=len(train_data)
         ).to(self.device)
 
     def forward(self, input_: torch.LongTensor):
-        out = self.get_hidden(input_)
-        out = self.output_dropout(out)
-
-        if self.is_sequence_classifier:
-            out = self.get_sequence_representation(out)
-
-        out = rearrange(out, "b s h -> (b s) h").float()
-        out = self.gp(out)
+        out = self.get_logits(input_)
 
         return out
 
@@ -719,14 +714,16 @@ class DUETransformerModule(SpectralTransformerModule):
         """
         out = self.get_hidden(input_)
         batch_size = out.shape[0]
+
+        if self.is_sequence_classifier:
+            out = self.get_sequence_representation(out)
+
         out = rearrange(out, "b s h -> (b s) h").float()
         mvn = self.gp(out)
-        predictions = mvn.sample(
-            sample_shape=torch.Size(
-                (batch_size, self.num_predictions, self.output_size)
-            )
+        predictions = mvn.sample(sample_shape=torch.Size((self.num_predictions,)))
+        predictions = rearrange(
+            predictions, "n (b s) o  -> b n s o", b=batch_size, n=self.num_predictions
         )
-        predictions = rearrange(predictions, "(b s) n h -> b n s h", b=batch_size)
 
         return predictions
 
@@ -777,11 +774,10 @@ class DUETransformer(Model):
 
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
 
-        with torch.no_grad(), gpytorch.settings.num_likelihood_samples(
-            self.module.num_predictions
-        ):
+        with torch.no_grad():
             out = self.module(X)
-            out = self.module.likelihood(out).mean(dim=0)
+            out = self.module.likelihood(out)
+            out = out.logits.mean(dim=1)
 
         return out
 

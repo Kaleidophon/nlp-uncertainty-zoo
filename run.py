@@ -197,8 +197,6 @@ if __name__ == "__main__":
 
     # Apply decorator
     if args.knock:
-        global SECRET_IMPORTED
-
         if not SECRET_IMPORTED:
             raise ImportError(
                 "secret.py wasn't found, please rename secret_template.py and fill in the information."

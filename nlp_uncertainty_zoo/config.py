@@ -49,7 +49,7 @@ _PREPROCESSING_PARAMS = {
         "sequence_length": 35,
         # "max_size": 10000,  # PTB has exactly 10000 types
     },
-    "clinc": {"batch_size": 4, "sequence_length": 32},  # TODO: Debug 32
+    "clinc": {"batch_size": 32, "sequence_length": 32},
 }
 
 # Update shared preprocessing params wth dataset-specific params
@@ -250,7 +250,7 @@ _MODEL_PARAMS = {
             "output_size": 151,
             "input_dropout": 0.3,
             "dropout": 0.3,
-            "num_predictions": 4,
+            "num_predictions": 10,
             "num_inducing_points": 20,
             "num_inducing_samples": 1000,
             "spectral_norm_upper_bound": 0.95,

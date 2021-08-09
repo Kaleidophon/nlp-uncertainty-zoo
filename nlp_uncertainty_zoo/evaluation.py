@@ -12,17 +12,25 @@ from torch.nn.functional import nll_loss
 from typing import Optional
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import LanguageModelingDataset, TextDataset, DataSplit
+from nlp_uncertainty_zoo.datasets import (
+    LanguageModelingDataset,
+    TextDataset,
+    SequenceClassificationDataset,
+    DataSplit,
+)
 
-# TODO: Implement eval for sequence classification
 # Map from dataset class to evaluation function
 EVAL_FUNCS = {
     LanguageModelingDataset: lambda preds, labels: nll_loss(
         torch.log(preds), labels, reduction="none"
-    )
+    ),
+    SequenceClassificationDataset: lambda preds, labels: (
+        torch.argmax(preds, dim=-1) == labels
+    ).long(),
 }
 EVAL_FUNCS_POST = {
-    LanguageModelingDataset: lambda raw_score: torch.exp(raw_score).item()
+    LanguageModelingDataset: lambda raw_score: torch.exp(raw_score).item(),
+    SequenceClassificationDataset: lambda raw_score: raw_score.item(),
 }
 
 
@@ -62,13 +70,16 @@ def evaluate(
     cum_scores = 0
     norm = 0  # Keep track of the number of tokens evaluated
     for (X, y) in eval_split:
-        batch_size, seq_len = X.shape
+        batch_size = y.shape[0]
+        seq_len = 1 if dataset_type == SequenceClassificationDataset else X.shape[1]
         X, y = X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
 
         scores = eval_func(
             rearrange(predictions, "b t p -> (b t) p"),
-            rearrange(y, "b l -> (b l)"),
+            rearrange(y, "b l -> (b l)")
+            if dataset_type == LanguageModelingDataset
+            else y,
         )
         cum_scores += scores.sum()
         norm += batch_size * seq_len

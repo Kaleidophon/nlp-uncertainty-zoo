@@ -20,7 +20,6 @@ from torch.utils.data import Dataset
 # PROJECT
 from nlp_uncertainty_zoo.types import BatchedSequences, Device
 
-# TODO: Add sequence classification dataset class
 # TODO: Add WILDS text dataset
 # TODO: Add IMDB dataset
 
@@ -395,7 +394,7 @@ class TextDataset(ABC):
         return DataSplit(list(zip(batched_sequences, batched_labels)))
 
 
-class LanguageModelingDataset(TextDataset):
+class LanguageModelingDataset(TextDataset, ABC):
     """
     A superclass for language modeling datasets.
     """
@@ -481,7 +480,33 @@ class PennTreebankDataset(LanguageModelingDataset):
         )
 
 
-class ClincDataset(TextDataset):
+class SequenceClassificationDataset(TextDataset, ABC):
+    """
+    Superclass for sequence classification datasets.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        data_dir: str,
+        splits: Dict[str, str],
+        batch_size: int,
+        sequence_length: int,
+        **indexing_params: Dict[str, Any],
+    ):
+        super().__init__(
+            name=name,
+            data_dir=data_dir,
+            splits=splits,
+            batch_size=batch_size,
+            batch_style="padding",
+            sequence_length=sequence_length,
+            is_sequence_classification=True,
+            **indexing_params,
+        )
+
+
+class ClincDataset(SequenceClassificationDataset):
     """
     Dataset class for the CLINC OOS dataset.
     """
@@ -503,8 +528,6 @@ class ClincDataset(TextDataset):
                 "oos_test": "oos_test.csv",
             },
             batch_size=batch_size,
-            batch_style="padding",
             sequence_length=sequence_length,
-            is_sequence_classification=True,
             **indexing_params,
         )
