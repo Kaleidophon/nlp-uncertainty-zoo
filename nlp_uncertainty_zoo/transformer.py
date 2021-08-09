@@ -91,7 +91,6 @@ class TransformerModule(Module):
             nhead=self.num_heads,
             dim_feedforward=hidden_size,
             dropout=dropout,
-            batch_first=True,
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
