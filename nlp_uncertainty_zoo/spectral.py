@@ -681,13 +681,13 @@ class DUETransformerModule(SpectralTransformerModule):
             initial_lengthscale=initial_length_scale,
             initial_inducing_points=initial_inducing_points,
             kernel=self.kernel_type,
-        )
+        ).to(self.device)
         self.likelihood = SoftmaxLikelihood(
             num_classes=self.output_size, mixing_weights=False
-        )
+        ).to(self.device)
         self.loss_function = VariationalELBO(
             self.likelihood, self.gp, num_data=len(train_data)
-        )
+        ).to(self.device)
 
     def forward(self, input_: torch.LongTensor):
         out = self.get_hidden(input_)
