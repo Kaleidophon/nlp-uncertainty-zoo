@@ -39,9 +39,6 @@ EMISSION_DIR = "./emissions"
 # GLOBALS
 SECRET_IMPORTED = False
 
-# TODO: Track learning rate
-# TODO: Add triangular scheduler as config option
-
 try:
     from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID, COUNTRY_CODE
 

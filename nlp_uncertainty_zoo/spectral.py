@@ -692,9 +692,15 @@ class DUETransformerModule(SpectralTransformerModule):
         ).to(self.device)
 
     def forward(self, input_: torch.LongTensor):
-        out = self.get_logits(input_)
+        out = self.get_hidden(input_)
 
-        return out
+        if self.is_sequence_classifier:
+            out = self.get_sequence_representation(out)
+
+        out = rearrange(out, "b s h -> (b s) h").float()
+        mvn = self.gp(out)
+
+        return mvn
 
     def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
         """
@@ -712,14 +718,9 @@ class DUETransformerModule(SpectralTransformerModule):
         torch.FloatTensor
             Logits for current input.
         """
-        out = self.get_hidden(input_)
-        batch_size = out.shape[0]
+        batch_size = input_.shape[0]
 
-        if self.is_sequence_classifier:
-            out = self.get_sequence_representation(out)
-
-        out = rearrange(out, "b s h -> (b s) h").float()
-        mvn = self.gp(out)
+        mvn = self.forward(input_)
         predictions = mvn.sample(sample_shape=torch.Size((self.num_predictions,)))
         predictions = rearrange(
             predictions, "n (b s) o  -> b n s o", b=batch_size, n=self.num_predictions

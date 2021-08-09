@@ -7,6 +7,8 @@ from sklearn.utils.fixes import loguniform
 from scipy.stats import uniform
 import torch
 import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
+import transformers
 
 # PROJECT
 from nlp_uncertainty_zoo.composer import Composer
@@ -82,10 +84,13 @@ _TRAIN_PARAMS = {
             "num_epochs": 40,  # Changed from 55 in original
             # "early_stopping_pat": 10,
             "grad_clip": 10,
-            "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma
-            "milestones": torch.LongTensor(range(13, 54, 1)),
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
             "optimizer_class": optim.SGD,
+            "scheduler_class": scheduler.MultiStepLR,
+            "scheduler_kwargs": {
+                "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
+                "milestones": torch.LongTensor(range(13, 54, 1)),
+            },
         },
         "lstm_ensemble": {
             "early_stopping": True,
@@ -94,10 +99,13 @@ _TRAIN_PARAMS = {
             "num_epochs": 40,  # Changed from 55 in original
             # "early_stopping_pat": 10,
             "grad_clip": 10,
-            "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma
-            "milestones": torch.LongTensor(range(13, 54, 1)),
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
             "optimizer_class": optim.SGD,
+            "scheduler_class": scheduler.MultiStepLR,
+            "scheduler_kwargs": {
+                "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
+                "milestones": torch.LongTensor(range(13, 54, 1)),
+            },
         },
         # Taken from  https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
         "variational_lstm": {
@@ -107,9 +115,12 @@ _TRAIN_PARAMS = {
             "num_epochs": 55,  # Changed from 55 in original
             # "early_stopping_pat": 10,
             "grad_clip": 10,
-            "gamma": 1 / 1.15,  # In the Gal implementation you divide by gamma
-            "milestones": torch.LongTensor(range(13, 54, 1)),
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
+            "scheduler_class": scheduler.MultiStepLR,
+            "scheduler_kwargs": {
+                "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
+                "milestones": torch.LongTensor(range(13, 54, 1)),
+            },
         },
         "composer": {
             "lr": 0.05,
@@ -125,10 +136,22 @@ _TRAIN_PARAMS = {
             "length_scale": 2,
             "weight_decay": 0.1,
             "num_epochs": 40,
+            "scheduler_class": transformers.get_linear_schedule_with_warmup,
+            "scheduler_kwargs": {
+                # Warmup prob: 0.1, training steps: 469
+                "num_warmup_steps": 469 * 40 * 0.1,
+                "num_training_steps": 469 * 40,
+            },
         },
         "due_transformer": {
             "lr": 5e-5,
             "num_epochs": 40,
+            "scheduler_class": transformers.get_linear_schedule_with_warmup,
+            "scheduler_kwargs": {
+                # Warmup prob: 0.1, training steps: 469
+                "num_warmup_steps": 469 * 40 * 0.1,
+                "num_training_steps": 469 * 40,
+            },
         },
         "ddu_transformer": {
             "lr": 5e-5,

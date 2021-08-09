@@ -31,10 +31,10 @@ from datasets import load_dataset, Dataset
 from secret import COUNTRY_CODE, TELEGRAM_CHAT_ID, TELEGRAM_API_TOKEN
 
 # CONST
-CLINC_DIR = "./data/processed/clinc"
+CLINC_DIR = "../data/processed/clinc"
 BERT_MODEL = "bert-base-uncased"
 SEED = 123
-EMISSION_DIR = "./emissions"
+EMISSION_DIR = "../emissions"
 
 # HYPERPARAMETERS
 HIDDEN_SIZE = 768

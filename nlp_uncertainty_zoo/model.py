@@ -234,11 +234,10 @@ class Model(ABC):
         )
 
         self.scheduler = None
-        if "milestones" in self.train_params and "gamma" in self.train_params:
-            self.scheduler = optim.lr_scheduler.MultiStepLR(
-                self.optimizer,
-                milestones=self.train_params["milestones"],
-                gamma=self.train_params["gamma"],
+        if "scheduler_class" in self.train_params:
+            scheduler_class = self.train_params["scheduler_class"]
+            self.scheduler = scheduler_class(
+                self.optimizer, **self.train_params["scheduler_kwargs"]
             )
 
         # Check if model directory exists, if not, create
@@ -282,16 +281,12 @@ class Model(ABC):
         for epoch in range(self.train_params["num_epochs"]):
             self.module.train()
 
-            # TODO: Debug
-            train_loss = torch.zeros(1)
-            """
             train_loss = self._epoch_iter(
                 epoch,
                 dataset.train,
                 progress_bar,
                 summary_writer,
             )
-            """
 
             # Update progress bar and summary writer
             if verbose:
