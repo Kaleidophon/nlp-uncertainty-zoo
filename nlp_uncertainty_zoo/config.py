@@ -49,7 +49,7 @@ _PREPROCESSING_PARAMS = {
         "sequence_length": 35,
         # "max_size": 10000,  # PTB has exactly 10000 types
     },
-    "clinc": {"batch_size": 32, "sequence_length": 32},
+    "clinc": {"batch_size": 4, "sequence_length": 32},  # TODO: Debug 32
 }
 
 # Update shared preprocessing params wth dataset-specific params

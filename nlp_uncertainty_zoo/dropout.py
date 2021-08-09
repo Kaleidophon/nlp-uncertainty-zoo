@@ -16,7 +16,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # PROJECT
-from nlp_uncertainty_zoo.model import Model
+from nlp_uncertainty_zoo.metrics import variance, mutual_information
+from nlp_uncertainty_zoo.model import Model, Module
 from nlp_uncertainty_zoo.transformer import TransformerModule
 from nlp_uncertainty_zoo.types import Device, HiddenDict
 
@@ -55,7 +56,7 @@ class VariationalDropout(nn.Module):
         ) / (1 - self.dropout)
 
 
-class VariationalLSTMModule(nn.Module):
+class VariationalLSTMModule(Module):
     """
     Variational LSTM as described in `Gal & Ghrahramani (2016b) <https://arxiv.org/pdf/1512.05287.pdf>`, where the same
     dropout mask is being reused throughout a batch for connection of the same type.
@@ -108,14 +109,20 @@ class VariationalLSTMModule(nn.Module):
         device: Device
             Device the model should be moved to.
         """
-        super().__init__()
-        self.num_layers = num_layers
-        self.vocab_size = vocab_size
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.output_size = output_size
-        self.is_sequence_classifier = is_sequence_classifier
-        self.device = device
+        super().__init__(
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            is_sequence_classifier,
+            device,
+        )
+        self.multi_prediction_uncertainty_metrics = {
+            "variance": variance,
+            "mutual_information": mutual_information,
+        }
+        self.default_uncertainty_metric = "variance"
 
         self.lstm_layers = nn.ModuleList(
             [
@@ -451,6 +458,12 @@ class VariationalTransformerModule(TransformerModule):
             is_sequence_classifier,
             device,
         )
+
+        self.multi_prediction_uncertainty_metrics = {
+            "variance": variance,
+            "mutual_information": mutual_information,
+        }
+        self.default_uncertainty_metric = "variance"
 
     def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
         """

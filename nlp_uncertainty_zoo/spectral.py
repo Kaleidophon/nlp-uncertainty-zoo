@@ -439,6 +439,7 @@ class SNGPTransformerModule(SpectralTransformerModule):
                 "mutual_information": metrics.mutual_information,
             }
         )
+        self.default_uncertainty_metric = "variance"
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         out = self.get_hidden(input_)
@@ -638,6 +639,7 @@ class DUETransformerModule(SpectralTransformerModule):
                 "mutual_information": metrics.mutual_information,
             }
         )
+        self.default_uncertainty_metric = "variance"
 
     def init_gp(self, train_data: DataSplit, num_instances: int = 1000):
         """
@@ -696,15 +698,6 @@ class DUETransformerModule(SpectralTransformerModule):
 
         out = rearrange(out, "b s h -> (b s) h").float()
         out = self.gp(out)
-
-        return out
-
-    def get_hidden(self, input_: torch.LongTensor) -> torch.FloatTensor:
-        out = self.get_hidden(input_)
-        out = self.output_dropout(out)
-
-        if self.is_sequence_classifier:
-            out = self.get_sequence_representation(out)
 
         return out
 
@@ -819,7 +812,7 @@ class DUETransformer(Model):
             Batch loss.
         """
         preds = self.module(X)
-        loss = self.module.loss_function(preds, y)
+        loss = -self.module.loss_function(preds, y)
 
         return loss
 

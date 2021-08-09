@@ -83,6 +83,7 @@ class Module(ABC, nn.Module):
             "dempster_shafer": metrics.dempster_shafer,
         }
         self.multi_prediction_uncertainty_metrics = {}
+        self.default_uncertainty_metric = "predictive_entropy"
 
         super().__init__()
 
@@ -144,7 +145,7 @@ class Module(ABC, nn.Module):
         pass
 
     def get_uncertainty(
-        self, input_: torch.LongTensor, metric_name: str
+        self, input_: torch.LongTensor, metric_name: Optional[str] = None
     ) -> torch.FloatTensor:
         """
         Get the uncertainty scores for the current batch.
@@ -153,14 +154,18 @@ class Module(ABC, nn.Module):
         ----------
         input_: torch.LongTensor
             (Batch of) Indexed input sequences.
-        metric_name: str
-            Name of uncertainty metric being used.
+        metric_name: Optional[str]
+            Name of uncertainty metric being used. If None, use metric defined under the default_uncertainty_metric
+            attribute.
 
         Returns
         -------
         torch.FloatTensor
             Uncertainty scores for the current batch.
         """
+        if metric_name is None:
+            metric_name = self.default_uncertainty_metric
+
         logits = self.get_logits(input_)
 
         with torch.no_grad():
