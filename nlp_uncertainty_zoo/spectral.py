@@ -672,7 +672,7 @@ class DUETransformerModule(SpectralTransformerModule):
         representations = rearrange(representations, "b s h -> (b s) h")
 
         initial_inducing_points = _get_initial_inducing_points(
-            representations.numpy(), self.num_inducing_points
+            representations.cpu().numpy(), self.num_inducing_points
         )
         initial_length_scale = _get_initial_lengthscale(representations)
 
