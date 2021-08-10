@@ -16,7 +16,6 @@ from typing import Tuple
 from due.dkl import GP, _get_initial_inducing_points, _get_initial_lengthscale
 from due.layers.spectral_norm_fc import spectral_norm_fc
 from einops import rearrange
-import gpytorch
 from gpytorch.likelihoods import SoftmaxLikelihood
 from gpytorch.mlls import VariationalELBO
 import numpy as np
@@ -575,6 +574,9 @@ class DUETransformerModule(SpectralTransformerModule):
         is_sequence_classifier: bool,
         device: Device,
     ):
+
+        # TODO: No gradients being computed
+
         """
         Initialize a DDU transformer.
 
@@ -628,7 +630,6 @@ class DUETransformerModule(SpectralTransformerModule):
         self.num_inducing_points = num_inducing_points
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
         self.kernel_type = kernel_type
-
         self.layer_norm = nn.LayerNorm([input_size])
 
         self.gp = None

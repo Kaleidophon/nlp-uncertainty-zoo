@@ -2,6 +2,8 @@
 This module puts all the hyper-, training and preprocessing parameters used in this project into one single place.
 """
 
+# TODO: Add tokenizers
+
 # EXT
 from sklearn.utils.fixes import loguniform
 from scipy.stats import uniform
@@ -148,14 +150,15 @@ _TRAIN_PARAMS = {
             },
         },
         "due_transformer": {
-            "lr": 5e-3,
-            "num_epochs": 40,
+            "lr": 1e-6,
+            "num_epochs": 80,
+            "optimizer_class": optim.Adam,
             "scheduler_class": transformers.get_linear_schedule_with_warmup,
             "scheduler_step_or_epoch": "step",
             "scheduler_kwargs": {
                 # Warmup prob: 0.1, training steps: 469
-                "num_warmup_steps": 469 * 40 * 0.1,
-                "num_training_steps": 469 * 40,
+                "num_warmup_steps": 469 * 80 * 0.1,
+                "num_training_steps": 469 * 80,
             },
         },
         "ddu_transformer": {
@@ -271,16 +274,16 @@ _MODEL_PARAMS = {
             "vocab_size": 10000,
         },
         "due_transformer": {
-            "num_layers": 6,
+            "num_layers": 4,
             "hidden_size": 768,
             "num_heads": 10,
             "vocab_size": 10001,
             "output_size": 151,
-            "input_dropout": 0.3,
-            "dropout": 0.3,
+            "input_dropout": 0.1,
+            "dropout": 0.1,
             "num_predictions": 10,
-            "num_inducing_points": 20,
-            "num_inducing_samples": 1000,
+            "num_inducing_points": 40,
+            "num_inducing_samples": 4000,
             "spectral_norm_upper_bound": 0.95,
             "kernel_type": "Matern32",
             "input_size": 500,
