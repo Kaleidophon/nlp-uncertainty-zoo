@@ -25,9 +25,6 @@ from nlp_uncertainty_zoo.model import Model
 from nlp_uncertainty_zoo.types import Device
 
 
-# TODO: Clean up code used in this module
-
-
 class LayerWiseLSTM(nn.Module):
     """
     Model of a LSTM with a custom layer class.

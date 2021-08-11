@@ -19,6 +19,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
@@ -127,6 +128,31 @@ class Module(ABC, nn.Module):
         """
         pass
 
+    def predict(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
+        """
+        Output a probability distribution over classes given an input. Results in a tensor of size batch_size x seq_len
+        x output_size or batch_size x num_predictions x seq_len x output_size depending on the model type.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        logits = self.get_logits(input_)
+        probabilities = F.softmax(logits, dim=-1)
+
+        return probabilities
+
     @abstractmethod
     def get_sequence_representation(
         self, hidden: torch.FloatTensor
@@ -206,6 +232,61 @@ class Module(ABC, nn.Module):
                 num_parameters += flattened_param.shape[0]
 
         return num_parameters
+
+
+class MultiPredictionMixin:
+    """
+    Mixin class that is used to bundle certain methods for modules that use multiple predictions to estimate
+    uncertainty.
+    """
+
+    def __init__(self, num_predictions: int):
+        self.num_predictions = num_predictions
+        self.multi_prediction_uncertainty_metrics.update(
+            {
+                "variance": metrics.variance,
+                "mutual_information": metrics.mutual_information,
+            }
+        )
+        self.default_uncertainty_metric = "predictive_entropy"
+        self.single_predict = self.predict
+
+    def predict(
+        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
+    ) -> torch.Tensor:
+        """
+        Make a prediction for some input.
+
+        Parameters
+        ----------
+        X: torch.Tensor
+            Input data points.
+        num_predictions: int
+            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
+            If None, the attribute of the same name set during initialization is used.
+
+        Returns
+        -------
+        torch.Tensor
+            Predictions.
+        """
+        if num_predictions is None:
+            num_predictions = self.num_predictions
+
+        X = X.to(self.device)
+
+        batch_size, seq_len = X.shape
+        preds = torch.zeros(batch_size, seq_len, self.output_size, device=self.device)
+
+        with torch.no_grad():
+            for prediction_num in range(num_predictions):
+                preds += self.single_predict(
+                    X, *args, prediction_num=prediction_num, **kwargs
+                )
+
+            preds /= num_predictions
+
+        return preds
 
 
 class Model(ABC):
@@ -395,7 +476,7 @@ class Model(ABC):
         """
         X = X.to(self.device)
 
-        return self.module(X)
+        return self.module.predict(X)
 
     def eval(self, data_split: DataSplit) -> torch.Tensor:
         """
