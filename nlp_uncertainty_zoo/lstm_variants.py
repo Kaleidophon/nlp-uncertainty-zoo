@@ -22,6 +22,10 @@ from nlp_uncertainty_zoo.model import Model
 from nlp_uncertainty_zoo.types import Device
 
 
+# TODO: Add documentation
+# TODO: Clean up code used in this module
+
+
 class LayerWiseLSTM(nn.Module):
     def __init__(self, layers: List[nn.Module], dropout: float):
         super().__init__()
@@ -180,17 +184,11 @@ class BayesianLSTM(Model):
         return preds
 
 
-class CustomLSTMLogic(nn.Module, ABC):
+class CellWiseLSTM(nn.Module):
     """
     Tries to imitate the interfaces of the torch LSTM module by providing the same input- and output structure,
     but using custom cells. Computations for sequences won't be as optimized as for nn.LSTM, but instead performed
     sequentially behind the scenes.
-
-    Also, this class won't have quite as many functionalities as the original torch one, so it is batch_first and uni-
-    directional in any case.
-
-    The class will then be used by SequentialLSTMBase below, so that subclasses of SequentialLSTMBase only have to
-    specify their custom cell type.
     """
 
     def __init__(
@@ -203,9 +201,16 @@ class CustomLSTMLogic(nn.Module, ABC):
         lstm_cell_type: Type[nn.Module],
         lstm_cell_kwargs: Dict[str, Any],
     ):
+        super().__init__()
+        layer_sizes = [input_size] + [hidden_size] * num_layers
         self.cells = [
-            lstm_cell_type(input_size, hidden_size, **lstm_cell_kwargs).to(device)
-            for _ in range(num_layers)
+            lstm_cell_type(
+                input_size=in_size,
+                hidden_size=out_size,
+                device=device,
+                **lstm_cell_kwargs
+            ).to(device)
+            for in_size, out_size in zip(layer_sizes[:-1], layer_sizes[1:])
         ]
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -226,27 +231,49 @@ class CustomLSTMLogic(nn.Module, ABC):
 
         # Unpack hidden
         hx, cx = hidden
+        new_hx, new_cx = torch.zeros(hx.shape), torch.zeros(cx.shape)
 
         for t in range(sequence_length):
             input_t = input_[:, t, :]
 
             for layer, cell in enumerate(self.cells):
-                hx[:, layer], cx[:, layer] = cell(input_t, (hx[:, layer], cx[:, layer]))
-                input_t = self.dropout(hx[:, layer])
+                new_hx[layer, :], new_cx[layer, :] = cell(
+                    input_t, (hx[layer, :], cx[layer, :])
+                )
+                input_t = self.dropout(hx[layer, :])
 
-            new_output[:, t] = hx[:, -1]
-
-        new_hx, new_cx = hx[-1, :, :], cx[-1, :, :]
+            new_output[:, t] = hx[-1, :, :]
 
         return new_output, (new_hx, new_cx)
 
 
-class SequentialLSTMModule(LSTMModule, ABC):
-    """
-    Base class for LSTM-based models that do not operate on whole sequences, but time step by time step, because they
-    implement a custom LSTM cell. Tries to otherwise stick to the LSTMModule structure.
-    """
+class STTauCell(nn.LSTMCell):
+    # TODO: Cite https://github.com/nec-research/st_tau/blob/master/st_stau/st_tau.py
+    def __init__(
+        self, input_size: int, hidden_size: int, num_centroids: int, device: Device
+    ):
+        super().__init__(input_size, hidden_size, device=device)
+        self.num_centroids = num_centroids
+        # Transition matrix between states
+        self.centroid_kernel = nn.Linear(self.hidden_size, num_centroids, bias=False)
+        # Learnable temperature parameter for Gumbel softmax
+        self.temperature = nn.Parameter(torch.ones(1))
 
+    def forward(
+        self,
+        input: torch.Tensor,
+        hx: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        hidden, cell = super().forward(input, hx)
+
+        logits = self.centroid_kernel(hidden)
+        samples = F.gumbel_softmax(logits, tau=self.temperature)
+        new_hidden = samples @ self.centroid_kernel.weight
+
+        return new_hidden, cell
+
+
+class STTauLSTMModule(LSTMModule):
     def __init__(
         self,
         num_layers: int,
@@ -254,13 +281,11 @@ class SequentialLSTMModule(LSTMModule, ABC):
         input_size: int,
         hidden_size: int,
         output_size: int,
-        input_dropout: float,
         dropout: float,
+        num_centroids: int,
+        num_predictions: int,
         is_sequence_classifier: bool,
         device: Device,
-        lstm_cell_type: Type[nn.Module],
-        lstm_cell_kwargs: Dict[str, Any],
-        **kwargs
     ):
         super().__init__(
             num_layers,
@@ -268,18 +293,105 @@ class SequentialLSTMModule(LSTMModule, ABC):
             input_size,
             hidden_size,
             output_size,
-            input_dropout,
             dropout,
             is_sequence_classifier,
             device,
         )
-        # Override definition of LSTM
-        self.lstm = CustomLSTMLogic(
+        # Override LSTM
+        self.lstm = CellWiseLSTM(
             num_layers,
             input_size,
             hidden_size,
             dropout,
             device,
-            lstm_cell_type,
-            lstm_cell_kwargs,
+            lstm_cell_type=STTauCell,
+            lstm_cell_kwargs={
+                "num_centroids": num_centroids,
+            },
         )
+
+        self.num_predictions = num_predictions
+
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        out = [self.forward(input_) for _ in range(self.num_predictions)]
+        out = torch.stack(out, dim=1)
+
+        return out
+
+
+class STTauLSTM(Model):
+    def __init__(
+        self,
+        model_params: Dict[str, Any],
+        train_params: Dict[str, Any],
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
+    ):
+        super().__init__(
+            "st_tau_lstm",
+            STTauLSTMModule,
+            model_params,
+            train_params,
+            model_dir,
+            device,
+        )
+
+    def predict(
+        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
+    ) -> torch.Tensor:
+        """
+        Make a prediction for some input.
+
+        Parameters
+        ----------
+        X: torch.Tensor
+            Input data points.
+        num_predictions: int
+            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
+            If None, the attribute of the same name set during initialization is used.
+
+        Returns
+        -------
+        torch.Tensor
+            Predictions.
+        """
+        if num_predictions is None:
+            num_predictions = self.module.num_predictions
+
+        X = X.to(self.device)
+
+        batch_size, seq_len = X.shape
+        preds = torch.zeros(
+            batch_size, seq_len, self.module.output_size, device=self.device
+        )
+
+        # Make sure that the same hidden state from the last batch is used for all forward passes
+        # Init hidden state - continue with hidden states from last batch
+        hidden_states = self.module.last_hidden_states
+
+        # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
+        if hidden_states is None:
+            hidden_states = self.module.init_hidden_states(batch_size, self.device)
+
+        with torch.no_grad():
+            for _ in range(num_predictions):
+                preds += F.softmax(self.module(X, hidden_states=hidden_states), dim=-1)
+
+            preds /= num_predictions
+
+        return preds

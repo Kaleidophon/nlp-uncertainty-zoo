@@ -31,6 +31,7 @@ from nlp_uncertainty_zoo.types import Device
 
 
 # TODO: triangular lr scheduler cannot be pickled
+# TODO: Add multiple prediction mixin to simplify a lot of redundant code
 
 
 class Module(ABC, nn.Module):
