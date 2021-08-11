@@ -36,6 +36,10 @@ DATA_DIR = "./data/processed"
 EMISSION_DIR = "./emissions"
 
 
+# TODO: Replace some of the logic with https://pytorch.org/tutorials/beginner/hyperparameter_tuning_tutorial.html or
+# TODO: https://github.com/fmfn/BayesianOptimization ?
+
+
 try:
     from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID, COUNTRY_CODE
 

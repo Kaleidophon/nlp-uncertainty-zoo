@@ -1,8 +1,11 @@
 """
 Implement LSTM variants that only differ in the cell that they are using. Specifically, implement
 
-- Bayes-by-backprop LSTM (@TODO)
-- ST-tau LSTM (@TODO)
+- Bayes-by-backprop LSTM [1]
+- ST-tau LSTM [2]
+
+[1] https://arxiv.org/pdf/1704.02798.pdf
+[2] https://openreview.net/pdf?id=9EKHN1jOlA
 """
 
 # STD
@@ -22,12 +25,25 @@ from nlp_uncertainty_zoo.model import Model
 from nlp_uncertainty_zoo.types import Device
 
 
-# TODO: Add documentation
 # TODO: Clean up code used in this module
 
 
 class LayerWiseLSTM(nn.Module):
+    """
+    Model of a LSTM with a custom layer class.
+    """
+
     def __init__(self, layers: List[nn.Module], dropout: float):
+        """
+        Initialize a LSTM with a custom layer class.
+
+        Parameters
+        ----------
+        layers: List[nn.Module]
+            List of layer objects.
+        dropout: float
+            Dropout probability for dropout applied between layers, except after the last layer.
+        """
         super().__init__()
         self.layers = layers
         self.dropout = nn.Dropout(dropout)
@@ -48,7 +64,10 @@ class LayerWiseLSTM(nn.Module):
 
 
 class BayesianLSTMModule(LSTMModule):
-    # TODO: Add doc
+    """
+    Implementation of a Bayes-by-backprop LSTM by Fortunato et al. (2017).
+    """
+
     def __init__(
         self,
         num_layers: int,
@@ -66,6 +85,41 @@ class BayesianLSTMModule(LSTMModule):
         is_sequence_classifier: bool,
         device: Device,
     ):
+        """
+        Initialize a Bayesian LSTM.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of layers.
+        vocab_size: int
+            Number of input vocabulary.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        output_size: int
+            Number of classes.
+        dropout: float
+            Dropout probability.
+        posterior_rho_init: float
+            Posterior mean for the weight rho init.
+        posterior_mu_init: float
+            Posterior mean for the weight mu init.
+        prior_pi: float
+            Mixture weight of the prior.
+        prior_sigma_1: float
+            Prior sigma on the mixture prior distribution 1.
+        prior_sigma_2: float
+            Prior sigma on the mixture prior distribution 2.
+        num_predictions: int
+            Number of predictions (forward passes) used to make predictions.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        device: Device
+            Device the model should be moved to.
+        """
         super().__init__(
             num_layers,
             vocab_size,
@@ -186,32 +240,34 @@ class BayesianLSTM(Model):
 
 class CellWiseLSTM(nn.Module):
     """
-    Tries to imitate the interfaces of the torch LSTM module by providing the same input- and output structure,
-    but using custom cells. Computations for sequences won't be as optimized as for nn.LSTM, but instead performed
-    sequentially behind the scenes.
+    Model of a LSTM with a custom cell class.
     """
 
     def __init__(
         self,
-        num_layers: int,
         input_size: int,
         hidden_size: int,
         dropout: float,
+        cells: List[nn.LSTMCell],
         device: Device,
-        lstm_cell_type: Type[nn.Module],
-        lstm_cell_kwargs: Dict[str, Any],
     ):
+        """
+
+        Parameters
+        ----------
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        dropout: float
+            Dropout probability.
+        cells: List[nn.Cell]
+            List of cells, with one per layer.
+        device: Device
+            Device the model should be moved to.
+        """
         super().__init__()
-        layer_sizes = [input_size] + [hidden_size] * num_layers
-        self.cells = [
-            lstm_cell_type(
-                input_size=in_size,
-                hidden_size=out_size,
-                device=device,
-                **lstm_cell_kwargs
-            ).to(device)
-            for in_size, out_size in zip(layer_sizes[:-1], layer_sizes[1:])
-        ]
+        self.cells = cells
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = 0
@@ -248,10 +304,30 @@ class CellWiseLSTM(nn.Module):
 
 
 class STTauCell(nn.LSTMCell):
-    # TODO: Cite https://github.com/nec-research/st_tau/blob/master/st_stau/st_tau.py
+    """
+    Implementation of a ST-tau LSTM cell, based on the implementation of Wang et al. (2021) [1].
+    In contrast to the original implementation, the base cell is not a peephole-, but a normal LSTM cell.
+
+    [1] https://github.com/nec-research/st_tau/blob/master/st_stau/st_tau.py
+    """
+
     def __init__(
         self, input_size: int, hidden_size: int, num_centroids: int, device: Device
     ):
+        """
+        Initialize a ST-tau cell.
+
+        Parameters
+        ----------
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        num_centroids: int
+            Number of states in the underlying finite-state automaton.
+        device: Device
+            Device the model should be moved to.
+        """
         super().__init__(input_size, hidden_size, device=device)
         self.num_centroids = num_centroids
         # Transition matrix between states
@@ -274,6 +350,10 @@ class STTauCell(nn.LSTMCell):
 
 
 class STTauLSTMModule(LSTMModule):
+    """
+    Implementation of a ST-tau LSTM by Wang et al. (2021).
+    """
+
     def __init__(
         self,
         num_layers: int,
@@ -287,6 +367,33 @@ class STTauLSTMModule(LSTMModule):
         is_sequence_classifier: bool,
         device: Device,
     ):
+        """
+        Initialize a ST-tau LSTM.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of layers.
+        vocab_size: int
+            Number of input vocabulary.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        output_size: int
+            Number of classes.
+        dropout: float
+            Dropout probability.
+        num_centroids: int
+            Number of states in the underlying finite-state automaton.
+        num_predictions: int
+            Number of predictions (forward passes) used to make predictions.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        device: Device
+            Device the model should be moved to.
+        """
         super().__init__(
             num_layers,
             vocab_size,
@@ -297,17 +404,24 @@ class STTauLSTMModule(LSTMModule):
             is_sequence_classifier,
             device,
         )
+        layer_sizes = [input_size] + [hidden_size] * num_layers
+        cells = [
+            STTauCell(
+                input_size=in_size,
+                hidden_size=out_size,
+                device=device,
+                num_centroids=num_centroids,
+            ).to(device)
+            for in_size, out_size in zip(layer_sizes[:-1], layer_sizes[1:])
+        ]
+
         # Override LSTM
         self.lstm = CellWiseLSTM(
-            num_layers,
             input_size,
             hidden_size,
             dropout,
+            cells,
             device,
-            lstm_cell_type=STTauCell,
-            lstm_cell_kwargs={
-                "num_centroids": num_centroids,
-            },
         )
 
         self.num_predictions = num_predictions
