@@ -11,3 +11,4 @@ datasets
 scikit-learn
 tqdm
 git+https://github.com/y0ast/DUE.git
+blitz-bayesian-pytorch

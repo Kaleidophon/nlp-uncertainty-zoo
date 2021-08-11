@@ -293,7 +293,8 @@ class VariationalLSTMModule(Module):
         torch.FloatTensor
             Logits for current input.
         """
-        out = self.forward(input_)
+        out = [self.forward(input_) for _ in range(self.num_predictions)]
+        out = torch.stack(out, dim=1)
 
         return out
 

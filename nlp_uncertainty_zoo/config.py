@@ -3,6 +3,7 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 """
 
 # TODO: Add tokenizers
+# TODO: Give each model its own module for clarity
 
 # EXT
 from sklearn.utils.fixes import loguniform
@@ -21,6 +22,7 @@ from nlp_uncertainty_zoo.datasets import (
 )
 from nlp_uncertainty_zoo.dropout import VariationalTransformer, VariationalLSTM
 from nlp_uncertainty_zoo.lstm import LSTM, LSTMEnsemble
+from nlp_uncertainty_zoo.lstm_variants import BayesianLSTM
 from nlp_uncertainty_zoo.spectral import SNGPTransformer, DDUTransformer, DUETransformer
 from nlp_uncertainty_zoo.transformer import Transformer
 
@@ -35,6 +37,7 @@ AVAILABLE_MODELS = {
     "lstm": LSTM,
     "lstm_ensemble": LSTMEnsemble,
     "variational_lstm": VariationalLSTM,
+    "bayesian_lstm": BayesianLSTM,
     "transformer": Transformer,
     "variational_transformer": VariationalTransformer,
     "sngp_transformer": SNGPTransformer,
@@ -103,6 +106,21 @@ _TRAIN_PARAMS = {
             # "early_stopping_pat": 10,
             "grad_clip": 10,
             "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
+            "optimizer_class": optim.SGD,
+            "scheduler_class": scheduler.MultiStepLR,
+            "scheduler_step_or_epoch": "epoch",
+            "scheduler_kwargs": {
+                "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
+                "milestones": torch.LongTensor(range(13, 54, 1)),
+            },
+        },
+        "bayesian_lstm": {
+            "early_stopping": True,
+            "weight_decay": 0,
+            "lr": 1,
+            "num_epochs": 40,  # Changed from 55 in original
+            # "early_stopping_pat": 10,
+            "grad_clip": 10,
             "optimizer_class": optim.SGD,
             "scheduler_class": scheduler.MultiStepLR,
             "scheduler_step_or_epoch": "epoch",
@@ -243,6 +261,21 @@ _MODEL_PARAMS = {
             "dropout": 0.5,
             "vocab_size": 10001,
             "output_size": 10001,
+            "is_sequence_classifier": False,
+        },
+        "bayesian_lstm": {
+            "num_layers": 2,
+            "hidden_size": 650,
+            "input_size": 650,
+            "dropout": 0.5,
+            "vocab_size": 10001,
+            "output_size": 10001,
+            "prior_sigma_1": 0.1,
+            "prior_sigma_2": 0.002,
+            "prior_pi": 1,
+            "posterior_mu_init": 0,
+            "posterior_rho_init": -6.0,
+            "num_predictions": 10,
             "is_sequence_classifier": False,
         },
         "lstm_ensemble": {
