@@ -22,6 +22,7 @@ from nlp_uncertainty_zoo.types import BatchedSequences, Device
 
 # TODO: Add WILDS text dataset
 # TODO: Add IMDB dataset
+# TODO: Check if DUE converges on other dataset than CLINC
 
 
 class DataSplit(Dataset):

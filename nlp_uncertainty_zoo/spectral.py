@@ -419,7 +419,7 @@ class SNGPTransformerModule(SpectralTransformerModule):
         )
 
         self.sngp_layer = SNGPModule(
-            hidden_size,
+            input_size,
             last_layer_size,
             output_size,
             ridge_factor,
@@ -430,7 +430,7 @@ class SNGPTransformerModule(SpectralTransformerModule):
             device,
         )
         self.num_predictions = num_predictions
-        self.layer_norm = nn.LayerNorm([hidden_size])
+        self.layer_norm = nn.LayerNorm([input_size])
 
         self.multi_prediction_uncertainty_metrics.update(
             {
@@ -500,20 +500,6 @@ class SNGPTransformer(Model):
             device,
         )
 
-        default_model_params = [
-            param for name, param in self.module.named_parameters() if name != "Beta"
-        ]
-        self.optimizer = torch.optim.Adam(
-            [
-                {"params": default_model_params, "lr": train_params["lr"]},
-                {
-                    "params": [self.module.sngp_layer.Beta.weight],
-                    "lr": train_params["lr"],
-                    "weight_decay": train_params["weight_decay"],
-                },
-            ]
-        )
-
     def predict(
         self, X: torch.Tensor, *args, num_predictions: Optional[int] = None
     ) -> torch.Tensor:
@@ -574,8 +560,6 @@ class DUETransformerModule(SpectralTransformerModule):
         is_sequence_classifier: bool,
         device: Device,
     ):
-
-        # TODO: No gradients being computed
 
         """
         Initialize a DDU transformer.
@@ -812,6 +796,7 @@ class DUETransformer(Model):
         torch.Tensor
             Batch loss.
         """
+        # TODO: This needs to be adapted for language modelling
         preds = self.module(X)
         loss = -self.module.loss_function(preds, y)
 
@@ -972,7 +957,7 @@ class DDUTransformerModule(SpectralTransformerModule):
         return probs
 
     def get_uncertainty(
-        self, input_: torch.LongTensor, metric_name: str
+        self, input_: torch.LongTensor, metric_name: Optional[str] = None
     ) -> torch.FloatTensor:
         """
         Get the uncertainty scores for the current batch.
@@ -989,6 +974,9 @@ class DDUTransformerModule(SpectralTransformerModule):
         torch.FloatTensor
             Uncertainty scores for the current batch.
         """
+        if metric_name is None:
+            metric_name = self.default_uncertainty_metric
+
         if metric_name == "log_prob":
             with torch.no_grad():
                 return self.gmm_predict(input_)

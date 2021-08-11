@@ -30,6 +30,9 @@ from nlp_uncertainty_zoo.evaluation import evaluate
 from nlp_uncertainty_zoo.types import Device
 
 
+# TODO: triangular lr scheduler cannot be pickled
+
+
 class Module(ABC, nn.Module):
     """
     Abstract module class, defining how the forward pass of a model looks.
