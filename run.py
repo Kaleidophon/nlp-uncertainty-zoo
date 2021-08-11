@@ -103,6 +103,7 @@ def run_experiments(
             model = AVAILABLE_MODELS[model_name](
                 model_params, train_params, model_dir=model_dir, device=device
             )
+
             result_dict = model.fit(
                 dataset=dataset,
                 summary_writer=summary_writer,

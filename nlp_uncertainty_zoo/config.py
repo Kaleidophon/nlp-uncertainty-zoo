@@ -165,8 +165,27 @@ _TRAIN_PARAMS = {
             "lr": 0.05,
             "num_epochs": 55,
             "grad_clip": 10,
-            "gamma": 0.74,
-            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "optimizer_class": optim.Adam,
+            "scheduler_class": transformers.get_linear_schedule_with_warmup,
+            "scheduler_step_or_epoch": "step",
+            "scheduler_kwargs": {
+                # Warmup prob: 0.1, training steps: 469
+                "num_warmup_steps": 469 * 80 * 0.1,
+                "num_training_steps": 469 * 80,
+            },
+        },
+        "transformer": {
+            "lr": 0.05,
+            "num_epochs": 55,
+            "grad_clip": 10,
+            "optimizer_class": optim.Adam,
+            "scheduler_class": transformers.get_linear_schedule_with_warmup,
+            "scheduler_step_or_epoch": "step",
+            "scheduler_kwargs": {
+                # Warmup prob: 0.1, training steps: 469
+                "num_warmup_steps": 469 * 80 * 0.1,
+                "num_training_steps": 469 * 80,
+            },
         },
         "due_transformer": {
             "lr": 1e-8,
@@ -336,6 +355,19 @@ _MODEL_PARAMS = {
             "output_size": 10001,
             "num_operations": 10,
             "sequence_length": 35,
+            "is_sequence_classifier": False,
+        },
+        "transformer": {
+            "num_layers": 6,
+            "hidden_size": 500,
+            "input_size": 500,
+            "vocab_size": 10001,
+            "output_size": 10001,
+            "input_dropout": 0.2,
+            "dropout": 0.2,
+            "num_heads": 10,
+            "sequence_length": 30,
+            "is_sequence_classifier": False,
         },
     },
     "clinc": {

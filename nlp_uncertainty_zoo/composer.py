@@ -36,6 +36,7 @@ class ComposerModule(Module):
         output_size: int,
         dropout: float,
         sequence_length: int,
+        is_sequence_classifier: bool,
         device: Device,
     ):
         """
@@ -57,11 +58,20 @@ class ComposerModule(Module):
             Dropout rate.
         sequence_length: int
             Maximum sequence length in dataset. Used to initialize positional embeddings.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
         device: Device
             Device the model is located on.
         """
         super().__init__(
-            num_layers, vocab_size, input_size, hidden_size, output_size, device
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            is_sequence_classifier,
+            device,
         )
 
         self.word_embeddings = nn.Embedding(vocab_size, hidden_size)
@@ -73,6 +83,7 @@ class ComposerModule(Module):
         self.composer_layer = ComposerLayer(
             num_operations, hidden_size, sequence_length
         )
+        self.pooler = nn.Linear(input_size, input_size)
         self.output_layer = nn.Linear(hidden_size, output_size)
 
     def forward(self, x: torch.FloatTensor):
@@ -88,11 +99,55 @@ class ComposerModule(Module):
             x = out
             x = self.dropout(x)
 
+        if self.is_sequence_classifier:
+            x = self.get_sequence_representation(x)
+
         x = rearrange(x, "b s h -> (b s) h")
         out = self.output_layer(x)
         out = rearrange(out, "(b s) o -> b s o", s=self.sequence_length)
 
         return out
+
+    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        return self.forward(input_)
+
+    def get_sequence_representation(
+        self, hidden: torch.FloatTensor
+    ) -> torch.FloatTensor:
+        """
+        Define how the representation for an entire sequence is extracted from a number of hidden states. This is
+        relevant in sequence classification. In this case this is done by using the first hidden state and adding a
+        pooler layer.
+
+        Parameters
+        ----------
+        hidden: torch.FloatTensor
+            Hidden states of a model for a sequence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        hidden = hidden[:, 0, :]
+        hidden = torch.tanh(self.pooler(hidden)).unsqueeze(1)
+
+        return hidden
 
 
 class ComposerLayer(nn.Module):

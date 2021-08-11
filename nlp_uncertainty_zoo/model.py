@@ -189,6 +189,24 @@ class Module(ABC, nn.Module):
                     f"Unknown metric '{metric_name}' for class '{self.__class__.__name__}'."
                 )
 
+    def get_num_learnable_parameters(self) -> int:
+        """
+        Return the total number of (learnable) parameters in the model.
+
+        Returns
+        -------
+        int
+            Number of learnable parameters.
+        """
+        num_parameters = 0
+
+        for param in self.parameters():
+            if param.requires_grad:
+                flattened_param = torch.flatten(param)
+                num_parameters += flattened_param.shape[0]
+
+        return num_parameters
+
 
 class Model(ABC):
     """
