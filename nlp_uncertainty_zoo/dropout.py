@@ -16,8 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # PROJECT
-from nlp_uncertainty_zoo.metrics import variance, mutual_information
-from nlp_uncertainty_zoo.model import Model, Module
+from nlp_uncertainty_zoo.model import Model, Module, MultiPredictionMixin
 from nlp_uncertainty_zoo.transformer import TransformerModule
 from nlp_uncertainty_zoo.types import Device, HiddenDict
 
@@ -56,7 +55,7 @@ class VariationalDropout(nn.Module):
         ) / (1 - self.dropout)
 
 
-class VariationalLSTMModule(Module):
+class VariationalLSTMModule(Module, MultiPredictionMixin):
     """
     Variational LSTM as described in `Gal & Ghrahramani (2016b) <https://arxiv.org/pdf/1512.05287.pdf>`, where the same
     dropout mask is being reused throughout a batch for connection of the same type.
@@ -118,11 +117,7 @@ class VariationalLSTMModule(Module):
             is_sequence_classifier,
             device,
         )
-        self.multi_prediction_uncertainty_metrics = {
-            "variance": variance,
-            "mutual_information": mutual_information,
-        }
-        self.default_uncertainty_metric = "variance"
+        MultiPredictionMixin.__init__(self, num_predictions)
 
         self.lstm_layers = nn.ModuleList(
             [
@@ -135,7 +130,6 @@ class VariationalLSTMModule(Module):
         )
         self.embeddings = nn.Embedding(vocab_size, input_size)
         self.decoder = nn.Linear(hidden_size, output_size)
-        self.num_predictions = num_predictions
 
         self.dropout_modules = {
             "embedding": [
@@ -221,6 +215,43 @@ class VariationalLSTMModule(Module):
             outputs = self.get_sequence_representation(outputs)
 
         return outputs
+
+    def predict(
+        self,
+        input_: torch.LongTensor,
+        hidden_states: Optional[HiddenDict] = None,
+        **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Make a prediction for some input.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Current batch in the form of one-hot encodings.
+        hidden_states: Optional[HiddenDict]
+            Dictionary of hidden and cell states by layer to initialize the model with at the first time step. If None,
+            they will be initialized with zero vectors or the ones stored under last_hidden_states if available.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Class probabilities for the current batch.
+        """
+        batch_size, seq_len = input_.shape
+
+        # Make sure that the same hidden state from the last batch is used for all forward passes
+        # Init hidden state - continue with hidden states from last batch
+        hidden_states = self.module.last_hidden_states
+
+        # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
+        if hidden_states is None:
+            hidden_states = self.module.init_hidden_states(batch_size, self.device)
+
+        logits = self.forward(input_, hidden_states)
+        preds = F.softmax(logits, dim=-1)
+
+        return preds
 
     def _assign_last_hidden_states(self, hidden: HiddenDict):
         """
@@ -345,53 +376,8 @@ class VariationalLSTM(Model):
                 cell.bias_hh.data.uniform_(-init_weight, init_weight)
                 cell.bias_ih.data.uniform_(-init_weight, init_weight)
 
-    def predict(
-        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
-    ) -> torch.Tensor:
-        """
-        Make a prediction for some input.
 
-        Parameters
-        ----------
-        X: torch.Tensor
-            Input data points.
-        num_predictions: int
-            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
-            If None, the attribute of the same name set during initialization is used.
-
-        Returns
-        -------
-        torch.Tensor
-            Predictions.
-        """
-        if num_predictions is None:
-            num_predictions = self.module.num_predictions
-
-        X = X.to(self.device)
-
-        batch_size, seq_len = X.shape
-        preds = torch.zeros(
-            batch_size, seq_len, self.module.output_size, device=self.device
-        )
-
-        # Make sure that the same hidden state from the last batch is used for all forward passes
-        # Init hidden state - continue with hidden states from last batch
-        hidden_states = self.module.last_hidden_states
-
-        # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
-        if hidden_states is None:
-            hidden_states = self.module.init_hidden_states(batch_size, self.device)
-
-        with torch.no_grad():
-            for _ in range(num_predictions):
-                preds += F.softmax(self.module(X, hidden_states=hidden_states), dim=-1)
-
-            preds /= num_predictions
-
-        return preds
-
-
-class VariationalTransformerModule(TransformerModule):
+class VariationalTransformerModule(TransformerModule, MultiPredictionMixin):
     """
     Implementation of Variational Transformer by `Xiao et al., (2021) <https://arxiv.org/pdf/2006.08344.pdf>`_.
     """
@@ -444,8 +430,6 @@ class VariationalTransformerModule(TransformerModule):
             Device the model is located on.
         """
 
-        self.num_predictions = num_predictions
-
         super().__init__(
             num_layers,
             vocab_size,
@@ -459,12 +443,7 @@ class VariationalTransformerModule(TransformerModule):
             is_sequence_classifier,
             device,
         )
-
-        self.multi_prediction_uncertainty_metrics = {
-            "variance": variance,
-            "mutual_information": mutual_information,
-        }
-        self.default_uncertainty_metric = "variance"
+        MultiPredictionMixin.__init__(self, num_predictions)
 
     def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
         """
@@ -516,39 +495,3 @@ class VariationalTransformer(Model):
             model_dir,
             device,
         )
-
-    def predict(
-        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
-    ) -> torch.Tensor:
-        """
-        Make a prediction for some input.
-
-        Parameters
-        ----------
-        X: torch.Tensor
-            Input data points.
-        num_predictions: int
-            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
-
-        Returns
-        -------
-        torch.Tensor
-            Predictions.
-        """
-        if num_predictions is None:
-            num_predictions = self.module.num_predictions
-
-        X = X.to(self.device)
-        batch, seq_len = X.shape
-
-        with torch.no_grad():
-            preds = torch.zeros(
-                batch, seq_len, self.module.output_size, device=self.device
-            )
-
-            for _ in range(num_predictions):
-                preds += self.module(X)
-
-            preds /= num_predictions
-
-        return preds

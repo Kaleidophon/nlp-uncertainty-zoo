@@ -32,7 +32,6 @@ from nlp_uncertainty_zoo.types import Device
 
 
 # TODO: triangular lr scheduler cannot be pickled
-# TODO: Add multiple prediction mixin to simplify a lot of redundant code
 
 
 class Module(ABC, nn.Module):
@@ -132,11 +131,6 @@ class Module(ABC, nn.Module):
         """
         Output a probability distribution over classes given an input. Results in a tensor of size batch_size x seq_len
         x output_size or batch_size x num_predictions x seq_len x output_size depending on the model type.
-
-        Parameters
-        ----------
-        input_: torch.LongTensor
-            (Batch of) Indexed input sequences.
 
         Parameters
         ----------
@@ -476,7 +470,7 @@ class Model(ABC):
         """
         X = X.to(self.device)
 
-        return self.module.predict(X)
+        return self.module.predict(X, *args, **kwargs)
 
     def eval(self, data_split: DataSplit) -> torch.Tensor:
         """

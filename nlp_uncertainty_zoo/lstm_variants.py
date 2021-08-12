@@ -9,8 +9,7 @@ Implement LSTM variants that only differ in the cell that they are using. Specif
 """
 
 # STD
-from abc import ABC
-from typing import Type, Dict, Any, Tuple, Optional, List
+from typing import Dict, Any, Tuple, Optional, List
 
 # EXT
 from blitz.modules import BayesianLSTM as BlitzBayesianLSTM
@@ -21,7 +20,7 @@ import torch.nn.functional as F
 # PROJECT
 from nlp_uncertainty_zoo.lstm import LSTMModule
 import nlp_uncertainty_zoo.metrics as metrics
-from nlp_uncertainty_zoo.model import Model
+from nlp_uncertainty_zoo.model import Model, MultiPredictionMixin
 from nlp_uncertainty_zoo.types import Device
 
 
@@ -60,7 +59,7 @@ class LayerWiseLSTM(nn.Module):
         return out, (new_hx, new_cx)
 
 
-class BayesianLSTMModule(LSTMModule):
+class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
     """
     Implementation of a Bayes-by-backprop LSTM by Fortunato et al. (2017).
     """
@@ -127,8 +126,7 @@ class BayesianLSTMModule(LSTMModule):
             is_sequence_classifier,
             device,
         )
-
-        self.num_predictions = num_predictions
+        MultiPredictionMixin.__init__(self, num_predictions)
         self.lstm = LayerWiseLSTM(
             [
                 BlitzBayesianLSTM(
@@ -144,11 +142,6 @@ class BayesianLSTMModule(LSTMModule):
             ],
             dropout=dropout,
         )
-        self.multi_prediction_uncertainty_metrics = {
-            "variance": metrics.variance,
-            "mutual_information": metrics.mutual_information,
-        }
-        self.default_uncertainty_metric = "variance"
 
     def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
         """
@@ -188,51 +181,6 @@ class BayesianLSTM(Model):
             model_dir,
             device,
         )
-
-    def predict(
-        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
-    ) -> torch.Tensor:
-        """
-        Make a prediction for some input.
-
-        Parameters
-        ----------
-        X: torch.Tensor
-            Input data points.
-        num_predictions: int
-            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
-            If None, the attribute of the same name set during initialization is used.
-
-        Returns
-        -------
-        torch.Tensor
-            Predictions.
-        """
-        if num_predictions is None:
-            num_predictions = self.module.num_predictions
-
-        X = X.to(self.device)
-
-        batch_size, seq_len = X.shape
-        preds = torch.zeros(
-            batch_size, seq_len, self.module.output_size, device=self.device
-        )
-
-        # Make sure that the same hidden state from the last batch is used for all forward passes
-        # Init hidden state - continue with hidden states from last batch
-        hidden_states = self.module.last_hidden_states
-
-        # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
-        if hidden_states is None:
-            hidden_states = self.module.init_hidden_states(batch_size, self.device)
-
-        with torch.no_grad():
-            for _ in range(num_predictions):
-                preds += F.softmax(self.module(X, hidden_states=hidden_states), dim=-1)
-
-            preds /= num_predictions
-
-        return preds
 
 
 class CellWiseLSTM(nn.Module):
@@ -346,7 +294,7 @@ class STTauCell(nn.LSTMCell):
         return new_hidden, cell
 
 
-class STTauLSTMModule(LSTMModule):
+class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
     """
     Implementation of a ST-tau LSTM by Wang et al. (2021).
     """
@@ -401,6 +349,7 @@ class STTauLSTMModule(LSTMModule):
             is_sequence_classifier,
             device,
         )
+        MultiPredictionMixin.__init__(self, num_predictions)
         layer_sizes = [input_size] + [hidden_size] * num_layers
         cells = [
             STTauCell(
@@ -420,8 +369,6 @@ class STTauLSTMModule(LSTMModule):
             cells,
             device,
         )
-
-        self.num_predictions = num_predictions
 
     def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
         """
@@ -461,48 +408,3 @@ class STTauLSTM(Model):
             model_dir,
             device,
         )
-
-    def predict(
-        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
-    ) -> torch.Tensor:
-        """
-        Make a prediction for some input.
-
-        Parameters
-        ----------
-        X: torch.Tensor
-            Input data points.
-        num_predictions: int
-            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
-            If None, the attribute of the same name set during initialization is used.
-
-        Returns
-        -------
-        torch.Tensor
-            Predictions.
-        """
-        if num_predictions is None:
-            num_predictions = self.module.num_predictions
-
-        X = X.to(self.device)
-
-        batch_size, seq_len = X.shape
-        preds = torch.zeros(
-            batch_size, seq_len, self.module.output_size, device=self.device
-        )
-
-        # Make sure that the same hidden state from the last batch is used for all forward passes
-        # Init hidden state - continue with hidden states from last batch
-        hidden_states = self.module.last_hidden_states
-
-        # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
-        if hidden_states is None:
-            hidden_states = self.module.init_hidden_states(batch_size, self.device)
-
-        with torch.no_grad():
-            for _ in range(num_predictions):
-                preds += F.softmax(self.module(X, hidden_states=hidden_states), dim=-1)
-
-            preds /= num_predictions
-
-        return preds

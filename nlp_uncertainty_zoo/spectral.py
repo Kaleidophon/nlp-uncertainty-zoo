@@ -27,9 +27,8 @@ from typing import Dict, Any, Optional
 
 # PROJECT
 from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
-import nlp_uncertainty_zoo.metrics as metrics
 from nlp_uncertainty_zoo.transformer import TransformerModule
-from nlp_uncertainty_zoo.model import Model, Module
+from nlp_uncertainty_zoo.model import Model, MultiPredictionMixin
 from nlp_uncertainty_zoo.types import Device
 
 
@@ -331,7 +330,7 @@ class SpectralTransformerModule(TransformerModule):
                 )
 
 
-class SNGPTransformerModule(SpectralTransformerModule):
+class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
     """
     Implementation of a spectral-normalized Gaussian Process transformer.
     """
@@ -417,6 +416,7 @@ class SNGPTransformerModule(SpectralTransformerModule):
             is_sequence_classifier,
             device,
         )
+        MultiPredictionMixin.__init__(self, num_predictions)
 
         self.sngp_layer = SNGPModule(
             input_size,
@@ -429,16 +429,7 @@ class SNGPTransformerModule(SpectralTransformerModule):
             num_predictions,
             device,
         )
-        self.num_predictions = num_predictions
         self.layer_norm = nn.LayerNorm([input_size])
-
-        self.multi_prediction_uncertainty_metrics.update(
-            {
-                "variance": metrics.variance,
-                "mutual_information": metrics.mutual_information,
-            }
-        )
-        self.default_uncertainty_metric = "variance"
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         out = self.get_hidden(input_)
@@ -535,7 +526,7 @@ class SNGPTransformer(Model):
         return out
 
 
-class DUETransformerModule(SpectralTransformerModule):
+class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin):
     """
     Implementation of Deterministic Uncertainty Estimation (DUE) Transformer by
     `Van Amersfoort et al., 2021 <https://arxiv.org/pdf/2102.11409.pdf>`.
@@ -608,8 +599,8 @@ class DUETransformerModule(SpectralTransformerModule):
             is_sequence_classifier,
             device,
         )
+        MultiPredictionMixin.__init__(self, num_predictions)
 
-        self.num_predictions = num_predictions
         self.num_inducing_samples = num_inducing_samples
         self.num_inducing_points = num_inducing_points
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
@@ -619,14 +610,6 @@ class DUETransformerModule(SpectralTransformerModule):
         self.gp = None
         self.likelihood = None
         self.loss_function = None
-
-        self.multi_prediction_uncertainty_metrics.update(
-            {
-                "variance": metrics.variance,
-                "mutual_information": metrics.mutual_information,
-            }
-        )
-        self.default_uncertainty_metric = "variance"
 
     def init_gp(self, train_data: DataSplit, num_instances: int = 1000):
         """

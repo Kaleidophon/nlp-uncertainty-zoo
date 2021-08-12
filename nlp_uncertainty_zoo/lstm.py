@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # PROJECT
-from nlp_uncertainty_zoo.model import Model, Module
+from nlp_uncertainty_zoo.model import Model, Module, MultiPredictionMixin
 from nlp_uncertainty_zoo.types import Device, HiddenDict
 
 
@@ -211,7 +211,7 @@ class LSTM(Model):
         return preds
 
 
-class LSTMEnsembleModule(nn.Module):
+class LSTMEnsembleModule(Module, MultiPredictionMixin):
     """
     Implementation for an ensemble of LSTMs.
     """
@@ -253,7 +253,16 @@ class LSTMEnsembleModule(nn.Module):
         device: Device
             Device the model should be moved to.
         """
-        super().__init__()
+        super().__init__(
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            is_sequence_classifier,
+            device,
+        )
+        MultiPredictionMixin.__init__(self, ensemble_size)
 
         self.ensemble_members = nn.ModuleList(
             [
@@ -276,7 +285,25 @@ class LSTMEnsembleModule(nn.Module):
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         preds = self._get_predictions(input_)
-        preds = torch.mean(preds, dim=1)
+
+        return preds
+
+    def predict(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        prediction_num: Optional[int] = None,
+        **kwargs
+    ) -> torch.FloatTensor:
+        if prediction_num is None:
+            logits = self._get_predictions(input_)
+
+        else:
+            logits = self.ensemble_members[prediction_num % len(self.ensemble_members)](
+                input_
+            )
+
+        preds = F.softmax(logits, dim=-1)
 
         return preds
 
@@ -309,9 +336,3 @@ class LSTMEnsemble(Model):
             model_dir,
             device,
         )
-
-    def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
-        out = super().predict(X)
-        preds = F.softmax(out, dim=-1)
-
-        return preds
