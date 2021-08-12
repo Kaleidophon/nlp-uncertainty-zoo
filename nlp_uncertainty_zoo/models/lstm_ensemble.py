@@ -11,7 +11,7 @@ from torch import nn as nn
 from torch.nn import functional as F
 
 # PROJECT
-from nlp_uncertainty_zoo import LSTMModule
+from nlp_uncertainty_zoo.models.lstm import LSTMModule
 from nlp_uncertainty_zoo.models.model import Module, MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.types import Device
 

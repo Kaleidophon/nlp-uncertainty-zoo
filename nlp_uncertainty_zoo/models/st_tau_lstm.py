@@ -2,14 +2,16 @@
 Implement the ST-tau LSTM by `Wang et al. (2021) <https://openreview.net/pdf?id=9EKHN1jOlA>`_.
 """
 
+# STD
 from typing import Optional, Tuple, Dict, Any
 
+# EXT
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
 
-from nlp_uncertainty_zoo import LSTMModule
-from nlp_uncertainty_zoo.models.lstm import CellWiseLSTM
+# PROJECT
+from nlp_uncertainty_zoo.models.lstm import CellWiseLSTM, LSTMModule
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.types import Device
 

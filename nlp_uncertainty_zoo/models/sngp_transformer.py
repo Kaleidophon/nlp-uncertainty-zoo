@@ -10,7 +10,7 @@ import torch
 from torch import nn as nn
 from torch.nn import functional as F
 
-from nlp_uncertainty_zoo import SpectralTransformerModule
+from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 
 from nlp_uncertainty_zoo.utils.types import Device

@@ -17,7 +17,8 @@ from torch import nn as nn
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
-from nlp_uncertainty_zoo import SpectralTransformerModule, DataSplit, TextDataset
+from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
+from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.types import Device
 

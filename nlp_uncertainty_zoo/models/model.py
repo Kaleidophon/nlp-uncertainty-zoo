@@ -10,6 +10,7 @@ Define common methods of models. This done by separating the logic into two part
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from datetime import datetime
+import dill
 from typing import Dict, Any, Optional
 import os
 
@@ -29,9 +30,6 @@ from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
 import nlp_uncertainty_zoo.utils.metrics as metrics
 from nlp_uncertainty_zoo.utils.evaluation import evaluate
 from nlp_uncertainty_zoo.utils.types import Device
-
-
-# TODO: triangular lr scheduler cannot be pickled
 
 
 class Module(ABC, nn.Module):
@@ -442,6 +440,7 @@ class Model(ABC):
                     self.full_model_dir,
                     f"{best_val_score:.2f}_{timestamp}.pt",
                 ),
+                pickle_module=dill,
                 _use_new_zipfile_serialization=False,
             )
 
