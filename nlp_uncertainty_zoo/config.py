@@ -3,10 +3,8 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 """
 
 # TODO: Add tokenizers
-# TODO: Give each model its own module for clarity
 
 # EXT
-from sklearn.utils.fixes import loguniform
 from scipy.stats import uniform
 import torch
 import torch.optim as optim
@@ -14,17 +12,24 @@ import torch.optim.lr_scheduler as scheduler
 import transformers
 
 # PROJECT
-from nlp_uncertainty_zoo.composer import Composer
+from nlp_uncertainty_zoo.models.composer import Composer
 from nlp_uncertainty_zoo.datasets import (
     Wikitext103Dataset,
     PennTreebankDataset,
     ClincDataset,
 )
-from nlp_uncertainty_zoo.dropout import VariationalTransformer, VariationalLSTM
-from nlp_uncertainty_zoo.lstm import LSTM, LSTMEnsemble
-from nlp_uncertainty_zoo.lstm_variants import BayesianLSTM, STTauLSTM
-from nlp_uncertainty_zoo.spectral import SNGPTransformer, DDUTransformer, DUETransformer
-from nlp_uncertainty_zoo.transformer import Transformer
+from nlp_uncertainty_zoo.models.variational_transformer import VariationalTransformer
+from nlp_uncertainty_zoo import (
+    VariationalLSTM,
+    LSTMEnsemble,
+    SNGPTransformer,
+    DUETransformer,
+    DDUTransformer,
+)
+from nlp_uncertainty_zoo.models.lstm import LSTM
+from nlp_uncertainty_zoo.models.bayesian_lstm import BayesianLSTM
+from nlp_uncertainty_zoo.models.st_tau_lstm import STTauLSTM
+from nlp_uncertainty_zoo.models.transformer import Transformer
 
 # AVAILABLE DATASETS AND MODELS
 AVAILABLE_DATASETS = {

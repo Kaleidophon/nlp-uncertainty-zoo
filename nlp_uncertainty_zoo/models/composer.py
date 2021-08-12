@@ -13,9 +13,9 @@ import torch.nn.functional as F
 from einops import rearrange
 
 # PROJECT
-from nlp_uncertainty_zoo.model import Model, Module
-from nlp_uncertainty_zoo.transformer import PositionalEmbedding
-from nlp_uncertainty_zoo.types import Device
+from nlp_uncertainty_zoo.models.model import Model, Module
+from nlp_uncertainty_zoo.models.transformer import PositionalEmbedding
+from nlp_uncertainty_zoo.utils.types import Device
 
 
 # TODO: Add missing doc

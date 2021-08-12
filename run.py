@@ -19,7 +19,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
 from nlp_uncertainty_zoo.datasets import TextDataset
-from nlp_uncertainty_zoo.evaluation import evaluate
+from nlp_uncertainty_zoo.utils.evaluation import evaluate
 from nlp_uncertainty_zoo.config import (
     PREPROCESSING_PARAMS,
     TRAIN_PARAMS,
@@ -27,7 +27,7 @@ from nlp_uncertainty_zoo.config import (
     AVAILABLE_DATASETS,
     AVAILABLE_MODELS,
 )
-from nlp_uncertainty_zoo.types import Device
+from nlp_uncertainty_zoo.utils.types import Device
 
 # CONST
 SEED = 123

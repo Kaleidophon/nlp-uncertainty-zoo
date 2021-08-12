@@ -3,7 +3,7 @@ Implement a simple vanilla LSTM.
 """
 
 # STD
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Tuple
 
 # EXT
 import torch
@@ -11,8 +11,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # PROJECT
-from nlp_uncertainty_zoo.model import Model, Module, MultiPredictionMixin
-from nlp_uncertainty_zoo.types import Device, HiddenDict
+from nlp_uncertainty_zoo.models.model import Model, Module
+from nlp_uncertainty_zoo.utils.types import Device, HiddenDict
 
 
 class LSTMModule(Module):
@@ -211,128 +211,101 @@ class LSTM(Model):
         return preds
 
 
-class LSTMEnsembleModule(Module, MultiPredictionMixin):
+class LayerWiseLSTM(nn.Module):
     """
-    Implementation for an ensemble of LSTMs.
+    Model of a LSTM with a custom layer class.
+    """
+
+    def __init__(self, layers: List[nn.Module], dropout: float):
+        """
+        Initialize a LSTM with a custom layer class.
+
+        Parameters
+        ----------
+        layers: List[nn.Module]
+            List of layer objects.
+        dropout: float
+            Dropout probability for dropout applied between layers, except after the last layer.
+        """
+        super().__init__()
+        self.layers = layers
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(
+        self,
+        input_: torch.FloatTensor,
+        hidden: Tuple[torch.FloatTensor, torch.FloatTensor],
+    ) -> Tuple[torch.FloatTensor, Tuple[torch.FloatTensor, torch.FloatTensor]]:
+        hx, cx = hidden
+        new_hx, new_cx = torch.zeros(hx.shape), torch.zeros(cx.shape)
+
+        for l, layer in enumerate(self.layers):
+            out, (new_hx[l, :], new_cx[l, :]) = layer(input_, (hx[l, :], cx[l, :]))
+            input_ = self.dropout(out)
+
+        return out, (new_hx, new_cx)
+
+
+class CellWiseLSTM(nn.Module):
+    """
+    Model of a LSTM with a custom cell class.
     """
 
     def __init__(
         self,
-        num_layers: int,
-        vocab_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
         dropout: float,
-        ensemble_size: int,
-        is_sequence_classifier: bool,
+        cells: List[nn.LSTMCell],
         device: Device,
     ):
         """
-        Initialize an LSTM.
 
         Parameters
         ----------
-        num_layers: int
-            Number of layers.
-        vocab_size: int
-            Number of input vocabulary.
         input_size: int
             Dimensionality of input to the first layer (embedding size).
         hidden_size: int
             Size of hidden units.
-        output_size: int
-            Number of classes.
         dropout: float
             Dropout probability.
-        ensemble_size: int
-            Number of members in the ensemble.
-        is_sequence_classifier: bool
-            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
-            made at every time step.
+        cells: List[nn.Cell]
+            List of cells, with one per layer.
         device: Device
             Device the model should be moved to.
         """
-        super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            is_sequence_classifier,
-            device,
-        )
-        MultiPredictionMixin.__init__(self, ensemble_size)
+        super().__init__()
+        self.cells = cells
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = 0
+        self.dropout = nn.Dropout(dropout)
+        self.device = device
 
-        self.ensemble_members = nn.ModuleList(
-            [
-                LSTMModule(
-                    num_layers,
-                    vocab_size,
-                    input_size,
-                    hidden_size,
-                    output_size,
-                    dropout,
-                    is_sequence_classifier,
-                    device,
+    def forward(
+        self,
+        input_: torch.FloatTensor,
+        hidden: Tuple[torch.FloatTensor, torch.FloatTensor],
+    ) -> Tuple[torch.FloatTensor, Tuple[torch.FloatTensor, torch.FloatTensor]]:
+        batch_size, sequence_length, _ = input_.shape
+        # Define output variables
+        new_output = torch.zeros(
+            batch_size, sequence_length, self.hidden_size, device=self.device
+        )
+
+        # Unpack hidden
+        hx, cx = hidden
+        new_hx, new_cx = torch.zeros(hx.shape), torch.zeros(cx.shape)
+
+        for t in range(sequence_length):
+            input_t = input_[:, t, :]
+
+            for layer, cell in enumerate(self.cells):
+                new_hx[layer, :], new_cx[layer, :] = cell(
+                    input_t, (hx[layer, :], cx[layer, :])
                 )
-                for _ in range(ensemble_size)
-            ]
-        )
+                input_t = self.dropout(hx[layer, :])
 
-    def _get_predictions(self, input_: torch.LongTensor):
-        return torch.stack([member(input_) for member in self.ensemble_members], dim=1)
+            new_output[:, t] = hx[-1, :, :]
 
-    def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
-        preds = self._get_predictions(input_)
-
-        return preds
-
-    def predict(
-        self,
-        input_: torch.LongTensor,
-        *args,
-        prediction_num: Optional[int] = None,
-        **kwargs
-    ) -> torch.FloatTensor:
-        if prediction_num is None:
-            logits = self._get_predictions(input_)
-
-        else:
-            logits = self.ensemble_members[prediction_num % len(self.ensemble_members)](
-                input_
-            )
-
-        preds = F.softmax(logits, dim=-1)
-
-        return preds
-
-    def to(self, device: Device):
-        """
-        Move model to another device.
-
-        Parameters
-        ----------
-        device: Device
-            Device the model should be moved to.
-        """
-        for member in self.ensemble_members:
-            member.to(device)
-
-
-class LSTMEnsemble(Model):
-    def __init__(
-        self,
-        model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
-        model_dir: Optional[str] = None,
-        device: Device = "cpu",
-    ):
-        super().__init__(
-            "lstm_ensemble",
-            LSTMEnsembleModule,
-            model_params,
-            train_params,
-            model_dir,
-            device,
-        )
+        return new_output, (new_hx, new_cx)
