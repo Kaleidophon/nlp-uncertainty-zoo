@@ -11,18 +11,25 @@ across model implementations.
 
 # STD
 from abc import ABC, abstractmethod
+from typing import Generator, Optional, Dict, Any
 import unittest
 
 # EXT
 import torch
 
 # PROJECT
-from nlp_uncertainty_zoo.config import AVAILABLE_MODELS, AVAILABLE_DATASETS
+from nlp_uncertainty_zoo.config import (
+    AVAILABLE_MODELS,
+    AVAILABLE_DATASETS,
+    MODEL_PARAMS,
+    TRAIN_PARAMS,
+)
 from nlp_uncertainty_zoo.datasets import (
     LanguageModelingDataset,
     SequenceClassificationDataset,
     DataSplit,
 )
+from nlp_uncertainty_zoo.models.model import Module, Model
 from nlp_uncertainty_zoo.utils.types import BatchedSequences
 
 # CONST
@@ -42,6 +49,7 @@ class MockDataset:
     ):
         self.num_batches = num_batches
         self.num_types = num_types
+        self.num_classes = num_types
         self.batch_size = batch_size
         self.sequence_length = sequence_length
         self.batched_sequences = self.generate_batched_sequences()
@@ -64,7 +72,7 @@ class MockLanguageModelingDataset(MockDataset):
     def generate_batched_sequences(self):
         batches = [
             torch.randint(
-                high=self.num_types, shape=(self.batch_size, self.sequence_length + 1)
+                high=self.num_types, size=(self.batch_size, self.sequence_length + 1)
             )
             for _ in range(self.num_batches)
         ]
@@ -93,9 +101,9 @@ class MockSequenceClassificationDataset(MockDataset):
         return [
             (
                 torch.randint(
-                    high=self.num_types, shape=(self.batch_size, self.sequence_length)
+                    high=self.num_types, size=(self.batch_size, self.sequence_length)
                 ),
-                torch.randint(high=self.num_classes, shape=(self.batch_size,)),
+                torch.randint(high=self.num_classes, size=(self.batch_size,)),
             )
             for _ in range(self.num_batches)
         ]
@@ -107,24 +115,77 @@ class AbstractFunctionTests(ABC):
     implemented models.
     """
 
-    def init_and_train_models(self) -> None:
-        ...  # TODO: Init and train models
+    @abstractmethod
+    @property
+    def mock_dataset(self) -> MockDataset:
+        pass
 
-    def test_module_functions(self):
+    @abstractmethod
+    @property
+    def dataset_name(self) -> str:
+        pass
+
+    @property
+    def trained_models(self) -> Generator[Model]:
+        """
+        Returns a generator of trained models to avoid having to hold all trained models in memory.
+
+        Returns
+        -------
+        Generator[Model]
+            Generator that returns one of the available models in trained form during every iteration.
+        """
+
+        def _init_and_train_model(model_name) -> Model:
+            model_params = MODEL_PARAMS[self.dataset_name][model_name]
+            train_params = TRAIN_PARAMS[self.dataset_name][model_name]
+
+            # Change some parameters to fit the test environment
+            train_params["num_epochs"] = 1
+            model_params["vocab_size"] = self.mock_dataset.num_types
+            model_params["output_size"] = self.mock_dataset.num_classes
+            model_params["is_sequence_classifier"] = isinstance(
+                self.mock_dataset, MockSequenceClassificationDataset
+            )
+
+            if "sequence_length" in model_params:
+                model_params["sequence_length"] = self.mock_dataset.sequence_length
+
+            # Init and fit model
+            model = AVAILABLE_MODELS[model_name](model_params, train_params)
+            model.fit(dataset=self.mock_dataset, verbose=False)
+
+            return model
+
+        return (
+            _init_and_train_model(model_name=model_name)
+            for model_name in AVAILABLE_MODELS.keys()
+        )
+
+    def test_all(self):
+        """
+        Test all important functionalities of all models for consistency. Check the called functions for more details.
+        """
+        for model in self.trained_models:
+            self._test_module_functions(model)
+            self._test_model_functions(model)
+            self._test_uncertainty_metrics(model)
+
+    def _test_module_functions(self, model: Model):
         """
         Test all functions implemented in the Module base class.
         """
         ...  # TODO
 
-    def test_model_functions(self):
+    def _test_model_functions(self, model: Model):
         """
         Test all functions implemented in the Model base class.
         """
         ...  # TODO
 
-    def test_uncertainty_metrics(self):
+    def _test_uncertainty_metrics(self, model: Model):
         """
-        Test all implemented uncertainty metrics.
+        Test all implemented uncertainty metrics, calling them from both the Module and Model class.
         """
         ...  # TODO
 
