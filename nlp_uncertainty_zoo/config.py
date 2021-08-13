@@ -371,7 +371,7 @@ _MODEL_PARAMS = {
             "input_dropout": 0.2,
             "dropout": 0.2,
             "num_heads": 10,
-            "sequence_length": 30,
+            "sequence_length": 35,
             "is_sequence_classifier": False,
         },
     },

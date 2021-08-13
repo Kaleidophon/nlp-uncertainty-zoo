@@ -195,8 +195,6 @@ class PositionalEmbedding(nn.Module):
         """
         super(PositionalEmbedding, self).__init__()
 
-        # TODO: This is an ugly hack: Find out why sequence lengths actually differ
-        sequence_length += 5
         positional_embeddings = torch.zeros(sequence_length, input_size)
         position = torch.arange(0, sequence_length, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(
