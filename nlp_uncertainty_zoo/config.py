@@ -38,7 +38,7 @@ AVAILABLE_DATASETS = {
     "clinc": ClincDataset,
 }
 AVAILABLE_MODELS = {
-    "composer": Composer,
+    # "composer": Composer,
     "lstm": LSTM,
     "lstm_ensemble": LSTMEnsemble,
     "variational_lstm": VariationalLSTM,

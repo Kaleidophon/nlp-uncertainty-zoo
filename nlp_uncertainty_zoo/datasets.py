@@ -492,7 +492,7 @@ class SequenceClassificationDataset(TextDataset, ABC):
         data_dir: str,
         splits: Dict[str, str],
         batch_size: int,
-        sequence_length: int,
+        sequence_length: Optional[int] = None,
         **indexing_params: Dict[str, Any],
     ):
         super().__init__(

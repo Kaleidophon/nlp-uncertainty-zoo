@@ -11,7 +11,7 @@ across model implementations.
 
 # STD
 from abc import ABC, abstractmethod
-from typing import Generator, Optional, Dict, Any
+from typing import Generator
 import unittest
 
 # EXT
@@ -20,23 +20,27 @@ import torch
 # PROJECT
 from nlp_uncertainty_zoo.config import (
     AVAILABLE_MODELS,
-    AVAILABLE_DATASETS,
     MODEL_PARAMS,
     TRAIN_PARAMS,
 )
 from nlp_uncertainty_zoo.datasets import (
+    DataSplit,
     LanguageModelingDataset,
     SequenceClassificationDataset,
-    DataSplit,
 )
-from nlp_uncertainty_zoo.models.model import Module, Model
-from nlp_uncertainty_zoo.utils.types import BatchedSequences
+from nlp_uncertainty_zoo.models.model import Model
 
 # CONST
 # Specify the datasets whose parameters are going to be used to initialize models. The datasets themselves will not be
 # used.
 TAKE_LANGUAGE_MODELING_HYPERPARAMS_FROM = "ptb"
 TAKE_SEQUENCE_CLASSIFICATION_HYPERPARAMS_FROM = "clinc"
+# Constants used for testing
+NUM_BATCHES = 4
+NUM_TYPES = 30
+NUM_CLASSES = 6
+BATCH_SIZE = 4
+SEQUENCE_LENGTH = 12
 
 
 class MockDataset:
@@ -56,18 +60,25 @@ class MockDataset:
         self.fake_split = DataSplit(self.batched_sequences)
 
         # Use this fake split for all splits
-        for split in ["train", "valid", "test"]:
-            setattr(self, split, self.fake_split)
+        self._train, self._valid, self._test = (
+            self.fake_split,
+            self.fake_split,
+            self.fake_split,
+        )
 
     @abstractmethod
     def generate_batched_sequences(self):
         pass
 
 
-class MockLanguageModelingDataset(MockDataset):
+class MockLanguageModelingDataset(LanguageModelingDataset, MockDataset):
     """
     Create a language modeling dataset.
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__("", "", {}, BATCH_SIZE)
+        MockDataset.__init__(self, *args, **kwargs)
 
     def generate_batched_sequences(self):
         batches = [
@@ -81,7 +92,7 @@ class MockLanguageModelingDataset(MockDataset):
         ]
 
 
-class MockSequenceClassificationDataset(MockDataset):
+class MockSequenceClassificationDataset(SequenceClassificationDataset, MockDataset):
     """
     Create a mock sequence classification dataset.
     """
@@ -95,7 +106,9 @@ class MockSequenceClassificationDataset(MockDataset):
         sequence_length: int,
     ):
         self.num_classes = num_classes
-        super().__init__(num_batches, num_types, batch_size, sequence_length)
+
+        super().__init__("", "", {}, BATCH_SIZE)
+        MockDataset.__init__(self, num_batches, num_types, batch_size, sequence_length)
 
     def generate_batched_sequences(self):
         return [
@@ -115,18 +128,11 @@ class AbstractFunctionTests(ABC):
     implemented models.
     """
 
-    @abstractmethod
-    @property
-    def mock_dataset(self) -> MockDataset:
-        pass
-
-    @abstractmethod
-    @property
-    def dataset_name(self) -> str:
-        pass
+    mock_dataset = None
+    dataset_name = None
 
     @property
-    def trained_models(self) -> Generator[Model]:
+    def trained_models(self) -> Generator[Model, None, None]:
         """
         Returns a generator of trained models to avoid having to hold all trained models in memory.
 
@@ -200,10 +206,17 @@ class LanguageModelingFunctionTests(AbstractFunctionTests, unittest.TestCase):
         ...  # TODO: Define target shapes
 
     def setUp(self) -> None:
-        ...  # TODO: Init dataset
-        ...  # TODO: Init models
+        self.mock_dataset = MockLanguageModelingDataset(
+            num_batches=NUM_BATCHES,
+            num_types=NUM_TYPES,
+            batch_size=BATCH_SIZE,
+            sequence_length=SEQUENCE_LENGTH,
+        )
+        self.dataset_name = TAKE_LANGUAGE_MODELING_HYPERPARAMS_FROM
 
 
+# TODO: Re-add this
+'''
 class SequenceClassificationFunctionTests(AbstractFunctionTests, unittest.TestCase):
     """
     Test all important model functionalities for a sequuence classification dataset.
@@ -214,5 +227,12 @@ class SequenceClassificationFunctionTests(AbstractFunctionTests, unittest.TestCa
         ...  # TODO: Define target shapes
 
     def setUp(self) -> None:
-        ...  # TODO: Init dataset
-        ...  # TODO: Init models
+        self.mock_dataset = MockSequenceClassificationDataset(
+            num_batches=NUM_BATCHES,
+            num_types=NUM_TYPES,
+            num_classes=NUM_CLASSES,
+            batch_size=BATCH_SIZE,
+            sequence_length=SEQUENCE_LENGTH
+        )
+        self.dataset_name = TAKE_SEQUENCE_CLASSIFICATION_HYPERPARAMS_FROM
+'''
