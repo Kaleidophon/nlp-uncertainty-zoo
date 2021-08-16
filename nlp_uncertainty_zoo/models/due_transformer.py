@@ -14,6 +14,7 @@ from einops import rearrange
 from gpytorch.likelihoods import SoftmaxLikelihood
 from gpytorch.mlls import VariationalELBO
 from torch import nn as nn
+import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
@@ -242,13 +243,17 @@ class DUETransformer(Model):
         return super().fit(dataset, validate, verbose, summary_writer)
 
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+        batch_size = X.shape[0]
 
         with torch.no_grad():
             out = self.module(X)
             out = self.module.likelihood(out)
             out = out.logits.mean(dim=0)
 
-        return out
+        out = rearrange(out, "(b t) p -> b t p", b=batch_size)
+        preds = F.softmax(out, dim=-1)
+
+        return preds
 
     def get_loss(
         self,
@@ -276,7 +281,9 @@ class DUETransformer(Model):
         torch.Tensor
             Batch loss.
         """
-        # TODO: This needs to be adapted for language modelling
+        if not self.module.is_sequence_classifier:
+            y = rearrange(y, "b t -> (b t)")
+
         preds = self.module(X)
         loss = -self.module.loss_function(preds, y)
 

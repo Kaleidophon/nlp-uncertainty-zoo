@@ -7,6 +7,7 @@ from typing import Dict, Any, Optional
 
 # EXT
 import torch
+import torch.nn.functional as F
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model, MultiPredictionMixin
@@ -82,7 +83,13 @@ class VariationalTransformerModule(TransformerModule, MultiPredictionMixin):
         )
         MultiPredictionMixin.__init__(self, num_predictions)
 
-    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def get_logits(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        num_predictions: Optional[int] = None,
+        **kwargs
+    ) -> torch.FloatTensor:
         """
         Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
         num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
@@ -92,17 +99,32 @@ class VariationalTransformerModule(TransformerModule, MultiPredictionMixin):
         ----------
         input_: torch.LongTensor
             (Batch of) Indexed input sequences.
+        num_predictions: Optional[int]
+            Number of predictions (number of forward passes).
 
         Returns
         -------
         torch.FloatTensor
             Logits for current input.
         """
+        if not num_predictions:
+            num_predictions = self.num_predictions
+
         logits = torch.stack(
-            [self.get_logits(input_) for _ in range(self.num_predictions)], dim=1
+            [
+                TransformerModule.get_logits(self, input_, *args, **kwargs)
+                for _ in range(num_predictions)
+            ],
+            dim=1,
         )
 
         return logits
+
+    def predict(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
+        logits = self.get_logits(input_, *args, **kwargs)
+        preds = F.softmax(logits, dim=-1).mean(dim=1)
+
+        return preds
 
     def eval(self, *args):
         super().eval()

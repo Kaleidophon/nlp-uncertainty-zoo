@@ -70,7 +70,7 @@ TRAIN_PARAMS = {
 # Hyperparameters by dataset and model
 SHARED_MODEL_PARAMS = {
     "wikitext-103": configs.WIKITEXT_SHARED_MODEL_PARAMS,
-    "ptb": configs.PTB_MODEL_PARAMS,
+    "ptb": configs.PTB_SHARED_MODEL_PARAMS,
     "clinc": configs.CLINC_SHARED_MODEL_PARAMS,
 }
 _MODEL_PARAMS = {

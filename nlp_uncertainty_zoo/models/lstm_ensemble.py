@@ -85,30 +85,17 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
             ]
         )
 
-    def _get_predictions(self, input_: torch.LongTensor):
+    def get_logits(self, input_: torch.LongTensor):
         return torch.stack([member(input_) for member in self.ensemble_members], dim=1)
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
-        preds = self._get_predictions(input_)
+        preds = self.get_logits(input_).mean(dim=1)
 
         return preds
 
-    def predict(
-        self,
-        input_: torch.LongTensor,
-        *args,
-        prediction_num: Optional[int] = None,
-        **kwargs
-    ) -> torch.FloatTensor:
-        if prediction_num is None:
-            logits = self._get_predictions(input_)
-
-        else:
-            logits = self.ensemble_members[prediction_num % len(self.ensemble_members)](
-                input_
-            )
-
-        preds = F.softmax(logits, dim=-1)
+    def predict(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
+        preds = Module.predict(self, input_, *args, **kwargs)
+        preds = preds.mean(dim=1)
 
         return preds
 
@@ -123,6 +110,23 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         """
         for member in self.ensemble_members:
             member.to(device)
+
+    @staticmethod
+    def get_sequence_representation(hidden: torch.FloatTensor) -> torch.FloatTensor:
+        """
+        Create a sequence representation from an ensemble of LSTMs.
+
+        Parameters
+        ----------
+        hidden: torch.FloatTensor
+            Hidden states of a model for a sequence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        return hidden[:, :, -1, :]
 
 
 class LSTMEnsemble(Model):

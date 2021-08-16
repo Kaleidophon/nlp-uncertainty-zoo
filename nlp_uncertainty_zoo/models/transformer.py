@@ -116,7 +116,9 @@ class TransformerModule(Module):
 
         return hidden
 
-    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def get_logits(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
         """
         Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
         num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty

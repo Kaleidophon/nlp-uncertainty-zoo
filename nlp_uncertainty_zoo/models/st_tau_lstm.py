@@ -138,7 +138,13 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
             device,
         )
 
-    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def get_logits(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        num_predictions: Optional[int] = None,
+        **kwargs
+    ) -> torch.FloatTensor:
         """
         Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
         num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
@@ -148,16 +154,27 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
         ----------
         input_: torch.LongTensor
             (Batch of) Indexed input sequences.
+        num_predictions: Optional[int]
+            Number of predictions (forward passes) used to make predictions.
 
         Returns
         -------
         torch.FloatTensor
             Logits for current input.
         """
-        out = [self.forward(input_) for _ in range(self.num_predictions)]
+        if not num_predictions:
+            num_predictions = self.num_predictions
+
+        out = [self.forward(input_) for _ in range(num_predictions)]
         out = torch.stack(out, dim=1)
 
         return out
+
+    def predict(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
+        logits = self.get_logits(input_, *args, **kwargs)
+        preds = F.softmax(logits, dim=-1).mean(dim=1)
+
+        return preds
 
 
 class STTauLSTM(Model):

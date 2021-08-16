@@ -107,7 +107,9 @@ class Module(ABC, nn.Module):
         pass
 
     @abstractmethod
-    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def get_logits(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
         """
         Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
         num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
@@ -140,7 +142,7 @@ class Module(ABC, nn.Module):
         torch.FloatTensor
             Logits for current input.
         """
-        logits = self.get_logits(input_)
+        logits = self.get_logits(input_, *args, **kwargs)
         probabilities = F.softmax(logits, dim=-1)
 
         return probabilities
@@ -241,44 +243,6 @@ class MultiPredictionMixin:
             }
         )
         self.default_uncertainty_metric = "predictive_entropy"
-        self.single_predict = self.predict
-
-    def predict(
-        self, X: torch.Tensor, num_predictions: Optional[int] = None, *args, **kwargs
-    ) -> torch.Tensor:
-        """
-        Make a prediction for some input.
-
-        Parameters
-        ----------
-        X: torch.Tensor
-            Input data points.
-        num_predictions: int
-            Number of predictions. In this case, equivalent to multiple forward passes with different dropout masks.
-            If None, the attribute of the same name set during initialization is used.
-
-        Returns
-        -------
-        torch.Tensor
-            Predictions.
-        """
-        if num_predictions is None:
-            num_predictions = self.num_predictions
-
-        X = X.to(self.device)
-
-        batch_size, seq_len = X.shape
-        preds = torch.zeros(batch_size, seq_len, self.output_size, device=self.device)
-
-        with torch.no_grad():
-            for prediction_num in range(num_predictions):
-                preds += self.single_predict(
-                    X, *args, prediction_num=prediction_num, **kwargs
-                )
-
-            preds /= num_predictions
-
-        return preds
 
 
 class Model(ABC):

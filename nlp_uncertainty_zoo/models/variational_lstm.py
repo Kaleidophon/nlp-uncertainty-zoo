@@ -237,11 +237,11 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
         # Make sure that the same hidden state from the last batch is used for all forward passes
         # Init hidden state - continue with hidden states from last batch
-        hidden_states = self.module.last_hidden_states
+        hidden_states = self.last_hidden_states
 
         # This would e.g. happen when model is switched from train() to eval() - init hidden states with zeros
         if hidden_states is None:
-            hidden_states = self.module.init_hidden_states(batch_size, self.device)
+            hidden_states = self.init_hidden_states(batch_size, self.device)
 
         logits = self.forward(input_, hidden_states)
         preds = F.softmax(logits, dim=-1)

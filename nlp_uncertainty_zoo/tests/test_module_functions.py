@@ -142,7 +142,8 @@ class AbstractFunctionTests(ABC):
             Generator that returns one of the available models in trained form during every iteration.
         """
 
-        def _init_and_train_model(model_name) -> Model:
+        def _init_and_train_model(model_name: str) -> Model:
+            print(model_name)  # TODO: Debug
             model_params = MODEL_PARAMS[self.dataset_name][model_name]
             train_params = TRAIN_PARAMS[self.dataset_name][model_name]
 
