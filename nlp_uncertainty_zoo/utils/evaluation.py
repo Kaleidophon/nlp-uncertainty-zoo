@@ -74,9 +74,9 @@ def evaluate(
         seq_len = 1 if dataset_type == SequenceClassificationDataset else X.shape[1]
         X, y = X.to(model.device), y.to(model.device)
         predictions = model.predict(X)
+        predictions = rearrange(predictions, "b t p -> (b t) p")
 
         if dataset_type == LanguageModelingDataset:
-            predictions = rearrange(predictions, "b t p -> (b t) p")
             y = rearrange(y, "b l -> (b l)")
 
         scores = eval_func(predictions, y)

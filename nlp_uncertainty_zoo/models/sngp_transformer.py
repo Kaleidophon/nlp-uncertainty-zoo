@@ -424,7 +424,8 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         if not num_predictions:
             num_predictions = self.num_predictions
 
-        batch_size, sequence_length = input_.shape
+        batch_size = input_.shape[0]
+        sequence_length = input_.shape[1] if not self.is_sequence_classifier else 1
         out = self.get_hidden(input_)
         out = rearrange(out, "b t p -> (b t) p")
         out = self.sngp_layer.get_logits(out, num_predictions=num_predictions)

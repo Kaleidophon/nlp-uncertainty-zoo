@@ -306,16 +306,10 @@ class LanguageModelingFunctionTests(AbstractFunctionTests):
         self.uncertainty_scores_shape = torch.Size((BATCH_SIZE, SEQUENCE_LENGTH))
 
 
-# TODO: Re-add this
-'''
-class SequenceClassificationFunctionTests(AbstractFunctionTests, unittest.TestCase):
+class SequenceClassificationFunctionTests(AbstractFunctionTests):
     """
     Test all important model functionalities for a sequuence classification dataset.
     """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        ...  # TODO: Define target shapes
 
     def setUp(self) -> None:
         self.mock_dataset = MockSequenceClassificationDataset(
@@ -323,7 +317,11 @@ class SequenceClassificationFunctionTests(AbstractFunctionTests, unittest.TestCa
             num_types=NUM_TYPES,
             num_classes=NUM_CLASSES,
             batch_size=BATCH_SIZE,
-            sequence_length=SEQUENCE_LENGTH
+            sequence_length=SEQUENCE_LENGTH,
         )
         self.dataset_name = TAKE_SEQUENCE_CLASSIFICATION_HYPERPARAMS_FROM
-'''
+
+        # Target shapes
+        self.logit_shape = torch.Size((BATCH_SIZE, 1, NUM_TYPES))
+        self.logit_multi_shape = torch.Size((BATCH_SIZE, NUM_PREDICTIONS, 1, NUM_TYPES))
+        self.uncertainty_scores_shape = torch.Size((BATCH_SIZE, 1))
