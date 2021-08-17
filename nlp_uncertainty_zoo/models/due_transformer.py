@@ -171,7 +171,26 @@ class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin):
 
         return mvn
 
-    def get_logits(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def predict(self, input_: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+        batch_size = input_.shape[0]
+
+        with torch.no_grad():
+            out = self.forward(input_)
+            out = self.likelihood(out)
+            out = out.logits.mean(dim=0)
+
+        out = rearrange(out, "(b t) p -> b t p", b=batch_size)
+        preds = F.softmax(out, dim=-1)
+
+        return preds
+
+    def get_logits(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        num_predictions: Optional[int] = None,
+        **kwargs
+    ) -> torch.FloatTensor:
         """
         Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
         num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
@@ -181,18 +200,23 @@ class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         ----------
         input_: torch.LongTensor
             (Batch of) Indexed input sequences.
+        num_predictions: Optional[int]
+            Number of samples used to make predictions.
 
         Returns
         -------
         torch.FloatTensor
             Logits for current input.
         """
+        if not num_predictions:
+            num_predictions = self.num_predictions
+
         batch_size = input_.shape[0]
 
         mvn = self.forward(input_)
-        predictions = mvn.sample(sample_shape=torch.Size((self.num_predictions,)))
+        predictions = mvn.sample(sample_shape=torch.Size((num_predictions,)))
         predictions = rearrange(
-            predictions, "n (b s) o  -> b n s o", b=batch_size, n=self.num_predictions
+            predictions, "n (b s) o  -> b n s o", b=batch_size, n=num_predictions
         )
 
         return predictions
@@ -243,17 +267,7 @@ class DUETransformer(Model):
         return super().fit(dataset, validate, verbose, summary_writer)
 
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
-        batch_size = X.shape[0]
-
-        with torch.no_grad():
-            out = self.module(X)
-            out = self.module.likelihood(out)
-            out = out.logits.mean(dim=0)
-
-        out = rearrange(out, "(b t) p -> b t p", b=batch_size)
-        preds = F.softmax(out, dim=-1)
-
-        return preds
+        return self.module.predict(X, *args, **kwargs)
 
     def get_loss(
         self,

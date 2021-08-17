@@ -154,8 +154,8 @@ class TransformerModule(Module):
         torch.FloatTensor
             Representation for the current sequence.
         """
-        hidden = hidden[:, 0, :]
-        hidden = torch.tanh(self.pooler(hidden)).unsqueeze(1)
+        hidden = hidden[:, 0, :].unsqueeze(1)
+        hidden = torch.tanh(self.pooler(hidden))
 
         return hidden
 

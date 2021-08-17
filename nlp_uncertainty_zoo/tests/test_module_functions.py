@@ -29,7 +29,8 @@ from nlp_uncertainty_zoo.datasets import (
     LanguageModelingDataset,
     SequenceClassificationDataset,
 )
-from nlp_uncertainty_zoo.models.model import Model
+from nlp_uncertainty_zoo.models.model import Model, MultiPredictionMixin
+from nlp_uncertainty_zoo.models import TransformerModule
 
 # CONST
 # Specify the datasets whose parameters are going to be used to initialize models. The datasets themselves will not be
@@ -67,6 +68,7 @@ class MockDataset:
             self.fake_split,
             self.fake_split,
         )
+        self.mock_input = self.batched_sequences[0][0]
 
     @abstractmethod
     def generate_batched_sequences(self):
@@ -124,7 +126,7 @@ class MockSequenceClassificationDataset(SequenceClassificationDataset, MockDatas
         ]
 
 
-class AbstractFunctionTests(ABC):
+class AbstractFunctionTests(unittest.TestCase, ABC):
     """
     Abstract base class, implementing all tests to check important model functions and their consistency across \
     implemented models.
@@ -132,6 +134,9 @@ class AbstractFunctionTests(ABC):
 
     mock_dataset = None
     dataset_name = None
+    logit_shape = None
+    logit_multi_shape = None
+    uncertainty_scores_shape = None
 
     @property
     def trained_models(self) -> Generator[Model, None, None]:
@@ -145,6 +150,7 @@ class AbstractFunctionTests(ABC):
         """
 
         def _init_and_train_model(model_name: str) -> Model:
+
             model_params = MODEL_PARAMS[self.dataset_name][model_name]
             train_params = TRAIN_PARAMS[self.dataset_name][model_name]
 
@@ -167,13 +173,16 @@ class AbstractFunctionTests(ABC):
 
         return (
             _init_and_train_model(model_name=model_name)
-            for model_name in AVAILABLE_MODELS.keys()
+            for model_name in list(AVAILABLE_MODELS.keys())
         )
 
     def test_all(self):
         """
         Test all important functionalities of all models for consistency. Check the called functions for more details.
         """
+        if self.dataset_name is None:
+            return
+
         with tqdm(total=len(AVAILABLE_MODELS)) as progress_bar:
             for model_class, trained_model in zip(
                 AVAILABLE_MODELS.values(), self.trained_models
@@ -181,7 +190,6 @@ class AbstractFunctionTests(ABC):
                 progress_bar.set_description(f'Testing model "{model_class.__name__}"')
 
                 self._test_module_functions(trained_model)
-                self._test_model_functions(trained_model)
                 self._test_uncertainty_metrics(trained_model)
 
                 progress_bar.update(1)
@@ -190,22 +198,65 @@ class AbstractFunctionTests(ABC):
         """
         Test all functions implemented in the Module base class.
         """
-        ...  # TODO
+        # Pick the right expected logit shape depending on whether model produces multiple predictions
+        logit_shape = (
+            self.logit_shape
+            if not isinstance(model.module, MultiPredictionMixin)
+            else self.logit_multi_shape
+        )
+        mock_input = self.mock_dataset.mock_input
 
-    def _test_model_functions(self, model: Model):
-        """
-        Test all functions implemented in the Model base class.
-        """
-        ...  # TODO
+        # Test get_logits()
+        logits = model.module.get_logits(mock_input, num_predictions=NUM_PREDICTIONS)
+        self.assertTrue(logits.shape == logit_shape)
+
+        # Test predict()
+        predictions_module = model.module.predict(mock_input)
+        self.assertTrue(predictions_module.shape == self.logit_shape)
+        self.assertTrue(
+            torch.allclose(
+                predictions_module.sum(dim=-1), torch.ones(BATCH_SIZE, SEQUENCE_LENGTH)
+            )
+        )
+
+        predictions_model = model.predict(mock_input)
+        self.assertTrue(predictions_model.shape == self.logit_shape)
+        self.assertTrue(
+            torch.allclose(
+                predictions_model.sum(dim=-1), torch.ones(BATCH_SIZE, SEQUENCE_LENGTH)
+            )
+        )
+
+        # Test get_sequence_representation()
+        hidden, target_size = self._generate_hidden_and_target(
+            model, BATCH_SIZE, SEQUENCE_LENGTH
+        )
+        seq_repr = model.module.get_sequence_representation(hidden)
+        self.assertTrue(seq_repr.shape == target_size)
 
     def _test_uncertainty_metrics(self, model: Model):
         """
         Test all implemented uncertainty metrics, calling them from both the Module and Model class.
         """
+        # Test default uncertainty metric
         ...  # TODO
 
+        # Test all available uncertainty metrics through Model and Module
+        ...  # TODO
 
-class LanguageModelingFunctionTests(AbstractFunctionTests, unittest.TestCase):
+    @staticmethod
+    def _generate_hidden_and_target(model: Model, batch_size: int, sequence_length):
+        repr_size = (
+            model.module.hidden_size
+            if not isinstance(model.module, TransformerModule)
+            else model.module.input_size
+        )
+        return torch.randn((batch_size, sequence_length, repr_size)), torch.Size(
+            (batch_size, 1, repr_size)
+        )
+
+
+class LanguageModelingFunctionTests(AbstractFunctionTests):
     """
     Test all important model functionalities for a language modeling dataset.
     """

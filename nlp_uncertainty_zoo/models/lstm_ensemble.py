@@ -3,6 +3,7 @@ Implementation of an ensemble of LSTMs.
 """
 
 # STD
+from itertools import cycle, islice
 from typing import Optional, Dict, Any
 
 # EXT
@@ -85,8 +86,24 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
             ]
         )
 
-    def get_logits(self, input_: torch.LongTensor):
-        return torch.stack([member(input_) for member in self.ensemble_members], dim=1)
+    def get_logits(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        num_predictions: Optional[int] = None,
+        **kwargs
+    ):
+
+        if num_predictions is None:
+            q, r = 1, 0
+        else:
+            q, r = divmod(num_predictions, len(self.ensemble_members))
+
+        members = list(self.ensemble_members._modules.values())
+
+        return torch.stack(
+            [member(input_) for member in q * members + members[:r]], dim=1
+        )
 
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         preds = self.get_logits(input_).mean(dim=1)
@@ -126,7 +143,7 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         torch.FloatTensor
             Representation for the current sequence.
         """
-        return hidden[:, :, -1, :]
+        return hidden[:, -1, :].unsqueeze(1)
 
 
 class LSTMEnsemble(Model):
