@@ -174,7 +174,11 @@ class DDUTransformerModule(SpectralTransformerModule):
         return probs
 
     def get_uncertainty(
-        self, input_: torch.LongTensor, metric_name: Optional[str] = None
+        self,
+        input_: torch.LongTensor,
+        *args,
+        metric_name: Optional[str] = None,
+        **kwargs
     ) -> torch.FloatTensor:
         """
         Get the uncertainty scores for the current batch.
@@ -199,7 +203,7 @@ class DDUTransformerModule(SpectralTransformerModule):
                 return self.gmm_predict(input_)
 
         else:
-            super().get_uncertainty(input_, metric_name)
+            return super().get_uncertainty(input_, metric_name)
 
 
 class DDUTransformer(Model):
@@ -241,3 +245,4 @@ class DDUTransformer(Model):
         """
         self.module.eval()  # Disable dropout
         self.module.gmm_fit(data_split)
+        self.module.train()

@@ -231,7 +231,7 @@ PTB_MODEL_PARAMS = {
         "time_dropout": 0.3,  # dropout_h, Large model Gal & Ghrahramani (2016)
         "vocab_size": 10001,
         "output_size": 10001,
-        "num_predictions": 250,  # Changed from 1000 because that's just excessive
+        "num_predictions": 10,  # Changed from 1000 because that's just excessive
     },
     "composer": {
         "num_layers": 4,

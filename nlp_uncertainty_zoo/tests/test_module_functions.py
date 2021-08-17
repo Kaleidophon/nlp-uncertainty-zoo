@@ -238,11 +238,39 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
         """
         Test all implemented uncertainty metrics, calling them from both the Module and Model class.
         """
+        mock_input = self.mock_dataset.mock_input
+
         # Test default uncertainty metric
-        ...  # TODO
+        uncertainty_scores_model = model.get_uncertainty(
+            mock_input, num_prediction=NUM_PREDICTIONS
+        )
+        self.assertTrue(uncertainty_scores_model.shape == self.uncertainty_scores_shape)
+
+        uncertainty_scores_module = model.module.get_uncertainty(
+            mock_input, num_prediction=NUM_PREDICTIONS
+        )
+        self.assertTrue(
+            uncertainty_scores_module.shape == self.uncertainty_scores_shape
+        )
 
         # Test all available uncertainty metrics through Model and Module
-        ...  # TODO
+        metrics = list(model.module.single_prediction_uncertainty_metrics) + list(
+            model.module.multi_prediction_uncertainty_metrics
+        )
+        for metric_name in metrics:
+            uncertainty_scores_model = model.get_uncertainty(
+                mock_input, metric_name, num_prediction=NUM_PREDICTIONS
+            )
+            self.assertTrue(
+                uncertainty_scores_model.shape == self.uncertainty_scores_shape
+            )
+
+            uncertainty_scores_module = model.module.get_uncertainty(
+                mock_input, metric_name, num_prediction=NUM_PREDICTIONS
+            )
+            self.assertTrue(
+                uncertainty_scores_module.shape == self.uncertainty_scores_shape
+            )
 
     @staticmethod
     def _generate_hidden_and_target(model: Model, batch_size: int, sequence_length):

@@ -24,8 +24,8 @@ def max_prob(logits: torch.FloatTensor) -> torch.FloatTensor:
     torch.FloatTensor
         Max. prob. values for the current batch.
     """
-    probs = torch.softmax(logits, dim=2)
-    max_prob = 1 - torch.max(probs, dim=2)[0]
+    probs = torch.softmax(logits, dim=-1)
+    max_prob = 1 - torch.max(probs, dim=-1)[0]
 
     return max_prob
 
@@ -44,8 +44,8 @@ def predictive_entropy(logits: torch.FloatTensor) -> torch.FloatTensor:
     torch.FloatTensor
         Predictive entropy for the current batch.
     """
-    probs = torch.softmax(logits, dim=2)
-    pred_entropy = -(probs * torch.log(probs)).sum(dim=2)
+    probs = torch.softmax(logits, dim=-1)
+    pred_entropy = -(probs * torch.log(probs)).sum(dim=-1)
 
     return pred_entropy
 
@@ -68,7 +68,7 @@ def dempster_shafer(logits: torch.FloatTensor) -> torch.FloatTensor:
     """
     num_classes = logits.shape[2]
 
-    return num_classes / num_classes + torch.exp(logits).sum(dim=2)
+    return num_classes / num_classes + torch.exp(logits).sum(dim=-1)
 
 
 def variance(logits: torch.FloatTensor) -> torch.FloatTensor:
@@ -86,8 +86,8 @@ def variance(logits: torch.FloatTensor) -> torch.FloatTensor:
     torch.FloatTensor
         Variance in predictions for the current batch.
     """
-    probs = torch.softmax(logits, dim=3)
-    var = torch.var(probs, dim=1)
+    probs = torch.softmax(logits, dim=-1)
+    var = torch.var(probs, dim=1).mean(dim=-1)
 
     return var
 
@@ -109,9 +109,9 @@ def mutual_information(logits: torch.FloatTensor) -> torch.FloatTensor:
     torch.FloatTensor
        Mutual information for the current batch.
     """
-    probs = torch.softmax(logits, dim=3)
-    mutual_info = -(probs.mean(dim=1) * torch.log(probs.mean(dim=1))).sum(dim=2) + (
+    probs = torch.softmax(logits, dim=-1)
+    mutual_info = -(probs.mean(dim=1) * torch.log(probs.mean(dim=1))).sum(dim=-1) + (
         probs * torch.log(probs)
-    ).sum(dim=2).mean(dim=1)
+    ).sum(dim=-1).mean(dim=1)
 
     return mutual_info

@@ -169,7 +169,11 @@ class Module(ABC, nn.Module):
         pass
 
     def get_uncertainty(
-        self, input_: torch.LongTensor, metric_name: Optional[str] = None
+        self,
+        input_: torch.LongTensor,
+        *args,
+        metric_name: Optional[str] = None,
+        **kwargs,
     ) -> torch.FloatTensor:
         """
         Get the uncertainty scores for the current batch.
@@ -190,13 +194,13 @@ class Module(ABC, nn.Module):
         if metric_name is None:
             metric_name = self.default_uncertainty_metric
 
-        logits = self.get_logits(input_)
+        logits = self.get_logits(input_, *args, **kwargs)
 
         with torch.no_grad():
             if metric_name in self.single_prediction_uncertainty_metrics:
 
                 # When model produces multiple predictions, average over them
-                if logits.shape == 4:
+                if len(logits.shape) == 4:
                     logits = logits.mean(dim=1)
 
                 return self.single_prediction_uncertainty_metrics[metric_name](logits)
@@ -242,7 +246,7 @@ class MultiPredictionMixin:
                 "mutual_information": metrics.mutual_information,
             }
         )
-        self.default_uncertainty_metric = "predictive_entropy"
+        self.default_uncertainty_metric = "variance"
 
 
 class Model(ABC):
@@ -434,6 +438,31 @@ class Model(ABC):
         X = X.to(self.device)
 
         return self.module.predict(X, *args, **kwargs)
+
+    def get_uncertainty(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        metric_name: Optional[str] = None,
+        **kwargs,
+    ) -> torch.FloatTensor:
+        """
+        Get the uncertainty scores for the current batch.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+        metric_name: Optional[str]
+            Name of uncertainty metric being used. If None, use metric defined under the default_uncertainty_metric
+            attribute.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Uncertainty scores for the current batch.
+        """
+        return self.module.get_uncertainty(input_, metric_name, *args, **kwargs)
 
     def eval(self, data_split: DataSplit) -> torch.Tensor:
         """
