@@ -12,8 +12,10 @@ from einops import rearrange
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
+from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
+from nlp_uncertainty_zoo.datasets import DataSplit
 from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.types import Device
@@ -453,3 +455,11 @@ class SNGPTransformer(Model):
             model_dir,
             device,
         )
+
+    def _finetune(
+        self,
+        data_split: DataSplit,
+        verbose: bool,
+        summary_writer: Optional[SummaryWriter] = None,
+    ):
+        self.module.sngp_layer.invert_sigma_hat()

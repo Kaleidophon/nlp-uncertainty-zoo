@@ -16,6 +16,7 @@ import unittest
 
 # EXT
 import torch
+from tqdm import tqdm
 
 # PROJECT
 from nlp_uncertainty_zoo.config import (
@@ -39,6 +40,7 @@ TAKE_SEQUENCE_CLASSIFICATION_HYPERPARAMS_FROM = "clinc"
 NUM_BATCHES = 4
 NUM_TYPES = 30
 NUM_CLASSES = 6
+NUM_PREDICTIONS = 5
 BATCH_SIZE = 4
 SEQUENCE_LENGTH = 12
 
@@ -143,7 +145,6 @@ class AbstractFunctionTests(ABC):
         """
 
         def _init_and_train_model(model_name: str) -> Model:
-            print(model_name)  # TODO: Debug
             model_params = MODEL_PARAMS[self.dataset_name][model_name]
             train_params = TRAIN_PARAMS[self.dataset_name][model_name]
 
@@ -173,10 +174,17 @@ class AbstractFunctionTests(ABC):
         """
         Test all important functionalities of all models for consistency. Check the called functions for more details.
         """
-        for model in self.trained_models:
-            self._test_module_functions(model)
-            self._test_model_functions(model)
-            self._test_uncertainty_metrics(model)
+        with tqdm(total=len(AVAILABLE_MODELS)) as progress_bar:
+            for model_class, trained_model in zip(
+                AVAILABLE_MODELS.values(), self.trained_models
+            ):
+                progress_bar.set_description(f'Testing model "{model_class.__name__}"')
+
+                self._test_module_functions(trained_model)
+                self._test_model_functions(trained_model)
+                self._test_uncertainty_metrics(trained_model)
+
+                progress_bar.update(1)
 
     def _test_module_functions(self, model: Model):
         """
@@ -202,10 +210,6 @@ class LanguageModelingFunctionTests(AbstractFunctionTests, unittest.TestCase):
     Test all important model functionalities for a language modeling dataset.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        ...  # TODO: Define target shapes
-
     def setUp(self) -> None:
         self.mock_dataset = MockLanguageModelingDataset(
             num_batches=NUM_BATCHES,
@@ -214,6 +218,13 @@ class LanguageModelingFunctionTests(AbstractFunctionTests, unittest.TestCase):
             sequence_length=SEQUENCE_LENGTH,
         )
         self.dataset_name = TAKE_LANGUAGE_MODELING_HYPERPARAMS_FROM
+
+        # Target shapes
+        self.logit_shape = torch.Size((BATCH_SIZE, SEQUENCE_LENGTH, NUM_TYPES))
+        self.logit_multi_shape = torch.Size(
+            (BATCH_SIZE, NUM_PREDICTIONS, SEQUENCE_LENGTH, NUM_TYPES)
+        )
+        self.uncertainty_scores_shape = torch.Size((BATCH_SIZE, SEQUENCE_LENGTH))
 
 
 # TODO: Re-add this
