@@ -5,6 +5,7 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 # TODO: Add tokenizers
 
 # EXT
+from ray import tune
 from scipy.stats import uniform
 
 # PROJECT
@@ -113,5 +114,8 @@ PARAM_SEARCH = {
         "variational_transformer": {},
         "sngp_transformer": {},
         "ddu_transformer": {},
-    }
+    },
+    "ptb": {
+        "lstm": {"dropout": tune.uniform(0.1, 0.4)},
+    },
 }
