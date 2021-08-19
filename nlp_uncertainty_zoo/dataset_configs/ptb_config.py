@@ -19,7 +19,7 @@ PTB_TRAIN_PARAMS = {
     "lstm": {
         "early_stopping": True,
         "weight_decay": 0,
-        "lr": 1,
+        "lr": 2,
         "num_epochs": 1,  # Changed from 55 in original
         # "early_stopping_pat": 10,
         "grad_clip": 10,
