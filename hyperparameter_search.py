@@ -8,7 +8,7 @@ from datetime import datetime
 from functools import partial
 import json
 import os
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 # EXT
 from codecarbon import OfflineEmissionsTracker
@@ -29,6 +29,8 @@ from nlp_uncertainty_zoo.config import (
     PARAM_SEARCH,
 )
 from nlp_uncertainty_zoo.utils.evaluation import evaluate
+from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.datasets import Dataset
 
 # CONST
 SEED = 123
@@ -87,12 +89,43 @@ def perform_hyperparameter_search(
     _, _ = dataset.train, dataset.valid
 
     def _init_and_train_model(
-        config, model_name, train_params, device, dataset=None, checkpoint_dir=None
+        config: Dict[str, Any],
+        model_name: str,
+        train_params: Dict[str, Any],
+        device: Device,
+        dataset: Optional[Dataset] = None,
+        checkpoint_dir: Optional[str] = None,
     ):
+        """
+        Initialize and train a model for hyperparameter search.
+
+        Parameters
+        ----------
+        config: Dict[str, Any]
+            Dictionary of model parameters, including some training parameters that should be optimized.
+        model_name: str
+            Name of model.
+        train_params: Dict[str, Any]
+            Dictionary of training parameters.
+        device: Device
+            Device the model is being trained on.
+        dataset: Dataset
+            The dataset the model is being trained and evaluated on.
+        checkpoint_dir: Optional[str]
+            Checkpoint directory. Intentionally set to None so no checkpoints will be made.
+        """
+        # Because I divide the config in model_params and train_params, but rays.tune only uses a single config,
+        # just push train_params that are supposed to be tuned (e.g. the learning rate) into config, then remove
+        # them here and overwrite the default param values in train_params
+        for param_name, param_value in config.items():
+            if param_name in train_params:
+                train_params[param_name] = param_value
+                del config[param_name]
+
         model = AVAILABLE_MODELS[model_name](config, train_params, device=device)
 
         for epoch in range(train_params["num_epochs"]):
-            model.epoch_iter(epoch, dataset.train, validate=False)
+            model.epoch_iter(epoch, dataset.train)
             val_score = evaluate(model, dataset, dataset.valid)
             tune.report(val_score=val_score)
 
@@ -106,16 +139,16 @@ def perform_hyperparameter_search(
             config.update(PARAM_SEARCH[dataset_name][model_name])
 
             scheduler = ASHAScheduler(
-                metric="val_score",
-                mode="min",
                 max_t=max_num_epochs,
                 grace_period=1,
                 reduction_factor=2,
             )
-            bayesopt = BayesOptSearch(metric="val_score", mode="min")
+            # bayesopt = BayesOptSearch()
 
             analysis = tune.run(
+                # Wrap function using tune.with_parameters to avoid sending errors due to dataset size
                 tune.with_parameters(
+                    # Use partial to create a function that only has a config and checkpoint_dir argument
                     partial(
                         _init_and_train_model,
                         model_name=model_name,
@@ -126,12 +159,12 @@ def perform_hyperparameter_search(
                 ),
                 config=config,
                 num_samples=NUM_EVALS[dataset_name][model_name],
-                mode="min",
-                metric="val_score",
                 reuse_actors=True,
                 scheduler=scheduler,
-                search_alg=bayesopt,
+                # search_alg=bayesopt,
                 verbose=3,
+                metric="val_score",
+                mode="min",
             )
 
             # Add info for knockknock bot
@@ -148,8 +181,6 @@ def perform_hyperparameter_search(
             )
 
             progress_bar.update(1)
-
-            # TODO: Determine optimization algorithm
 
     if tracker is not None:
         tracker.stop()

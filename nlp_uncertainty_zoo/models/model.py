@@ -71,6 +71,8 @@ class Module(ABC, nn.Module):
         build_params: Dict[str, Any]
             Dictionary containing additional parameters used to set up the architecture.
         """
+        super().__init__()
+
         self.num_layers = num_layers
         self.vocab_size = vocab_size
         self.input_size = input_size
