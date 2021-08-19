@@ -12,6 +12,7 @@ tqdm
 git+https://github.com/y0ast/DUE.git
 blitz-bayesian-pytorch
 gpytorch
+bayesian-optimization
 ray[default]
 ray[tune]
 ray[rllib]

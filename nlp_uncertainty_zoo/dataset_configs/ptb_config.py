@@ -19,8 +19,8 @@ PTB_TRAIN_PARAMS = {
     "lstm": {
         "early_stopping": True,
         "weight_decay": 0,
-        "lr": 2,
-        "num_epochs": 1,  # Changed from 55 in original
+        "lr": 1,
+        "num_epochs": 5,  # Changed from 55 in original
         # "early_stopping_pat": 10,
         "grad_clip": 10,
         "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else

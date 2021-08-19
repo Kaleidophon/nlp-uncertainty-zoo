@@ -14,7 +14,8 @@ from typing import List, Optional
 from codecarbon import OfflineEmissionsTracker
 from knockknock import telegram_sender
 from ray import tune
-from torch.utils.tensorboard import SummaryWriter
+from ray.tune.schedulers import ASHAScheduler
+from ray.tune.suggest.bayesopt import BayesOptSearch
 from tqdm import tqdm
 
 # PROJECT
@@ -38,10 +39,6 @@ EMISSION_DIR = "./emissions"
 SECRET_IMPORTED = False
 
 
-# TODO: Replace some of the logic with https://pytorch.org/tutorials/beginner/hyperparameter_tuning_tutorial.html or
-# TODO: https://github.com/fmfn/BayesianOptimization ?
-
-
 try:
     from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID, COUNTRY_CODE
 
@@ -56,6 +53,7 @@ except ImportError:
 def perform_hyperparameter_search(
     models: List[str],
     dataset_name: str,
+    max_num_epochs: int,
     result_dir: str,
     device: str = "cpu",
 ) -> str:
@@ -68,15 +66,12 @@ def perform_hyperparameter_search(
         List specifying the names of models.
     dataset_name: str
         Name of data set models should be evaluated on.
+    max_num_epochs: int
+        Maximum number of epochs before trial is stopped.
     result_dir: str
         Directory that results should be saved to.
-    save_top_n: int
-        Save the top n parameter configuration. Default is 10.
     device: Device
         Device hyperparameter search happens on.
-    summary_writer: Optional[SummaryWriter]
-        Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
-        default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
 
     Returns
     -------
@@ -110,6 +105,15 @@ def perform_hyperparameter_search(
             config = MODEL_PARAMS[dataset_name][model_name]
             config.update(PARAM_SEARCH[dataset_name][model_name])
 
+            scheduler = ASHAScheduler(
+                metric="val_score",
+                mode="min",
+                max_t=max_num_epochs,
+                grace_period=1,
+                reduction_factor=2,
+            )
+            bayesopt = BayesOptSearch(metric="val_score", mode="min")
+
             analysis = tune.run(
                 tune.with_parameters(
                     partial(
@@ -125,6 +129,8 @@ def perform_hyperparameter_search(
                 mode="min",
                 metric="val_score",
                 reuse_actors=True,
+                scheduler=scheduler,
+                search_alg=bayesopt,
                 verbose=3,
             )
 
@@ -144,7 +150,6 @@ def perform_hyperparameter_search(
             progress_bar.update(1)
 
             # TODO: Determine optimization algorithm
-            # TODO: Determine schedule
 
     if tracker is not None:
         tracker.stop()
@@ -175,6 +180,7 @@ if __name__ == "__main__":
     parser.add_argument("--save-top-n", type=int, default=10)
     parser.add_argument("--emission-dir", type=str, default=EMISSION_DIR)
     parser.add_argument("--track-emissions", action="store_true", default=False)
+    parser.add_argument("--max-num-epochs", type=int)
     parser.add_argument("--knock", action="store_true", default=False)
     parser.add_argument("--seed", type=int, default=SEED)
     args = parser.parse_args()
@@ -206,6 +212,7 @@ if __name__ == "__main__":
     perform_hyperparameter_search(
         args.models,
         args.dataset,
+        args.max_num_epochs,
         args.hyperparam_dir,
         args.device,
     )

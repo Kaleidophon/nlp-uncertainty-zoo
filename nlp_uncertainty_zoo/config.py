@@ -98,7 +98,8 @@ NUM_EVALS = {
         "variational_transformer": 10,
         "sngp_transformer": 10,
         "ddu_transformer": 10,
-    }
+    },
+    "ptb": {"lstm": 2},
 }
 
 # Search ranges / options per dataset per model
