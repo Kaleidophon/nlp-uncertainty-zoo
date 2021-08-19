@@ -87,8 +87,6 @@ class Module(ABC, nn.Module):
         self.multi_prediction_uncertainty_metrics = {}
         self.default_uncertainty_metric = "predictive_entropy"
 
-        super().__init__()
-
     @abstractmethod
     def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
         """
@@ -344,7 +342,7 @@ class Model(ABC):
         for epoch in range(self.train_params["num_epochs"]):
             self.module.train()
 
-            train_loss = self._epoch_iter(
+            train_loss = self.epoch_iter(
                 epoch,
                 dataset.train,
                 progress_bar,
@@ -479,12 +477,12 @@ class Model(ABC):
             Loss on evaluation split.
         """
         self.module.eval()
-        loss = self._epoch_iter(0, data_split)
+        loss = self.epoch_iter(0, data_split)
         self.module.train()
 
         return loss
 
-    def _epoch_iter(
+    def epoch_iter(
         self,
         epoch: int,
         data_split: DataSplit,

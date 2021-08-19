@@ -5,15 +5,15 @@ Perform hyperparameter search.
 # STD
 import argparse
 from datetime import datetime
+from functools import partial
 import json
 import os
-from typing import List, Dict, Union, Optional
+from typing import List, Optional
 
 # EXT
 from codecarbon import OfflineEmissionsTracker
 from knockknock import telegram_sender
-from sklearn.model_selection import ParameterSampler
-import numpy as np
+from ray import tune
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
@@ -27,6 +27,7 @@ from nlp_uncertainty_zoo.config import (
     NUM_EVALS,
     PARAM_SEARCH,
 )
+from nlp_uncertainty_zoo.utils.evaluation import evaluate
 
 # CONST
 SEED = 123
@@ -34,6 +35,7 @@ HYPERPARAM_DIR = "./hyperparameters"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
 EMISSION_DIR = "./emissions"
+SECRET_IMPORTED = False
 
 
 # TODO: Replace some of the logic with https://pytorch.org/tutorials/beginner/hyperparameter_tuning_tutorial.html or
@@ -42,6 +44,8 @@ EMISSION_DIR = "./emissions"
 
 try:
     from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID, COUNTRY_CODE
+
+    SECRET_IMPORTED = True
 
 except ImportError:
     raise ImportError(
@@ -53,9 +57,7 @@ def perform_hyperparameter_search(
     models: List[str],
     dataset_name: str,
     result_dir: str,
-    save_top_n: int = 10,
     device: str = "cpu",
-    summary_writer: Optional[SummaryWriter] = None,
 ) -> str:
     """
     Perform hyperparameter search for a list of models and save the results into a directory.
@@ -85,130 +87,70 @@ def perform_hyperparameter_search(
     dataset = AVAILABLE_DATASETS[dataset_name](
         data_dir=args.data_dir, **PREPROCESSING_PARAMS[dataset_name]
     )
+    # Somehow there's an obscure error if data splits are not loaded in advance, but during hyperparameter search,
+    # so do that here
+    _, _ = dataset.train, dataset.valid
 
-    with tqdm(total=get_num_runs(models, dataset_name)) as progress_bar:
+    def _init_and_train_model(
+        config, model_name, train_params, device, dataset=None, checkpoint_dir=None
+    ):
+        model = AVAILABLE_MODELS[model_name](config, train_params, device=device)
+
+        for epoch in range(train_params["num_epochs"]):
+            model.epoch_iter(epoch, dataset.train, validate=False)
+            val_score = evaluate(model, dataset, dataset.valid)
+            tune.report(val_score=val_score)
+
+    with tqdm(total=len(models)) as progress_bar:
 
         for model_name in models:
-
             progress_bar.postfix = f"(model: {model_name})"
             progress_bar.update()
-            scores = {}
+            train_params = TRAIN_PARAMS[dataset_name][model_name]
+            config = MODEL_PARAMS[dataset_name][model_name]
+            config.update(PARAM_SEARCH[dataset_name][model_name])
 
-            sampled_params = sample_hyperparameters(model_name, dataset_name)
+            analysis = tune.run(
+                tune.with_parameters(
+                    partial(
+                        _init_and_train_model,
+                        model_name=model_name,
+                        train_params=train_params,
+                        device=device,
+                    ),
+                    dataset=dataset,
+                ),
+                config=config,
+                num_samples=NUM_EVALS[dataset_name][model_name],
+                mode="min",
+                metric="val_score",
+                reuse_actors=True,
+                verbose=3,
+            )
 
-            for run, param_set in enumerate(sampled_params):
+            # Add info for knockknock bot
+            info_dict[model_name] = {
+                "best_params": analysis.best_config,
+                "best_score": analysis.best_result,
+            }
 
-                model_params = MODEL_PARAMS[dataset_name][model_name]
-                train_params = TRAIN_PARAMS[dataset_name][model_name]
+            # Add save results
+            timestamp = str(datetime.now().strftime("%d-%m-%Y (%H:%M:%S)"))
+            results_df = analysis.dataframe()
+            results_df.to_csv(
+                os.path.join(result_dir, dataset_name, f"{model_name}_{timestamp}.csv")
+            )
 
-                module = AVAILABLE_MODELS[model_name](
-                    model_params, train_params, model_dir="models", device=device
-                )
+            progress_bar.update(1)
 
-                try:
-                    module.fit(
-                        dataset.train.to(device),
-                        verbose=True,  # TODO
-                        summary_writer=summary_writer,
-                    )
-                    score = -module.eval(dataset.valid.to(device)).item()
-
-                # In case of nans due bad training parameters
-                except (ValueError, RuntimeError) as e:
-                    print(f"There was an error: '{str(e)}', run aborted.")
-                    score = -np.inf
-
-                if np.isnan(score):
-                    score = -np.inf
-
-                scores[run] = {"score": score, "hyperparameters": param_set}
-                progress_bar.update(1)
-
-                # Rank and save results
-                # Do after every experiment in case anything goes wrong
-                sorted_scores = dict(
-                    list(
-                        sorted(
-                            scores.items(),
-                            key=lambda run: run[1]["score"],
-                            reverse=True,
-                        )
-                    )[:save_top_n]
-                )
-                model_result_dir = f"{result_dir}/{dataset_name}/"
-                info_dict[model_name] = sorted_scores[0]
-
-                if not os.path.exists(model_result_dir):
-                    os.makedirs(model_result_dir)
-
-                with open(f"{model_result_dir}/{model_name}.json", "w") as result_file:
-                    result_file.write(json.dumps(sorted_scores, indent=4, default=str))
+            # TODO: Determine optimization algorithm
+            # TODO: Determine schedule
 
     if tracker is not None:
         tracker.stop()
         info_dict["emissions"] = tracker._prepare_emissions_data().emissions
 
     return "\n" + json.dumps(info_dict, indent=4)
-
-
-def get_num_runs(model_names: List[str], dataset_name: str) -> int:
-    """
-    Calculate the total number of runs for this search given a list of model names.
-    """
-    return sum([NUM_EVALS[dataset_name][model_name] for model_name in model_names])
-
-
-def sample_hyperparameters(
-    model_name: str, dataset_name: str, round_to: int = 6
-) -> List[Dict[str, Union[int, float]]]:
-    """
-    Sample the hyperparameters for different runs of the same model. The distributions parameters are sampled from are
-    defined in nlp_uncertainty_zoo.config.PARAM_SEARCH and the number of evaluations per model type in
-    nlp_uncertainty_zoo.config.NUM_EVALS.
-
-    Parameters
-    ----------
-    model_name: str
-        Name of the model.
-    dataset_name: str
-        Specify the data set which should be used to specify the hyperparameters to be sampled / default values.
-    round_to: int
-        Decimal that floats should be rounded to.
-
-    Returns
-    -------
-    sampled_params: List[Dict[str, Union[int, float]]]
-        List of dictionaries containing hyperparameters and their sampled values.
-    """
-    sampled_params = list(
-        ParameterSampler(
-            param_distributions={
-                hyperparam: PARAM_SEARCH[dataset_name][model_name][hyperparam]
-                for hyperparam, val in MODEL_PARAMS[dataset_name][model_name].items()
-                if hyperparam in PARAM_SEARCH[dataset_name][model_name]
-            },
-            n_iter=NUM_EVALS[dataset_name][model_name],
-        )
-    )
-
-    sampled_params = [
-        dict(
-            {
-                # Round float values
-                hyperparam: round(val, round_to) if isinstance(val, float) else val
-                for hyperparam, val in params.items()
-            },
-            **{
-                # Add hyperparameters that stay fixed
-                hyperparam: val
-                for hyperparam, val in MODEL_PARAMS[dataset_name][model_name].items()
-                if hyperparam not in PARAM_SEARCH[dataset_name][model_name]
-            },
-        )
-        for params in sampled_params
-    ]
-
-    return sampled_params
 
 
 if __name__ == "__main__":
@@ -237,7 +179,6 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=SEED)
     args = parser.parse_args()
 
-    summary_writer = SummaryWriter()
     tracker = None
 
     if args.track_emissions:
@@ -253,6 +194,11 @@ if __name__ == "__main__":
 
     # Apply decorator
     if args.knock:
+        if not SECRET_IMPORTED:
+            raise ImportError(
+                "secret.py wasn't found, please rename secret_template.py and fill in the information."
+            )
+
         perform_hyperparameter_search = telegram_sender(
             token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
         )(perform_hyperparameter_search)
@@ -261,7 +207,5 @@ if __name__ == "__main__":
         args.models,
         args.dataset,
         args.hyperparam_dir,
-        args.save_top_n,
         args.device,
-        summary_writer,
     )

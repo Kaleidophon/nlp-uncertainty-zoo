@@ -20,7 +20,7 @@ PTB_TRAIN_PARAMS = {
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
-        "num_epochs": 40,  # Changed from 55 in original
+        "num_epochs": 1,  # Changed from 55 in original
         # "early_stopping_pat": 10,
         "grad_clip": 10,
         "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
