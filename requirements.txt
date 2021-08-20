@@ -18,3 +18,4 @@ ray[tune]
 ray[rllib]
 protobuf
 tabulate
+tensorboardX
