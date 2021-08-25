@@ -20,8 +20,6 @@ from torch.utils.data import Dataset
 # PROJECT
 from nlp_uncertainty_zoo.utils.types import BatchedSequences, Device
 
-# TODO: Add WILDS text dataset
-# TODO: Add IMDB dataset
 # TODO: Check if DUE converges on other dataset than CLINC
 
 

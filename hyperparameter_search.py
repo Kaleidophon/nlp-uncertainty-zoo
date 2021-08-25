@@ -16,6 +16,7 @@ from knockknock import telegram_sender
 from ray import tune
 from ray.tune.schedulers import ASHAScheduler
 from ray.tune.suggest.bayesopt import BayesOptSearch
+import torch
 from tqdm import tqdm
 
 # PROJECT
@@ -145,6 +146,11 @@ def perform_hyperparameter_search(
             )
             # bayesopt = BayesOptSearch()
 
+            # Set up gpus
+            gpus_config = {}
+            if torch.cuda.is_available() and device == "cuda":
+                gpus_config["resources_per_trial"] = {"gpu": torch.cuda.device_count()}
+
             analysis = tune.run(
                 # Wrap function using tune.with_parameters to avoid sending errors due to dataset size
                 tune.with_parameters(
@@ -165,6 +171,7 @@ def perform_hyperparameter_search(
                 verbose=3,
                 metric="val_score",
                 mode="min",
+                **gpus_config,
             )
 
             # Add info for knockknock bot

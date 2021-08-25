@@ -32,6 +32,9 @@ from nlp_uncertainty_zoo.utils.evaluation import evaluate
 from nlp_uncertainty_zoo.utils.types import Device
 
 
+# TODO: Use https://github.com/huggingface/accelerate?
+
+
 class Module(ABC, nn.Module):
     """
     Abstract module class, defining how the forward pass of a model looks.
