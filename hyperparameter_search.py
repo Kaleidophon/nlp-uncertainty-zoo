@@ -16,6 +16,7 @@ from knockknock import telegram_sender
 from ray import tune
 from ray.tune.schedulers import ASHAScheduler
 from ray.tune.suggest.bayesopt import BayesOptSearch
+from ray.tune.logger import TBXLogger
 import torch
 from tqdm import tqdm
 
@@ -164,6 +165,7 @@ def perform_hyperparameter_search(
                     dataset=dataset,
                 ),
                 config=config,
+                loggers=[TBXLogger],
                 num_samples=NUM_EVALS[dataset_name][model_name],
                 reuse_actors=True,
                 scheduler=scheduler,
