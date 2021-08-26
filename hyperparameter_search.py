@@ -150,7 +150,9 @@ def perform_hyperparameter_search(
             # Set up gpus
             gpus_config = {}
             if torch.cuda.is_available() and device == "cuda":
-                gpus_config["resources_per_trial"] = {"gpu": torch.cuda.device_count()}
+                gpus_config["resources_per_trial"] = {
+                    "gpu": 1
+                }  # TODO: Debug; torch.cuda.device_count()}
 
             analysis = tune.run(
                 # Wrap function using tune.with_parameters to avoid sending errors due to dataset size
