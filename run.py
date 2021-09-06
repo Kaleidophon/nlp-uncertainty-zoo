@@ -51,7 +51,7 @@ except ImportError:
 # CUDA
 if torch.cuda.is_available():
     torch.backends.cudnn.benchmark = True
-    torch.distributed.init_process_group()
+    torch.distributed.init_process_group("gloo")
 
 
 def run_experiments(
