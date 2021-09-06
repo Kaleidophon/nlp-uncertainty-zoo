@@ -39,6 +39,7 @@ EMISSION_DIR = "./emissions"
 # GLOBALS
 SECRET_IMPORTED = False
 
+# Knockknock support
 try:
     from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID, COUNTRY_CODE
 
@@ -46,6 +47,11 @@ try:
 
 except ImportError:
     pass
+
+# CUDA
+if torch.cuda.is_available():
+    torch.backends.cudnn.benchmark = True
+    torch.distributed.init_process_group()
 
 
 def run_experiments(
