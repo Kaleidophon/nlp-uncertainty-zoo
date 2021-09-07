@@ -27,6 +27,7 @@ from nlp_uncertainty_zoo.config import (
     NUM_EVALS,
     PARAM_SEARCH,
 )
+from nlp_uncertainty_zoo.datasets import Dataset
 
 # CONST
 SEED = 123
@@ -34,6 +35,7 @@ HYPERPARAM_DIR = "./hyperparameters"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
 EMISSION_DIR = "./emissions"
+SECRET_IMPORTED = False
 
 
 try:
@@ -48,6 +50,7 @@ except ImportError:
 def perform_hyperparameter_search(
     models: List[str],
     dataset_name: str,
+    max_num_epochs: int,
     result_dir: str,
     save_top_n: int = 10,
     device: str = "cpu",
@@ -62,6 +65,8 @@ def perform_hyperparameter_search(
         List specifying the names of models.
     dataset_name: str
         Name of data set models should be evaluated on.
+    max_num_epochs: int
+        Maximum number of epochs before trial is stopped.
     result_dir: str
         Directory that results should be saved to.
     save_top_n: int
@@ -81,6 +86,9 @@ def perform_hyperparameter_search(
     dataset = AVAILABLE_DATASETS[dataset_name](
         data_dir=args.data_dir, **PREPROCESSING_PARAMS[dataset_name]
     )
+    # Somehow there's an obscure error if data splits are not loaded in advance, but during hyperparameter search,
+    # so do that here
+    _, _ = dataset.train, dataset.valid
 
     with tqdm(total=get_num_runs(models, dataset_name)) as progress_bar:
 
@@ -96,6 +104,7 @@ def perform_hyperparameter_search(
 
                 model_params = MODEL_PARAMS[dataset_name][model_name]
                 train_params = TRAIN_PARAMS[dataset_name][model_name]
+                train_params["num_epochs"] = max_num_epochs
 
                 module = AVAILABLE_MODELS[model_name](
                     model_params, train_params, model_dir="models", device=device
@@ -229,6 +238,7 @@ if __name__ == "__main__":
     parser.add_argument("--save-top-n", type=int, default=10)
     parser.add_argument("--emission-dir", type=str, default=EMISSION_DIR)
     parser.add_argument("--track-emissions", action="store_true", default=False)
+    parser.add_argument("--max-num-epochs", type=int)
     parser.add_argument("--knock", action="store_true", default=False)
     parser.add_argument("--seed", type=int, default=SEED)
     args = parser.parse_args()
@@ -249,6 +259,11 @@ if __name__ == "__main__":
 
     # Apply decorator
     if args.knock:
+        if not SECRET_IMPORTED:
+            raise ImportError(
+                "secret.py wasn't found, please rename secret_template.py and fill in the information."
+            )
+
         perform_hyperparameter_search = telegram_sender(
             token=TELEGRAM_API_TOKEN, chat_id=TELEGRAM_CHAT_ID
         )(perform_hyperparameter_search)
@@ -256,6 +271,7 @@ if __name__ == "__main__":
     perform_hyperparameter_search(
         args.models,
         args.dataset,
+        args.max_num_epochs,
         args.hyperparam_dir,
         args.save_top_n,
         args.device,

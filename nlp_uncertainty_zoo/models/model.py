@@ -283,11 +283,6 @@ class Model(ABC):
         self.model_name = model_name
         self.module_class = module_class
         self.module = module_class(**model_params, device=device)
-
-        # Enable data-parallel training if possible
-        if torch.cuda.is_available():
-            self.module = torch.nn.parallel.DistributedDataParallel(self.module)
-
         self.train_params = train_params
         self.model_dir = model_dir
         self.device = device

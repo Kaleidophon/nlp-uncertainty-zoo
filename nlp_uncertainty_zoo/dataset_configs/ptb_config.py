@@ -3,6 +3,7 @@ Define all training and model parameters used for the Penn Treebank Dataset.
 """
 
 # EXT
+import numpy as np
 import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
@@ -318,4 +319,10 @@ PTB_MODEL_PARAMS = {
         "sequence_length": 35,
         "is_sequence_classifier": True,
     },
+}
+
+PTB_NUM_EVALS = {"lstm": 2}
+
+PTB_PARAM_SEARCH = {
+    "lstm": {"dropout": np.uniform(0.1, 0.4), "num_layers": np.choice([1, 2])},
 }

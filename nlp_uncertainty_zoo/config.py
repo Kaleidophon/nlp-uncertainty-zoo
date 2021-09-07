@@ -86,32 +86,15 @@ MODEL_PARAMS = {
     for dataset, model_dicts in _MODEL_PARAMS.items()
 }
 
-# TODO: Move this into dataset_configs modules
 # HYPERPARAMETER SEARCH
 # Number of tested configurations per dataset per model
 NUM_EVALS = {
-    "wikitext-103": {
-        "lstm": 2,
-        "variational_lstm": 20,
-        "transformer": 2,
-        "variational_transformer": 10,
-        "sngp_transformer": 10,
-        "ddu_transformer": 10,
-    }
+    "wikitext-103": configs.WIKITEXT_NUM_EVALS,
+    "ptb": configs.PTB_NUM_EVALS,
 }
 
 # Search ranges / options per dataset per model
 PARAM_SEARCH = {
-    "wikitext-103": {
-        "lstm": {"num_layers": list(range(2, 6)), "dropout": uniform(0.1, 0.4)},
-        "variational_lstm": {},
-        "transformer": {
-            "num_layers": list(range(2, 6)),
-            "dropout": uniform(0.1, 0.4),
-            "num_heads": [5, 10, 15],
-        },
-        "variational_transformer": {},
-        "sngp_transformer": {},
-        "ddu_transformer": {},
-    }
+    "wikitext-103": configs.WIKITEXT_PARAM_SEARCH,
+    "ptb": configs.PTB_PARAM_SEARCH,
 }
