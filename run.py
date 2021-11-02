@@ -146,6 +146,7 @@ def run_experiments(
                 model_name: f"{np.mean(model_scores):.2f} ±{np.std(model_scores):.2f}"
                 for model_name, model_scores in scores.items()
             },
+            "url": wandb.run.get_url(),
         },
         indent=4,
         ensure_ascii=False,
