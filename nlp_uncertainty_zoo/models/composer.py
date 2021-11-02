@@ -38,6 +38,7 @@ class ComposerModule(Module):
         sequence_length: int,
         is_sequence_classifier: bool,
         device: Device,
+        **build_params,
     ):
         """
         Initialize a composer.
@@ -242,7 +243,6 @@ class Composer(Model):
     def __init__(
         self,
         model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
@@ -250,7 +250,6 @@ class Composer(Model):
             "composer",
             ComposerModule,
             model_params,
-            train_params,
             model_dir,
             device,
         )

@@ -259,7 +259,6 @@ class Model(ABC):
         model_name: str,
         module_class: type,
         model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
@@ -274,32 +273,30 @@ class Model(ABC):
             Class of the model that is being wrapped.
         model_params: Dict[str, Any]
             Parameters to initialize the model.
-        train_params: Dict[str, Any]
-            Parameters for model training.
         device: Device
             The device the model is located on.
         """
         self.model_name = model_name
         self.module_class = module_class
         self.module = module_class(**model_params, device=device)
-        self.train_params = train_params
         self.model_dir = model_dir
+        self.model_params = model_params
         self.device = device
         self.to(device)
 
         # Initialize optimizer and scheduler
-        optimizer_class = self.train_params.get("optimizer_class", optim.Adam)
+        optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
         self.optimizer = optimizer_class(
             self.module.parameters(),
-            lr=self.train_params["lr"],
-            weight_decay=self.train_params.get("weight_decay", 0),
+            lr=self.model_params["lr"],
+            weight_decay=self.model_params.get("weight_decay", 0),
         )
 
         self.scheduler = None
-        if "scheduler_class" in self.train_params:
-            scheduler_class = self.train_params["scheduler_class"]
+        if "scheduler_class" in self.model_params:
+            scheduler_class = self.model_params["scheduler_class"]
             self.scheduler = scheduler_class(
-                self.optimizer, **self.train_params["scheduler_kwargs"]
+                self.optimizer, **self.model_params["scheduler_kwargs"]
             )
 
         # Check if model directory exists, if not, create
@@ -331,16 +328,16 @@ class Model(ABC):
             Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        num_epochs = self.train_params["num_epochs"]
+        num_epochs = self.model_params["num_epochs"]
         best_val_score = np.inf
-        early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
-        early_stopping = self.train_params.get("early_stopping", True)
+        early_stopping_pat = self.model_params.get("early_stopping_pat", np.inf)
+        early_stopping = self.model_params.get("early_stopping", True)
         num_no_improvements = 0
         total_steps = num_epochs * len(dataset.train)
         progress_bar = tqdm(total=total_steps) if verbose else None
         best_model = deepcopy(self)
 
-        for epoch in range(self.train_params["num_epochs"]):
+        for epoch in range(self.model_params["num_epochs"]):
             self.module.train()
 
             train_loss = self._epoch_iter(
@@ -385,7 +382,7 @@ class Model(ABC):
             # Update scheduler
             if (
                 self.scheduler
-                and self.train_params.get("scheduler_step_or_epoch", "") == "epoch"
+                and self.model_params.get("scheduler_step_or_epoch", "") == "epoch"
             ):
                 self.scheduler.step(epoch=epoch)
 
@@ -504,7 +501,7 @@ class Model(ABC):
         wandb_run: Optional[WandBRun] = None
             Weights & Biases run to track training statistics.
         """
-        grad_clip = self.train_params.get("grad_clip", np.inf)
+        grad_clip = self.model_params.get("grad_clip", np.inf)
         epoch_loss = torch.zeros(1)
         num_batches = len(data_split)
 
@@ -544,7 +541,7 @@ class Model(ABC):
 
                 if (
                     self.scheduler is not None
-                    and self.train_params.get("scheduler_step_or_epoch", "") == "step"
+                    and self.model_params.get("scheduler_step_or_epoch", "") == "step"
                 ):
                     self.scheduler.step()
 

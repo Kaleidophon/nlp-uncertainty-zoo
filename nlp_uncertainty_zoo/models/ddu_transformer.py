@@ -40,6 +40,7 @@ class DDUTransformerModule(SpectralTransformerModule):
         spectral_norm_upper_bound: float,
         is_sequence_classifier: bool,
         device: Device,
+        **build_params,
     ):
         """
         Initialize a DDU transformer.
@@ -178,7 +179,7 @@ class DDUTransformerModule(SpectralTransformerModule):
         input_: torch.LongTensor,
         *args,
         metric_name: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> torch.FloatTensor:
         """
         Get the uncertainty scores for the current batch.
@@ -210,7 +211,6 @@ class DDUTransformer(Model):
     def __init__(
         self,
         model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
@@ -218,7 +218,6 @@ class DDUTransformer(Model):
             "ddu_transformer",
             DDUTransformerModule,
             model_params,
-            train_params,
             model_dir,
             device,
         )

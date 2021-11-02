@@ -36,6 +36,7 @@ class SpectralTransformerModule(TransformerModule):
         spectral_norm_upper_bound: float,
         is_sequence_classifier: bool,
         device: Device,
+        **build_params,
     ):
         super().__init__(
             num_layers,

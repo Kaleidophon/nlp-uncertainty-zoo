@@ -33,6 +33,7 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         ensemble_size: int,
         is_sequence_classifier: bool,
         device: Device,
+        **build_params,
     ):
         """
         Initialize an LSTM.
@@ -91,7 +92,7 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         input_: torch.LongTensor,
         *args,
         num_predictions: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ):
 
         if num_predictions is None:
@@ -150,7 +151,6 @@ class LSTMEnsemble(Model):
     def __init__(
         self,
         model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
@@ -158,7 +158,6 @@ class LSTMEnsemble(Model):
             "lstm_ensemble",
             LSTMEnsembleModule,
             model_params,
-            train_params,
             model_dir,
             device,
         )

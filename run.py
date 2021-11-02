@@ -22,7 +22,6 @@ from nlp_uncertainty_zoo.datasets import TextDataset
 from nlp_uncertainty_zoo.utils.evaluation import evaluate
 from nlp_uncertainty_zoo.config import (
     PREPROCESSING_PARAMS,
-    TRAIN_PARAMS,
     MODEL_PARAMS,
     AVAILABLE_DATASETS,
     AVAILABLE_MODELS,
@@ -104,10 +103,9 @@ def run_experiments(
             timestamp = str(datetime.now().strftime("%d-%m-%Y_(%H:%M:%S)"))
 
             model_params = MODEL_PARAMS[dataset.name][model_name]
-            train_params = TRAIN_PARAMS[dataset.name][model_name]
 
             model = AVAILABLE_MODELS[model_name](
-                model_params, train_params, model_dir=model_dir, device=device
+                model_params, model_dir=model_dir, device=device
             )
 
             result_dict = model.fit(
@@ -125,10 +123,9 @@ def run_experiments(
             )
             scores[model_name].append(score)
 
-            # Add all info to summary writer
-            # TODO: Adjust for wandb
+            # Add all info to Weights & Biases
             if wandb_run is not None:
-                wandb_run.config = {**model_params, **train_params}
+                wandb_run.config = model_params
                 wandb_run.log(
                     {
                         "train_loss": result_dict["train_loss"],

@@ -39,6 +39,7 @@ class SNGPModule(nn.Module):
         gp_mean_field_factor: float,
         num_predictions: int,
         device: Device,
+        **build_params,
     ):
         """
         Initialize a SNGP output layer.
@@ -300,6 +301,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         num_predictions: int,
         is_sequence_classifier: bool,
         device: Device,
+        **build_params,
     ):
         """
         Initialize a transformer.
@@ -402,7 +404,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         input_: torch.LongTensor,
         *args,
         num_predictions: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> torch.FloatTensor:
         """
         Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
@@ -444,7 +446,6 @@ class SNGPTransformer(Model):
     def __init__(
         self,
         model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
@@ -452,7 +453,6 @@ class SNGPTransformer(Model):
             "sngp_transformer",
             SNGPTransformerModule,
             model_params,
-            train_params,
             model_dir,
             device,
         )
