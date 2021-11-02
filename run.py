@@ -15,7 +15,7 @@ from codecarbon import OfflineEmissionsTracker
 from knockknock import telegram_sender
 import numpy as np
 import torch
-from torch.utils.tensorboard import SummaryWriter
+import wandb
 
 # PROJECT
 from nlp_uncertainty_zoo.datasets import TextDataset
@@ -27,7 +27,7 @@ from nlp_uncertainty_zoo.config import (
     AVAILABLE_DATASETS,
     AVAILABLE_MODELS,
 )
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.types import Device, WandBRun
 
 # CONST
 SEED = 123
@@ -35,6 +35,7 @@ RESULT_DIR = "./results"
 MODEL_DIR = "./models"
 DATA_DIR = "./data/processed"
 EMISSION_DIR = "./emissions"
+PROJECT_NAME = "nlp-uncertainty-zoo"
 
 # GLOBALS
 SECRET_IMPORTED = False
@@ -61,7 +62,7 @@ def run_experiments(
     device: Device,
     model_dir: str,
     result_dir: str,
-    summary_writer: Optional[SummaryWriter] = None,
+    wandb_run: Optional[WandBRun] = None,
 ) -> str:
     """
     Run experiments. An experiment consists of training evaluating a number of models on a dataset and saving
@@ -83,8 +84,8 @@ def run_experiments(
         Directory that models are being saved to.
     result_dir: str
         Directory where results will be written to.
-    summary_writer: Optional[SummaryWriter]
-        Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
+    wandb_run: Optional[WandBRun]
+        Weights and Biases Run to track training statistics. Training and validation loss (if applicable) are tracked by
         default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
 
     Returns
@@ -111,7 +112,7 @@ def run_experiments(
 
             result_dict = model.fit(
                 dataset=dataset,
-                summary_writer=summary_writer,
+                wandb_run=wandb_run,
             )
 
             # Evaluate
@@ -125,18 +126,20 @@ def run_experiments(
             scores[model_name].append(score)
 
             # Add all info to summary writer
-            if summary_writer is not None:
-                summary_writer.add_hparams(
-                    hparam_dict={**model_params, **train_params},
-                    metric_dict={
+            # TODO: Adjust for wandb
+            if wandb_run is not None:
+                wandb_run.config = {**model_params, **train_params}
+                wandb_run.log(
+                    {
                         "train_loss": result_dict["train_loss"],
                         "best_val_loss": result_dict["best_val_loss"],
                         "test_score": score,
-                    },
+                    }
                 )
+
                 # Reset for potential next run
-                summary_writer.close()
-                summary_writer = SummaryWriter()
+                wandb_run.finish()
+                wandb_run = wandb.init(PROJECT_NAME)
 
     return json.dumps(
         {
@@ -184,7 +187,7 @@ if __name__ == "__main__":
         data_dir=args.data_dir, **PREPROCESSING_PARAMS[args.dataset]
     )
 
-    summary_writer = SummaryWriter()
+    wandb_run = wandb.init(project=PROJECT_NAME)
     tracker = None
 
     if args.track_emissions:
@@ -218,7 +221,7 @@ if __name__ == "__main__":
             args.device,
             args.model_dir,
             args.result_dir,
-            summary_writer,
+            wandb_run,
         )
 
     except Exception as e:

@@ -2,11 +2,6 @@
 This module puts all the hyper-, training and preprocessing parameters used in this project into one single place.
 """
 
-# TODO: Add tokenizers
-
-# EXT
-from scipy.stats import uniform
-
 # PROJECT
 from nlp_uncertainty_zoo.models.composer import Composer
 from nlp_uncertainty_zoo.datasets import (
@@ -84,17 +79,4 @@ MODEL_PARAMS = {
         for model_name, model_params in model_dicts.items()
     }
     for dataset, model_dicts in _MODEL_PARAMS.items()
-}
-
-# HYPERPARAMETER SEARCH
-# Number of tested configurations per dataset per model
-NUM_EVALS = {
-    "wikitext-103": configs.WIKITEXT_NUM_EVALS,
-    "ptb": configs.PTB_NUM_EVALS,
-}
-
-# Search ranges / options per dataset per model
-PARAM_SEARCH = {
-    "wikitext-103": configs.WIKITEXT_PARAM_SEARCH,
-    "ptb": configs.PTB_PARAM_SEARCH,
 }

@@ -320,9 +320,3 @@ PTB_MODEL_PARAMS = {
         "is_sequence_classifier": True,
     },
 }
-
-PTB_NUM_EVALS = {"lstm": 2}
-
-PTB_PARAM_SEARCH = {
-    "lstm": {"dropout": np.uniform(0.1, 0.4), "num_layers": np.choice([1, 2])},
-}

@@ -7,6 +7,12 @@ specified otherwise.
 import torch
 
 
+# TODO: Implement gap between softmax scores (Tagasovska and Lopez-Paz, 2018: Single-model uncertainties for deep
+#  learning)
+# TODO: Implement norm of Jacobian (Novak et al., 2018: Sensitivity and generalization in neural networks: an empirical
+#  study)
+
+
 def max_prob(logits: torch.FloatTensor) -> torch.FloatTensor:
     """
     Compute the maximum softmax probability baseline by [1] for a tensor of batch_size x seq_len x output_size.

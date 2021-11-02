@@ -22,14 +22,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
-from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 # PROJECT
 from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
 import nlp_uncertainty_zoo.utils.metrics as metrics
 from nlp_uncertainty_zoo.utils.evaluation import evaluate
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.types import Device, WandBRun
 
 
 class Module(ABC, nn.Module):
@@ -315,7 +314,7 @@ class Model(ABC):
         dataset: TextDataset,
         validate: bool = True,
         verbose: bool = True,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ):
         """
         Fit the model to training data.
@@ -328,9 +327,9 @@ class Model(ABC):
             Indicate whether model should also be evaluated on the validation set.
         verbose: bool
             Whether to display information about current loss.
-        summary_writer: Optional[SummaryWriter]
-            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
-            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         num_epochs = self.train_params["num_epochs"]
         best_val_score = np.inf
@@ -348,7 +347,7 @@ class Model(ABC):
                 epoch,
                 dataset.train,
                 progress_bar,
-                summary_writer,
+                wandb_run,
             )
 
             # Update progress bar and summary writer
@@ -358,8 +357,8 @@ class Model(ABC):
                 )
                 progress_bar.update(1)
 
-            if summary_writer is not None:
-                summary_writer.add_scalar("Epoch train loss", train_loss.item(), epoch)
+            if wandb_run is not None:
+                wandb_run.log({"Epoch train loss": train_loss.item()}, step=epoch)
 
             # Get validation loss
             if validate:
@@ -368,8 +367,8 @@ class Model(ABC):
                 with torch.no_grad():
                     val_score = evaluate(self, dataset, dataset.valid)
 
-                if summary_writer is not None:
-                    summary_writer.add_scalar("Epoch val score", val_score, epoch)
+                if wandb_run is not None:
+                    wandb_run.log({"Epoch val score": val_score}, step=epoch)
 
                 if val_score < best_val_score:
                     best_val_score = val_score
@@ -397,7 +396,7 @@ class Model(ABC):
 
         # Additional training step, e.g. temperature scaling on val
         if validate:
-            self._finetune(dataset.valid, verbose, summary_writer)
+            self._finetune(dataset.valid, verbose, wandb_run)
 
         # Save model if applicable
         if self.model_dir is not None:
@@ -489,7 +488,7 @@ class Model(ABC):
         epoch: int,
         data_split: DataSplit,
         progress_bar: Optional[tqdm] = None,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ) -> torch.Tensor:
         """
         Perform one training epoch.
@@ -502,8 +501,8 @@ class Model(ABC):
             Current data split.
         progress_bar: Optional[tqdm]
             Progress bar used to display information about current run.
-        summary_writer: SummaryWriter
-            Summary writer to track training statistics.
+        wandb_run: Optional[WandBRun] = None
+            Weights & Biases run to track training statistics.
         """
         grad_clip = self.train_params.get("grad_clip", np.inf)
         epoch_loss = torch.zeros(1)
@@ -513,7 +512,7 @@ class Model(ABC):
 
             X, y = X.to(self.device), y.to(self.device)
             global_batch_num = epoch * len(data_split) + i
-            batch_loss = self.get_loss(global_batch_num, X, y, summary_writer)
+            batch_loss = self.get_loss(global_batch_num, X, y, wandb_run)
 
             # Update progress bar and summary writer
             if progress_bar is not None:
@@ -522,17 +521,13 @@ class Model(ABC):
                 )
                 progress_bar.update(1)
 
-            if summary_writer is not None:
-                summary_writer.add_scalar(
-                    "Batch train loss", batch_loss, global_batch_num
-                )
+            if wandb_run is not None:
+                batch_info = {"Batch train loss": batch_loss}
 
                 if self.scheduler is not None:
-                    summary_writer.add_scalar(
-                        "Batch learning rate",
-                        self.scheduler.get_last_lr()[0],
-                        global_batch_num,
-                    )
+                    batch_info["Batch learning rate"] = self.scheduler.get_last_lr()[0]
+
+                wandb_run.log(batch_info, step=global_batch_num)
 
             epoch_loss += batch_loss.cpu().detach()
 
@@ -560,7 +555,7 @@ class Model(ABC):
         n_batch: int,
         X: torch.Tensor,
         y: torch.Tensor,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ) -> torch.Tensor:
         """
         Get loss for a single batch. This just uses cross-entropy loss, but can be adjusted in subclasses by overwriting
@@ -574,8 +569,8 @@ class Model(ABC):
             Batch input.
         y: torch.Tensor
             Batch labels.
-        summary_writer: SummaryWriter
-            Summary writer to track training statistics.
+        wandb_run: Optional[WandBRun] = None
+            Weights and Biases run to track training statistics.
 
         Returns
         -------
@@ -599,7 +594,7 @@ class Model(ABC):
         self,
         data_split: DataSplit,
         verbose: bool,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb: Optional[WandBRun] = None,
     ):
         """
         Do an additional training / fine-tuning step, which is required for some models. Is being overwritten in some
@@ -611,9 +606,9 @@ class Model(ABC):
             Data split for fine-tuning step.
         verbose: bool
             Whether to display information about current loss.
-        summary_writer: Optional[SummaryWriter]
-            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
-            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        wandb: Optional[WandBRun]
+            Weights & Biases run object to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         pass
 

@@ -61,25 +61,3 @@ WIKITEXT_MODEL_PARAMS = {
         "num_predictions": 10,
     },
 }
-
-WIKITEXT_NUM_EVALS = {
-    "lstm": 2,
-    "variational_lstm": 20,
-    "transformer": 2,
-    "variational_transformer": 10,
-    "sngp_transformer": 10,
-    "ddu_transformer": 10,
-}
-
-WIKITEXT_PARAM_SEARCH = {
-    "lstm": {"num_layers": list(range(2, 6)), "dropout": np.random.uniform(0.1, 0.4)},
-    "variational_lstm": {},
-    "transformer": {
-        "num_layers": list(range(2, 6)),
-        "dropout": np.random.uniform(0.1, 0.4),
-        "num_heads": [5, 10, 15],
-    },
-    "variational_transformer": {},
-    "sngp_transformer": {},
-    "ddu_transformer": {},
-}
