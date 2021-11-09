@@ -16,6 +16,7 @@ import wandb
 from secret import WANDB_API_KEY
 
 # CONST
+USER_NAME = "kaleidophon"
 PROJECT_NAME = "nlp-uncertainty-zoo"
 
 
@@ -31,4 +32,12 @@ if __name__ == "__main__":
         config_dict = yaml.load(file, Loader=yaml.FullLoader)
 
     sweep_id = wandb.sweep(config_dict, project=PROJECT_NAME)
-    subprocess.Popen(["wandb", "agent", sweep_id, "--count", num_runs])
+    subprocess.Popen(
+        [
+            "wandb",
+            "agent",
+            f"{USER_NAME}/{PROJECT_NAME}/{sweep_id}",
+            "--count",
+            num_runs,
+        ]
+    )
