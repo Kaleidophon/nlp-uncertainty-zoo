@@ -32,7 +32,7 @@ if __name__ == "__main__":
         config_dict = yaml.load(file, Loader=yaml.FullLoader)
 
     sweep_id = wandb.sweep(config_dict, project=PROJECT_NAME)
-    subprocess.Popen(
+    process = subprocess.Popen(
         [
             "wandb",
             "agent",
@@ -41,3 +41,4 @@ if __name__ == "__main__":
             num_runs,
         ]
     )
+    process.wait()

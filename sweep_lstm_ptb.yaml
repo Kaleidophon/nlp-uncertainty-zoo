@@ -11,6 +11,8 @@ parameters:
     value: "lstm"
   seed:
     value: 1234
+  device:
+    value: "cuda"
   # Actual hyperparameter search params
   weight_decay:
     min: 0.0
