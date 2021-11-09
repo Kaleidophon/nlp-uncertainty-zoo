@@ -151,11 +151,11 @@ if __name__ == "__main__":
             try:
                 config[arg] = int(value)
 
-            except TypeError:
+            except ValueError:
                 try:
                     config[arg] = float(value)
 
-                except TypeError:
+                except ValueError:
                     # Argument is probably a string
                     config[arg] = value
 
