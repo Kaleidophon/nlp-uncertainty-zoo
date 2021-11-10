@@ -79,7 +79,7 @@ def perform_hyperparameter_search(
     info_dict = {}
 
     if wandb_run is not None:
-        info_dict["config"] = wandb_run.config
+        info_dict["config"] = wandb_run.config.as_dict()
 
     dataset = AVAILABLE_DATASETS[dataset_name](
         data_dir=args.data_dir, **PREPROCESSING_PARAMS[dataset_name]
