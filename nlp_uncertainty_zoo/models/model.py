@@ -82,6 +82,7 @@ class Module(ABC, nn.Module):
             "max_prob": metrics.max_prob,
             "predictive_entropy": metrics.predictive_entropy,
             "dempster_shafer": metrics.dempster_shafer,
+            "softmax_gap": metrics.softmax_gap,
         }
         self.multi_prediction_uncertainty_metrics = {}
         self.default_uncertainty_metric = "predictive_entropy"
