@@ -27,7 +27,7 @@ from tqdm import tqdm
 # PROJECT
 from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
 import nlp_uncertainty_zoo.utils.metrics as metrics
-from nlp_uncertainty_zoo.utils.evaluation import evaluate
+from nlp_uncertainty_zoo.utils.task_eval import evaluate
 from nlp_uncertainty_zoo.utils.types import Device, WandBRun
 
 
