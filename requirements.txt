@@ -1,7 +1,7 @@
 torch==1.9.0
 numpy
 codecarbon
-tensorboard
+wandb
 scikit-learn
 knockknock
 transformers

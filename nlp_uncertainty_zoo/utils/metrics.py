@@ -30,6 +30,30 @@ def max_prob(logits: torch.FloatTensor) -> torch.FloatTensor:
     return max_prob
 
 
+def softmax_gap(logits: torch.FloatTensor) -> torch.FloatTensor:
+    """
+    Compute softmax gap by [2] for a tensor of batch_size x seq_len x output_size.
+
+    [2] https://arxiv.org/pdf/1811.00908.pdf
+
+    Parameters
+    ----------
+    logits: torch.FloatTensor
+        Logits of the current batch.
+
+    Returns
+    -------
+    torch.FloatTensor
+        Softmax gap.
+    """
+    probs = torch.softmax(logits, dim=-1)
+    max_prob, max_idx = torch.max(probs, dim=-1)
+    probs[:, :, max_idx] = 0
+    gap = max_prob - torch.max(probs, dim=-1)[0]
+
+    return gap
+
+
 def predictive_entropy(logits: torch.FloatTensor) -> torch.FloatTensor:
     """
     Compute predictive entropy for a tensor of batch_size x seq_len x output_size.
@@ -68,7 +92,7 @@ def dempster_shafer(logits: torch.FloatTensor) -> torch.FloatTensor:
     """
     num_classes = logits.shape[2]
 
-    return num_classes / num_classes + torch.exp(logits).sum(dim=-1)
+    return num_classes / (num_classes + torch.exp(logits).sum(dim=-1))
 
 
 def variance(logits: torch.FloatTensor) -> torch.FloatTensor:

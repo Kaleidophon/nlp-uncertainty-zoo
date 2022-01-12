@@ -19,11 +19,7 @@ import torch
 from tqdm import tqdm
 
 # PROJECT
-from nlp_uncertainty_zoo.config import (
-    AVAILABLE_MODELS,
-    MODEL_PARAMS,
-    TRAIN_PARAMS,
-)
+from nlp_uncertainty_zoo.config import AVAILABLE_MODELS, MODEL_PARAMS
 from nlp_uncertainty_zoo.datasets import (
     DataSplit,
     LanguageModelingDataset,
@@ -152,10 +148,9 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
         def _init_and_train_model(model_name: str) -> Model:
 
             model_params = MODEL_PARAMS[self.dataset_name][model_name]
-            train_params = TRAIN_PARAMS[self.dataset_name][model_name]
 
             # Change some parameters to fit the test environment
-            train_params["num_epochs"] = 1
+            model_params["num_epochs"] = 1
             model_params["vocab_size"] = self.mock_dataset.num_types
             model_params["output_size"] = self.mock_dataset.num_classes
             model_params["is_sequence_classifier"] = isinstance(
@@ -166,7 +161,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
                 model_params["sequence_length"] = self.mock_dataset.sequence_length
 
             # Init and fit model
-            model = AVAILABLE_MODELS[model_name](model_params, train_params)
+            model = AVAILABLE_MODELS[model_name](model_params)
             model.fit(dataset=self.mock_dataset, verbose=False)
 
             return model

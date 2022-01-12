@@ -30,6 +30,7 @@ class LSTMModule(Module):
         dropout: float,
         is_sequence_classifier: bool,
         device: Device,
+        **build_params,
     ):
         """
         Initialize an LSTM.
@@ -190,17 +191,14 @@ class LSTM(Model):
     def __init__(
         self,
         model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
-        super().__init__(
-            "lstm", LSTMModule, model_params, train_params, model_dir, device
-        )
+        super().__init__("lstm", LSTMModule, model_params, model_dir, device)
 
         # Only for Zaremba et al. / Gal & Ghahramani replication, I know this isn't pretty
-        if "init_weight" in train_params:
-            init_weight = train_params["init_weight"]
+        if "init_weight" in model_params:
+            init_weight = model_params["init_weight"]
 
             for layer_weights in self.module.lstm.all_weights:
                 for param in layer_weights:

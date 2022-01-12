@@ -22,14 +22,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
-from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 # PROJECT
 from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
 import nlp_uncertainty_zoo.utils.metrics as metrics
 from nlp_uncertainty_zoo.utils.evaluation import evaluate
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.types import Device, WandBRun
 
 
 class Module(ABC, nn.Module):
@@ -83,6 +82,7 @@ class Module(ABC, nn.Module):
             "max_prob": metrics.max_prob,
             "predictive_entropy": metrics.predictive_entropy,
             "dempster_shafer": metrics.dempster_shafer,
+            "softmax_gap": metrics.softmax_gap,
         }
         self.multi_prediction_uncertainty_metrics = {}
         self.default_uncertainty_metric = "predictive_entropy"
@@ -260,7 +260,6 @@ class Model(ABC):
         model_name: str,
         module_class: type,
         model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
@@ -275,32 +274,30 @@ class Model(ABC):
             Class of the model that is being wrapped.
         model_params: Dict[str, Any]
             Parameters to initialize the model.
-        train_params: Dict[str, Any]
-            Parameters for model training.
         device: Device
             The device the model is located on.
         """
         self.model_name = model_name
         self.module_class = module_class
         self.module = module_class(**model_params, device=device)
-        self.train_params = train_params
         self.model_dir = model_dir
+        self.model_params = model_params
         self.device = device
         self.to(device)
 
         # Initialize optimizer and scheduler
-        optimizer_class = self.train_params.get("optimizer_class", optim.Adam)
+        optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
         self.optimizer = optimizer_class(
             self.module.parameters(),
-            lr=self.train_params["lr"],
-            weight_decay=self.train_params.get("weight_decay", 0),
+            lr=self.model_params["lr"],
+            weight_decay=self.model_params.get("weight_decay", 0),
         )
 
         self.scheduler = None
-        if "scheduler_class" in self.train_params:
-            scheduler_class = self.train_params["scheduler_class"]
+        if "scheduler_class" in self.model_params:
+            scheduler_class = self.model_params["scheduler_class"]
             self.scheduler = scheduler_class(
-                self.optimizer, **self.train_params["scheduler_kwargs"]
+                self.optimizer, **self.model_params["scheduler_kwargs"]
             )
 
         # Check if model directory exists, if not, create
@@ -315,7 +312,7 @@ class Model(ABC):
         dataset: TextDataset,
         validate: bool = True,
         verbose: bool = True,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ):
         """
         Fit the model to training data.
@@ -328,27 +325,27 @@ class Model(ABC):
             Indicate whether model should also be evaluated on the validation set.
         verbose: bool
             Whether to display information about current loss.
-        summary_writer: Optional[SummaryWriter]
-            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
-            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        num_epochs = self.train_params["num_epochs"]
+        num_epochs = self.model_params["num_epochs"]
         best_val_score = np.inf
-        early_stopping_pat = self.train_params.get("early_stopping_pat", np.inf)
-        early_stopping = self.train_params.get("early_stopping", True)
+        early_stopping_pat = self.model_params.get("early_stopping_pat", np.inf)
+        early_stopping = self.model_params.get("early_stopping", True)
         num_no_improvements = 0
         total_steps = num_epochs * len(dataset.train)
         progress_bar = tqdm(total=total_steps) if verbose else None
         best_model = deepcopy(self)
 
-        for epoch in range(self.train_params["num_epochs"]):
+        for epoch in range(self.model_params["num_epochs"]):
             self.module.train()
 
             train_loss = self._epoch_iter(
                 epoch,
                 dataset.train,
                 progress_bar,
-                summary_writer,
+                wandb_run,
             )
 
             # Update progress bar and summary writer
@@ -358,8 +355,8 @@ class Model(ABC):
                 )
                 progress_bar.update(1)
 
-            if summary_writer is not None:
-                summary_writer.add_scalar("Epoch train loss", train_loss.item(), epoch)
+            if wandb_run is not None:
+                wandb_run.log({"Epoch train loss": train_loss.item()}, step=epoch)
 
             # Get validation loss
             if validate:
@@ -368,8 +365,8 @@ class Model(ABC):
                 with torch.no_grad():
                     val_score = evaluate(self, dataset, dataset.valid)
 
-                if summary_writer is not None:
-                    summary_writer.add_scalar("Epoch val score", val_score, epoch)
+                if wandb_run is not None:
+                    wandb_run.log({"Epoch val score": val_score}, step=epoch)
 
                 if val_score < best_val_score:
                     best_val_score = val_score
@@ -386,7 +383,7 @@ class Model(ABC):
             # Update scheduler
             if (
                 self.scheduler
-                and self.train_params.get("scheduler_step_or_epoch", "") == "epoch"
+                and self.model_params.get("scheduler_step_or_epoch", "") == "epoch"
             ):
                 self.scheduler.step(epoch=epoch)
 
@@ -397,7 +394,7 @@ class Model(ABC):
 
         # Additional training step, e.g. temperature scaling on val
         if validate:
-            self._finetune(dataset.valid, verbose, summary_writer)
+            self._finetune(dataset.valid, verbose, wandb_run)
 
         # Save model if applicable
         if self.model_dir is not None:
@@ -489,7 +486,7 @@ class Model(ABC):
         epoch: int,
         data_split: DataSplit,
         progress_bar: Optional[tqdm] = None,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ) -> torch.Tensor:
         """
         Perform one training epoch.
@@ -502,10 +499,10 @@ class Model(ABC):
             Current data split.
         progress_bar: Optional[tqdm]
             Progress bar used to display information about current run.
-        summary_writer: SummaryWriter
-            Summary writer to track training statistics.
+        wandb_run: Optional[WandBRun] = None
+            Weights & Biases run to track training statistics.
         """
-        grad_clip = self.train_params.get("grad_clip", np.inf)
+        grad_clip = self.model_params.get("grad_clip", np.inf)
         epoch_loss = torch.zeros(1)
         num_batches = len(data_split)
 
@@ -513,7 +510,7 @@ class Model(ABC):
 
             X, y = X.to(self.device), y.to(self.device)
             global_batch_num = epoch * len(data_split) + i
-            batch_loss = self.get_loss(global_batch_num, X, y, summary_writer)
+            batch_loss = self.get_loss(global_batch_num, X, y, wandb_run)
 
             # Update progress bar and summary writer
             if progress_bar is not None:
@@ -522,17 +519,13 @@ class Model(ABC):
                 )
                 progress_bar.update(1)
 
-            if summary_writer is not None:
-                summary_writer.add_scalar(
-                    "Batch train loss", batch_loss, global_batch_num
-                )
+            if wandb_run is not None:
+                batch_info = {"Batch train loss": batch_loss}
 
                 if self.scheduler is not None:
-                    summary_writer.add_scalar(
-                        "Batch learning rate",
-                        self.scheduler.get_last_lr()[0],
-                        global_batch_num,
-                    )
+                    batch_info["Batch learning rate"] = self.scheduler.get_last_lr()[0]
+
+                wandb_run.log(batch_info, step=global_batch_num)
 
             epoch_loss += batch_loss.cpu().detach()
 
@@ -549,7 +542,7 @@ class Model(ABC):
 
                 if (
                     self.scheduler is not None
-                    and self.train_params.get("scheduler_step_or_epoch", "") == "step"
+                    and self.model_params.get("scheduler_step_or_epoch", "") == "step"
                 ):
                     self.scheduler.step()
 
@@ -560,7 +553,7 @@ class Model(ABC):
         n_batch: int,
         X: torch.Tensor,
         y: torch.Tensor,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ) -> torch.Tensor:
         """
         Get loss for a single batch. This just uses cross-entropy loss, but can be adjusted in subclasses by overwriting
@@ -574,8 +567,8 @@ class Model(ABC):
             Batch input.
         y: torch.Tensor
             Batch labels.
-        summary_writer: SummaryWriter
-            Summary writer to track training statistics.
+        wandb_run: Optional[WandBRun] = None
+            Weights and Biases run to track training statistics.
 
         Returns
         -------
@@ -599,7 +592,7 @@ class Model(ABC):
         self,
         data_split: DataSplit,
         verbose: bool,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb: Optional[WandBRun] = None,
     ):
         """
         Do an additional training / fine-tuning step, which is required for some models. Is being overwritten in some
@@ -611,9 +604,9 @@ class Model(ABC):
             Data split for fine-tuning step.
         verbose: bool
             Whether to display information about current loss.
-        summary_writer: Optional[SummaryWriter]
-            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
-            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        wandb: Optional[WandBRun]
+            Weights & Biases run object to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         pass
 

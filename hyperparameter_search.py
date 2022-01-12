@@ -7,15 +7,14 @@ import argparse
 from datetime import datetime
 import json
 import os
-from typing import List, Dict, Union, Optional
+from typing import Optional, List
 
 # EXT
 from codecarbon import OfflineEmissionsTracker
 from knockknock import telegram_sender
-from sklearn.model_selection import ParameterSampler
 import numpy as np
-from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm
+import torch
+import wandb
 
 # PROJECT
 from nlp_uncertainty_zoo.config import (
@@ -23,23 +22,21 @@ from nlp_uncertainty_zoo.config import (
     AVAILABLE_DATASETS,
     PREPROCESSING_PARAMS,
     MODEL_PARAMS,
-    TRAIN_PARAMS,
-    NUM_EVALS,
-    PARAM_SEARCH,
 )
-from nlp_uncertainty_zoo.datasets import Dataset
+from nlp_uncertainty_zoo.utils.types import Device, WandBRun
 
 # CONST
-SEED = 123
-HYPERPARAM_DIR = "./hyperparameters"
-MODEL_DIR = "./models"
-DATA_DIR = "./data/processed"
 EMISSION_DIR = "./emissions"
+SEED = 123
+DATA_DIR = "./data/processed"
 SECRET_IMPORTED = False
+PROJECT_NAME = "nlp-uncertainty-zoo"
 
 
 try:
     from secret import TELEGRAM_API_TOKEN, TELEGRAM_CHAT_ID, COUNTRY_CODE
+
+    SECRET_IMPORTED = True
 
 except ImportError:
     raise ImportError(
@@ -48,33 +45,27 @@ except ImportError:
 
 
 def perform_hyperparameter_search(
-    models: List[str],
+    model_name: str,
     dataset_name: str,
-    max_num_epochs: int,
-    result_dir: str,
-    save_top_n: int = 10,
-    device: str = "cpu",
-    summary_writer: Optional[SummaryWriter] = None,
+    device: Device = "cpu",
+    seed: Optional[int] = None,
+    wandb_run: Optional[WandBRun] = None,
 ) -> str:
     """
     Perform hyperparameter search for a list of models and save the results into a directory.
 
     Parameters
     ----------
-    models: List[str]
-        List specifying the names of models.
+    model_name: str
+        The name of model to run the search for.
     dataset_name: str
         Name of data set models should be evaluated on.
-    max_num_epochs: int
-        Maximum number of epochs before trial is stopped.
-    result_dir: str
-        Directory that results should be saved to.
-    save_top_n: int
-        Save the top n parameter configuration. Default is 10.
     device: Device
         Device hyperparameter search happens on.
-    summary_writer: Optional[SummaryWriter]
-        Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
+    seed: Optional[int]
+        Seed for the hyperparameter run.
+    wandb_run: Optional[WandBRun]
+        Weights and Biases Run to track training statistics. Training and validation loss (if applicable) are tracked by
         default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
 
     Returns
@@ -82,7 +73,14 @@ def perform_hyperparameter_search(
     str
         Information being passed on to knockknock.
     """
+    if seed is not None:
+        torch.random.manual_seed(seed)
+
     info_dict = {}
+
+    if wandb_run is not None:
+        info_dict["config"] = wandb_run.config.as_dict()
+
     dataset = AVAILABLE_DATASETS[dataset_name](
         data_dir=args.data_dir, **PREPROCESSING_PARAMS[dataset_name]
     )
@@ -90,130 +88,33 @@ def perform_hyperparameter_search(
     # so do that here
     _, _ = dataset.train, dataset.valid
 
-    with tqdm(total=get_num_runs(models, dataset_name)) as progress_bar:
+    model_params = MODEL_PARAMS[dataset_name][model_name]
 
-        for model_name in models:
+    module = AVAILABLE_MODELS[model_name](model_params, device=device)
 
-            progress_bar.postfix = f"(model: {model_name})"
-            progress_bar.update()
-            scores = {}
+    try:
+        module.fit(dataset, validate=True, verbose=False, wandb_run=wandb)
+        score = -module.eval(dataset.valid.to(device)).item()
 
-            sampled_params = sample_hyperparameters(model_name, dataset_name)
+    # In case of nans due bad training parameters
+    except (ValueError, RuntimeError) as e:
+        print(f"There was an error: '{str(e)}', run aborted.")
+        score = -np.inf
 
-            for run, param_set in enumerate(sampled_params):
+    if np.isnan(score):
+        score = -np.inf
 
-                model_params = MODEL_PARAMS[dataset_name][model_name]
-                train_params = TRAIN_PARAMS[dataset_name][model_name]
-                train_params["num_epochs"] = max_num_epochs
-
-                module = AVAILABLE_MODELS[model_name](
-                    model_params, train_params, model_dir="models", device=device
-                )
-
-                try:
-                    module.fit(
-                        dataset.train.to(device),
-                        verbose=True,  # TODO
-                        summary_writer=summary_writer,
-                    )
-                    score = -module.eval(dataset.valid.to(device)).item()
-
-                # In case of nans due bad training parameters
-                except (ValueError, RuntimeError) as e:
-                    print(f"There was an error: '{str(e)}', run aborted.")
-                    score = -np.inf
-
-                if np.isnan(score):
-                    score = -np.inf
-
-                scores[run] = {"score": score, "hyperparameters": param_set}
-                progress_bar.update(1)
-
-                # Rank and save results
-                # Do after every experiment in case anything goes wrong
-                sorted_scores = dict(
-                    list(
-                        sorted(
-                            scores.items(),
-                            key=lambda run: run[1]["score"],
-                            reverse=True,
-                        )
-                    )[:save_top_n]
-                )
-                model_result_dir = f"{result_dir}/{dataset_name}/"
-                info_dict[model_name] = sorted_scores[0]
-
-                if not os.path.exists(model_result_dir):
-                    os.makedirs(model_result_dir)
-
-                with open(f"{model_result_dir}/{model_name}.json", "w") as result_file:
-                    result_file.write(json.dumps(sorted_scores, indent=4, default=str))
+    info_dict["score"] = score
+    wandb.log({"score": score})
 
     if tracker is not None:
         tracker.stop()
-        info_dict["emissions"] = tracker._prepare_emissions_data().emissions
+        emissions = tracker._prepare_emissions_data().emissions
+        info_dict["emissions"] = emissions
+        wandb.log({"emissions": emissions})
 
+    info_dict["url"] = wandb.run.get_url()
     return "\n" + json.dumps(info_dict, indent=4)
-
-
-def get_num_runs(model_names: List[str], dataset_name: str) -> int:
-    """
-    Calculate the total number of runs for this search given a list of model names.
-    """
-    return sum([NUM_EVALS[dataset_name][model_name] for model_name in model_names])
-
-
-def sample_hyperparameters(
-    model_name: str, dataset_name: str, round_to: int = 6
-) -> List[Dict[str, Union[int, float]]]:
-    """
-    Sample the hyperparameters for different runs of the same model. The distributions parameters are sampled from are
-    defined in nlp_uncertainty_zoo.config.PARAM_SEARCH and the number of evaluations per model type in
-    nlp_uncertainty_zoo.config.NUM_EVALS.
-
-    Parameters
-    ----------
-    model_name: str
-        Name of the model.
-    dataset_name: str
-        Specify the data set which should be used to specify the hyperparameters to be sampled / default values.
-    round_to: int
-        Decimal that floats should be rounded to.
-
-    Returns
-    -------
-    sampled_params: List[Dict[str, Union[int, float]]]
-        List of dictionaries containing hyperparameters and their sampled values.
-    """
-    sampled_params = list(
-        ParameterSampler(
-            param_distributions={
-                hyperparam: PARAM_SEARCH[dataset_name][model_name][hyperparam]
-                for hyperparam, val in MODEL_PARAMS[dataset_name][model_name].items()
-                if hyperparam in PARAM_SEARCH[dataset_name][model_name]
-            },
-            n_iter=NUM_EVALS[dataset_name][model_name],
-        )
-    )
-
-    sampled_params = [
-        dict(
-            {
-                # Round float values
-                hyperparam: round(val, round_to) if isinstance(val, float) else val
-                for hyperparam, val in params.items()
-            },
-            **{
-                # Add hyperparameters that stay fixed
-                hyperparam: val
-                for hyperparam, val in MODEL_PARAMS[dataset_name][model_name].items()
-                if hyperparam not in PARAM_SEARCH[dataset_name][model_name]
-            },
-        )
-        for params in sampled_params
-    ]
-
-    return sampled_params
 
 
 if __name__ == "__main__":
@@ -226,24 +127,45 @@ if __name__ == "__main__":
         help="Dataset to run experiments on.",
     )
     parser.add_argument(
-        "--models",
+        "--model",
         type=str,
         required=True,
-        nargs="+",
         choices=AVAILABLE_MODELS.keys(),
     )
     parser.add_argument("--data-dir", type=str, default=DATA_DIR)
-    parser.add_argument("--hyperparam-dir", type=str, default=HYPERPARAM_DIR)
     parser.add_argument("--device", type=str, default="cpu")
-    parser.add_argument("--save-top-n", type=int, default=10)
-    parser.add_argument("--emission-dir", type=str, default=EMISSION_DIR)
     parser.add_argument("--track-emissions", action="store_true", default=False)
-    parser.add_argument("--max-num-epochs", type=int)
+    parser.add_argument("--emission-dir", type=str, default=EMISSION_DIR)
     parser.add_argument("--knock", action="store_true", default=False)
     parser.add_argument("--seed", type=int, default=SEED)
-    args = parser.parse_args()
 
-    summary_writer = SummaryWriter()
+    # Parse into the arguments specified above, everything else are ran parameters
+    args, config = parser.parse_known_args()
+
+    def _stupid_parse(raw_config: List[str]):
+        config = {}
+
+        for raw_arg in raw_config:
+            arg, value = raw_arg.strip().replace("--", "").split("=")
+
+            try:
+                config[arg] = int(value)
+
+            except ValueError:
+                try:
+                    config[arg] = float(value)
+
+                except ValueError:
+                    # Argument is probably a string
+                    config[arg] = value
+
+        return config
+
+    config = _stupid_parse(config)
+    model_params = MODEL_PARAMS[args.dataset][args.model]
+    model_params.update(config)
+
+    wandb_run = wandb.init(project=PROJECT_NAME, config=model_params)
     tracker = None
 
     if args.track_emissions:
@@ -269,11 +191,5 @@ if __name__ == "__main__":
         )(perform_hyperparameter_search)
 
     perform_hyperparameter_search(
-        args.models,
-        args.dataset,
-        args.max_num_epochs,
-        args.hyperparam_dir,
-        args.save_top_n,
-        args.device,
-        summary_writer,
+        args.model, args.dataset, args.device, args.seed, wandb_run
     )

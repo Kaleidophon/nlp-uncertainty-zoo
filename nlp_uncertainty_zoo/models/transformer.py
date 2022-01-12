@@ -33,6 +33,7 @@ class TransformerModule(Module):
         sequence_length: int,
         is_sequence_classifier: bool,
         device: Device,
+        **build_params,
     ):
         """
         Initialize a transformer.
@@ -164,7 +165,6 @@ class Transformer(Model):
     def __init__(
         self,
         model_params: Dict[str, Any],
-        train_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
@@ -172,7 +172,6 @@ class Transformer(Model):
             "transformer",
             TransformerModule,
             model_params,
-            train_params,
             model_dir,
             device,
         )

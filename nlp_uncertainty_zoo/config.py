@@ -2,11 +2,6 @@
 This module puts all the hyper-, training and preprocessing parameters used in this project into one single place.
 """
 
-# TODO: Add tokenizers
-
-# EXT
-from scipy.stats import uniform
-
 # PROJECT
 from nlp_uncertainty_zoo.models.composer import Composer
 from nlp_uncertainty_zoo.datasets import (
@@ -57,44 +52,10 @@ PREPROCESSING_PARAMS = {
     "clinc": configs.CLINC_PREPROCESSING_PARAMS,
 }
 
-# TRAINING PARAMETERS
-# Training parameters by dataset and model
-TRAIN_PARAMS = {
-    "wikitext-103": configs.WIKITEXT_TRAIN_PARAMS,
-    "ptb": configs.PTB_TRAIN_PARAMS,
-    "clinc": configs.CLINC_TRAIN_PARAMS,
-}
-
-
 # MODEL HYPERPARAMETERS
 # Hyperparameters by dataset and model
-SHARED_MODEL_PARAMS = {
-    "wikitext-103": configs.WIKITEXT_SHARED_MODEL_PARAMS,
-    "ptb": configs.PTB_SHARED_MODEL_PARAMS,
-    "clinc": configs.CLINC_SHARED_MODEL_PARAMS,
-}
-_MODEL_PARAMS = {
+MODEL_PARAMS = {
     "wikitext-103": configs.WIKITEXT_MODEL_PARAMS,
     "ptb": configs.PTB_MODEL_PARAMS,
     "clinc": configs.CLINC_MODEL_PARAMS,
-}
-MODEL_PARAMS = {
-    dataset: {
-        model_name: {**SHARED_MODEL_PARAMS[dataset], **model_params}
-        for model_name, model_params in model_dicts.items()
-    }
-    for dataset, model_dicts in _MODEL_PARAMS.items()
-}
-
-# HYPERPARAMETER SEARCH
-# Number of tested configurations per dataset per model
-NUM_EVALS = {
-    "wikitext-103": configs.WIKITEXT_NUM_EVALS,
-    "ptb": configs.PTB_NUM_EVALS,
-}
-
-# Search ranges / options per dataset per model
-PARAM_SEARCH = {
-    "wikitext-103": configs.WIKITEXT_PARAM_SEARCH,
-    "ptb": configs.PTB_PARAM_SEARCH,
 }
