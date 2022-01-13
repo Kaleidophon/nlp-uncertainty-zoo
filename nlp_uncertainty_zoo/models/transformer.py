@@ -12,7 +12,7 @@ import torch.nn as nn
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model, Module
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 class TransformerModule(Module):

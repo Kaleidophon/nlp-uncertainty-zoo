@@ -26,7 +26,7 @@ from nlp_uncertainty_zoo.config import (
     AVAILABLE_DATASETS,
     AVAILABLE_MODELS,
 )
-from nlp_uncertainty_zoo.utils.types import Device, WandBRun
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 # CONST
 SEED = 123

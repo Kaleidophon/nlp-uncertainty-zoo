@@ -26,7 +26,7 @@ from transformers import BertModel, BertTokenizer, get_linear_schedule_with_warm
 
 # PROJECT
 from nlp_uncertainty_zoo import SNGPModule
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device
 from datasets import load_dataset, Dataset
 from secret import COUNTRY_CODE, TELEGRAM_CHAT_ID, TELEGRAM_API_TOKEN
 

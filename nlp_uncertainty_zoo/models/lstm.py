@@ -12,7 +12,7 @@ import torch.nn.functional as F
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model, Module
-from nlp_uncertainty_zoo.utils.types import Device, HiddenDict
+from nlp_uncertainty_zoo.utils.custom_types import Device, HiddenDict
 
 
 class LSTMModule(Module):

@@ -28,7 +28,7 @@ from tqdm import tqdm
 from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
 import nlp_uncertainty_zoo.utils.metrics as metrics
 from nlp_uncertainty_zoo.utils.task_eval import evaluate
-from nlp_uncertainty_zoo.utils.types import Device, WandBRun
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
 class Module(ABC, nn.Module):

@@ -18,7 +18,7 @@ import torch
 from torch.utils.data import Dataset
 
 # PROJECT
-from nlp_uncertainty_zoo.utils.types import BatchedSequences, Device
+from nlp_uncertainty_zoo.utils.custom_types import BatchedSequences, Device
 
 # TODO: Add WILDS text dataset
 # TODO: Add IMDB dataset

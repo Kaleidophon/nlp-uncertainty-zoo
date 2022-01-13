@@ -13,7 +13,7 @@ from torch.nn import functional as F
 # PROJECT
 from nlp_uncertainty_zoo.models.lstm import CellWiseLSTM, LSTMModule
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 class STTauCell(nn.LSTMCell):

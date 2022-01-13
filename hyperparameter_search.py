@@ -23,7 +23,7 @@ from nlp_uncertainty_zoo.config import (
     PREPROCESSING_PARAMS,
     MODEL_PARAMS,
 )
-from nlp_uncertainty_zoo.utils.types import Device, WandBRun
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 # CONST
 EMISSION_DIR = "./emissions"

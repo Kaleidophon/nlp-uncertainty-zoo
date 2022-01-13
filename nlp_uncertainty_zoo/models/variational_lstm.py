@@ -13,7 +13,7 @@ from torch.nn import functional as F
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Module, MultiPredictionMixin, Model
-from nlp_uncertainty_zoo.utils.types import Device, HiddenDict
+from nlp_uncertainty_zoo.utils.custom_types import Device, HiddenDict
 
 
 class VariationalDropout(nn.Module):

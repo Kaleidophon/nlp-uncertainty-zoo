@@ -12,7 +12,7 @@ import torch.nn.functional as F
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model, MultiPredictionMixin
 from nlp_uncertainty_zoo.models.transformer import TransformerModule
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 class VariationalTransformerModule(TransformerModule, MultiPredictionMixin):

@@ -14,7 +14,7 @@ import torch.nn as nn
 
 # PROJECT
 from nlp_uncertainty_zoo.models.transformer import TransformerModule
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 class SpectralTransformerModule(TransformerModule):

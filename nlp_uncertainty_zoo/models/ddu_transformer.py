@@ -17,7 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
 from nlp_uncertainty_zoo.datasets import DataSplit
 from nlp_uncertainty_zoo.models.model import Model
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 class DDUTransformerModule(SpectralTransformerModule):

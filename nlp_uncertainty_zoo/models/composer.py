@@ -15,7 +15,7 @@ from einops import rearrange
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model, Module
 from nlp_uncertainty_zoo.models.transformer import PositionalEmbedding
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 # TODO: Add missing doc

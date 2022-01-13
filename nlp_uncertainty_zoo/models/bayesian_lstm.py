@@ -13,7 +13,7 @@ from blitz.modules import BayesianLSTM as BlitzBayesianLSTM
 # PROJECT
 from nlp_uncertainty_zoo.models.lstm import LayerWiseLSTM, LSTMModule
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
-from nlp_uncertainty_zoo.utils.types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
