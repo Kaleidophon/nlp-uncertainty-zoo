@@ -16,3 +16,4 @@ BERT_MODELS = {
 # TODO: Use different BERTs for different languages
 # TODO: Ensure compatibility for (sequence) classification
 # TODO: Write wrapper that implements all other functions defined by model / module class
+# TODO: Write Model subclass with BERT batching
