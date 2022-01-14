@@ -24,6 +24,9 @@ from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
+# TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
+
+
 class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin):
     """
     Implementation of Deterministic Uncertainty Estimation (DUE) Transformer by

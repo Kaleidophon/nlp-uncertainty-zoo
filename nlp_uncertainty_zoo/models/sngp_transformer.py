@@ -21,6 +21,9 @@ from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
+# TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
+
+
 class SNGPModule(nn.Module):
     """
     Spectral-normalized Gaussian Process output layer, as presented in

@@ -20,6 +20,9 @@ from nlp_uncertainty_zoo.models.model import Model
 from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
+# TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
+
+
 class DDUTransformerModule(SpectralTransformerModule):
     """
     Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by

@@ -15,6 +15,9 @@ from nlp_uncertainty_zoo.models.transformer import TransformerModule
 from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
+# TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
+
+
 class VariationalTransformerModule(TransformerModule, MultiPredictionMixin):
     """
     Implementation of Variational Transformer by `Xiao et al., (2021) <https://arxiv.org/pdf/2006.08344.pdf>`_.
