@@ -554,6 +554,7 @@ class Model(ABC):
         X: torch.Tensor,
         y: torch.Tensor,
         wandb_run: Optional[WandBRun] = None,
+        **kwargs,
     ) -> torch.Tensor:
         """
         Get loss for a single batch. This just uses cross-entropy loss, but can be adjusted in subclasses by overwriting
@@ -577,7 +578,7 @@ class Model(ABC):
         """
 
         loss_function = nn.CrossEntropyLoss()
-        preds = self.module(X)
+        preds = self.module(X, **kwargs)
 
         loss = loss_function(
             rearrange(preds, "b t p -> (b t) p"),

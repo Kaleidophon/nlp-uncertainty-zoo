@@ -3,14 +3,19 @@ Define Bert modules used in this project and make them consistent with the other
 """
 
 # EXT
-import torch.nn.functional as F
+import numpy as np
 import torch
 import torch.nn as nn
-from transformers import BertModel, BertTokenizer, get_linear_schedule_with_warmup
+import torch.nn.functional as F
+from torch.nn.utils import clip_grad_norm_
+from typing import Dict, Any, Optional
+from tqdm import tqdm
+from transformers import BertModel
 
 # PROJECT
+from nlp_uncertainty_zoo.datasets import DataSplit
 from nlp_uncertainty_zoo.models.model import Model, Module
-from nlp_uncertainty_zoo.utils.custom_types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 # CONST
 BERT_MODELS = {
@@ -19,8 +24,6 @@ BERT_MODELS = {
     "finnish": "bert-base-finnish-cased-v1",
     "swahili": "bert-base-multilingual-cased",
 }
-
-# TODO: Write Model subclass with BERT batching
 
 
 class BERTModule(Module):
@@ -156,3 +159,89 @@ class BERTModule(Module):
         hidden = torch.tanh(self.custom_bert_pooler(hidden))
 
         return hidden
+
+
+class BERTModel(Model):
+    """
+    Model class for BERT models with modified training loop.
+    """
+
+    def __init__(
+        self,
+        model_params: Dict[str, Any],
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
+    ):
+        language = model_params["language"]
+        super().__init__(
+            f"{language}_transformer",
+            BERTModule,
+            model_params,
+            model_dir,
+            device,
+        )
+
+    def _epoch_iter(
+        self,
+        epoch: int,
+        data_split: DataSplit,
+        progress_bar: Optional[tqdm] = None,
+        wandb_run: Optional[WandBRun] = None,
+    ) -> torch.Tensor:
+
+        grad_clip = self.model_params.get("grad_clip", np.inf)
+        epoch_loss = torch.zeros(1)
+        num_batches = len(data_split)
+
+        for i, batch in enumerate(data_split):
+
+            attention_mask, input_ids, labels = (
+                batch["attention_mask"].to(self.device),
+                batch["input_ids"].to(self.device),
+                batch["y"].to(self.device),
+            )
+
+            global_batch_num = epoch * len(data_split) + i
+            batch_loss = self.get_loss(
+                global_batch_num,
+                input_ids,
+                labels,
+                wandb_run,
+                attention_mask=attention_mask,
+            )
+
+            # Update progress bar and summary writer
+            if progress_bar is not None:
+                progress_bar.set_description(
+                    f"Epoch {epoch + 1}: {i + 1}/{num_batches} | Loss {batch_loss.item():.4f}"
+                )
+                progress_bar.update(1)
+
+            if wandb_run is not None:
+                batch_info = {"Batch train loss": batch_loss}
+
+                if self.scheduler is not None:
+                    batch_info["Batch learning rate"] = self.scheduler.get_last_lr()[0]
+
+                wandb_run.log(batch_info, step=global_batch_num)
+
+            epoch_loss += batch_loss.cpu().detach()
+
+            if epoch_loss == np.inf or np.isnan(epoch_loss):
+                raise ValueError(f"Loss became NaN or inf during epoch {epoch + 1}.")
+
+            if self.module.training:
+                batch_loss.backward()
+                clip_grad_norm_(self.module.parameters(), grad_clip)
+                self.optimizer.step()
+                self.optimizer.zero_grad(
+                    set_to_none=True
+                )  # Save memory by setting to None
+
+                if (
+                    self.scheduler is not None
+                    and self.model_params.get("scheduler_step_or_epoch", "") == "step"
+                ):
+                    self.scheduler.step()
+
+        return epoch_loss
