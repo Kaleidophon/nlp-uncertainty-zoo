@@ -90,7 +90,7 @@ class Module(ABC, nn.Module):
         super().__init__()
 
     @abstractmethod
-    def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def forward(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
         """
         Forward pass of the model.
 
