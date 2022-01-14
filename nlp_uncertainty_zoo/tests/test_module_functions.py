@@ -41,6 +41,8 @@ NUM_PREDICTIONS = 5
 BATCH_SIZE = 4
 SEQUENCE_LENGTH = 12
 
+# TODO: Test BERTs
+
 
 class MockDataset:
     """

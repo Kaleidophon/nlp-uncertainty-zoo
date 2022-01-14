@@ -17,6 +17,9 @@ from nlp_uncertainty_zoo.models.transformer import TransformerModule
 from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
+# TODO: Add spectral Bert
+
+
 class SpectralTransformerModule(TransformerModule):
     """
     Implementation of a spectral-normalized transformer. Used as a base for models like SNGP, DUE and DDU.
