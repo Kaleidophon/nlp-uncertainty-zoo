@@ -26,7 +26,7 @@ BERT_MODELS = {
 }
 
 
-class BERTModule(Module):
+class BertModule(Module):
     """
     Define a BERT module that implements all the functions implemented in Module.
     """
@@ -161,25 +161,10 @@ class BERTModule(Module):
         return hidden
 
 
-class BERTModel(Model):
+class BertModelMixin:
     """
-    Model class for BERT models with modified training loop.
+    Model mixin for BERT models with modified training loop.
     """
-
-    def __init__(
-        self,
-        model_params: Dict[str, Any],
-        model_dir: Optional[str] = None,
-        device: Device = "cpu",
-    ):
-        language = model_params["language"]
-        super().__init__(
-            f"{language}_transformer",
-            BERTModule,
-            model_params,
-            model_dir,
-            device,
-        )
 
     def _epoch_iter(
         self,
