@@ -3,14 +3,16 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 """
 
 # PROJECT
-from nlp_uncertainty_zoo.models.composer import Composer
 from nlp_uncertainty_zoo.datasets import (
     Wikitext103Dataset,
     PennTreebankDataset,
     ClincDataset,
 )
 import nlp_uncertainty_zoo.dataset_configs as configs
-from nlp_uncertainty_zoo.models.variational_transformer import VariationalTransformer
+from nlp_uncertainty_zoo.models.variational_transformer import (
+    VariationalTransformer,
+    VariationalBert,
+)
 from nlp_uncertainty_zoo import (
     VariationalLSTM,
     LSTMEnsemble,
@@ -38,6 +40,7 @@ AVAILABLE_MODELS = {
     "st_tau_lstm": STTauLSTM,
     "transformer": Transformer,
     "variational_transformer": VariationalTransformer,
+    "variational_bert": VariationalBert,
     "sngp_transformer": SNGPTransformer,
     "ddu_transformer": DDUTransformer,
     "due_transformer": DUETransformer,

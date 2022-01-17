@@ -64,7 +64,7 @@ class SNGPModule(nn.Module):
             Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
             initialized from.
         gp_mean_field_factor: float
-            Multiplicative factor used in the mean-field approcimation for the posterior mean of the softmax
+            Multiplicative factor used in the mean-field approximation for the posterior mean of the softmax
             Gaussian process, based on `Lu et al. (2021) <https://arxiv.org/pdf/2006.07584.pdf>'_.
         num_predictions: int
             Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.

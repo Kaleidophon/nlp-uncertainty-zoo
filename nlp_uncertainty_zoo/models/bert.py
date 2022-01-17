@@ -14,7 +14,7 @@ from transformers import BertModel
 
 # PROJECT
 from nlp_uncertainty_zoo.datasets import DataSplit
-from nlp_uncertainty_zoo.models.model import Model, Module
+from nlp_uncertainty_zoo.models.model import Module
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 # CONST

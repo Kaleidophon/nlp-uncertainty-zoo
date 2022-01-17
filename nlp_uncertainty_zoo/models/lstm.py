@@ -14,6 +14,8 @@ import torch.nn.functional as F
 from nlp_uncertainty_zoo.models.model import Model, Module
 from nlp_uncertainty_zoo.utils.custom_types import Device, HiddenDict
 
+# TODO: Use bi-lstms?
+
 
 class LSTMModule(Module):
     """
