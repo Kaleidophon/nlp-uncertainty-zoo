@@ -8,9 +8,6 @@ import torch.optim.lr_scheduler as scheduler
 import torch.optim as optim
 import transformers
 
-
-CLINC_PREPROCESSING_PARAMS = {"batch_size": 32, "sequence_length": 32}
-
 CLINC_MODEL_PARAMS = {
     "lstm": {
         "early_stopping": True,

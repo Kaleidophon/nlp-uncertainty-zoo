@@ -341,6 +341,7 @@ class Model(ABC):
         for epoch in range(self.model_params["num_epochs"]):
             self.module.train()
 
+            # TODO: Refactor for new dataset usage
             train_loss = self._epoch_iter(
                 epoch,
                 dataset.train,
@@ -362,6 +363,7 @@ class Model(ABC):
             if validate:
                 self.module.eval()
 
+                # TODO: Refactor for new dataset usage
                 with torch.no_grad():
                     val_score = evaluate(self, dataset, dataset.valid)
 
@@ -502,6 +504,7 @@ class Model(ABC):
         wandb_run: Optional[WandBRun] = None
             Weights & Biases run to track training statistics.
         """
+        # TODO: Refactor for new dataset usage
         grad_clip = self.model_params.get("grad_clip", np.inf)
         epoch_loss = torch.zeros(1)
         num_batches = len(data_split)

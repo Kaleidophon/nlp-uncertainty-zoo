@@ -124,6 +124,8 @@ class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         num_instances: int
             Number of instances being sampled to initialize the GP inducing points and length scale.
         """
+        # TODO: Refactor for new dataset usage
+
         # Compute how many batches need to be sampled to initialize the inducing points when using batches of
         # batch_size and length sequence_length
         batch_size = train_data[0][0].shape[0]
@@ -263,6 +265,7 @@ class DUETransformer(Model):
             Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
             default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
+        # TODO: Refactor for new dataset usage
         # Retrieve inducing points and length scale from training set to initialize the GP
         self.module.init_gp(dataset.train)
 

@@ -28,6 +28,8 @@ from nlp_uncertainty_zoo.config import (
 )
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
+# TODO: Refactor for new dataset usage
+
 # CONST
 SEED = 123
 RESULT_DIR = "./results"

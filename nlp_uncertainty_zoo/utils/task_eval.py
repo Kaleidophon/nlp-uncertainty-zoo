@@ -34,6 +34,9 @@ EVAL_FUNCS_POST = {
 }
 
 
+# TODO: Refactor for new dataset usage
+
+
 def evaluate(
     model,
     dataset: TextDataset,

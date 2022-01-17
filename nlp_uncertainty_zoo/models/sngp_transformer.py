@@ -466,4 +466,5 @@ class SNGPTransformer(Model):
         verbose: bool,
         summary_writer: Optional[SummaryWriter] = None,
     ):
+        # TODO: Refactor for new dataset usage
         self.module.sngp_layer.invert_sigma_hat()

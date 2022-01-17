@@ -2,12 +2,6 @@
 Define all training and model parameters used for the Wikitext-103 dataset.
 """
 
-WIKITEXT_PREPROCESSING_PARAMS = {
-    "batch_size": 64,
-    "sequence_length": 30,
-    "min_freq": 20,
-}
-
 WIKITEXT_MODEL_PARAMS = {
     "lstm": {"lr": 0.01, "num_layers": 2, "dropout": 0.2},
     "variational_lstm": {"lr": 0.01, "num_layers": 2, "dropout": 0.35},

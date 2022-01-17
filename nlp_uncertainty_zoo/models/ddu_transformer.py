@@ -105,6 +105,8 @@ class DDUTransformerModule(SpectralTransformerModule):
         data_split: DataSplit
             Data split used for fitting, usually the training or validation split.
         """
+        # TODO: Refactor for new dataset usage
+
         with torch.no_grad():
             hiddens, labels = [], []
 

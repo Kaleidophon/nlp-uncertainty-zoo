@@ -8,13 +8,6 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
 import transformers
 
-
-PTB_PREPROCESSING_PARAMS = {
-    "batch_size": 20,
-    "sequence_length": 35,
-    # "max_size": 10000,  # PTB has exactly 10000 types
-}
-
 PTB_MODEL_PARAMS = {
     "lstm": {
         "early_stopping": True,
