@@ -4,6 +4,7 @@ Module to implement data reading and batching functionalities.
 
 # STD
 from abc import ABC, abstractmethod
+from functools import reduce
 from typing import Dict, Optional, Any, List, Union
 
 # EXT
@@ -229,40 +230,123 @@ class ClassificationDatasetBuilder(DatasetBuilder):
     sequence labelling.
     """
 
-    ...  # TODO
+    def build(
+        self, batch_size: int, **dataloader_kwargs: Dict[str, Any]
+    ) -> Dict[str, DataLoader]:
+        """
+        Build a language modelling dataset.
+
+        Parameters
+        ----------
+        batch_size: int
+            The desired batch size.
+
+        Returns
+        -------
+        Dict[str, DataLoader]
+            Dictionary of DataLoaders for every given split.
+        """
+        assert self.type in [
+            "sequence_classification",
+            "token_classification",
+        ], f"Invalid type '{self.type}' found, must be sequence_classification or token_classification."
+
+        self.dataset = load_dataset(
+            "csv",
+            data_files=self.splits,
+            delimiter="\t",
+            column_names=["sentence", "label"],
+        )
+
+        # Extract all classes from data
+        classes = None
+        if self.type == "sequence_classification":
+            # This one-liner goes through all the labels occuring in the different splits and adds them to a set
+            classes = reduce(
+                lambda x, y: set(x).union(y),
+                [self.dataset[split]["label"] for split in self.splits],
+            )
+
+        # TODO: Modify and debug
+        elif self.type == "token_classification":
+            classes = reduce(
+                lambda x, y: set(x).union(y),
+                [self.dataset[split]["label"] for split in self.splits],
+            )
+
+        # Encode classes
+        label_encoder = LabelEncoder()
+        label_encoder.fit(list(classes))
+
+        # Replace with classes with labels
+        self.dataset = self.dataset.map(
+            # TODO: The lambda function below likely needs to be changed for token_classification
+            lambda inst: {"label": label_encoder.transform([inst["label"]])[0]},
+            batched=False,
+            with_indices=False,
+            num_proc=self.num_jobs,
+        )
+
+        # The following is basically copied from the corresponding HuggingFace tutorial: https://youtu.be/8PmhEIXhBvI
+        self.dataset = self.dataset.map(
+            lambda inst: self.tokenizer(
+                inst["sentence"],
+                truncation=True,
+                padding="max_length",
+                max_length=self.max_length,
+            ),
+            batched=True,
+            num_proc=self.num_jobs,
+        )
+        self.dataset.set_format(
+            type="torch", columns=["input_ids", "attention_mask", "label"]
+        )
+
+        # Create the DataLoader for every split
+        self.dataloaders = {
+            split: DataLoader(
+                self.dataset[split],
+                batch_size=batch_size,
+                **dataloader_kwargs,
+            )
+            for split in self.splits
+        }
+
+        # TODO: Debug
+        for batch in self.dataloaders["train"]:
+            ...
+
+        return self.dataloaders
 
 
-'''
 class ClincBuilder(ClassificationDatasetBuilder):
     """
     Dataset class for the CLINC OOS dataset.
     """
 
-    def __init__(
-        self,
-        data_dir: str,
-        batch_size: int,
-        sequence_length: int,
-        **indexing_params: Dict[str, Any],
-    ):
+    def __init__(self, data_dir: str, max_length: int, num_jobs: Optional[int] = 1):
         super().__init__(
             name="clinc",
             data_dir=data_dir,
             splits={
-                "train": "train.csv",
-                "valid": "val.csv",
-                "test": "test.csv",
-                "oos_test": "oos_test.csv",
+                "train": f"{data_dir}/train.csv",
+                "valid": f"{data_dir}/val.csv",
+                "test": f"{data_dir}/test.csv",
+                "oos_test": f"{data_dir}/oos_test.csv",
             },
-            batch_size=batch_size,
-            sequence_length=sequence_length,
-            **indexing_params,
+            type_="sequence_classification",
+            tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
+            max_length=max_length,
+            num_jobs=num_jobs,
         )
-'''
+
 
 if __name__ == "__main__":
     # TODO: Debug
-    dataset = PennTreebankBuilder(
-        data_dir="../data/processed/ptb", max_length=32, num_jobs=1
+    # dataset = PennTreebankBuilder(
+    #    data_dir="../data/processed/ptb", max_length=32, num_jobs=1
+    # ).build(16)
+    dataset = ClincBuilder(
+        data_dir="../data/processed/clinc", max_length=32, num_jobs=1
     ).build(16)
     ...
