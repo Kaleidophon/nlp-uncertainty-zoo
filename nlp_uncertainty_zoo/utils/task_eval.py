@@ -12,7 +12,7 @@ from torch.nn.functional import nll_loss
 from typing import Optional
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import (
+from nlp_uncertainty_zoo.data import (
     LanguageModelingDataset,
     TextDataset,
     SequenceClassificationDataset,

@@ -3,7 +3,7 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 """
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import (
+from nlp_uncertainty_zoo.data import (
     Wikitext103Dataset,
     PennTreebankDataset,
     ClincDataset,

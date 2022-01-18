@@ -18,7 +18,7 @@ import torch
 import wandb
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import TextDataset
+from nlp_uncertainty_zoo.data import TextDataset
 from nlp_uncertainty_zoo.utils.task_eval import evaluate
 from nlp_uncertainty_zoo.config import (
     PREPROCESSING_PARAMS,

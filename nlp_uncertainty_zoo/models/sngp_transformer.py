@@ -15,7 +15,7 @@ from torch.nn import functional as F
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import DataSplit
+from nlp_uncertainty_zoo.data import DataSplit
 from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.custom_types import Device

@@ -25,7 +25,7 @@ from torch.nn.utils import clip_grad_norm_
 from tqdm import tqdm
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
+from nlp_uncertainty_zoo.data import DataSplit, TextDataset
 import nlp_uncertainty_zoo.utils.metrics as metrics
 from nlp_uncertainty_zoo.utils.task_eval import evaluate
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
@@ -580,7 +580,9 @@ class Model(ABC):
             Batch loss.
         """
 
-        loss_function = nn.CrossEntropyLoss()
+        loss_function = nn.CrossEntropyLoss(
+            ignore_index=-100
+        )  # Index that is used for non-masked tokens for MLM
         preds = self.module(X, **kwargs)
 
         loss = loss_function(
