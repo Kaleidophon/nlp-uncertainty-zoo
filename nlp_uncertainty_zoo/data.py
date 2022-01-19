@@ -4,6 +4,7 @@ Module to implement data reading and batching functionalities.
 
 # STD
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from functools import reduce
 from typing import Dict, Optional, Any, List, Union
 
@@ -13,6 +14,7 @@ import torch
 from torch.utils.data import DataLoader
 from datasets import load_dataset
 from transformers import (
+    BertTokenizerFast,
     PreTrainedTokenizerBase,
     DataCollatorForLanguageModeling,
     BertTokenizer,
@@ -288,9 +290,6 @@ class ClassificationDatasetBuilder(DatasetBuilder):
         label_encoder.fit(list(classes))
 
         # Replace with classes with labels
-        # TODO: For token_classification, call tokenizer with return_offsets_mapping=True and add -100 label for all but
-        # TODO: the first or last subword token
-        # https://discuss.huggingface.co/t/bug-with-tokernizers-offset-mapping-for-ner-problems/2928
         self.dataset = self.dataset.map(
             labeling_func,
             batched=False,
@@ -299,16 +298,87 @@ class ClassificationDatasetBuilder(DatasetBuilder):
         )
 
         # The following is basically copied from the corresponding HuggingFace tutorial: https://youtu.be/8PmhEIXhBvI
-        self.dataset = self.dataset.map(
-            lambda inst: self.tokenizer(
-                inst["sentence"],
-                truncation=True,
-                padding="max_length",
-                max_length=self.max_length,
-            ),
-            batched=True,
-            num_proc=self.num_jobs,
-        )
+        if self.type == "sequence_classification":
+            self.dataset = self.dataset.map(
+                lambda inst: self.tokenizer(
+                    inst["sentence"],
+                    truncation=True,
+                    padding="max_length",
+                    max_length=self.max_length,
+                ),
+                batched=True,
+                num_proc=self.num_jobs,
+            )
+
+        # For token classification, we have to adjust the token labels according to the subwords that the tokenizer
+        # creates. Unfortunately, we have to do that manually and the code is quite ugly. Sorry!
+        elif self.type == "token_classification":
+
+            def create_inst_data(inst: Dict[str, Any]) -> Dict[str, Any]:
+                # Dummy object, see explanations below
+                class LabelledInfo:
+                    val = False
+
+                sentence, labels = inst["sentence"], inst["label"]
+
+                # Create data structure that maps the index of a character belonging to a token to the tokens label.
+                # Also, create second structure mapping from character index to bool indicating whether token this
+                # character belongs to was already labeled once - this way, splitting one labelled token into
+                # multiple sub-word tokens later only labels the first ones and gives the ignore label -100 to the
+                # other ones.
+                char_idx2label = defaultdict(lambda: -100)
+                char_idx2relabeled = defaultdict(lambda: LabelledInfo())
+                char_idx = 0
+                for token_idx, token in enumerate(sentence.split(" ")):
+                    # Dirty trick: Assign the same INSTANCE of a bool value wrapped in an object to all char indices
+                    # of a sub-word such that changing one of them changes all of them, since they all point to the
+                    # same object in memory. I know this is ugly and confusing! I also don't like this!
+                    # Don't you think that I also know that this is insane??
+                    inf = LabelledInfo()
+                    char_idx2relabeled.update(
+                        {i: inf for i in range(char_idx + 1, char_idx + len(token) + 1)}
+                    )
+
+                    # Update the dict mapping from char index to label
+                    char_idx2label.update(
+                        {
+                            i: labels[token_idx]
+                            for i in range(char_idx + 1, char_idx + len(token) + 1)
+                        }
+                    )
+
+                    char_idx += len(token) + 1  # Account for whitespace
+
+                inst_encoding = self.tokenizer(
+                    sentence,
+                    truncation=True,
+                    padding="max_length",
+                    max_length=self.max_length,
+                    return_offsets_mapping=True,
+                )
+
+                adjusted_labels = []  # New labels for sub-word tokens go here
+                # Here, we have one single offset mapping per sub-word token, indicating which characters it span in
+                # original sentence.
+                for _, char_end in inst_encoding["offset_mapping"]:
+                    # Check if one of the sub-word tokens belong to a word has been labelled already
+                    if not char_idx2relabeled[char_end].val:
+                        adjusted_labels.append(char_idx2label[char_end])
+                        char_idx2relabeled[char_end].val = True
+
+                    else:
+                        adjusted_labels.append(-100)
+
+                # Update the instance info
+                return {**inst_encoding.data, "label": adjusted_labels}
+
+            # Finally map that shit function over the dataset
+            self.dataset = self.dataset.map(
+                create_inst_data,
+                batched=False,
+                num_proc=self.num_jobs,
+            )
+
         self.dataset.set_format(
             type="torch", columns=["input_ids", "attention_mask", "label"]
         )
@@ -322,10 +392,6 @@ class ClassificationDatasetBuilder(DatasetBuilder):
             )
             for split in self.splits
         }
-
-        # TODO: Debug
-        for batch in self.dataloaders["train"]:
-            ...
 
         return self.dataloaders
 
@@ -368,7 +434,9 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
                 "oos_test": f"{data_dir}/ood_test.csv",
             },
             type_="token_classification",
-            tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
+            tokenizer=BertTokenizerFast.from_pretrained(
+                "alexanderfalk/danbert-small-cased"
+            ),
             max_length=max_length,
             num_jobs=num_jobs,
         )

@@ -20,7 +20,7 @@ from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 # CONST
 BERT_MODELS = {
     "english": "bert-base-cased",
-    "danish": "danbert-small-cased",
+    "danish": "alexanderfalk/danbert-small-cased",
     "finnish": "bert-base-finnish-cased-v1",
     "swahili": "bert-base-multilingual-cased",
 }
