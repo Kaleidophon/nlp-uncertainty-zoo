@@ -259,29 +259,40 @@ class ClassificationDatasetBuilder(DatasetBuilder):
         )
 
         # Extract all classes from data
-        classes = None
+        classes, labeling_func = None, None
         if self.type == "sequence_classification":
             # This one-liner goes through all the labels occuring in the different splits and adds them to a set
             classes = reduce(
                 lambda x, y: set(x).union(y),
                 [self.dataset[split]["label"] for split in self.splits],
             )
+            labeling_func = lambda inst: {
+                "label": label_encoder.transform([inst["label"]])[0]
+            }
 
-        # TODO: Modify and debug
         elif self.type == "token_classification":
             classes = reduce(
                 lambda x, y: set(x).union(y),
-                [self.dataset[split]["label"] for split in self.splits],
+                [
+                    labels.split(" ")
+                    for split in self.splits
+                    for labels in self.dataset[split]["label"]
+                ],
             )
+            labeling_func = lambda inst: {
+                "label": label_encoder.transform(inst["label"].split(" "))
+            }
 
         # Encode classes
         label_encoder = LabelEncoder()
         label_encoder.fit(list(classes))
 
         # Replace with classes with labels
+        # TODO: For token_classification, call tokenizer with return_offsets_mapping=True and add -100 label for all but
+        # TODO: the first or last subword token
+        # https://discuss.huggingface.co/t/bug-with-tokernizers-offset-mapping-for-ner-problems/2928
         self.dataset = self.dataset.map(
-            # TODO: The lambda function below likely needs to be changed for token_classification
-            lambda inst: {"label": label_encoder.transform([inst["label"]])[0]},
+            labeling_func,
             batched=False,
             with_indices=False,
             num_proc=self.num_jobs,
@@ -341,12 +352,34 @@ class ClincBuilder(ClassificationDatasetBuilder):
         )
 
 
+class DanPlusBuilder(ClassificationDatasetBuilder):
+    """
+    Dataset class for the CLINC OOS dataset.
+    """
+
+    def __init__(self, data_dir: str, max_length: int, num_jobs: Optional[int] = 1):
+        super().__init__(
+            name="dan+",
+            data_dir=data_dir,
+            splits={
+                "train": f"{data_dir}/train.csv",
+                "valid": f"{data_dir}/val.csv",
+                "test": f"{data_dir}/test.csv",
+                "oos_test": f"{data_dir}/ood_test.csv",
+            },
+            type_="token_classification",
+            tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
+            max_length=max_length,
+            num_jobs=num_jobs,
+        )
+
+
 if __name__ == "__main__":
     # TODO: Debug
     # dataset = PennTreebankBuilder(
     #    data_dir="../data/processed/ptb", max_length=32, num_jobs=1
     # ).build(16)
-    dataset = ClincBuilder(
-        data_dir="../data/processed/clinc", max_length=32, num_jobs=1
+    dataset = DanPlusBuilder(
+        data_dir="../data/processed/danplus", max_length=32, num_jobs=1
     ).build(16)
     ...
