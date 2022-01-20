@@ -27,7 +27,6 @@ from tqdm import tqdm
 
 # PROJECT
 import nlp_uncertainty_zoo.utils.metrics as metrics
-from nlp_uncertainty_zoo.utils.task_eval import evaluate
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
