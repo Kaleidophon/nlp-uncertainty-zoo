@@ -440,14 +440,3 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
             max_length=max_length,
             num_jobs=num_jobs,
         )
-
-
-if __name__ == "__main__":
-    # TODO: Debug
-    # dataset = PennTreebankBuilder(
-    #    data_dir="../data/processed/ptb", max_length=32, num_jobs=1
-    # ).build(16)
-    dataset = DanPlusBuilder(
-        data_dir="../data/processed/danplus", max_length=32, num_jobs=1
-    ).build(16)
-    ...

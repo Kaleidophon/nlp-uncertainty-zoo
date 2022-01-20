@@ -182,6 +182,8 @@ if __name__ == "__main__":
     parser.add_argument("--knock", action="store_true", default=False)
     args = parser.parse_args()
 
+    # TODO: Pass information about what kind of task is performed to evaluation function
+
     # Read data
     data = AVAILABLE_DATASETS[args.dataset](
         data_dir=args.data_dir, **PREPROCESSING_PARAMS[args.dataset]

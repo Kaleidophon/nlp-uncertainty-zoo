@@ -8,6 +8,9 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 from scipy.stats import kendalltau
 
 
+# TODO: Implement coverage metrics
+
+
 def aupr(y_true: np.array, y_pred: np.array) -> float:
     """
     Return the area under the precision-recall curve for a pseudo binary classification task, where in- and
