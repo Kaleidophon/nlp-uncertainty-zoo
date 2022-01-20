@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 # PROJECT
 from nlp_uncertainty_zoo.config import AVAILABLE_MODELS, MODEL_PARAMS
-from nlp_uncertainty_zoo.datasets import (
+from nlp_uncertainty_zoo.data import (
     DataSplit,
     LanguageModelingDataset,
     SequenceClassificationDataset,

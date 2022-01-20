@@ -12,13 +12,12 @@ from einops import rearrange
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
-from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import DataLoader
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import DataSplit
 from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
-from nlp_uncertainty_zoo.utils.custom_types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
 # TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
@@ -64,7 +63,7 @@ class SNGPModule(nn.Module):
             Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
             initialized from.
         gp_mean_field_factor: float
-            Multiplicative factor used in the mean-field approcimation for the posterior mean of the softmax
+            Multiplicative factor used in the mean-field approximation for the posterior mean of the softmax
             Gaussian process, based on `Lu et al. (2021) <https://arxiv.org/pdf/2006.07584.pdf>'_.
         num_predictions: int
             Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
@@ -387,7 +386,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
 
         return out
 
-    def get_hidden(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def get_hidden(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
         embeddings = self.pos_embeddings(word_embeddings)
         embeddings = self.input_dropout(embeddings)
@@ -462,8 +461,8 @@ class SNGPTransformer(Model):
 
     def _finetune(
         self,
-        data_split: DataSplit,
+        data_split: DataLoader,
         verbose: bool,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ):
         self.module.sngp_layer.invert_sigma_hat()

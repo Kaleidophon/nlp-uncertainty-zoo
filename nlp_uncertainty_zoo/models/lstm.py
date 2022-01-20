@@ -14,6 +14,8 @@ import torch.nn.functional as F
 from nlp_uncertainty_zoo.models.model import Model, Module
 from nlp_uncertainty_zoo.utils.custom_types import Device, HiddenDict
 
+# TODO: Use bi-lstms?
+
 
 class LSTMModule(Module):
     """
@@ -81,6 +83,7 @@ class LSTMModule(Module):
         self,
         input_: torch.LongTensor,
         hidden_states: Optional[HiddenDict] = None,
+        **kwargs,
     ) -> torch.FloatTensor:
         """
         The forward pass of the model.

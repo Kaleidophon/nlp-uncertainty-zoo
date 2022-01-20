@@ -18,13 +18,12 @@ import torch
 import wandb
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import TextDataset
 from nlp_uncertainty_zoo.utils.task_eval import evaluate
 from nlp_uncertainty_zoo.config import (
-    PREPROCESSING_PARAMS,
     MODEL_PARAMS,
     AVAILABLE_DATASETS,
     AVAILABLE_MODELS,
+    DATASET_TASKS,
 )
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
@@ -55,10 +54,11 @@ if torch.cuda.is_available():
 
 def run_experiments(
     model_names: List[str],
-    dataset: TextDataset,
+    dataset_name: str,
     runs: int,
     seed: int,
     device: Device,
+    data_dir: str,
     model_dir: str,
     result_dir: str,
     wandb_run: Optional[WandBRun] = None,
@@ -71,14 +71,16 @@ def run_experiments(
     ----------
     model_names: List[str]
         Names of models that experiments should be run for.
-    dataset: TextDataset
-        Dataset the model should be run on.
+    dataset_name: str
+        Name of the dataset the model should be run on.
     runs: int
         Number of runs with different random seeds per model.
     seed: int
         Initial seed for every model.
     device: Device
         Device the model is being trained on.
+    data_dir: str
+        Directory the data is stored in.
     model_dir: str
         Directory that models are being saved to.
     result_dir: str
@@ -99,17 +101,26 @@ def run_experiments(
         np.random.seed(seed)
         torch.manual_seed(seed)
 
+        # Get model (hyper-)parameters
+        model_params = MODEL_PARAMS[dataset_name][model_name]
+
+        # Read data and build data splits
+        dataset_task = DATASET_TASKS[dataset_name]
+        dataset_builder = AVAILABLE_DATASETS[dataset_name](
+            data_dir=data_dir, max_length=model_params["sequence_length"]
+        )
+        data_splits = dataset_builder.build(batch_size=model_params["batch_size"])
+
         for run in range(runs):
             timestamp = str(datetime.now().strftime("%d-%m-%Y_(%H:%M:%S)"))
-
-            model_params = MODEL_PARAMS[dataset.name][model_name]
 
             model = AVAILABLE_MODELS[model_name](
                 model_params, model_dir=model_dir, device=device
             )
 
             result_dict = model.fit(
-                dataset=dataset,
+                train_split=data_splits["train"],
+                valid_split=data_splits["valid"],
                 wandb_run=wandb_run,
             )
 
@@ -117,9 +128,10 @@ def run_experiments(
             model.module.eval()
             score = evaluate(
                 model,
-                dataset,
-                dataset.test,
-                f"{result_dir}/{model_name}_{run+1}_{timestamp}.csv",
+                eval_split=data_splits["test"],
+                task=dataset_task,
+                tokenizer=dataset_builder.tokenizer,
+                predictions_path=f"{result_dir}/{model_name}_{run+1}_{timestamp}.csv",
             )
             scores[model_name].append(score)
 
@@ -140,7 +152,7 @@ def run_experiments(
 
     return json.dumps(
         {
-            "dataset": dataset.name,
+            "dataset": dataset_name,
             "runs": runs,
             "scores": {
                 model_name: f"{np.mean(model_scores):.2f} ±{np.std(model_scores):.2f}"
@@ -180,11 +192,6 @@ if __name__ == "__main__":
     parser.add_argument("--knock", action="store_true", default=False)
     args = parser.parse_args()
 
-    # Read data
-    data = AVAILABLE_DATASETS[args.dataset](
-        data_dir=args.data_dir, **PREPROCESSING_PARAMS[args.dataset]
-    )
-
     wandb_run = wandb.init(project=PROJECT_NAME)
     tracker = None
 
@@ -213,10 +220,11 @@ if __name__ == "__main__":
     try:
         run_experiments(
             args.models,
-            data,
+            args.dataset,
             args.runs,
             args.seed,
             args.device,
+            args.data_dir,
             args.model_dir,
             args.result_dir,
             wandb_run,
