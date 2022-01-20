@@ -8,6 +8,8 @@ import torch.optim.lr_scheduler as scheduler
 import torch.optim as optim
 import transformers
 
+# TODO: Add max length and batch size as parameters
+
 CLINC_MODEL_PARAMS = {
     "lstm": {
         "early_stopping": True,

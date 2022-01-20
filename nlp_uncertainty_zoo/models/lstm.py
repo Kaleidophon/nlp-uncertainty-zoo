@@ -83,6 +83,7 @@ class LSTMModule(Module):
         self,
         input_: torch.LongTensor,
         hidden_states: Optional[HiddenDict] = None,
+        **kwargs,
     ) -> torch.FloatTensor:
         """
         The forward pass of the model.
