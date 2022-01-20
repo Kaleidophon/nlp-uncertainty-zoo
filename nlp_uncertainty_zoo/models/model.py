@@ -511,7 +511,7 @@ class Model(ABC):
             attention_mask, input_ids, labels = (
                 batch["attention_mask"],
                 batch["input_ids"],
-                batch["label"],
+                batch["labels"],
             )
             global_batch_num = epoch * len(data_split) + i
             batch_loss = self.get_loss(

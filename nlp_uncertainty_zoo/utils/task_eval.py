@@ -78,7 +78,7 @@ def evaluate(
         attention_mask, input_ids, labels = (
             batch["attention_mask"].to(model.device),
             batch["input_ids"].to(model.device),
-            batch["label"].to(model.device),
+            batch["labels"].to(model.device),
         )
 
         batch_size = labels.shape[0]

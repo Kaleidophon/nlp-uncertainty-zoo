@@ -21,7 +21,6 @@ from nlp_uncertainty_zoo.config import (
     AVAILABLE_MODELS,
     AVAILABLE_DATASETS,
     MODEL_PARAMS,
-    DATASET_TASKS,
 )
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
@@ -90,7 +89,7 @@ def perform_hyperparameter_search(
 
     # Read data and build data splits
     dataset_builder = AVAILABLE_DATASETS[dataset_name](
-        data_dir=data_dir, max_length=model_params["max_length"]
+        data_dir=data_dir, max_length=model_params["sequence_length"]
     )
     data_splits = dataset_builder.build(batch_size=model_params["batch_size"])
 

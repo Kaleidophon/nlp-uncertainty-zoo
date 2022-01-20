@@ -215,9 +215,9 @@ class PennTreebankBuilder(LanguageModellingDatasetBuilder):
             name="ptb",
             data_dir=data_dir,
             splits={
-                "train": f"{data_dir}/ptb.train.txt",
-                "valid": f"{data_dir}/ptb.valid.txt",
-                "test": f"{data_dir}/ptb.test.txt",
+                "train": f"{data_dir}/ptb/ptb.train.txt",
+                "valid": f"{data_dir}/ptb/ptb.valid.txt",
+                "test": f"{data_dir}/ptb/ptb.test.txt",
             },
             type_="next_token_prediction",
             tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
@@ -257,7 +257,7 @@ class ClassificationDatasetBuilder(DatasetBuilder):
             "csv",
             data_files=self.splits,
             delimiter="\t",
-            column_names=["sentence", "label"],
+            column_names=["sentence", "labels"],
         )
 
         # Extract all classes from data
@@ -266,10 +266,10 @@ class ClassificationDatasetBuilder(DatasetBuilder):
             # This one-liner goes through all the labels occuring in the different splits and adds them to a set
             classes = reduce(
                 lambda x, y: set(x).union(y),
-                [self.dataset[split]["label"] for split in self.splits],
+                [self.dataset[split]["labels"] for split in self.splits],
             )
             labeling_func = lambda inst: {
-                "label": label_encoder.transform([inst["label"]])[0]
+                "labels": label_encoder.transform([inst["labels"]])[0]
             }
 
         elif self.type == "token_classification":
@@ -278,11 +278,11 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                 [
                     labels.split(" ")
                     for split in self.splits
-                    for labels in self.dataset[split]["label"]
+                    for labels in self.dataset[split]["labels"]
                 ],
             )
             labeling_func = lambda inst: {
-                "label": label_encoder.transform(inst["label"].split(" "))
+                "labels": label_encoder.transform(inst["labels"].split(" "))
             }
 
         # Encode classes
@@ -319,7 +319,7 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                 class LabelledInfo:
                     val = False
 
-                sentence, labels = inst["sentence"], inst["label"]
+                sentence, labels = inst["sentence"], inst["labels"]
 
                 # Create data structure that maps the index of a character belonging to a token to the tokens label.
                 # Also, create second structure mapping from character index to bool indicating whether token this
@@ -370,7 +370,7 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                         adjusted_labels.append(-100)
 
                 # Update the instance info
-                return {**inst_encoding.data, "label": adjusted_labels}
+                return {**inst_encoding.data, "labels": adjusted_labels}
 
             # Finally map that shit function over the dataset
             self.dataset = self.dataset.map(
@@ -380,7 +380,7 @@ class ClassificationDatasetBuilder(DatasetBuilder):
             )
 
         self.dataset.set_format(
-            type="torch", columns=["input_ids", "attention_mask", "label"]
+            type="torch", columns=["input_ids", "attention_mask", "labels"]
         )
 
         # Create the DataLoader for every split
@@ -406,10 +406,10 @@ class ClincBuilder(ClassificationDatasetBuilder):
             name="clinc",
             data_dir=data_dir,
             splits={
-                "train": f"{data_dir}/train.csv",
-                "valid": f"{data_dir}/val.csv",
-                "test": f"{data_dir}/test.csv",
-                "oos_test": f"{data_dir}/oos_test.csv",
+                "train": f"{data_dir}/clinc/train.csv",
+                "valid": f"{data_dir}/clinc/val.csv",
+                "test": f"{data_dir}/clinc/test.csv",
+                "oos_test": f"{data_dir}/clinc/oos_test.csv",
             },
             type_="sequence_classification",
             tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
@@ -428,10 +428,10 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
             name="dan+",
             data_dir=data_dir,
             splits={
-                "train": f"{data_dir}/train.csv",
-                "valid": f"{data_dir}/val.csv",
-                "test": f"{data_dir}/test.csv",
-                "oos_test": f"{data_dir}/ood_test.csv",
+                "train": f"{data_dir}/danplus/train.csv",
+                "valid": f"{data_dir}/danplus/val.csv",
+                "test": f"{data_dir}/danplus/test.csv",
+                "oos_test": f"{data_dir}/danplus/ood_test.csv",
             },
             type_="token_classification",
             tokenizer=BertTokenizerFast.from_pretrained(

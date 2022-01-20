@@ -51,7 +51,6 @@ AVAILABLE_MODELS = {
 # MODEL HYPERPARAMETERS
 # Hyperparameters by dataset and model
 MODEL_PARAMS = {
-    "wikitext-103": configs.WIKITEXT_MODEL_PARAMS,
     "ptb": configs.PTB_MODEL_PARAMS,
     "clinc": configs.CLINC_MODEL_PARAMS,
 }

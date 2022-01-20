@@ -107,7 +107,7 @@ def run_experiments(
         # Read data and build data splits
         dataset_task = DATASET_TASKS[dataset_name]
         dataset_builder = AVAILABLE_DATASETS[dataset_name](
-            data_dir=data_dir, max_length=model_params["max_length"]
+            data_dir=data_dir, max_length=model_params["sequence_length"]
         )
         data_splits = dataset_builder.build(batch_size=model_params["batch_size"])
 
