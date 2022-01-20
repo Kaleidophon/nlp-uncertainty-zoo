@@ -255,9 +255,9 @@ class VariationalBert(Model, BertModelMixin):
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
-        language = model_params["language"]
+        bert_name = model_params["bert_name"]
         super().__init__(
-            f"{language}_transformer",
+            f"variational-{bert_name}",
             VariationalBertModule,
             model_params,
             model_dir,

@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
-from typing import Dict, Any, Optional
+from typing import Optional
 from tqdm import tqdm
 from transformers import BertModel
 
@@ -16,14 +16,6 @@ from transformers import BertModel
 from nlp_uncertainty_zoo.datasets import DataSplit
 from nlp_uncertainty_zoo.models.model import Model, Module
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
-
-# CONST
-BERT_MODELS = {
-    "english": "bert-base-uncased",
-    "danish": "danbert-small-cased",
-    "finnish": "bert-base-finnish-cased-v1",
-    "swahili": "bert-base-multilingual-cased",
-}
 
 
 class BertModule(Module):
@@ -33,16 +25,14 @@ class BertModule(Module):
 
     def __init__(
         self,
-        language: str,
+        bert_name: str,
+        output_size: int,
         is_sequence_classifier: bool,
         device: Device,
         **build_params,
     ):
-        assert (
-            language in BERT_MODELS
-        ), f"No Bert model has been specified for {language}!"
-
-        self.bert = BertModel.from_pretrained(BERT_MODELS[language]).to(device)
+        self.output_size = output_size
+        self.bert = BertModel.from_pretrained(bert_name).to(device)
         hidden_size = self.bert.config["hidden_size"]
 
         # Init custom pooler without tanh activations, copy Bert parameters
@@ -51,12 +41,14 @@ class BertModule(Module):
         self.custom_bert_pooler.bias = self.bert.pooler.dense.bias
 
         # Init layer norm
+        # TODO: Check if this is correct
         if is_sequence_classifier:
             layer_norm_size = [hidden_size]
         else:
             layer_norm_size = [self.bert.config["max_position_embeddings"], hidden_size]
 
         self.layer_norm = nn.LayerNorm(layer_norm_size)
+        self.output = nn.Linear(hidden_size, output_size)
 
         super().__init__(
             num_layers=self.bert.config["num_hidden_layers"],
@@ -94,6 +86,8 @@ class BertModule(Module):
         else:
             activations = return_dict["hidden_states"]
             out = self.layer_norm(activations)
+
+        out = self.output(out)
 
         return out
 

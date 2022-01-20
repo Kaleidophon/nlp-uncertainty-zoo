@@ -14,81 +14,23 @@ from einops import rearrange
 from torch.utils.tensorboard import SummaryWriter
 
 # PROJECT
-from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
+from nlp_uncertainty_zoo.models.spectral import (
+    SpectralTransformerModule,
+    SpectralBertModule,
+)
 from nlp_uncertainty_zoo.datasets import DataSplit
 from nlp_uncertainty_zoo.models.model import Model
 from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
-# TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
-
-
-class DDUTransformerModule(SpectralTransformerModule):
+class DDUMixin:
     """
-    Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by
-    `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_.
+    Implementation of the functions used by the Deep Deterministic Uncertainty (DDU) Transformer by
+    `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_. as a Mixin class. This is done to avoid
+    code redundancies.
     """
 
-    def __init__(
-        self,
-        num_layers: int,
-        vocab_size: int,
-        input_size: int,
-        hidden_size: int,
-        output_size: int,
-        input_dropout: float,
-        dropout: float,
-        num_heads: int,
-        sequence_length: int,
-        spectral_norm_upper_bound: float,
-        is_sequence_classifier: bool,
-        device: Device,
-        **build_params,
-    ):
-        """
-        Initialize a DDU transformer.
-
-        Parameters
-        ----------
-        num_layers: int
-            Number of model layers.
-        vocab_size: int
-            Vocabulary size.
-        input_size: int
-            Dimensionality of input to model.
-        hidden_size: int
-            Size of hidden representations.
-        output_size: int
-            Size of output of model.
-        input_dropout: float
-            Input dropout added to embeddings.
-        dropout: float
-            Dropout rate.
-        num_heads: int
-            Number of self-attention heads per layer.
-        sequence_length: int
-            Maximum sequence length in dataset. Used to initialize positional embeddings.
-        is_sequence_classifier: bool
-            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
-            made at every time step.
-        device: Device
-            Device the model is located on.
-        """
-        super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            input_dropout,
-            dropout,
-            num_heads,
-            sequence_length,
-            spectral_norm_upper_bound,
-            is_sequence_classifier,
-            device,
-        )
-
+    def __init__(self, input_size: int, output_size: int):
         # Parameters for Gaussian Discriminant Analysis
         self.mu = torch.zeros(output_size, input_size)
         self.Sigma = torch.stack(
@@ -177,6 +119,74 @@ class DDUTransformerModule(SpectralTransformerModule):
 
         return probs
 
+
+class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
+    """
+    Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by
+    `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_.
+    """
+
+    def __init__(
+        self,
+        num_layers: int,
+        vocab_size: int,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        input_dropout: float,
+        dropout: float,
+        num_heads: int,
+        sequence_length: int,
+        spectral_norm_upper_bound: float,
+        is_sequence_classifier: bool,
+        device: Device,
+        **build_params,
+    ):
+        """
+        Initialize a DDU transformer.
+
+        Parameters
+        ----------
+        num_layers: int
+            Number of model layers.
+        vocab_size: int
+            Vocabulary size.
+        input_size: int
+            Dimensionality of input to model.
+        hidden_size: int
+            Size of hidden representations.
+        output_size: int
+            Size of output of model.
+        input_dropout: float
+            Input dropout added to embeddings.
+        dropout: float
+            Dropout rate.
+        num_heads: int
+            Number of self-attention heads per layer.
+        sequence_length: int
+            Maximum sequence length in dataset. Used to initialize positional embeddings.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        device: Device
+            Device the model is located on.
+        """
+        super().__init__(
+            num_layers,
+            vocab_size,
+            input_size,
+            hidden_size,
+            output_size,
+            input_dropout,
+            dropout,
+            num_heads,
+            sequence_length,
+            spectral_norm_upper_bound,
+            is_sequence_classifier,
+            device,
+        )
+        DDUMixin.__init__(self, input_size, output_size)
+
     def get_uncertainty(
         self,
         input_: torch.LongTensor,
@@ -219,6 +229,104 @@ class DDUTransformer(Model):
     ):
         super().__init__(
             "ddu_transformer",
+            DDUTransformerModule,
+            model_params,
+            model_dir,
+            device,
+        )
+
+    def _finetune(
+        self,
+        data_split: DataSplit,
+        verbose: bool,
+        summary_writer: Optional[SummaryWriter] = None,
+    ):
+        """
+        As an additional step after training, DDU fits a Gaussian Discriminant Analysis model to
+        the training data.
+
+        Parameters
+        ----------
+        data_split: DataSplit
+            Data the GDA is fit on.
+        verbose: bool
+            Whether to display information about current loss.
+        summary_writer: Optional[SummaryWriter]
+            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
+            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        """
+        self.module.eval()  # Disable dropout
+        self.module.gmm_fit(data_split)
+        self.module.train()
+
+
+class DDUBertModule(SpectralBertModule, DDUMixin):
+    """
+    Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by
+    `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_ in the form of a pre-trained BERT.
+    """
+
+    def __init__(
+        self,
+        bert_name: str,
+        output_size: int,
+        spectral_norm_upper_bound: float,
+        is_sequence_classifier: bool,
+        device: Device,
+        **build_params,
+    ):
+        super().__init__(
+            bert_name,
+            output_size,
+            spectral_norm_upper_bound,
+            is_sequence_classifier,
+            device ** build_params,
+        )
+        DDUMixin.__init__(self, self.bert.config.hidden_size, output_size)
+
+    def get_uncertainty(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        metric_name: Optional[str] = None,
+        **kwargs,
+    ) -> torch.FloatTensor:
+        """
+        Get the uncertainty scores for the current batch.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+        metric_name: str
+            Name of uncertainty metric being used.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Uncertainty scores for the current batch.
+        """
+        if metric_name is None:
+            metric_name = self.default_uncertainty_metric
+
+        if metric_name == "log_prob":
+            with torch.no_grad():
+                return self.gmm_predict(input_)
+
+        else:
+            return super().get_uncertainty(input_, metric_name)
+
+
+class DDUBert(Model):
+    def __init__(
+        self,
+        model_params: Dict[str, Any],
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
+    ):
+        bert_name = model_params["bert_name"]
+        super().__init__(
+            f"ddu-{bert_name}",
             DDUTransformerModule,
             model_params,
             model_dir,

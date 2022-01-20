@@ -13,11 +13,9 @@ from due.layers.spectral_norm_fc import spectral_norm_fc
 import torch.nn as nn
 
 # PROJECT
+from nlp_uncertainty_zoo.models.bert import BertModule
 from nlp_uncertainty_zoo.models.transformer import TransformerModule
 from nlp_uncertainty_zoo.utils.custom_types import Device
-
-
-# TODO: Add spectral Bert
 
 
 class SpectralTransformerModule(TransformerModule):
@@ -54,6 +52,36 @@ class SpectralTransformerModule(TransformerModule):
             is_sequence_classifier,
             device,
         )
+
+        # Add spectral normalization
+        for module_name, module in self.named_modules():
+            if isinstance(module, nn.Linear):
+                setattr(
+                    self,
+                    module_name,
+                    spectral_norm_fc(module, coeff=spectral_norm_upper_bound),
+                )
+
+
+class SpectralBertModule(BertModule):
+    """
+    Implementation of a BERT model that uses spectral normalization.
+    """
+
+    def __init__(
+        self,
+        bert_name: str,
+        output_size: int,
+        spectral_norm_upper_bound: float,
+        is_sequence_classifier: bool,
+        device: Device,
+        **build_params,
+    ):
+        super().__init__(
+            bert_name, output_size, is_sequence_classifier, device, **build_params
+        )
+
+        self.spectral_norm_upper_bound = spectral_norm_upper_bound
 
         # Add spectral normalization
         for module_name, module in self.named_modules():
