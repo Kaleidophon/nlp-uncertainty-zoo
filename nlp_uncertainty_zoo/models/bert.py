@@ -9,12 +9,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
 from typing import Optional
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import BertModel
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import DataSplit
-from nlp_uncertainty_zoo.models.model import Model, Module
+from nlp_uncertainty_zoo.models.model import Module
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
@@ -163,7 +163,7 @@ class BertModelMixin:
     def _epoch_iter(
         self,
         epoch: int,
-        data_split: DataSplit,
+        data_split: DataLoader,
         progress_bar: Optional[tqdm] = None,
         wandb_run: Optional[WandBRun] = None,
     ) -> torch.Tensor:

@@ -22,10 +22,10 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 # PROJECT
-from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
 import nlp_uncertainty_zoo.utils.metrics as metrics
 from nlp_uncertainty_zoo.utils.task_eval import evaluate
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
@@ -309,8 +309,8 @@ class Model(ABC):
 
     def fit(
         self,
-        dataset: TextDataset,
-        validate: bool = True,
+        train_split: DataLoader,
+        valid_split: Optional[DataLoader] = None,
         verbose: bool = True,
         wandb_run: Optional[WandBRun] = None,
     ):
@@ -319,10 +319,10 @@ class Model(ABC):
 
         Parameters
         ----------
-        dataset: TextDataset
+        train_split: DataLoader
             Dataset the model is being trained on.
-        validate: bool
-            Indicate whether model should also be evaluated on the validation set.
+        valid_split: Optional[DataLoader]
+            Validation set the model is being evaluated on if given.
         verbose: bool
             Whether to display information about current loss.
         wandb_run: Optional[WandBRun]
@@ -334,7 +334,7 @@ class Model(ABC):
         early_stopping_pat = self.model_params.get("early_stopping_pat", np.inf)
         early_stopping = self.model_params.get("early_stopping", True)
         num_no_improvements = 0
-        total_steps = num_epochs * len(dataset.train)
+        total_steps = num_epochs * len(train_split)
         progress_bar = tqdm(total=total_steps) if verbose else None
         best_model = deepcopy(self)
 
@@ -343,7 +343,7 @@ class Model(ABC):
 
             train_loss = self._epoch_iter(
                 epoch,
-                dataset.train,
+                train_split,
                 progress_bar,
                 wandb_run,
             )
@@ -359,11 +359,11 @@ class Model(ABC):
                 wandb_run.log({"Epoch train loss": train_loss.item()}, step=epoch)
 
             # Get validation loss
-            if validate:
+            if valid_split is not None:
                 self.module.eval()
 
                 with torch.no_grad():
-                    val_score = evaluate(self, dataset, dataset.valid)
+                    val_score = self.eval(self, valid_split)
 
                 if wandb_run is not None:
                     wandb_run.log({"Epoch val score": val_score}, step=epoch)
@@ -393,8 +393,8 @@ class Model(ABC):
             del best_model
 
         # Additional training step, e.g. temperature scaling on val
-        if validate:
-            self._finetune(dataset.valid, verbose, wandb_run)
+        if valid_split is not None:
+            self._finetune(valid_split, verbose, wandb_run)
 
         # Save model if applicable
         if self.model_dir is not None:
@@ -461,7 +461,7 @@ class Model(ABC):
         """
         return self.module.get_uncertainty(input_, metric_name, *args, **kwargs)
 
-    def eval(self, data_split: DataSplit) -> torch.Tensor:
+    def eval(self, data_split: DataLoader) -> torch.Tensor:
         """
         Evaluate a data split.
 
@@ -484,7 +484,7 @@ class Model(ABC):
     def _epoch_iter(
         self,
         epoch: int,
-        data_split: DataSplit,
+        data_split: DataLoader,
         progress_bar: Optional[tqdm] = None,
         wandb_run: Optional[WandBRun] = None,
     ) -> torch.Tensor:
@@ -506,11 +506,21 @@ class Model(ABC):
         epoch_loss = torch.zeros(1)
         num_batches = len(data_split)
 
-        for i, (X, y) in enumerate(data_split):
+        for i, batch in enumerate(data_split):
 
-            X, y = X.to(self.device), y.to(self.device)
+            attention_mask, input_ids, labels = (
+                batch["attention_mask"],
+                batch["input_ids"],
+                batch["labels"],
+            )
             global_batch_num = epoch * len(data_split) + i
-            batch_loss = self.get_loss(global_batch_num, X, y, wandb_run)
+            batch_loss = self.get_loss(
+                global_batch_num,
+                input_ids,
+                labels,
+                attention_mask=attention_mask,
+                wandb_run=wandb_run,
+            )
 
             # Update progress bar and summary writer
             if progress_bar is not None:
@@ -577,7 +587,9 @@ class Model(ABC):
             Batch loss.
         """
 
-        loss_function = nn.CrossEntropyLoss()
+        loss_function = nn.CrossEntropyLoss(
+            ignore_index=-100
+        )  # Index that is used for non-masked tokens for MLM
         preds = self.module(X, **kwargs)
 
         loss = loss_function(
@@ -591,7 +603,7 @@ class Model(ABC):
 
     def _finetune(
         self,
-        data_split: DataSplit,
+        data_split: DataLoader,
         verbose: bool,
         wandb: Optional[WandBRun] = None,
     ):

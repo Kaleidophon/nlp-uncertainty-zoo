@@ -5,7 +5,6 @@ wandb
 scikit-learn
 knockknock
 transformers
-token2index
 einops
 datasets
 tqdm
@@ -13,3 +12,4 @@ git+https://github.com/y0ast/DUE.git
 blitz-bayesian-pytorch
 gpytorch
 scipy
+dill

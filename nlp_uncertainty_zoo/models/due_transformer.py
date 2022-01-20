@@ -16,12 +16,12 @@ from gpytorch.mlls import VariationalELBO
 from torch import nn as nn
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import DataLoader
 
 # PROJECT
 from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
-from nlp_uncertainty_zoo.datasets import DataSplit, TextDataset
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
-from nlp_uncertainty_zoo.utils.custom_types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
 # TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
@@ -113,7 +113,7 @@ class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         self.likelihood = None
         self.loss_function = None
 
-    def init_gp(self, train_data: DataSplit, num_instances: int = 1000):
+    def init_gp(self, train_data: DataLoader, num_instances: int = 1000):
         """
         Initialize the Gaussian Process layer together with the likelihood and loss function.
 
@@ -126,7 +126,7 @@ class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         """
         # Compute how many batches need to be sampled to initialize the inducing points when using batches of
         # batch_size and length sequence_length
-        batch_size = train_data[0][0].shape[0]
+        batch_size = train_data.dataset[0]["input_ids"].shape[0]
         num_batches = math.ceil(num_instances / (batch_size * self.sequence_length))
 
         # Essentially do the same as in due.dkl.initial_values_for_GP, but with a sequential dataset
@@ -137,7 +137,7 @@ class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin):
 
         with torch.no_grad():
             for batch_idx in sampled_batch_idx:
-                X = train_data[batch_idx][0].to(self.device)
+                X = train_data.dataset[batch_idx][0]["input_ids"].to(self.device)
                 batch_representations.append(self.get_hidden(X))
 
         representations = torch.cat(batch_representations, dim=0)
@@ -243,30 +243,30 @@ class DUETransformer(Model):
 
     def fit(
         self,
-        dataset: TextDataset,
-        validate: bool = True,
+        train_split: DataLoader,
+        valid_split: Optional[DataLoader] = None,
         verbose: bool = True,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ):
         """
         Fit the model to training data.
 
         Parameters
         ----------
-        dataset: TextDataset
+        train_split: DataLoader
             Dataset the model is being trained on.
-        validate: bool
-            Indicate whether model should also be evaluated on the validation set.
+        valid_split: Optional[DataLoader]
+            Validation set the model is being evaluated on if given.
         verbose: bool
             Whether to display information about current loss.
-        summary_writer: Optional[SummaryWriter]
-            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
-            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         # Retrieve inducing points and length scale from training set to initialize the GP
-        self.module.init_gp(dataset.train)
+        self.module.init_gp(train_split)
 
-        return super().fit(dataset, validate, verbose, summary_writer)
+        return super().fit(train_split, valid_split, verbose, wandb_run)
 
     def predict(self, X: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         return self.module.predict(X, *args, **kwargs)
@@ -277,6 +277,7 @@ class DUETransformer(Model):
         X: torch.Tensor,
         y: torch.Tensor,
         summary_writer: Optional[SummaryWriter] = None,
+        **kwargs,
     ) -> torch.Tensor:
         """
         Get loss for a single batch. This uses the Variational ELBO instead of a cross-entropy loss.

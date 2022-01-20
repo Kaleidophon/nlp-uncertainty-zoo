@@ -8,11 +8,10 @@ import torch.optim.lr_scheduler as scheduler
 import torch.optim as optim
 import transformers
 
-
-CLINC_PREPROCESSING_PARAMS = {"batch_size": 32, "sequence_length": 32}
-
 CLINC_MODEL_PARAMS = {
     "lstm": {
+        "batch_size": 32,
+        "sequence_length": 35,
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
@@ -31,11 +30,13 @@ CLINC_MODEL_PARAMS = {
         "hidden_size": 650,
         "input_size": 650,
         "dropout": 0.5,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "is_sequence_classifier": False,
     },
     "lstm_ensemble": {
+        "batch_size": 32,
+        "sequence_length": 35,
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
@@ -54,12 +55,14 @@ CLINC_MODEL_PARAMS = {
         "hidden_size": 650,
         "input_size": 650,
         "dropout": 0.5,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "ensemble_size": 10,
         "is_sequence_classifier": False,
     },
     "bayesian_lstm": {
+        "batch_size": 32,
+        "sequence_length": 35,
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
@@ -77,7 +80,7 @@ CLINC_MODEL_PARAMS = {
         "hidden_size": 650,
         "input_size": 650,
         "dropout": 0.5,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "prior_sigma_1": 0.1,
         "prior_sigma_2": 0.002,
@@ -88,6 +91,8 @@ CLINC_MODEL_PARAMS = {
         "is_sequence_classifier": False,
     },
     "st_tau_lstm": {
+        "batch_size": 32,
+        "sequence_length": 35,
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
@@ -105,7 +110,7 @@ CLINC_MODEL_PARAMS = {
         "hidden_size": 650,
         "input_size": 650,
         "dropout": 0.5,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "num_predictions": 10,
         "num_centroids": 20,
@@ -113,6 +118,8 @@ CLINC_MODEL_PARAMS = {
     },
     # Taken from  https://github.com/yaringal/BayesianRNN/blob/master/LM_code/main_new_dropout_SOTA.lua
     "variational_lstm": {
+        "batch_size": 32,
+        "sequence_length": 35,
         "early_stopping": True,
         "weight_decay": 1e-7,
         "lr": 1,
@@ -132,11 +139,12 @@ CLINC_MODEL_PARAMS = {
         "embedding_dropout": 0.3,  # dropout_x, Large model Gal & Ghrahramani (2016)
         "layer_dropout": 0.5,  # dropout_i / dropout_o, Large model Gal & Ghrahramani (2016)
         "time_dropout": 0.3,  # dropout_h, Large model Gal & Ghrahramani (2016)
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "num_predictions": 10,  # Changed from 1000 because that's just excessive
     },
     "transformer": {
+        "batch_size": 32,
         "lr": 0.05,
         "num_epochs": 55,
         "grad_clip": 10,
@@ -151,7 +159,7 @@ CLINC_MODEL_PARAMS = {
         "num_layers": 6,
         "hidden_size": 500,
         "input_size": 500,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "input_dropout": 0.2,
         "dropout": 0.2,
@@ -160,6 +168,7 @@ CLINC_MODEL_PARAMS = {
         "is_sequence_classifier": False,
     },
     "variational_transformer": {
+        "batch_size": 32,
         "lr": 0.05,
         "num_epochs": 55,
         "grad_clip": 10,
@@ -174,7 +183,7 @@ CLINC_MODEL_PARAMS = {
         "num_layers": 6,
         "hidden_size": 500,
         "input_size": 500,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "input_dropout": 0.2,
         "dropout": 0.2,
@@ -184,6 +193,7 @@ CLINC_MODEL_PARAMS = {
         "is_sequence_classifier": False,
     },
     "sngp_transformer": {
+        "batch_size": 32,
         "lr": 5e-3,
         "length_scale": 2,
         "weight_decay": 0.1,
@@ -196,7 +206,7 @@ CLINC_MODEL_PARAMS = {
             "num_training_steps": 469 * 40,
         },
         "num_layers": 3,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "input_size": 500,
         "input_dropout": 0.2,
@@ -214,6 +224,7 @@ CLINC_MODEL_PARAMS = {
         "is_sequence_classifier": True,
     },
     "due_transformer": {
+        "batch_size": 32,
         "lr": 5e-3,
         "num_epochs": 80,
         "optimizer_class": optim.Adam,
@@ -227,7 +238,7 @@ CLINC_MODEL_PARAMS = {
         "num_layers": 3,
         "hidden_size": 768,
         "num_heads": 5,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "input_dropout": 0.2,
         "dropout": 0.2,
@@ -241,12 +252,13 @@ CLINC_MODEL_PARAMS = {
         "is_sequence_classifier": True,
     },
     "ddu_transformer": {
+        "batch_size": 32,
         "lr": 5e-5,
         "num_epochs": 40,
         "num_layers": 6,
         "hidden_size": 768,
         "num_heads": 10,
-        "vocab_size": 10001,
+        "vocab_size": 28996,
         "output_size": 151,
         "input_dropout": 0.3,
         "dropout": 0.3,

@@ -10,7 +10,6 @@ import torch
 import wandb
 
 # TYPES
-BatchedSequences = List[torch.LongTensor]
 Device = Union[torch.device, str]
 HiddenDict = Dict[int, torch.FloatTensor]
 HiddenStates = Tuple[torch.FloatTensor, torch.FloatTensor]

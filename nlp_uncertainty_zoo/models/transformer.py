@@ -108,7 +108,9 @@ class TransformerModule(Module):
 
         return out
 
-    def get_hidden(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def get_hidden(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
         embeddings = self.pos_embeddings(word_embeddings)
         embeddings = self.input_dropout(embeddings)

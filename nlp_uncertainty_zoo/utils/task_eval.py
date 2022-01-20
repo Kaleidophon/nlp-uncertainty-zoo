@@ -8,36 +8,35 @@ import codecs
 # EXT
 from einops import rearrange
 import torch
+from torch.utils.data import DataLoader
 from torch.nn.functional import nll_loss
 from typing import Optional
-
-# PROJECT
-from nlp_uncertainty_zoo.datasets import (
-    LanguageModelingDataset,
-    TextDataset,
-    SequenceClassificationDataset,
-    DataSplit,
-)
+from transformers import PreTrainedTokenizerBase
 
 # Map from dataset class to evaluation function
 EVAL_FUNCS = {
-    LanguageModelingDataset: lambda preds, labels: nll_loss(
+    "language_modelling": lambda preds, labels: nll_loss(
         torch.log(preds), labels, reduction="none"
     ),
-    SequenceClassificationDataset: lambda preds, labels: (
+    "sequence_classification": lambda preds, labels: (
+        torch.argmax(preds, dim=-1) == labels
+    ).long(),
+    "token_classification": lambda preds, labels: (
         torch.argmax(preds, dim=-1) == labels
     ).long(),
 }
 EVAL_FUNCS_POST = {
-    LanguageModelingDataset: lambda raw_score: torch.exp(raw_score).item(),
-    SequenceClassificationDataset: lambda raw_score: raw_score.item(),
+    "language_modelling": lambda raw_score: torch.exp(raw_score).item(),
+    "sequence_classification": lambda raw_score: raw_score.item(),
+    "token_classification": lambda raw_score: raw_score.item(),
 }
 
 
 def evaluate(
     model,
-    dataset: TextDataset,
-    eval_split: DataSplit,
+    eval_split: DataLoader,
+    task: str,
+    tokenizer: Optional[PreTrainedTokenizerBase] = None,
     predictions_path: Optional[str] = None,
 ) -> float:
     """
@@ -47,10 +46,13 @@ def evaluate(
     ----------
     model: Model
         Model to be evaluated.
-    dataset: TextDataset
-        Dataset the model the eval split is from.
     eval_split: DataSplit
         Data split the model is being evaluated on.
+    task: str
+        Task type, specified using a string.
+    tokenizer: Optional[PreTrainedTokenizerBase]
+        Tokenizer of the evaluated model. If given and predictions_path is specified, the input_ids of (sub-word) tokens
+        are turned back into strings and saved.
     predictions_path: Optional[str]
         File that predictions are being written to if specified.
 
@@ -59,9 +61,12 @@ def evaluate(
     float
         Return score on test set.
     """
-    dataset_type = type(dataset).__bases__[0]
-    eval_func = EVAL_FUNCS[dataset_type]
-    eval_post_func = EVAL_FUNCS_POST[dataset_type]
+    assert (
+        task in EVAL_FUNCS
+    ), f"Invalid task '{task}' given, must be one of {', '.join(EVAL_FUNCS.keys())}."
+
+    eval_func = EVAL_FUNCS[task]
+    eval_post_func = EVAL_FUNCS_POST[task]
     prediction_file = None
 
     if predictions_path is not None:
@@ -69,17 +74,22 @@ def evaluate(
 
     cum_scores = 0
     norm = 0  # Keep track of the number of tokens evaluated
-    for (X, y) in eval_split:
-        batch_size = y.shape[0]
-        seq_len = 1 if dataset_type == SequenceClassificationDataset else X.shape[1]
-        X, y = X.to(model.device), y.to(model.device)
-        predictions = model.predict(X)
+    for batch in eval_split:
+        attention_mask, input_ids, labels = (
+            batch["attention_mask"].to(model.device),
+            batch["input_ids"].to(model.device),
+            batch["labels"].to(model.device),
+        )
+
+        batch_size = labels.shape[0]
+        seq_len = 1 if task == "sequence_classification" else input_ids.shape[1]
+        predictions = model.predict(input_ids, attention_mask=attention_mask)
         predictions = rearrange(predictions, "b t p -> (b t) p")
 
-        if dataset_type == LanguageModelingDataset:
-            y = rearrange(y, "b l -> (b l)")
+        if task in ("language_modelling", "token_classification"):
+            labels = rearrange(labels, "b l -> (b l)")
 
-        scores = eval_func(predictions, y)
+        scores = eval_func(predictions, labels)
         cum_scores += scores.sum()
         norm += batch_size * seq_len
 
@@ -88,9 +98,12 @@ def evaluate(
 
         if predictions_path is not None:
             for s in range(batch_size):
-                seq, score = dataset.t2i.unindex(X[s, :]), eval_post_func(
-                    scores[s, :].mean()
-                )
+                seq = input_ids[s, :]
+
+                if tokenizer is not None:
+                    seq = tokenizer.decode(seq)
+
+                score = scores[s, :]
                 prediction_file.write(f"{seq}\t{score:.4f}\n")
 
     score = eval_post_func(cum_scores / norm)

@@ -21,5 +21,7 @@ from nlp_uncertainty_zoo.models.variational_lstm import (
 )
 from nlp_uncertainty_zoo.models.variational_transformer import (
     VariationalTransformer,
+    VariationalBert,
     VariationalTransformerModule,
+    VariationalBertModule,
 )

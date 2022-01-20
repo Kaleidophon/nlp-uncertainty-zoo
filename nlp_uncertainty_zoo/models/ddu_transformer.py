@@ -12,15 +12,15 @@ import numpy as np
 import torch
 from einops import rearrange
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import DataLoader
 
 # PROJECT
 from nlp_uncertainty_zoo.models.spectral import (
     SpectralTransformerModule,
     SpectralBertModule,
 )
-from nlp_uncertainty_zoo.datasets import DataSplit
 from nlp_uncertainty_zoo.models.model import Model
-from nlp_uncertainty_zoo.utils.custom_types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
 class DDUMixin:
@@ -38,7 +38,7 @@ class DDUMixin:
         )
         self.determinants = torch.zeros(output_size)
 
-    def gmm_fit(self, data_split: DataSplit) -> None:
+    def gmm_fit(self, data_split: DataLoader) -> None:
         """
         Fit a Gaussian mixture model on the feature representations of the trained model.
 
@@ -47,26 +47,32 @@ class DDUMixin:
         data_split: DataSplit
             Data split used for fitting, usually the training or validation split.
         """
+
         with torch.no_grad():
-            hiddens, labels = [], []
+            hiddens, all_labels = [], []
 
-            for i, (X, y) in enumerate(data_split):
+            for i, batch in enumerate(data_split):
+                attention_mask, input_ids, labels = (
+                    batch["attention_mask"],
+                    batch["input_ids"],
+                    batch["label"],
+                )
 
-                hidden = self.get_hidden(X)
+                hidden = self.get_hidden(input_ids, attention_mask=attention_mask)
                 hidden = (
                     self.get_sequence_representation(hidden).squeeze(1)
                     if self.is_sequence_classifier
                     else torch.flatten(hidden, end_dim=1)
                 )
-                y = torch.flatten(y)
+                labels = torch.flatten(labels)
                 hiddens.append(hidden)
-                labels.append(y)
+                all_labels.append(labels)
 
             hiddens = torch.cat(hiddens, dim=0)
-            labels = torch.cat(labels, dim=0)
+            all_labels = torch.cat(all_labels, dim=0)
 
             for cls in labels.unique():
-                num_batch_classes = (labels == cls).long().sum()
+                num_batch_classes = (all_labels == cls).long().sum()
 
                 if num_batch_classes == 0:
                     continue
@@ -237,9 +243,9 @@ class DDUTransformer(Model):
 
     def _finetune(
         self,
-        data_split: DataSplit,
+        data_split: DataLoader,
         verbose: bool,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ):
         """
         As an additional step after training, DDU fits a Gaussian Discriminant Analysis model to
@@ -251,9 +257,9 @@ class DDUTransformer(Model):
             Data the GDA is fit on.
         verbose: bool
             Whether to display information about current loss.
-        summary_writer: Optional[SummaryWriter]
-            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
-            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         self.module.eval()  # Disable dropout
         self.module.gmm_fit(data_split)
@@ -280,7 +286,8 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
             output_size,
             spectral_norm_upper_bound,
             is_sequence_classifier,
-            device ** build_params,
+            device,
+            **build_params,
         )
         DDUMixin.__init__(self, self.bert.config.hidden_size, output_size)
 
@@ -335,7 +342,7 @@ class DDUBert(Model):
 
     def _finetune(
         self,
-        data_split: DataSplit,
+        data_split: DataLoader,
         verbose: bool,
         summary_writer: Optional[SummaryWriter] = None,
     ):
