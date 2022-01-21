@@ -9,17 +9,15 @@ from nlp_uncertainty_zoo.models.variational_transformer import (
     VariationalTransformer,
     VariationalBert,
 )
-from nlp_uncertainty_zoo import (
-    VariationalLSTM,
-    LSTMEnsemble,
-    SNGPTransformer,
-    DUETransformer,
-    DDUTransformer,
-)
+from nlp_uncertainty_zoo.models.variational_lstm import VariationalLSTM
+from nlp_uncertainty_zoo.models.lstm_ensemble import LSTMEnsemble
 from nlp_uncertainty_zoo.models.lstm import LSTM
 from nlp_uncertainty_zoo.models.bayesian_lstm import BayesianLSTM
 from nlp_uncertainty_zoo.models.st_tau_lstm import STTauLSTM
 from nlp_uncertainty_zoo.models.transformer import Transformer
+from nlp_uncertainty_zoo.models.ddu_transformer import DDUTransformer, DDUBert
+from nlp_uncertainty_zoo.models.due_transformer import DUETransformer, DUEBert
+from nlp_uncertainty_zoo.models.sngp_transformer import SNGPTransformer, SNGPBert
 
 # AVAILABLE DATASETS AND MODELS
 AVAILABLE_DATASETS = {
@@ -32,7 +30,6 @@ DATASET_TASKS = {
     "clinc": "sequence_classification",
     "dan+": "token_classification",
 }
-# TODO: Add Bert models
 AVAILABLE_MODELS = {
     # "composer": Composer,
     "lstm": LSTM,
@@ -44,8 +41,11 @@ AVAILABLE_MODELS = {
     "variational_transformer": VariationalTransformer,
     "variational_bert": VariationalBert,
     "sngp_transformer": SNGPTransformer,
+    "sngp_bert": SNGPBert,
     "ddu_transformer": DDUTransformer,
+    "ddu_bert": DDUBert,
     "due_transformer": DUETransformer,
+    "due_bert": DUEBert,
 }
 
 # MODEL HYPERPARAMETERS

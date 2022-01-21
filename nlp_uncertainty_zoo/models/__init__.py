@@ -2,16 +2,22 @@ from nlp_uncertainty_zoo.models.bayesian_lstm import BayesianLSTM, BayesianLSTMM
 from nlp_uncertainty_zoo.models.ddu_transformer import (
     DDUTransformer,
     DDUTransformerModule,
+    DDUBert,
+    DDUBertModule,
 )
 from nlp_uncertainty_zoo.models.due_transformer import (
     DUETransformer,
     DUETransformerModule,
+    DUEBert,
+    DUEBertModule,
 )
 from nlp_uncertainty_zoo.models.lstm import LSTM, LSTMModule
 from nlp_uncertainty_zoo.models.lstm_ensemble import LSTMEnsemble, LSTMEnsembleModule
 from nlp_uncertainty_zoo.models.sngp_transformer import (
     SNGPTransformer,
     SNGPTransformerModule,
+    SNGPBert,
+    SNGPBertModule,
 )
 from nlp_uncertainty_zoo.models.st_tau_lstm import STTauLSTM, STTauLSTMModule
 from nlp_uncertainty_zoo.models.transformer import Transformer, TransformerModule
