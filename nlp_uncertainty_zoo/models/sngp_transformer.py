@@ -15,12 +15,12 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
 # PROJECT
-from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
+from nlp_uncertainty_zoo.models.spectral import (
+    SpectralTransformerModule,
+    SpectralBertModule,
+)
 from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
-
-
-# TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
 
 
 class SNGPModule(nn.Module):
@@ -454,6 +454,111 @@ class SNGPTransformer(Model):
         super().__init__(
             "sngp_transformer",
             SNGPTransformerModule,
+            model_params,
+            model_dir,
+            device,
+        )
+
+    def _finetune(
+        self,
+        data_split: DataLoader,
+        verbose: bool,
+        wandb_run: Optional[WandBRun] = None,
+    ):
+        self.module.sngp_layer.invert_sigma_hat()
+
+
+class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
+    """
+    Implementation of a spectral-normalized Gaussian Process transformer, based on a fine-tuned Bert.
+    """
+
+    def __init__(
+        self,
+        bert_name: str,
+        last_layer_size: int,
+        output_size: int,
+        spectral_norm_upper_bound: float,
+        ridge_factor: float,
+        scaling_coefficient: float,
+        beta_length_scale: float,
+        gp_mean_field_factor: float,
+        num_predictions: int,
+        is_sequence_classifier: bool,
+        device: Device,
+        **build_params,
+    ):
+        super().__init__(
+            bert_name,
+            output_size,
+            spectral_norm_upper_bound,
+            is_sequence_classifier,
+            device,
+        )
+        MultiPredictionMixin.__init__(self, num_predictions)
+
+        hidden_size = self.bert.config.hidden_size
+        self.sngp_layer = SNGPModule(
+            hidden_size,
+            last_layer_size,
+            output_size,
+            ridge_factor,
+            scaling_coefficient,
+            beta_length_scale,
+            gp_mean_field_factor,
+            num_predictions,
+            device,
+        )
+        self.layer_norm = nn.LayerNorm([hidden_size])
+
+    def get_logits(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        num_predictions: Optional[int] = None,
+        **kwargs,
+    ) -> torch.FloatTensor:
+        """
+        Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
+        num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
+        metrics defined in nlp_uncertainty_zoo.metrics.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+        num_predictions: int
+            Number of predictions.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Logits for current input.
+        """
+        if not num_predictions:
+            num_predictions = self.num_predictions
+
+        batch_size = input_.shape[0]
+        sequence_length = input_.shape[1] if not self.is_sequence_classifier else 1
+        out = self.get_hidden(input_)
+        out = rearrange(out, "b t p -> (b t) p")
+        out = self.sngp_layer.get_logits(out, num_predictions=num_predictions)
+        out = rearrange(out, "(b t) n p -> b n t p", b=batch_size, t=sequence_length)
+
+        return out
+
+
+class SNGPBert(Model):
+    def __init__(
+        self,
+        model_params: Dict[str, Any],
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
+    ):
+        bert_name = model_params["bert_name"]
+        super().__init__(
+            f"sngp-{bert_name}",
+            SNGPBertModule,
             model_params,
             model_dir,
             device,

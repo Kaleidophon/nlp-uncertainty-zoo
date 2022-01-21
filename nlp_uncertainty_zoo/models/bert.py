@@ -40,14 +40,7 @@ class BertModule(Module):
         self.custom_bert_pooler.weight = self.bert.pooler.dense.weight
         self.custom_bert_pooler.bias = self.bert.pooler.dense.bias
 
-        # Init layer norm
-        # TODO: Check if this is correct
-        if is_sequence_classifier:
-            layer_norm_size = [hidden_size]
-        else:
-            layer_norm_size = [self.bert.config["max_position_embeddings"], hidden_size]
-
-        self.layer_norm = nn.LayerNorm(layer_norm_size)
+        self.layer_norm = nn.LayerNorm([hidden_size])
         self.output = nn.Linear(hidden_size, output_size)
 
         super().__init__(

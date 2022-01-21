@@ -27,9 +27,6 @@ from nlp_uncertainty_zoo.models.model import MultiPredictionMixin, Model
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
-# TODO: Write version of this which accepts a pre-trained model that is to be fine-tuned
-
-
 class DUEMixin:
     """
     Implementation of Deterministic Uncertainty Estimation (DUE) by

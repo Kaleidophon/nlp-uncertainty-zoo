@@ -334,7 +334,7 @@ class DDUBert(Model):
         bert_name = model_params["bert_name"]
         super().__init__(
             f"ddu-{bert_name}",
-            DDUTransformerModule,
+            DDUBertModule,
             model_params,
             model_dir,
             device,
