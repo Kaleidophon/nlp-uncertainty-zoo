@@ -97,7 +97,7 @@ class TransformerModule(Module):
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
-    def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def forward(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
         hidden = self.get_hidden(input_)
         out = self.output_dropout(hidden)
 

@@ -589,7 +589,7 @@ class Model(ABC):
         loss_function = nn.CrossEntropyLoss(
             ignore_index=-100
         )  # Index that is used for non-masked tokens for MLM
-        preds = self.module(X, **kwargs)
+        preds = self.module.forward(X, **kwargs)
 
         loss = loss_function(
             rearrange(preds, "b t p -> (b t) p"),

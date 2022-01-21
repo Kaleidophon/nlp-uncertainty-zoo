@@ -143,7 +143,8 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
 
     def __init__(
         self,
-        language: str,
+        bert_name: str,
+        output_size: int,
         num_predictions: int,
         is_sequence_classifier: bool,
         device: Device,
@@ -154,8 +155,8 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
 
         Parameters
         ----------
-        language: str
-            Language of the BERT to be used.
+        bert_name: str
+            Name of the BERT to be used.
         num_predictions: int
             Number of predictions with different dropout masks.
         is_sequence_classifier: bool
@@ -167,7 +168,8 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
         self.num_predictions = num_predictions
 
         super().__init__(
-            language,
+            bert_name,
+            output_size,
             is_sequence_classifier,
             device,
         )

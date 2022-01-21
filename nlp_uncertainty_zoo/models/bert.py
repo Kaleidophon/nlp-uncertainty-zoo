@@ -31,9 +31,22 @@ class BertModule(Module):
         device: Device,
         **build_params,
     ):
+
+        bert = BertModel.from_pretrained(bert_name).to(device)
+        hidden_size = bert.config.hidden_size
+
+        super().__init__(
+            num_layers=bert.config.num_hidden_layers,
+            vocab_size=bert.config.vocab_size,
+            input_size=hidden_size,
+            hidden_size=hidden_size,
+            output_size=hidden_size,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
+        )
+
+        self.bert = bert
         self.output_size = output_size
-        self.bert = BertModel.from_pretrained(bert_name).to(device)
-        hidden_size = self.bert.config["hidden_size"]
 
         # Init custom pooler without tanh activations, copy Bert parameters
         self.custom_bert_pooler = nn.Linear(hidden_size, hidden_size)
@@ -42,16 +55,6 @@ class BertModule(Module):
 
         self.layer_norm = nn.LayerNorm([hidden_size])
         self.output = nn.Linear(hidden_size, output_size)
-
-        super().__init__(
-            num_layers=self.bert.config["num_hidden_layers"],
-            vocab_size=self.bert.config["vocab_size"],
-            input_size=hidden_size,
-            hidden_size=hidden_size,
-            output_size=hidden_size,
-            is_sequence_classifier=is_sequence_classifier,
-            device=device,
-        )
 
     def forward(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
         """
@@ -66,7 +69,7 @@ class BertModule(Module):
         torch.FloatTensor
             Output predictions for input.
         """
-        attention_mask = kwargs.get("attention_mask", args[0])
+        attention_mask = kwargs["attention_mask"]
         return_dict = self.bert.forward(input_, attention_mask, return_dict=True)
 
         if self.is_sequence_classifier:
