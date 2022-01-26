@@ -547,6 +547,12 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
 
         return out
 
+    def predict(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
+        logits = self.get_logits(input_, *args, **kwargs).mean(dim=1)
+        probabilities = F.softmax(logits, dim=-1)
+
+        return probabilities
+
 
 class SNGPBert(Model):
     def __init__(

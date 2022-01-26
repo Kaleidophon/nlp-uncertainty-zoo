@@ -61,16 +61,19 @@ class DUEMixin:
         batch_size = train_data.dataset[0]["input_ids"].shape[0]
         num_batches = math.ceil(num_instances / (batch_size * self.sequence_length))
 
-        # Essentially do the same as in due.dkl.initial_values_for_GP, but with a sequential dataset
-        sampled_batch_idx = torch.randperm(len(train_data))[:num_batches]
-
         # Extract feature representations for sampled batches
         batch_representations = []
 
         with torch.no_grad():
-            for batch_idx in sampled_batch_idx:
-                X = train_data.dataset[batch_idx]["input_ids"].to(self.device)
-                batch_representations.append(self.get_hidden(X))
+            train_data.shuffle = True
+            for _ in range(num_batches):
+                batch = next(iter(train_data))
+                input_ = batch["input_ids"].to(self.device)
+                attention_mask = batch["attention_mask"].to(self.device)
+
+                batch_representations.append(
+                    self.get_hidden(input_, attention_mask=attention_mask)
+                )
 
         representations = torch.cat(batch_representations, dim=0)
         representations = rearrange(representations, "b s h -> (b s) h")
@@ -356,6 +359,14 @@ class DUEBertModule(SpectralBertModule, MultiPredictionMixin, DUEMixin):
         )
         MultiPredictionMixin.__init__(self, num_predictions)
         DUEMixin.__init__(self, num_inducing_samples, num_inducing_points, kernel_type)
+
+    def get_logits(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        return DUEMixin.get_logits(self, input_, *args, **kwargs)
+
+    def predict(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
+        return DUEMixin.predict(self, input_, *args, **kwargs)
 
 
 class DUEBert(Model):

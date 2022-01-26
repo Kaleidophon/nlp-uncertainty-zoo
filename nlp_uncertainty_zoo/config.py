@@ -30,22 +30,21 @@ DATASET_TASKS = {
     "clinc": "sequence_classification",
     "dan+": "token_classification",
 }
-# TODO: Debug
 AVAILABLE_MODELS = {
-    # "lstm": LSTM,
-    # "lstm_ensemble": LSTMEnsemble,
-    # "variational_lstm": VariationalLSTM,
-    # "bayesian_lstm": BayesianLSTM,
-    # "st_tau_lstm": STTauLSTM,
-    # "transformer": Transformer,
-    # "variational_transformer": VariationalTransformer,
-    # "variational_bert": VariationalBert,
-    # "sngp_transformer": SNGPTransformer,
+    "lstm": LSTM,
+    "lstm_ensemble": LSTMEnsemble,
+    "variational_lstm": VariationalLSTM,
+    "bayesian_lstm": BayesianLSTM,
+    "st_tau_lstm": STTauLSTM,
+    "transformer": Transformer,
+    "variational_transformer": VariationalTransformer,
+    "variational_bert": VariationalBert,
+    "sngp_transformer": SNGPTransformer,
     "sngp_bert": SNGPBert,
-    # "ddu_transformer": DDUTransformer,
-    # "ddu_bert": DDUBert,
-    # "due_transformer": DUETransformer,
-    # "due_bert": DUEBert,
+    "ddu_transformer": DDUTransformer,
+    "ddu_bert": DDUBert,
+    "due_transformer": DUETransformer,
+    "due_bert": DUEBert,
 }
 
 # MODEL HYPERPARAMETERS

@@ -47,7 +47,9 @@ class BertModule(Module):
 
         self.bert = bert
         self.output_size = output_size
+        self.sequence_length = bert.config.max_length
 
+        # TODO: Is the custom pooler still necessary?
         # Init custom pooler without tanh activations, copy Bert parameters
         self.custom_bert_pooler = nn.Linear(hidden_size, hidden_size)
         self.custom_bert_pooler.weight = self.bert.pooler.dense.weight
@@ -156,7 +158,7 @@ class BertModule(Module):
         return_dict = self.bert.forward(input_, attention_mask, return_dict=True)
 
         if self.is_sequence_classifier:
-            activations = return_dict["last_hidden_state"][:, 0, :]
+            activations = return_dict["last_hidden_state"][:, 0, :].unsqueeze(1)
 
         else:
             activations = return_dict["last_hidden_state"]
