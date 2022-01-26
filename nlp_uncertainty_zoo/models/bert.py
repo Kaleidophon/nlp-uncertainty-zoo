@@ -74,13 +74,12 @@ class BertModule(Module):
 
         if self.is_sequence_classifier:
             cls_activations = return_dict["last_hidden_state"][:, 0, :]
-            self.custom_bert_pooler(cls_activations)
-
             out = torch.tanh(self.custom_bert_pooler(cls_activations))
             out = self.layer_norm(out)
+            out = out.unsqueeze(1)
 
         else:
-            activations = return_dict["hidden_states"]
+            activations = return_dict["last_hidden_state"]
             out = self.layer_norm(activations)
 
         out = self.output(out)

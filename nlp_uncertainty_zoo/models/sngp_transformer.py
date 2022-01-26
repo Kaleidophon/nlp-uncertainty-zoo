@@ -380,7 +380,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         )
         self.layer_norm = nn.LayerNorm([input_size])
 
-    def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def forward(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
         out = self.get_hidden(input_)
         out = self.sngp_layer(out)
 

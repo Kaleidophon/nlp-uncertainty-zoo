@@ -84,10 +84,14 @@ class SpectralBertModule(BertModule):
         self.spectral_norm_upper_bound = spectral_norm_upper_bound
 
         # Add spectral normalization
-        for module_name, module in self.named_modules():
-            if isinstance(module, nn.Linear):
-                setattr(
-                    self,
-                    module_name,
-                    spectral_norm_fc(module, coeff=spectral_norm_upper_bound),
-                )
+        # Since Bert module are stored in an OrderedDict which is not mutable, so we simply create a new module dict
+        # and add spectral norm to Linear layers this way.
+        spectral_modules = dict(self.named_modules())
+        spectral_modules.update(
+            {
+                module_name: spectral_norm_fc(module, coeff=spectral_norm_upper_bound)
+                for module_name, module in self.named_modules()
+                if isinstance(module, nn.Linear)
+            }
+        )
+        self._modules = spectral_modules

@@ -69,7 +69,7 @@ class DUEMixin:
 
         with torch.no_grad():
             for batch_idx in sampled_batch_idx:
-                X = train_data.dataset[batch_idx][0]["input_ids"].to(self.device)
+                X = train_data.dataset[batch_idx]["input_ids"].to(self.device)
                 batch_representations.append(self.get_hidden(X))
 
         representations = torch.cat(batch_representations, dim=0)
@@ -95,8 +95,8 @@ class DUEMixin:
             self.likelihood, self.gp, num_data=len(train_data)
         ).to(self.device)
 
-    def forward(self, input_: torch.LongTensor):
-        out = self.get_hidden(input_)
+    def forward(self, input_: torch.LongTensor, **kwargs):
+        out = self.get_hidden(input_, **kwargs)
 
         if self.is_sequence_classifier:
             out = self.get_sequence_representation(out)
@@ -111,7 +111,7 @@ class DUEMixin:
         batch_size = input_.shape[0]
 
         with torch.no_grad():
-            out = self.forward(input_)
+            out = DUEMixin.forward(self, input_, **kwargs)
             out = self.likelihood(out)
             out = out.logits.mean(dim=0)
 
@@ -149,7 +149,7 @@ class DUEMixin:
 
         batch_size = input_.shape[0]
 
-        mvn = self.forward(input_)
+        mvn = DUEMixin.forward(self, input_, **kwargs)
         predictions = mvn.sample(sample_shape=torch.Size((num_predictions,)))
         predictions = rearrange(
             predictions, "n (b s) o  -> b n s o", b=batch_size, n=num_predictions
@@ -237,6 +237,14 @@ class DUETransformerModule(SpectralTransformerModule, MultiPredictionMixin, DUEM
 
         self.layer_norm = nn.LayerNorm([input_size])
 
+    def get_logits(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        return DUEMixin.get_logits(self, input_, *args, **kwargs)
+
+    def predict(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
+        return DUEMixin.predict(self, input_, *args, **kwargs)
+
 
 class DUETransformer(Model):
     def __init__(
@@ -313,7 +321,7 @@ class DUETransformer(Model):
         if not self.module.is_sequence_classifier:
             y = rearrange(y, "b t -> (b t)")
 
-        preds = self.module(X)
+        preds = DUEMixin.forward(self.module, X, **kwargs)
         loss = -self.module.loss_function(preds, y)
 
         return loss
@@ -348,6 +356,20 @@ class DUEBertModule(SpectralBertModule, MultiPredictionMixin, DUEMixin):
         )
         MultiPredictionMixin.__init__(self, num_predictions)
         DUEMixin.__init__(self, num_inducing_samples, num_inducing_points, kernel_type)
+
+    def get_hidden(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        attention_mask = kwargs["attention_mask"]
+        return_dict = self.bert.forward(input_, attention_mask, return_dict=True)
+
+        if self.is_sequence_classifier:
+            activations = return_dict["last_hidden_state"][:, 0, :]
+
+        else:
+            activations = return_dict["last_hidden_state"]
+
+        return activations
 
 
 class DUEBert(Model):
@@ -426,7 +448,7 @@ class DUEBert(Model):
         if not self.module.is_sequence_classifier:
             y = rearrange(y, "b t -> (b t)")
 
-        preds = self.module(X)
+        preds = DUEMixin.forward(self.module, X, **kwargs)
         loss = -self.module.loss_function(preds, y)
 
         return loss

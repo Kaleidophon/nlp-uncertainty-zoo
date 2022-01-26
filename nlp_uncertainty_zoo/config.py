@@ -32,7 +32,6 @@ DATASET_TASKS = {
 }
 # TODO: Debug
 AVAILABLE_MODELS = {
-    # "composer": Composer,
     # "lstm": LSTM,
     # "lstm_ensemble": LSTMEnsemble,
     # "variational_lstm": VariationalLSTM,
@@ -41,11 +40,11 @@ AVAILABLE_MODELS = {
     # "transformer": Transformer,
     # "variational_transformer": VariationalTransformer,
     # "variational_bert": VariationalBert,
-    "sngp_transformer": SNGPTransformer,
+    # "sngp_transformer": SNGPTransformer,
     "sngp_bert": SNGPBert,
-    "ddu_transformer": DDUTransformer,
+    # "ddu_transformer": DDUTransformer,
     "ddu_bert": DDUBert,
-    "due_transformer": DUETransformer,
+    # "due_transformer": DUETransformer,
     "due_bert": DUEBert,
 }
 

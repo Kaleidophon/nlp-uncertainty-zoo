@@ -37,6 +37,8 @@ NUM_PREDICTIONS = 5
 BATCH_SIZE = 4
 SEQUENCE_LENGTH = 12
 
+# TODO: Give uncertainties per token and modify tests
+
 
 class MockDatasetBuilder(ABC):
     """
@@ -94,7 +96,6 @@ class MockSequenceClassificationDatasetBuilder(MockDatasetBuilder):
         )
         sequences = sequences.reshape(self.num_instances, self.sequence_length)
         labels = torch.randint(self.num_classes, (self.num_instances,))
-
         instances = [
             {
                 "labels": labels[i],
@@ -145,6 +146,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             model_params["is_sequence_classifier"] = isinstance(
                 self.mock_dataset_builder, MockSequenceClassificationDatasetBuilder
             )
+            model_params["num_predictions"] = NUM_PREDICTIONS
 
             if "sequence_length" in model_params:
                 model_params[
@@ -323,6 +325,8 @@ class SequenceClassificationFunctionTests(AbstractFunctionTests):
         self.dataset_name = TAKE_SEQUENCE_CLASSIFICATION_HYPERPARAMS_FROM
 
         # Target shapes
-        self.logit_shape = torch.Size((BATCH_SIZE, 1, NUM_TYPES))
-        self.logit_multi_shape = torch.Size((BATCH_SIZE, NUM_PREDICTIONS, 1, NUM_TYPES))
+        self.logit_shape = torch.Size((BATCH_SIZE, 1, NUM_CLASSES))
+        self.logit_multi_shape = torch.Size(
+            (BATCH_SIZE, NUM_PREDICTIONS, 1, NUM_CLASSES)
+        )
         self.uncertainty_scores_shape = torch.Size((BATCH_SIZE, 1))
