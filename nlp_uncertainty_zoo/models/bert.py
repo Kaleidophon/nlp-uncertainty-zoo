@@ -149,6 +149,20 @@ class BertModule(Module):
 
         return hidden
 
+    def get_hidden(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        attention_mask = kwargs["attention_mask"]
+        return_dict = self.bert.forward(input_, attention_mask, return_dict=True)
+
+        if self.is_sequence_classifier:
+            activations = return_dict["last_hidden_state"][:, 0, :]
+
+        else:
+            activations = return_dict["last_hidden_state"]
+
+        return activations
+
 
 class BertModelMixin:
     """

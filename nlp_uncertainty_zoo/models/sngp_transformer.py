@@ -540,7 +540,7 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
 
         batch_size = input_.shape[0]
         sequence_length = input_.shape[1] if not self.is_sequence_classifier else 1
-        out = self.get_hidden(input_)
+        out = self.get_hidden(input_, **kwargs)
         out = rearrange(out, "b t p -> (b t) p")
         out = self.sngp_layer.get_logits(out, num_predictions=num_predictions)
         out = rearrange(out, "(b t) n p -> b n t p", b=batch_size, t=sequence_length)

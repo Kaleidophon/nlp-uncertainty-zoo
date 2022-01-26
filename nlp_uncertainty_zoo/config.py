@@ -43,9 +43,9 @@ AVAILABLE_MODELS = {
     # "sngp_transformer": SNGPTransformer,
     "sngp_bert": SNGPBert,
     # "ddu_transformer": DDUTransformer,
-    "ddu_bert": DDUBert,
+    # "ddu_bert": DDUBert,
     # "due_transformer": DUETransformer,
-    "due_bert": DUEBert,
+    # "due_bert": DUEBert,
 }
 
 # MODEL HYPERPARAMETERS

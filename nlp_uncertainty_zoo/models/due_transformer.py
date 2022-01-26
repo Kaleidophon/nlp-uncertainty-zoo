@@ -357,20 +357,6 @@ class DUEBertModule(SpectralBertModule, MultiPredictionMixin, DUEMixin):
         MultiPredictionMixin.__init__(self, num_predictions)
         DUEMixin.__init__(self, num_inducing_samples, num_inducing_points, kernel_type)
 
-    def get_hidden(
-        self, input_: torch.LongTensor, *args, **kwargs
-    ) -> torch.FloatTensor:
-        attention_mask = kwargs["attention_mask"]
-        return_dict = self.bert.forward(input_, attention_mask, return_dict=True)
-
-        if self.is_sequence_classifier:
-            activations = return_dict["last_hidden_state"][:, 0, :]
-
-        else:
-            activations = return_dict["last_hidden_state"]
-
-        return activations
-
 
 class DUEBert(Model):
     def __init__(
