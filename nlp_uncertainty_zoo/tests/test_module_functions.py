@@ -37,8 +37,6 @@ NUM_PREDICTIONS = 5
 BATCH_SIZE = 4
 SEQUENCE_LENGTH = 12
 
-# TODO: Give uncertainties per token and modify tests
-
 
 class MockDatasetBuilder(ABC):
     """
