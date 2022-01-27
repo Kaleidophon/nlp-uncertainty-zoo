@@ -20,7 +20,6 @@ import wandb
 from nlp_uncertainty_zoo.config import (
     AVAILABLE_MODELS,
     AVAILABLE_DATASETS,
-    PREPROCESSING_PARAMS,
     MODEL_PARAMS,
 )
 from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
@@ -47,6 +46,7 @@ except ImportError:
 def perform_hyperparameter_search(
     model_name: str,
     dataset_name: str,
+    data_dir: str,
     device: Device = "cpu",
     seed: Optional[int] = None,
     wandb_run: Optional[WandBRun] = None,
@@ -60,6 +60,8 @@ def perform_hyperparameter_search(
         The name of model to run the search for.
     dataset_name: str
         Name of data set models should be evaluated on.
+    data_dir: str
+        Directory the data is stored in.
     device: Device
         Device hyperparameter search happens on.
     seed: Optional[int]
@@ -81,20 +83,25 @@ def perform_hyperparameter_search(
     if wandb_run is not None:
         info_dict["config"] = wandb_run.config.as_dict()
 
-    dataset = AVAILABLE_DATASETS[dataset_name](
-        data_dir=args.data_dir, **PREPROCESSING_PARAMS[dataset_name]
-    )
-    # Somehow there's an obscure error if data splits are not loaded in advance, but during hyperparameter search,
-    # so do that here
-    _, _ = dataset.train, dataset.valid
-
     model_params = MODEL_PARAMS[dataset_name][model_name]
 
     module = AVAILABLE_MODELS[model_name](model_params, device=device)
 
+    # Read data and build data splits
+    dataset_builder = AVAILABLE_DATASETS[dataset_name](
+        data_dir=data_dir, max_length=model_params["sequence_length"]
+    )
+    data_splits = dataset_builder.build(batch_size=model_params["batch_size"])
+
     try:
-        module.fit(dataset, validate=True, verbose=False, wandb_run=wandb)
-        score = -module.eval(dataset.valid.to(device)).item()
+        module.fit(
+            train_split=data_splits["train"],
+            valid_split=data_splits["valid"],
+            validate=True,
+            verbose=False,
+            wandb_run=wandb,
+        )
+        score = -module.eval(data_splits["eval"].to(device)).item()
 
     # In case of nans due bad training parameters
     except (ValueError, RuntimeError) as e:

@@ -147,6 +147,7 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
         self,
         input_: torch.LongTensor,
         hidden_states: Optional[HiddenDict] = None,
+        **kwargs,
     ):
         """
         The forward pass of the model.

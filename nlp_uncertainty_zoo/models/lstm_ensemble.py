@@ -106,7 +106,7 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
             [member(input_) for member in q * members + members[:r]], dim=1
         )
 
-    def forward(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def forward(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
         preds = self.get_logits(input_).mean(dim=1)
 
         return preds

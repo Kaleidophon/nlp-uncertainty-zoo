@@ -1,5 +1,4 @@
 # Expose some common imports
-from nlp_uncertainty_zoo.datasets import TextDataset, DataSplit
 from nlp_uncertainty_zoo.models.variational_transformer import (
     VariationalTransformer,
     VariationalTransformerModule,

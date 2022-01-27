@@ -12,15 +12,121 @@ import numpy as np
 import torch
 from einops import rearrange
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import DataLoader
 
 # PROJECT
-from nlp_uncertainty_zoo.models.spectral import SpectralTransformerModule
-from nlp_uncertainty_zoo.datasets import DataSplit
+from nlp_uncertainty_zoo.models.spectral import (
+    SpectralTransformerModule,
+    SpectralBertModule,
+)
 from nlp_uncertainty_zoo.models.model import Model
-from nlp_uncertainty_zoo.utils.custom_types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
-class DDUTransformerModule(SpectralTransformerModule):
+class DDUMixin:
+    """
+    Implementation of the functions used by the Deep Deterministic Uncertainty (DDU) Transformer by
+    `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_. as a Mixin class. This is done to avoid
+    code redundancies.
+    """
+
+    def __init__(self, input_size: int, output_size: int):
+        # Parameters for Gaussian Discriminant Analysis
+        self.mu = torch.zeros(output_size, input_size)
+        self.Sigma = torch.stack(
+            [torch.eye(input_size, input_size) for _ in range(self.output_size)]
+        )
+        self.determinants = torch.zeros(output_size)
+
+    def gmm_fit(self, data_split: DataLoader) -> None:
+        """
+        Fit a Gaussian mixture model on the feature representations of the trained model.
+
+        Parameters
+        ----------
+        data_split: DataSplit
+            Data split used for fitting, usually the training or validation split.
+        """
+
+        with torch.no_grad():
+            hiddens, all_labels = [], []
+
+            for i, batch in enumerate(data_split):
+                attention_mask, input_ids, labels = (
+                    batch["attention_mask"],
+                    batch["input_ids"],
+                    batch["label"],
+                )
+
+                hidden = self.get_hidden(input_ids, attention_mask=attention_mask)
+                hidden = (
+                    self.get_sequence_representation(hidden).squeeze(1)
+                    if self.is_sequence_classifier
+                    else torch.flatten(hidden, end_dim=1)
+                )
+                labels = torch.flatten(labels)
+                hiddens.append(hidden)
+                all_labels.append(labels)
+
+            hiddens = torch.cat(hiddens, dim=0)
+            all_labels = torch.cat(all_labels, dim=0)
+
+            for cls in labels.unique():
+                num_batch_classes = (all_labels == cls).long().sum()
+
+                if num_batch_classes == 0:
+                    continue
+
+                self.mu[cls] = hiddens[labels == cls].mean(dim=0)
+                self.Sigma[cls] = torch.FloatTensor(
+                    np.cov(hiddens[labels == cls].T.numpy())
+                ) * (num_batch_classes - 1)
+
+                self.determinants[cls] = torch.det(
+                    self.Sigma[cls, :, :]
+                )  # Compute determinant
+                self.Sigma[cls, :, :] = torch.linalg.inv(self.Sigma[cls, :, :])
+
+    def gmm_predict(self, input_: torch.LongTensor) -> torch.FloatTensor:
+        """
+        Make a prediction with the Gaussian mixture Model for a batch of inputs.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Batch of inputs in the form of indexed tokens.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Probability of the input under every mixture component, with one component per class.
+        """
+        batch_size = input_.shape[0]
+        hidden = self.get_hidden(input_)  # batch_size x seq_length x input_size
+        hidden = (
+            self.get_sequence_representation(hidden).squeeze(1)
+            if self.is_sequence_classifier
+            else rearrange(hidden, "b s i -> (b s) i")
+        )
+
+        hidden = hidden.unsqueeze(1)  # (batch_size x seq_length) x 1 x input_size
+        hidden = hidden.repeat(1, self.output_size, 1)
+        diff = hidden - self.mu  # (batch_size x seq_length) x output_size x input_size
+        diff_t = rearrange(diff, "b o i -> b i o")
+
+        probs = (
+            1
+            / (2 * math.pi * self.determinants + 1e-6)
+            * torch.exp(
+                -0.5 * torch.einsum("boi,oii,bio->bo", diff, self.Sigma, diff_t)
+            )
+        )  # (batch_size x seq_length) x output_size
+        probs = rearrange(probs, "(b s) o -> b s o", b=batch_size)
+
+        return probs
+
+
+class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
     """
     Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by
     `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_.
@@ -85,94 +191,7 @@ class DDUTransformerModule(SpectralTransformerModule):
             is_sequence_classifier,
             device,
         )
-
-        # Parameters for Gaussian Discriminant Analysis
-        self.mu = torch.zeros(output_size, input_size)
-        self.Sigma = torch.stack(
-            [torch.eye(input_size, input_size) for _ in range(self.output_size)]
-        )
-        self.determinants = torch.zeros(output_size)
-
-    def gmm_fit(self, data_split: DataSplit) -> None:
-        """
-        Fit a Gaussian mixture model on the feature representations of the trained model.
-
-        Parameters
-        ----------
-        data_split: DataSplit
-            Data split used for fitting, usually the training or validation split.
-        """
-        with torch.no_grad():
-            hiddens, labels = [], []
-
-            for i, (X, y) in enumerate(data_split):
-
-                hidden = self.get_hidden(X)
-                hidden = (
-                    self.get_sequence_representation(hidden).squeeze(1)
-                    if self.is_sequence_classifier
-                    else torch.flatten(hidden, end_dim=1)
-                )
-                y = torch.flatten(y)
-                hiddens.append(hidden)
-                labels.append(y)
-
-            hiddens = torch.cat(hiddens, dim=0)
-            labels = torch.cat(labels, dim=0)
-
-            for cls in labels.unique():
-                num_batch_classes = (labels == cls).long().sum()
-
-                if num_batch_classes == 0:
-                    continue
-
-                self.mu[cls] = hiddens[labels == cls].mean(dim=0)
-                self.Sigma[cls] = torch.FloatTensor(
-                    np.cov(hiddens[labels == cls].T.numpy())
-                ) * (num_batch_classes - 1)
-
-                self.determinants[cls] = torch.det(
-                    self.Sigma[cls, :, :]
-                )  # Compute determinant
-                self.Sigma[cls, :, :] = torch.linalg.inv(self.Sigma[cls, :, :])
-
-    def gmm_predict(self, input_: torch.LongTensor) -> torch.FloatTensor:
-        """
-        Make a prediction with the Gaussian mixture Model for a batch of inputs.
-
-        Parameters
-        ----------
-        input_: torch.LongTensor
-            Batch of inputs in the form of indexed tokens.
-
-        Returns
-        -------
-        torch.FloatTensor
-            Probability of the input under every mixture component, with one component per class.
-        """
-        batch_size = input_.shape[0]
-        hidden = self.get_hidden(input_)  # batch_size x seq_length x input_size
-        hidden = (
-            self.get_sequence_representation(hidden).squeeze(1)
-            if self.is_sequence_classifier
-            else rearrange(hidden, "b s i -> (b s) i")
-        )
-
-        hidden = hidden.unsqueeze(1)  # (batch_size x seq_length) x 1 x input_size
-        hidden = hidden.repeat(1, self.output_size, 1)
-        diff = hidden - self.mu  # (batch_size x seq_length) x output_size x input_size
-        diff_t = rearrange(diff, "b o i -> b i o")
-
-        probs = (
-            1
-            / (2 * math.pi * self.determinants + 1e-6)
-            * torch.exp(
-                -0.5 * torch.einsum("boi,oii,bio->bo", diff, self.Sigma, diff_t)
-            )
-        )  # (batch_size x seq_length) x output_size
-        probs = rearrange(probs, "(b s) o -> b s o", b=batch_size)
-
-        return probs
+        DDUMixin.__init__(self, input_size, output_size)
 
     def get_uncertainty(
         self,
@@ -224,7 +243,106 @@ class DDUTransformer(Model):
 
     def _finetune(
         self,
-        data_split: DataSplit,
+        data_split: DataLoader,
+        verbose: bool,
+        wandb_run: Optional[WandBRun] = None,
+    ):
+        """
+        As an additional step after training, DDU fits a Gaussian Discriminant Analysis model to
+        the training data.
+
+        Parameters
+        ----------
+        data_split: DataSplit
+            Data the GDA is fit on.
+        verbose: bool
+            Whether to display information about current loss.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        """
+        self.module.eval()  # Disable dropout
+        self.module.gmm_fit(data_split)
+        self.module.train()
+
+
+class DDUBertModule(SpectralBertModule, DDUMixin):
+    """
+    Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by
+    `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_ in the form of a pre-trained BERT.
+    """
+
+    def __init__(
+        self,
+        bert_name: str,
+        output_size: int,
+        spectral_norm_upper_bound: float,
+        is_sequence_classifier: bool,
+        device: Device,
+        **build_params,
+    ):
+        super().__init__(
+            bert_name,
+            output_size,
+            spectral_norm_upper_bound,
+            is_sequence_classifier,
+            device,
+            **build_params,
+        )
+        DDUMixin.__init__(self, self.bert.config.hidden_size, output_size)
+
+    def get_uncertainty(
+        self,
+        input_: torch.LongTensor,
+        *args,
+        metric_name: Optional[str] = None,
+        **kwargs,
+    ) -> torch.FloatTensor:
+        """
+        Get the uncertainty scores for the current batch.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            (Batch of) Indexed input sequences.
+        metric_name: str
+            Name of uncertainty metric being used.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Uncertainty scores for the current batch.
+        """
+        if metric_name is None:
+            metric_name = self.default_uncertainty_metric
+
+        if metric_name == "log_prob":
+            with torch.no_grad():
+                return self.gmm_predict(input_)
+
+        else:
+            return super().get_uncertainty(input_, metric_name, *args, **kwargs)
+
+
+class DDUBert(Model):
+    def __init__(
+        self,
+        model_params: Dict[str, Any],
+        model_dir: Optional[str] = None,
+        device: Device = "cpu",
+    ):
+        bert_name = model_params["bert_name"]
+        super().__init__(
+            f"ddu-{bert_name}",
+            DDUBertModule,
+            model_params,
+            model_dir,
+            device,
+        )
+
+    def _finetune(
+        self,
+        data_split: DataLoader,
         verbose: bool,
         summary_writer: Optional[SummaryWriter] = None,
     ):
