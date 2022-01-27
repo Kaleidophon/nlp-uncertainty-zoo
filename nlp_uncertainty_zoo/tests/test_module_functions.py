@@ -11,7 +11,7 @@ across model implementations.
 
 # STD
 from abc import ABC
-from typing import Generator, Dict
+from typing import Generator, Dict, Tuple
 import unittest
 
 # EXT
@@ -124,7 +124,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
     uncertainty_scores_shape = None
 
     @property
-    def trained_models(self) -> Generator[Model, None, None]:
+    def trained_models(self) -> Generator[Tuple[str, Model], None, None]:
         """
         Returns a generator of trained models to avoid having to hold all trained models in memory.
 
@@ -134,7 +134,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             Generator that returns one of the available models in trained form during every iteration.
         """
 
-        def _init_and_train_model(model_name: str) -> Model:
+        def _init_and_train_model(model_name: str) -> Tuple[str, Model]:
 
             model_params = MODEL_PARAMS[self.dataset_name][model_name]
             mock_dataset = self.mock_dataset_builder.build(BATCH_SIZE)
@@ -157,7 +157,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             model = AVAILABLE_MODELS[model_name](model_params)
             model.fit(train_split=mock_dataset["train"], verbose=False)
 
-            return model
+            return model_name, model
 
         return (
             _init_and_train_model(model_name=model_name)
@@ -172,10 +172,8 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             return
 
         with tqdm(total=len(AVAILABLE_MODELS)) as progress_bar:
-            for model_class, trained_model in zip(
-                AVAILABLE_MODELS.values(), self.trained_models
-            ):
-                progress_bar.set_description(f'Testing model "{model_class.__name__}"')
+            for model_name, trained_model in self.trained_models:
+                progress_bar.set_description(f'Testing model "{model_name}"')
                 progress_bar.update(1)
 
                 self._test_module_functions(trained_model)

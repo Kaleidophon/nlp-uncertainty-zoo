@@ -85,8 +85,8 @@ class SpectralBertModule(BertModule):
 
         # Add spectral normalization
         self.output = spectral_norm_fc(self.output, coeff=spectral_norm_upper_bound)
-        self.custom_bert_pooler = spectral_norm_fc(
-            self.custom_bert_pooler, coeff=spectral_norm_upper_bound
+        self.bert.pooler.dense = spectral_norm_fc(
+            self.bert.pooler.dense, coeff=spectral_norm_upper_bound
         )
 
         # Since Bert module are stored in an OrderedDict which is not mutable, so we simply create a new module dict

@@ -49,12 +49,6 @@ class BertModule(Module):
         self.output_size = output_size
         self.sequence_length = bert.config.max_length
 
-        # TODO: Is the custom pooler still necessary?
-        # Init custom pooler without tanh activations, copy Bert parameters
-        self.custom_bert_pooler = nn.Linear(hidden_size, hidden_size)
-        self.custom_bert_pooler.weight = self.bert.pooler.dense.weight
-        self.custom_bert_pooler.bias = self.bert.pooler.dense.bias
-
         self.layer_norm = nn.LayerNorm([hidden_size])
         self.output = nn.Linear(hidden_size, output_size)
 
@@ -76,7 +70,7 @@ class BertModule(Module):
 
         if self.is_sequence_classifier:
             cls_activations = return_dict["last_hidden_state"][:, 0, :]
-            out = torch.tanh(self.custom_bert_pooler(cls_activations))
+            out = torch.tanh(self.bert.pooler.dense(cls_activations))
             out = self.layer_norm(out)
             out = out.unsqueeze(1)
 
@@ -147,7 +141,7 @@ class BertModule(Module):
             Representation for the current sequence.
         """
         hidden = hidden[:, 0, :].unsqueeze(1)
-        hidden = torch.tanh(self.custom_bert_pooler(hidden))
+        hidden = torch.tanh(self.bert.pooler.dense(hidden))
 
         return hidden
 
