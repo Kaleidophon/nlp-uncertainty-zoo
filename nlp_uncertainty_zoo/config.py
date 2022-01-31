@@ -3,7 +3,11 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 """
 
 # PROJECT
-from nlp_uncertainty_zoo.data import PennTreebankBuilder, ClincBuilder, DanPlusBuilder
+from nlp_uncertainty_zoo.utils.data import (
+    PennTreebankBuilder,
+    ClincBuilder,
+    DanPlusBuilder,
+)
 import nlp_uncertainty_zoo.model_configs as configs
 from nlp_uncertainty_zoo.models.variational_transformer import (
     VariationalTransformer,
