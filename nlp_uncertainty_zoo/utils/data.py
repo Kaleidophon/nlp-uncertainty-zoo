@@ -489,12 +489,23 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
 
 # TODO; Debug
 if __name__ == "__main__":
-    from nlp_uncertainty_zoo.utils.samplers import SequenceClassificationSampler
+    from nlp_uncertainty_zoo.utils.samplers import (
+        SequenceClassificationSampler,
+        LanguageModellingSampler,
+    )
 
-    clinc_builder = ClincBuilder(
+    # clinc_builder = ClincBuilder(
+    #    data_dir="../data/processed",
+    #    max_length=10,
+    #    sampler_class=SequenceClassificationSampler,
+    #    sampler_kwargs={"target_size": 40},
+    # )
+    # splits = clinc_builder.build(batch_size=5)
+
+    ptb_builder = PennTreebankBuilder(
         data_dir="../data/processed",
         max_length=10,
-        sampler_class=SequenceClassificationSampler,
-        sampler_kwargs={"target_size": 40},
+        sampler_class=LanguageModellingSampler,
+        sampler_kwargs={"target_size": 40, "sample_range": [5, 15]},
     )
-    splits = clinc_builder.build(batch_size=5)
+    splits = ptb_builder.build(batch_size=5)
