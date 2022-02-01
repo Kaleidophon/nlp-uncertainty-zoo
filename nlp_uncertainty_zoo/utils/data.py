@@ -492,6 +492,7 @@ if __name__ == "__main__":
     from nlp_uncertainty_zoo.utils.samplers import (
         SequenceClassificationSampler,
         LanguageModellingSampler,
+        TokenClassificationSampler,
     )
 
     # clinc_builder = ClincBuilder(
@@ -502,10 +503,21 @@ if __name__ == "__main__":
     # )
     # splits = clinc_builder.build(batch_size=5)
 
-    ptb_builder = PennTreebankBuilder(
+    # ptb_builder = PennTreebankBuilder(
+    #    data_dir="../data/processed",
+    #    max_length=10,
+    #    sampler_class=LanguageModellingSampler,
+    #    sampler_kwargs={"target_size": 40, "sample_range": [5, 15]},
+    # )
+    # splits = ptb_builder.build(batch_size=5)
+
+    danplus_builder = DanPlusBuilder(
         data_dir="../data/processed",
         max_length=10,
-        sampler_class=LanguageModellingSampler,
-        sampler_kwargs={"target_size": 40, "sample_range": [5, 15]},
+        sampler_class=TokenClassificationSampler,
+        sampler_kwargs={"target_size": 40},
     )
-    splits = ptb_builder.build(batch_size=5)
+    splits = danplus_builder.build(batch_size=5)
+
+    for batch in splits["train"]:
+        ...

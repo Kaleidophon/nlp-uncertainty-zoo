@@ -4,20 +4,28 @@ Sampler used to sub-sample different types of datasets.
 
 # STD
 from abc import ABC, abstractmethod
-from collections import defaultdict
+from collections import defaultdict, Counter
 import numpy as np
 from typing import Sized, Dict, Optional, Tuple
 
 # EXT
 from torch.utils.data.sampler import Sampler
 
+# TODO: Document this code better, some variable names acre cryptic and the logic is not obvious
+# TODO: Use joblib to speed up sampling?
 
-def _create_probs_from_dict(freq_dict: Dict[int, int]) -> np.array:
+
+def _create_probs_from_dict(
+    freq_dict: Dict[int, int], max_label: Optional[int] = None
+) -> np.array:
     """
     Auxiliary function creating a numpy array containing a categorical distribution over integers from
     a dictionary of frequencies.
     """
-    probs = np.zeros(max(freq_dict.keys()) + 1)
+    if max_label is None:
+        max_label = max(freq_dict.keys())
+
+    probs = np.zeros(max_label + 1)
 
     for key, freq in freq_dict.items():
         probs[key] = freq
@@ -99,9 +107,8 @@ class LanguageModellingSampler(Subsampler):
         for seq_length in self.length2instances:
 
             for i in self.length2instances[seq_length]:
-                # Probability for an instance to be sampled is the probability of the class label times the
-                # probability of the sequence length given the class label divided by the number of sequences
-                # with that same class and sequence length
+                # Probability for an instance to be sampled is the probability of the sequence length divided by the
+                # number of sequences with that same length
                 instance_probs[i] = seq_length_probs[seq_length] / len(
                     self.length2instances[seq_length]
                 )
@@ -202,4 +209,89 @@ class TokenClassificationSampler(Subsampler):
     the SequenceClassificationSampler, all labels of a sequence are considered.
     """
 
-    ...  # TODO: Implement _analyse_data
+    def __init__(
+        self,
+        data_source: Sized,
+        target_size: int,
+        ignore_label: int = -100,
+        seed: Optional[int] = None,
+    ):
+        self.length2instances = defaultdict(lambda: [])
+        self.seq_lengths = defaultdict(int)
+        self.label_freqs = {}
+        self.instance2label_freqs = {}
+        self.ignore_label = ignore_label
+        super().__init__(data_source, target_size, seed)
+
+    def _create_indices(self, data_source: Sized):
+        """
+        Analyze the given data in order to determing the sampling strategy.
+
+        Parameters
+        ----------
+        data_source: Sized
+            Data containing instances of data split.
+        """
+
+        # Go through data and categorize it
+        for i, instance in enumerate(data_source):
+            seq_length = len(instance["input_ids"])
+            label_freqs = Counter(instance["labels"].tolist())
+            del label_freqs[self.ignore_label]
+            self.seq_lengths[seq_length] += 1
+            self.length2instances[seq_length].append(i)
+            self.label_freqs.update(
+                label_freqs
+            )  # Update label distribution for whole dataset
+            self.instance2label_freqs[
+                i
+            ] = label_freqs  # Update label freqs for instance
+
+        # Compute probability of sampling an instance based on class and sentence length
+        instance_probs = np.zeros(len(data_source))
+        seq_length_probs = _create_probs_from_dict(self.seq_lengths)
+        label_probs = _create_probs_from_dict(self.label_freqs)
+
+        for seq_length in self.length2instances:
+
+            cross_entroy = lambda p, q: sum(
+                p * np.log(q)
+            )  # Note that this is missing the leading minus
+            # Create a probability distribution over instances of the sample length by computing the cross-entropy
+            # between the label distribution of an instance and the label distribution of a corpus and normalizing
+            # all the scores for one length "bucket" into the 0, 1 range. This way, smapling instances that match the
+            # overall label distribution becomes more likely.
+
+            # First, create distributions over labels per instancs
+            seq_length_instance_probs = [
+                _create_probs_from_dict(
+                    self.instance2label_freqs[i], max_label=len(label_probs) - 1
+                )
+                for i in self.length2instances[seq_length]
+            ]
+            # Secondly, compute cross-entropy scores
+            seq_length_instance_probs = np.array(
+                [
+                    cross_entroy(label_probs, label_dist + 1e-5)
+                    for label_dist in seq_length_instance_probs
+                ]
+            )
+            seq_length_instance_probs /= sum(seq_length_instance_probs)
+
+            for i, instance_prob in zip(
+                self.length2instances[seq_length], seq_length_instance_probs
+            ):
+                # Probability for an instance to be sampled is the probability of the sequence length times the
+                # probability created by checking the frequencies of labels in a sequence with the overall labels in
+                # the corpus
+                instance_probs[i] = seq_length_probs[seq_length] * instance_prob
+
+        if self.seed is not None:
+            np.random.seed(self.seed)
+
+        self.indices = np.random.choice(
+            np.arange(len(data_source)),
+            size=self.target_size,
+            replace=False,
+            p=instance_probs,
+        ).tolist()
