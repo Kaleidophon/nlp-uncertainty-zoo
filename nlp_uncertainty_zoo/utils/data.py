@@ -6,7 +6,7 @@ Module to implement data reading and batching functionalities.
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import reduce
-from typing import Dict, Optional, Any, List, Union
+from typing import Dict, Optional, Any, List, Union, Type
 
 # EXT
 from sklearn.preprocessing import LabelEncoder
@@ -85,6 +85,8 @@ class DatasetBuilder(ABC):
         type_: str,
         tokenizer: PreTrainedTokenizerBase,
         max_length: int,
+        sampler_class: Optional[Type] = None,
+        sampler_kwargs: Optional[Dict[str, Any]] = None,
         num_jobs: Optional[int] = 1,
     ):
         """
@@ -105,6 +107,10 @@ class DatasetBuilder(ABC):
             Pre-trained tokenizer.
         max_length: int
             Maximum sequence length.
+        sampler_class: Optional[Sampler]
+            Sampler class used to (sub-)sample the dataset.
+        sampler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments to initialize the sampler.
         num_jobs: Optional[int]
             Number of jobs used to build the dataset (on CPU). Default is 1.
         """
@@ -114,6 +120,8 @@ class DatasetBuilder(ABC):
         self.type = type_
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.sampler_class = sampler_class
+        self.sampler_kwargs = sampler_kwargs
         self.num_jobs = num_jobs
 
         # To be set after calling build()
@@ -197,6 +205,13 @@ class LanguageModellingDatasetBuilder(DatasetBuilder):
                 self.dataset[split],
                 batch_size=batch_size,
                 collate_fn=collator,
+                sampler=self.sampler_class(
+                    data_source=self.dataset[split],
+                    num_jobs=self.num_jobs,
+                    **self.sampler_kwargs,
+                )
+                if self.sampler_class is not None
+                else None,
                 **dataloader_kwargs,
             )
             for split in self.splits
@@ -210,7 +225,14 @@ class PennTreebankBuilder(LanguageModellingDatasetBuilder):
     Dataset class for the Penn Treebank.
     """
 
-    def __init__(self, data_dir: str, max_length: int, num_jobs: Optional[int] = 1):
+    def __init__(
+        self,
+        data_dir: str,
+        max_length: int,
+        sampler_class: Optional[Type] = None,
+        sampler_kwargs: Optional[Dict[str, Any]] = None,
+        num_jobs: Optional[int] = 1,
+    ):
         super().__init__(
             name="ptb",
             data_dir=data_dir,
@@ -222,6 +244,8 @@ class PennTreebankBuilder(LanguageModellingDatasetBuilder):
             type_="next_token_prediction",
             tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
             max_length=max_length,
+            sampler_class=sampler_class,
+            sampler_kwargs=sampler_kwargs,
             num_jobs=num_jobs,
         )
 
@@ -388,6 +412,13 @@ class ClassificationDatasetBuilder(DatasetBuilder):
             split: DataLoader(
                 self.dataset[split],
                 batch_size=batch_size,
+                sampler=self.sampler_class(
+                    data_source=self.dataset[split],
+                    num_jobs=self.num_jobs,
+                    **self.sampler_kwargs,
+                )
+                if self.sampler_class is not None
+                else None,
                 **dataloader_kwargs,
             )
             for split in self.splits
@@ -401,7 +432,14 @@ class ClincBuilder(ClassificationDatasetBuilder):
     Dataset class for the CLINC OOS dataset.
     """
 
-    def __init__(self, data_dir: str, max_length: int, num_jobs: Optional[int] = 1):
+    def __init__(
+        self,
+        data_dir: str,
+        max_length: int,
+        sampler_class: Optional[Type] = None,
+        sampler_kwargs: Optional[Dict[str, Any]] = None,
+        num_jobs: Optional[int] = 1,
+    ):
         super().__init__(
             name="clinc",
             data_dir=data_dir,
@@ -414,6 +452,8 @@ class ClincBuilder(ClassificationDatasetBuilder):
             type_="sequence_classification",
             tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
             max_length=max_length,
+            sampler_class=sampler_class,
+            sampler_kwargs=sampler_kwargs,
             num_jobs=num_jobs,
         )
 
@@ -423,7 +463,14 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
     Dataset class for the CLINC OOS dataset.
     """
 
-    def __init__(self, data_dir: str, max_length: int, num_jobs: Optional[int] = 1):
+    def __init__(
+        self,
+        data_dir: str,
+        max_length: int,
+        sampler_class: Optional[Type] = None,
+        sampler_kwargs: Optional[Dict[str, Any]] = None,
+        num_jobs: Optional[int] = 1,
+    ):
         super().__init__(
             name="dan+",
             data_dir=data_dir,
@@ -438,5 +485,7 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
                 "alexanderfalk/danbert-small-cased"
             ),
             max_length=max_length,
+            sampler_class=sampler_class,
+            sampler_kwargs=sampler_kwargs,
             num_jobs=num_jobs,
         )

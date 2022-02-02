@@ -13,3 +13,4 @@ blitz-bayesian-pytorch
 gpytorch
 scipy
 dill
+joblib
