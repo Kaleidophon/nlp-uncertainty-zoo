@@ -206,7 +206,9 @@ class LanguageModellingDatasetBuilder(DatasetBuilder):
                 batch_size=batch_size,
                 collate_fn=collator,
                 sampler=self.sampler_class(
-                    data_source=self.dataset[split], **self.sampler_kwargs
+                    data_source=self.dataset[split],
+                    num_jobs=self.num_jobs,
+                    **self.sampler_kwargs,
                 )
                 if self.sampler_class is not None
                 else None,
@@ -411,7 +413,9 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                 self.dataset[split],
                 batch_size=batch_size,
                 sampler=self.sampler_class(
-                    data_source=self.dataset[split], **self.sampler_kwargs
+                    data_source=self.dataset[split],
+                    num_jobs=self.num_jobs,
+                    **self.sampler_kwargs,
                 )
                 if self.sampler_class is not None
                 else None,
@@ -485,41 +489,3 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
             sampler_kwargs=sampler_kwargs,
             num_jobs=num_jobs,
         )
-
-
-# TODO; Debug
-if __name__ == "__main__":
-    from nlp_uncertainty_zoo.utils.samplers import (
-        SequenceClassificationSampler,
-        LanguageModellingSampler,
-        TokenClassificationSampler,
-    )
-
-    # TODO: Test seeding
-
-    # clinc_builder = ClincBuilder(
-    #    data_dir="../data/processed",
-    #    max_length=10,
-    #    sampler_class=SequenceClassificationSampler,
-    #    sampler_kwargs={"target_size": 40},
-    # )
-    # splits = clinc_builder.build(batch_size=5)
-
-    # ptb_builder = PennTreebankBuilder(
-    #    data_dir="../data/processed",
-    #    max_length=10,
-    #    sampler_class=LanguageModellingSampler,
-    #    sampler_kwargs={"target_size": 40, "sample_range": [5, 15]},
-    # )
-    # splits = ptb_builder.build(batch_size=5)
-
-    danplus_builder = DanPlusBuilder(
-        data_dir="../data/processed",
-        max_length=10,
-        sampler_class=TokenClassificationSampler,
-        sampler_kwargs={"target_size": 40},
-    )
-    splits = danplus_builder.build(batch_size=5)
-
-    for batch in splits["train"]:
-        ...

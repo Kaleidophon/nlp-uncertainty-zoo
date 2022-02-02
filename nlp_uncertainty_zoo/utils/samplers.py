@@ -6,13 +6,16 @@ is built, and then indices of instances from the dataset are subs-ampled based o
 # STD
 from abc import ABC, abstractmethod
 from collections import defaultdict, Counter
+from functools import reduce
 import numpy as np
-from typing import Sized, Dict, Optional, Tuple
+from typing import Sized, Dict, Optional, Tuple, Any, List
 
 # EXT
+from joblib import Parallel, delayed
 from torch.utils.data.sampler import Sampler
 
-# TODO: Use joblib to speed up sampling?
+
+# ---------------------------------------------- Helper functions ------------------------------------------------------
 
 
 def create_probs_from_dict(
@@ -48,13 +51,71 @@ def create_probs_from_dict(
     return probs
 
 
+def merge_freq_dicts(
+    freqs_a: Dict[int, int], freqs_b: Dict[int, int]
+) -> Dict[int, int]:
+    """
+    Merge two dictionaries of frequencies. Used for creating data statistics before sub-sampling, where statistics for
+    each instance are collected via different jobs and then merged.
+
+    Parameters
+    ----------
+    freqs_a: Dict[int, int]
+        First frequency dictionary.
+    freqs_b: Dict[int, int]
+        Second frequency dictionary.
+
+    Returns
+    -------
+    Dict[int, int]
+        New frequency dictionary.
+    """
+    return {
+        key: freqs_a.get(key, 0) + freqs_b.get(key, 0)
+        for key in (set(freqs_a) | set(freqs_b))
+    }
+
+
+def merge_instance_dicts(
+    lengths_a: Dict[int, List[int]], lengths_b: Dict[int, List[int]]
+) -> Dict[int, List[int]]:
+    """
+    Merge two dictionaries of instances lights, where inputs are grouped by a common characteristic, e.g. length. Used
+    for creating data statistics before sub-sampling, where statistics for each instance are collected via different
+    jobs and then merged.
+
+    Parameters
+    ----------
+    lengths_a: Dict[int, List[int]]
+        First instance dictionary.
+    lengths_b: Dict[int, List[int]]
+        Second instance dictionary.
+
+    Returns
+    -------
+    Dict[int, List[int]]
+         New instance dictionary.
+    """
+    return {
+        key: lengths_a.get(key, []) + lengths_b.get(key, [])
+        for key in (set(lengths_a) | set(lengths_b))
+    }
+
+
+# -------------------------------------------------- Samplers ----------------------------------------------------------
+
+
 class Subsampler(Sampler, ABC):
     """
     Abstract base class of any sampler that sub-samples a dataset to a given target size.
     """
 
     def __init__(
-        self, data_source: Sized, target_size: int, seed: Optional[int] = None
+        self,
+        data_source: Sized,
+        target_size: int,
+        num_jobs: int = 1,
+        seed: Optional[int] = None,
     ):
         """
         Initialize a sub-sampler.
@@ -66,11 +127,14 @@ class Subsampler(Sampler, ABC):
             and labels for each instance.
         target_size: int
             Number of instances that should be contained in the sub-sampled data set.
+        num_jobs: int
+            Number of jobs used to process data before sampling.
         seed: Optional[int]
             Seed set for reproducibility.
         """
         super().__init__(data_source)
         self.target_size = target_size
+        self.num_jobs = num_jobs
         self.seed = seed
         self.indices = None
         self._create_indices(data_source)
@@ -103,6 +167,7 @@ class LanguageModellingSampler(Subsampler):
         data_source: Sized,
         target_size: int,
         sample_range: Tuple[int, int],
+        num_jobs: int = 1,
         seed: Optional[int] = None,
     ):
         """
@@ -118,6 +183,8 @@ class LanguageModellingSampler(Subsampler):
         sample_range: Tuple[int, int]
             Length of paragraphs that are sampled from the corpus. sample_range determines the ranges from which the
             length is sampled uniformly.
+        num_jobs: int
+            Number of jobs used to process data before sampling.
         seed: Optional[int]
             Seed set for reproducibility.
         """
@@ -126,7 +193,7 @@ class LanguageModellingSampler(Subsampler):
         )  # List of instances with the same sentence length
         self.sample_range = sample_range
         self.seq_length_freqs = defaultdict(int)  # Frequency of sentence lengths
-        super().__init__(data_source, target_size, seed)
+        super().__init__(data_source, target_size, num_jobs, seed)
 
     def _create_indices(self, data_source: Sized):
         """
@@ -138,11 +205,30 @@ class LanguageModellingSampler(Subsampler):
             Data containing instances of data split.
         """
 
-        # Go through data and categorize it
-        for i, instance in enumerate(data_source):
+        def _collect_stats(
+            i: int, instance: Dict[str, Any]
+        ) -> Tuple[Dict[int, Any], ...]:
             seq_length = len(instance["input_ids"])
-            self.seq_length_freqs[seq_length] += 1
-            self.length2instances[seq_length].append(i)
+
+            return (
+                {seq_length: 1},  # Into self.seq_length_freqs
+                {seq_length: [i]},  # Into self.length2instances
+            )
+
+        # Go through data and categorize it
+        parallel = Parallel(n_jobs=self.num_jobs)
+        stats = parallel(
+            delayed(_collect_stats)(i, data) for i, data in enumerate(data_source)
+        )
+
+        # Merge results
+        self.seq_length_freqs, self.length2instances = reduce(
+            lambda stats_a, stats_b: (
+                merge_freq_dicts(stats_a[0], stats_b[0]),
+                merge_instance_dicts(stats_a[1], stats_b[1]),
+            ),
+            stats,
+        )
 
         # Compute probability of sampling an instance based on class and sentence length
         instance_probs = np.zeros(len(data_source))
@@ -192,7 +278,11 @@ class SequenceClassificationSampler(Subsampler):
     """
 
     def __init__(
-        self, data_source: Sized, target_size: int, seed: Optional[int] = None
+        self,
+        data_source: Sized,
+        target_size: int,
+        num_jobs: int = 1,
+        seed: Optional[int] = None,
     ):
         """
         Initialize a sub-sampler for sequence classification tasks.
@@ -204,6 +294,8 @@ class SequenceClassificationSampler(Subsampler):
             and labels for each instance.
         target_size: int
             Number of instances that should be contained in the sub-sampled data set.
+        num_jobs: int
+            Number of jobs used to process data before sampling.
         seed: Optional[int]
             Seed set for reproducibility.
         """
@@ -212,7 +304,7 @@ class SequenceClassificationSampler(Subsampler):
         self.class_freqs = defaultdict(int)  # Frequency of classes
         # Frequencies of sentence lengths of the same class
         self.class_length_freqs = defaultdict(lambda: defaultdict(int))
-        super().__init__(data_source, target_size, seed)
+        super().__init__(data_source, target_size, num_jobs, seed)
 
     def _create_indices(self, data_source: Sized):
         """
@@ -224,13 +316,47 @@ class SequenceClassificationSampler(Subsampler):
             Data containing instances of data split.
         """
 
-        # Go through data and categorize it
-        for i, instance in enumerate(data_source):
+        def _collect_stats(
+            i: int, instance: Dict[str, Any]
+        ) -> Tuple[Dict[int, Any], ...]:
             label = instance["labels"].item()
             seq_length = len(instance["input_ids"])
-            self.class2length2instances[label][seq_length].append(i)
-            self.class_freqs[label] += 1
-            self.class_length_freqs[label][seq_length] += 1
+
+            return (
+                {label: {seq_length: [i]}},  # Into self.class2length2instances
+                {label: 1},  # Into self.class_freqs
+                {label: {seq_length: 1}},  # Into self.class_length_freqs
+            )
+
+        # Go through data and categorize it
+        parallel = Parallel(n_jobs=self.num_jobs)
+        stats = parallel(
+            delayed(_collect_stats)(i, data) for i, data in enumerate(data_source)
+        )
+
+        # Merge results
+        # Since some of the dictionaries are nested, we also unfortunately have to apply nested merge operations
+        self.class2length2instances, self.class_freqs, self.class_length_freqs = reduce(
+            lambda stats_a, stats_b: (
+                # class2length2instances
+                {
+                    label: merge_instance_dicts(
+                        stats_a[0].get(label, {}), stats_b[0].get(label, {})
+                    )
+                    for label in set(stats_a[0].keys() | stats_b[0].keys())
+                },
+                # class_freqs
+                merge_freq_dicts(stats_a[1], stats_b[1]),
+                # class_length_freqs
+                {
+                    label: merge_freq_dicts(
+                        stats_a[2].get(label, {}), stats_b[2].get(label, {})
+                    )
+                    for label in set(stats_a[2].keys() | stats_b[2].keys())
+                },
+            ),
+            stats,
+        )
 
         # Compute probability of sampling an instance based on class and sentence length
         label_probs = create_probs_from_dict(self.class_freqs)
@@ -273,6 +399,7 @@ class TokenClassificationSampler(Subsampler):
         data_source: Sized,
         target_size: int,
         ignore_label: int = -100,
+        num_jobs: int = 1,
         seed: Optional[int] = None,
     ):
         """
@@ -287,6 +414,8 @@ class TokenClassificationSampler(Subsampler):
             Number of instances that should be contained in the sub-sampled data set.
         ignore_label: int
             Determine label that should be ignored when computing input statistics used for sampling. Default is -100.
+        num_jobs: int
+            Number of jobs used to process data before sampling.
         seed: Optional[int]
             Seed set for reproducibility.
         """
@@ -297,7 +426,7 @@ class TokenClassificationSampler(Subsampler):
         self.label_freqs = {}  # Frequencies of labels (over the whole corpus)
         self.instance2label_freqs = {}  # Frequencies of labels (per instance)
         self.ignore_label = ignore_label
-        super().__init__(data_source, target_size, seed)
+        super().__init__(data_source, target_size, num_jobs, seed)
 
     def _create_indices(self, data_source: Sized):
         """
@@ -309,19 +438,46 @@ class TokenClassificationSampler(Subsampler):
             Data containing instances of data split.
         """
 
-        # Go through data and categorize it
-        for i, instance in enumerate(data_source):
+        def _collect_stats(
+            i: int, instance: Dict[str, Any]
+        ) -> Tuple[Dict[int, Any], ...]:
             seq_length = len(instance["input_ids"])
             label_freqs = Counter(instance["labels"].tolist())
             del label_freqs[self.ignore_label]
-            self.seq_length_freqs[seq_length] += 1
-            self.length2instances[seq_length].append(i)
-            self.label_freqs.update(
-                label_freqs
-            )  # Update label distribution for whole dataset
-            self.instance2label_freqs[
-                i
-            ] = label_freqs  # Update label freqs for instance
+
+            return (
+                {seq_length: 1},  # Into self.seq_length_freqs
+                {seq_length: [i]},  # Into self.length2instances
+                label_freqs,  # Into self.label_freqs
+                {i: label_freqs},  # Into self.instance2label_freqs
+            )
+
+        # Go through data and categorize it
+        parallel = Parallel(n_jobs=self.num_jobs)
+        stats = parallel(
+            delayed(_collect_stats)(i, data) for i, data in enumerate(data_source)
+        )
+
+        # Merge results
+        # Since some of the dictionaries are nested, we also unfortunately have to apply nested merge operations
+        (
+            self.seq_length_freqs,
+            self.length2instances,
+            self.label_freqs,
+            self.instance2label_freqs,
+        ) = reduce(
+            lambda stats_a, stats_b: (
+                # seq_length_freqs
+                merge_freq_dicts(stats_a[0], stats_b[0]),
+                # length2instances
+                merge_instance_dicts(stats_a[1], stats_b[1]),
+                # label_freqs
+                merge_freq_dicts(stats_a[2], stats_b[2]),
+                # instance2label_freqs
+                {**stats_a[3], **stats_b[3]},
+            ),
+            stats,
+        )
 
         # Compute probability of sampling an instance based on class and sentence length
         instance_probs = np.zeros(len(data_source))
