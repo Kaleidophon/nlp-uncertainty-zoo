@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 with open("requirements.txt") as f:
-    required = f.read().splitlines()
+    required = [line for line in f.read().splitlines() if not line.startswith("git")]
 
 setup(
     name="nlp-uncertainty-zoo",
@@ -31,4 +31,5 @@ setup(
     ],
     packages=find_packages(exclude=["docs", "dist"]),
     install_requires=required,
+    dependency_links=["git+https://github.com/y0ast/DUE.git"],
 )
