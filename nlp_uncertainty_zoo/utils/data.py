@@ -21,6 +21,10 @@ from transformers import (
 )
 from transformers.data.data_collator import BatchEncoding, _collate_batch
 
+# TYPES
+# Either one set of keyword arguments per split or dictionary mapping split to split-specific keyword args
+SamplerKwargs = Union[Dict[str, Any], Dict[str, Dict[str, Any]]]
+
 
 class ModifiedDataCollatorForLanguageModeling(DataCollatorForLanguageModeling):
     """
@@ -86,7 +90,7 @@ class DatasetBuilder(ABC):
         tokenizer: PreTrainedTokenizerBase,
         max_length: int,
         sampler_class: Optional[Type] = None,
-        sampler_kwargs: Optional[Dict[str, Any]] = None,
+        sampler_kwargs: Optional[SamplerKwargs] = None,
         num_jobs: Optional[int] = 1,
     ):
         """
@@ -109,7 +113,7 @@ class DatasetBuilder(ABC):
             Maximum sequence length.
         sampler_class: Optional[Sampler]
             Sampler class used to (sub-)sample the dataset.
-        sampler_kwargs: Optional[Dict[str, Any]]
+        sampler_kwargs: Optional[SamplerKwargs]
             Keyword arguments to initialize the sampler.
         num_jobs: Optional[int]
             Number of jobs used to build the dataset (on CPU). Default is 1.
@@ -208,7 +212,7 @@ class LanguageModellingDatasetBuilder(DatasetBuilder):
                 sampler=self.sampler_class(
                     data_source=self.dataset[split],
                     num_jobs=self.num_jobs,
-                    **self.sampler_kwargs,
+                    **self.sampler_kwargs.get(split, self.sampler_kwargs),
                 )
                 if self.sampler_class is not None
                 else None,
@@ -230,7 +234,7 @@ class PennTreebankBuilder(LanguageModellingDatasetBuilder):
         data_dir: str,
         max_length: int,
         sampler_class: Optional[Type] = None,
-        sampler_kwargs: Optional[Dict[str, Any]] = None,
+        sampler_kwargs: Optional[SamplerKwargs] = None,
         num_jobs: Optional[int] = 1,
     ):
         super().__init__(
@@ -415,7 +419,7 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                 sampler=self.sampler_class(
                     data_source=self.dataset[split],
                     num_jobs=self.num_jobs,
-                    **self.sampler_kwargs,
+                    **self.sampler_kwargs.get(split, self.sampler_kwargs),
                 )
                 if self.sampler_class is not None
                 else None,
@@ -437,7 +441,7 @@ class ClincBuilder(ClassificationDatasetBuilder):
         data_dir: str,
         max_length: int,
         sampler_class: Optional[Type] = None,
-        sampler_kwargs: Optional[Dict[str, Any]] = None,
+        sampler_kwargs: Optional[SamplerKwargs] = None,
         num_jobs: Optional[int] = 1,
     ):
         super().__init__(
@@ -468,7 +472,7 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
         data_dir: str,
         max_length: int,
         sampler_class: Optional[Type] = None,
-        sampler_kwargs: Optional[Dict[str, Any]] = None,
+        sampler_kwargs: Optional[SamplerKwargs] = None,
         num_jobs: Optional[int] = 1,
     ):
         super().__init__(
