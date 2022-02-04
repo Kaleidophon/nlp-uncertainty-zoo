@@ -211,10 +211,9 @@ class LanguageModellingDatasetBuilder(DatasetBuilder):
                 collate_fn=collator,
                 sampler=self.sampler_class(
                     data_source=self.dataset[split],
-                    num_jobs=self.num_jobs,
-                    **self.sampler_kwargs.get(split, self.sampler_kwargs),
+                    **self.sampler_kwargs[split],
                 )
-                if self.sampler_class is not None
+                if self.sampler_class is not None and split in self.sampler_kwargs
                 else None,
                 **dataloader_kwargs,
             )
@@ -418,10 +417,9 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                 batch_size=batch_size,
                 sampler=self.sampler_class(
                     data_source=self.dataset[split],
-                    num_jobs=self.num_jobs,
-                    **self.sampler_kwargs.get(split, self.sampler_kwargs),
+                    **self.sampler_kwargs[split],
                 )
-                if self.sampler_class is not None
+                if self.sampler_class is not None and split in self.sampler_kwargs
                 else None,
                 **dataloader_kwargs,
             )
@@ -464,7 +462,7 @@ class ClincBuilder(ClassificationDatasetBuilder):
 
 class DanPlusBuilder(ClassificationDatasetBuilder):
     """
-    Dataset class for the CLINC OOS dataset.
+    Dataset class for the Dan+ dataset.
     """
 
     def __init__(

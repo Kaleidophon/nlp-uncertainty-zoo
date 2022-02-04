@@ -15,7 +15,6 @@ from gpytorch.likelihoods import SoftmaxLikelihood
 from gpytorch.mlls import VariationalELBO
 from torch import nn as nn
 import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 
 # PROJECT
@@ -299,7 +298,7 @@ class DUETransformer(Model):
         n_batch: int,
         X: torch.Tensor,
         y: torch.Tensor,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
         **kwargs,
     ) -> torch.Tensor:
         """
@@ -313,8 +312,9 @@ class DUETransformer(Model):
             Batch input.
         y: torch.Tensor
             Batch labels.
-        summary_writer: SummaryWriter
-            Summary writer to track training statistics.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
 
         Returns
         -------
@@ -420,7 +420,7 @@ class DUEBert(Model):
         n_batch: int,
         X: torch.Tensor,
         y: torch.Tensor,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
         **kwargs,
     ) -> torch.Tensor:
         """
@@ -434,8 +434,9 @@ class DUEBert(Model):
             Batch input.
         y: torch.Tensor
             Batch labels.
-        summary_writer: SummaryWriter
-            Summary writer to track training statistics.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
 
         Returns
         -------

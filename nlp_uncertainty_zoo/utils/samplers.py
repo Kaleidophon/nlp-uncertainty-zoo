@@ -381,7 +381,7 @@ class SequenceClassificationSampler(Subsampler):
 
         self.indices = np.random.choice(
             np.arange(len(data_source)),
-            size=self.target_size,
+            size=min(self.target_size, len(data_source)),
             replace=False,
             p=instance_probs,
         ).tolist()
@@ -526,7 +526,7 @@ class TokenClassificationSampler(Subsampler):
 
         self.indices = np.random.choice(
             np.arange(len(data_source)),
-            size=self.target_size,
+            size=min(self.target_size, len(data_source)),
             replace=False,
             p=instance_probs,
         ).tolist()

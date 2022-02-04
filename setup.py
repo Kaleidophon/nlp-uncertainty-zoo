@@ -31,5 +31,5 @@ setup(
     ],
     packages=find_packages(exclude=["docs", "dist"]),
     install_requires=required,
-    dependency_links=["git+https://github.com/y0ast/DUE.git"],
+    dependency_links=["git+https://github.com/y0ast/DUE.git#egg=due-0.1"],
 )

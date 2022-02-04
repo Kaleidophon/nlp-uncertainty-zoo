@@ -4,7 +4,7 @@ codecarbon
 wandb
 scikit-learn
 knockknock
-transformers
+transformers==4.5.1
 einops
 datasets
 tqdm

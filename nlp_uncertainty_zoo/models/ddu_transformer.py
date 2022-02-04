@@ -11,7 +11,6 @@ from typing import Optional, Dict, Any
 import numpy as np
 import torch
 from einops import rearrange
-from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 
 # PROJECT
@@ -344,7 +343,7 @@ class DDUBert(Model):
         self,
         data_split: DataLoader,
         verbose: bool,
-        summary_writer: Optional[SummaryWriter] = None,
+        wandb_run: Optional[WandBRun] = None,
     ):
         """
         As an additional step after training, DDU fits a Gaussian Discriminant Analysis model to
@@ -356,9 +355,9 @@ class DDUBert(Model):
             Data the GDA is fit on.
         verbose: bool
             Whether to display information about current loss.
-        summary_writer: Optional[SummaryWriter]
-            Summary writer to track training statistics. Training and validation loss (if applicable) are tracked by
-            default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         self.module.eval()  # Disable dropout
         self.module.gmm_fit(data_split)
