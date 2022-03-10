@@ -508,10 +508,11 @@ class Model(ABC):
         for i, batch in enumerate(data_split):
 
             attention_mask, input_ids, labels = (
-                batch["attention_mask"],
-                batch["input_ids"],
-                batch["labels"],
+                batch["attention_mask"].to(self.device),
+                batch["input_ids"].to(self.device),
+                batch["labels"].to(self.device),
             )
+
             global_batch_num = epoch * len(data_split) + i
             batch_loss = self.get_loss(
                 global_batch_num,

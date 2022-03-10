@@ -140,6 +140,7 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
     """
     Implementation of Variational Transformer by `Xiao et al., (2021) <https://arxiv.org/pdf/2006.08344.pdf>`_ for BERT.
     """
+    # TODO: Add dropout as parameter
 
     def __init__(
         self,

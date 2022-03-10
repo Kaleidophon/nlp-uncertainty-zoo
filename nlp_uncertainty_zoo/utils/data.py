@@ -369,7 +369,10 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                     # Update the dict mapping from char index to label
                     char_idx2label.update(
                         {
-                            i: labels[token_idx]
+                            # The min() expression is an ugly fix for cases in which a tokenizer butchers unusual
+                            # expressions like an emoticon at the end of the sequence, suddenly creating a missing
+                            # label. In this case, just repeat the last sequence label.
+                            i: labels[min(token_idx, len(labels) - 1)]
                             for i in range(char_idx + 1, char_idx + len(token) + 1)
                         }
                     )
@@ -449,7 +452,7 @@ class ClincBuilder(ClassificationDatasetBuilder):
                 "train": f"{data_dir}/clinc/train.csv",
                 "valid": f"{data_dir}/clinc/val.csv",
                 "test": f"{data_dir}/clinc/test.csv",
-                "oos_test": f"{data_dir}/clinc/oos_test.csv",
+                "ood_test": f"{data_dir}/clinc/oos_test.csv",
             },
             type_="sequence_classification",
             tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
@@ -480,7 +483,7 @@ class DanPlusBuilder(ClassificationDatasetBuilder):
                 "train": f"{data_dir}/danplus/train.csv",
                 "valid": f"{data_dir}/danplus/val.csv",
                 "test": f"{data_dir}/danplus/test.csv",
-                "oos_test": f"{data_dir}/danplus/ood_test.csv",
+                "ood_test": f"{data_dir}/danplus/ood_test.csv",
             },
             type_="token_classification",
             tokenizer=BertTokenizerFast.from_pretrained(

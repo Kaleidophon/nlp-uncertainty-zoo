@@ -14,3 +14,4 @@ gpytorch
 scipy
 dill
 joblib
+categorical
