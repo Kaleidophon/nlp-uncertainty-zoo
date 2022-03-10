@@ -362,7 +362,7 @@ class Model(ABC):
                 self.module.eval()
 
                 with torch.no_grad():
-                    val_score = self.eval(self, valid_split)
+                    val_score = self.eval(valid_split)
 
                 if wandb_run is not None:
                     wandb_run.log({"Epoch val score": val_score}, step=epoch)
