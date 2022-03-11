@@ -355,7 +355,7 @@ class Model(ABC):
                 progress_bar.update(1)
 
             if wandb_run is not None:
-                wandb_run.log({"epoch_train_loss": train_loss.item()}, step=epoch)
+                wandb_run.log({"epoch_train_loss": train_loss.item()})
 
             # Get validation loss
             if valid_split is not None:
@@ -365,7 +365,8 @@ class Model(ABC):
                     val_loss = self.eval(valid_split)
 
                 if wandb_run is not None:
-                    wandb_run.log({"epoch_val_loss": val_loss}, step=epoch)
+                    import wandb
+                    wandb.log({"epoch_val_loss": val_loss.item()})
 
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss
