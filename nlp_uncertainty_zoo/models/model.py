@@ -329,7 +329,7 @@ class Model(ABC):
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         num_epochs = self.model_params["num_epochs"]
-        best_val_score = np.inf
+        best_val_loss = np.inf
         early_stopping_pat = self.model_params.get("early_stopping_pat", np.inf)
         early_stopping = self.model_params.get("early_stopping", True)
         num_no_improvements = 0
@@ -355,20 +355,20 @@ class Model(ABC):
                 progress_bar.update(1)
 
             if wandb_run is not None:
-                wandb_run.log({"Epoch train loss": train_loss.item()}, step=epoch)
+                wandb_run.log({"epoch_train_loss": train_loss.item()}, step=epoch)
 
             # Get validation loss
             if valid_split is not None:
                 self.module.eval()
 
                 with torch.no_grad():
-                    val_score = self.eval(valid_split)
+                    val_loss = self.eval(valid_split)
 
                 if wandb_run is not None:
-                    wandb_run.log({"Epoch val score": val_score}, step=epoch)
+                    wandb_run.log({"epoch_val_loss": val_loss}, step=epoch)
 
-                if val_score < best_val_score:
-                    best_val_score = val_score
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
 
                     if early_stopping:
                         best_model = deepcopy(self)
@@ -402,7 +402,7 @@ class Model(ABC):
                 self,
                 os.path.join(
                     self.full_model_dir,
-                    f"{best_val_score:.2f}_{timestamp}.pt",
+                    f"{best_val_loss:.2f}_{timestamp}.pt",
                 ),
                 pickle_module=dill,
                 _use_new_zipfile_serialization=False,
@@ -412,7 +412,7 @@ class Model(ABC):
         result_dict = {
             "model_name": self.model_name,
             "train_loss": train_loss.item(),
-            "best_val_loss": best_val_score,
+            "best_val_loss": best_val_loss,
         }
 
         return result_dict
@@ -530,7 +530,7 @@ class Model(ABC):
                 progress_bar.update(1)
 
             if wandb_run is not None:
-                batch_info = {"Batch train loss": batch_loss}
+                batch_info = {"batch_train_loss": batch_loss}
 
                 if self.scheduler is not None:
                     batch_info["Batch learning rate"] = self.scheduler.get_last_lr()[0]
