@@ -531,12 +531,12 @@ class Model(ABC):
                 progress_bar.update(1)
 
             if wandb_run is not None:
-                batch_info = {"batch_train_loss": batch_loss}
+                batch_info = {"batch_train_loss": batch_loss.detach().item()}
 
                 if self.scheduler is not None:
                     batch_info["Batch learning rate"] = self.scheduler.get_last_lr()[0]
 
-                wandb_run.log(batch_info, step=global_batch_num)
+                wandb_run.log(batch_info)
 
             epoch_loss += batch_loss.cpu().detach()
 
