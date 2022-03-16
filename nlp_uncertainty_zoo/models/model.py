@@ -388,7 +388,7 @@ class Model(ABC):
 
         # Set current model to best model found, otherwise use last
         if early_stopping:
-            self.__dict__ = best_model.__dict__
+            self.__dict__ = best_model
             del best_model
 
         # Additional training step, e.g. temperature scaling on val
