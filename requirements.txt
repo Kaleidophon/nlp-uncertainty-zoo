@@ -8,10 +8,8 @@ transformers==4.5.1
 einops
 datasets
 tqdm
-git+https://github.com/y0ast/DUE.git
 blitz-bayesian-pytorch
 gpytorch
 scipy
 dill
 joblib
-categorical

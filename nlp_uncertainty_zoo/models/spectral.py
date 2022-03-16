@@ -9,7 +9,7 @@ The following models inherit from this class:
 """
 
 # EXT
-from due.layers.spectral_norm_fc import spectral_norm_fc
+from nlp_uncertainty_zoo.models.due_utils import spectral_norm_fc
 import torch.nn as nn
 
 # PROJECT

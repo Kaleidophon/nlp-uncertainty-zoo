@@ -9,7 +9,6 @@ from typing import Dict, Any, Optional
 
 # EXT
 import torch
-from due.dkl import _get_initial_inducing_points, _get_initial_lengthscale, GP
 from einops import rearrange
 from gpytorch.likelihoods import SoftmaxLikelihood
 from gpytorch.mlls import VariationalELBO
@@ -18,6 +17,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 # PROJECT
+from nlp_uncertainty_zoo.models.due_utils import  _get_initial_inducing_points, _get_initial_lengthscale, GP
 from nlp_uncertainty_zoo.models.spectral import (
     SpectralTransformerModule,
     SpectralBertModule,
