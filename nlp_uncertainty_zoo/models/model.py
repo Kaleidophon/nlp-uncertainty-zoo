@@ -8,7 +8,6 @@ Define common methods of models. This done by separating the logic into two part
 
 # STD
 from abc import ABC, abstractmethod
-from copy import deepcopy
 from datetime import datetime
 import dill
 from typing import Dict, Any, Optional
@@ -335,7 +334,7 @@ class Model(ABC):
         num_no_improvements = 0
         total_steps = num_epochs * len(train_split)
         progress_bar = tqdm(total=total_steps) if verbose else None
-        best_model = deepcopy(self)
+        best_model = dict(self.__dict__)
 
         for epoch in range(self.model_params["num_epochs"]):
             self.module.train()
@@ -372,7 +371,7 @@ class Model(ABC):
                     best_val_loss = val_loss
 
                     if early_stopping:
-                        best_model = deepcopy(self)
+                        best_model = dict(self.__dict__)
 
                 else:
                     num_no_improvements += 1
@@ -389,7 +388,7 @@ class Model(ABC):
 
         # Set current model to best model found, otherwise use last
         if early_stopping:
-            self.__dict__.update(best_model.__dict__)
+            self.__dict__ = best_model.__dict__
             del best_model
 
         # Additional training step, e.g. temperature scaling on val
