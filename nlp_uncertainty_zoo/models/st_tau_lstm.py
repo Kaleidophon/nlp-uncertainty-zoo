@@ -49,9 +49,9 @@ class STTauCell(nn.LSTMCell):
         super().__init__(input_size, hidden_size, device=device)
         self.num_centroids = num_centroids
         # Transition matrix between states
-        self.centroid_kernel = nn.Linear(self.hidden_size, num_centroids, bias=False)
+        self.centroid_kernel = nn.Linear(self.hidden_size, num_centroids, bias=False, device=device)
         # Learnable temperature parameter for Gumbel softmax
-        self.temperature = nn.Parameter(torch.ones(1))
+        self.temperature = nn.Parameter(torch.ones(1)).to(device)
 
     def forward(
         self,
