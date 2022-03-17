@@ -296,7 +296,7 @@ class CellWiseLSTM(nn.Module):
 
         # Unpack hidden
         hx, cx = hidden
-        new_hx, new_cx = torch.zeros(hx.shape), torch.zeros(cx.shape)
+        new_hx, new_cx = torch.zeros(hx.shape, device=self.device), torch.zeros(cx.shape, device=self.device)
 
         for t in range(sequence_length):
             input_t = input_[:, t, :]
