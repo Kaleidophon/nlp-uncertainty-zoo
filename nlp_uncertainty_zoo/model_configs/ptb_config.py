@@ -275,6 +275,7 @@ PTB_MODEL_PARAMS = {
         "output_size": 28996,
         "num_predictions": 10,
         "is_sequence_classifier": False,
+        "dropout": 0.2
     },
     "due_transformer": {
         "batch_size": 32,

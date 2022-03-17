@@ -209,6 +209,8 @@ CLINC_MODEL_PARAMS = {
         "output_size": 151,
         "num_predictions": 10,
         "is_sequence_classifier": False,
+        "sequence_length": 64,
+        "dropout": 0.2,
     },
     "sngp_transformer": {
         "batch_size": 32,

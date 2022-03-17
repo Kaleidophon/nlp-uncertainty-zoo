@@ -140,12 +140,12 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
     """
     Implementation of Variational Transformer by `Xiao et al., (2021) <https://arxiv.org/pdf/2006.08344.pdf>`_ for BERT.
     """
-    # TODO: Add dropout as parameter
 
     def __init__(
         self,
         bert_name: str,
         output_size: int,
+        dropout: float,
         num_predictions: int,
         is_sequence_classifier: bool,
         device: Device,
@@ -158,6 +158,8 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
         ----------
         bert_name: str
             Name of the BERT to be used.
+        dropout: float
+            Dropout probability.
         num_predictions: int
             Number of predictions with different dropout masks.
         is_sequence_classifier: bool
@@ -174,6 +176,12 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
             is_sequence_classifier,
             device,
         )
+
+        # Set dropout probability to argument
+        for module in self.bert.modules():
+            if isinstance(module, torch.nn.Dropout):
+                module.p = dropout
+
         MultiPredictionMixin.__init__(self, num_predictions)
 
     def get_logits(
