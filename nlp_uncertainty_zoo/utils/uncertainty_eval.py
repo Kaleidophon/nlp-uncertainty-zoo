@@ -234,7 +234,7 @@ def coverage_percentage(y_true: np.array, y_pred: np.array, alpha: float, eps: f
     return coverage_percentage
 
 
-def coverage_width(y_true: np.array, y_pred: np.array, alpha: float, eps: float = 1e-8):
+def coverage_width(y_pred: np.array, alpha: float, eps: float = 1e-8):
     """
     Return the width of the 1 - alpha prediction set. Based on the work by [3].
 
@@ -243,8 +243,6 @@ def coverage_width(y_true: np.array, y_pred: np.array, alpha: float, eps: float 
 
     Parameters
     ----------
-    y_true: np.array
-         True labels for each input.
     y_pred: np.array
          Categorical probability distribution for each input.
     alpha: float
