@@ -72,52 +72,6 @@ def kendalls_tau(losses: np.array, uncertainties: np.array) -> float:
     return kendalltau(losses, uncertainties)[0]
 
 
-def cvmc(uncertainties_a: np.array, uncertainties_b: np.array) -> float:
-    """
-    Compute the Cramer-van Mises criterion between two empirical cumulative distributions functions, using the
-    rank-based approximation by [1].
-
-    [1] https://arxiv.org/pdf/1802.06332.pdf
-
-    Parameters
-    ----------
-    uncertainties_a: np.array
-        Uncertainty scores of model A.
-    uncertainties_b: np.array
-        Uncertainty scores of model B.
-
-    Returns
-    -------
-    float:
-        Value of the Cramer-van Mises criterion.
-    """
-    m = len(uncertainties_a)
-    n = len(uncertainties_b)
-    # Add small value so that ranks of same scores are different when they appear in the two different scores
-    uncertainties_b += 1e-13
-    combined = np.concatenate([uncertainties_a, uncertainties_b])
-    combined = np.sort(combined)
-    rank = {score: rank for rank, score in enumerate(combined)}
-
-    mm, mn, nn = 0, 0, 0
-
-    for x in uncertainties_a:
-        for xx in uncertainties_a:
-            mm += abs(rank[x] - rank[xx])
-
-    for x in uncertainties_a:
-        for y in uncertainties_b:
-            mn += abs(rank[x] - rank[y])
-
-    for y in uncertainties_b:
-        for yy in uncertainties_b:
-            nn += abs(rank[y] - rank[yy])
-
-    cvmc = m * n / (m + n) * (mn / (m * n) - mm / (2 * m ** 2) - nn / (2 * nn * 2))
-
-    return cvmc
-
-
 def sce(y_true: np.array, y_pred: np.array, num_bins: int = 10) -> float:
     """
     Measure the Static Calibration Error (SCE) by [2], an extension to the Expected Calibration Error to multiple
@@ -232,3 +186,90 @@ def ace(y_true: np.array, y_pred: np.array, num_ranges: int = 4) -> float:
     ace /= num_classes * num_ranges
 
     return ace
+
+
+def coverage_percentage(y_true: np.array, y_pred: np.array, alpha: float, eps: float = 1e-8):
+    """
+    Return the percentage of times the true prediction was contained in the 1 - alpha prediction set. Based on the work
+    by [3].
+
+    [3] Kompa, Benjamin, Jasper Snoek, and Andrew L. Beam. "Empirical frequentist coverage of deep learning uncertainty
+    quantification procedures." Entropy 23.12 (2021): 1608.
+
+    Parameters
+    ----------
+    y_true: np.array
+         True labels for each input.
+    y_pred: np.array
+         Categorical probability distribution for each input.
+    alpha: float
+        Probability mass threshold.
+    eps: float
+        Small number to avoid floating point precision problems.
+
+    Returns
+    -------
+    float
+        Coverage percentage.
+    """
+    sorted_indices = np.argsort(-y_pred, axis=1)  # Add minus to sort descendingly
+    # See https://stackoverflow.com/questions/19775831/row-wise-indexing-in-numpy for explanation for expression below
+    sorted_probs = y_pred[np.arange(y_pred.shape[0])[:, None], sorted_indices]
+    cum_probs = np.cumsum(sorted_probs, axis=1)
+
+    # Create boolean array as int to determine the classes in the prediction set
+    thresholded_cum_probs = (cum_probs >= (1 - alpha - 1e-8)).astype(int)
+
+    # Use argmax to find first class for which the 1 - alpha threshold is surpassed - all other classes are outside
+    # of the prediction set.
+    cut_indices = np.argmax(thresholded_cum_probs, axis=1) + 1
+
+    # Check if class is contained in prediction set
+    num_covered = 0
+    for i, cut_idx in enumerate(cut_indices):
+        num_covered += int(y_true[i] in sorted_indices[i, :cut_idx])
+
+    coverage_percentage = num_covered / y_true.shape[0]
+
+    return coverage_percentage
+
+
+def coverage_width(y_true: np.array, y_pred: np.array, alpha: float, eps: float = 1e-8):
+    """
+    Return the width of the 1 - alpha prediction set. Based on the work by [3].
+
+    [3] Kompa, Benjamin, Jasper Snoek, and Andrew L. Beam. "Empirical frequentist coverage of deep learning uncertainty
+    quantification procedures." Entropy 23.12 (2021): 1608.
+
+    Parameters
+    ----------
+    y_true: np.array
+         True labels for each input.
+    y_pred: np.array
+         Categorical probability distribution for each input.
+    alpha: float
+        Probability mass threshold.
+     eps: float
+        Small number to avoid floating point precision problems.
+
+    Returns
+    -------
+    float
+        Average prediction set width.
+    """
+    sorted_indices = np.argsort(-y_pred, axis=1)  # Add minus to sort descendingly
+    # See https://stackoverflow.com/questions/19775831/row-wise-indexing-in-numpy for explanation for expression below
+    sorted_probs = y_pred[np.arange(y_pred.shape[0])[:, None], sorted_indices]
+    cum_probs = np.cumsum(sorted_probs, axis=1)
+
+    # Create boolean array as int to determine the classes in the prediction set
+    thresholded_cum_probs = (cum_probs >= (1 - alpha - eps)).astype(int)
+
+    # Use argmax to find first class for which the 1 - alpha threshold is surpassed - all other classes are outside
+    # of the prediction set.
+    widths = np.argmax(thresholded_cum_probs, axis=1).astype(float)
+
+    # Compute average width
+    average_width = np.mean(widths)
+
+    return average_width
