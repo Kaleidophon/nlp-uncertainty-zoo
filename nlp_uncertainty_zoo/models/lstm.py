@@ -217,7 +217,7 @@ class LayerWiseLSTM(nn.Module):
     Model of a LSTM with a custom layer class.
     """
 
-    def __init__(self, layers: List[nn.Module], dropout: float):
+    def __init__(self, layers: List[nn.Module], dropout: float, device: Device):
         """
         Initialize a LSTM with a custom layer class.
 
@@ -231,6 +231,7 @@ class LayerWiseLSTM(nn.Module):
         super().__init__()
         self.layers = layers
         self.dropout = nn.Dropout(dropout)
+        self.device = device
 
     def forward(
         self,
@@ -238,7 +239,7 @@ class LayerWiseLSTM(nn.Module):
         hidden: Tuple[torch.FloatTensor, torch.FloatTensor],
     ) -> Tuple[torch.FloatTensor, Tuple[torch.FloatTensor, torch.FloatTensor]]:
         hx, cx = hidden
-        new_hx, new_cx = torch.zeros(hx.shape), torch.zeros(cx.shape)
+        new_hx, new_cx = torch.zeros(hx.shape, device=self.device), torch.zeros(cx, device=self.device)
 
         for l, layer in enumerate(self.layers):
             out, (new_hx[l, :], new_cx[l, :]) = layer(input_, (hx[l, :], cx[l, :]))
