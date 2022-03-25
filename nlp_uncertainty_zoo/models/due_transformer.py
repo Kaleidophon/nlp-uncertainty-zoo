@@ -5,7 +5,7 @@ Implementation of Deterministic Uncertainty Estimation (DUE) Transformer by
 
 # STD
 import math
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 # EXT
 import torch
@@ -44,7 +44,7 @@ class DUEMixin:
         self.likelihood = None
         self.loss_function = None
 
-    def init_gp(self, train_data: DataLoader, num_instances: int = 1000):
+    def init_gp(self, train_data: DataLoader, ignore_indices: List[int] = [-100, 0, 1, 2, 3, 4]):
         """
         Initialize the Gaussian Process layer together with the likelihood and loss function.
 
@@ -58,14 +58,15 @@ class DUEMixin:
         # Compute how many batches need to be sampled to initialize the inducing points when using batches of
         # batch_size and length sequence_length
         batch_size = train_data.dataset[0]["input_ids"].shape[0]
-        num_batches = math.ceil(num_instances / (batch_size * self.sequence_length))
 
         # Extract feature representations for sampled batches
         batch_representations = []
+        batch_masks = []
+        num_representations = 0
 
         with torch.no_grad():
             train_data.shuffle = True
-            for _ in range(num_batches):
+            while num_representations <= self.num_inducing_samples:
                 batch = next(iter(train_data))
                 input_ = batch["input_ids"].to(self.device)
                 attention_mask = batch["attention_mask"].to(self.device)
@@ -73,9 +74,15 @@ class DUEMixin:
                 batch_representations.append(
                     self.get_hidden(input_, attention_mask=attention_mask)
                 )
+                batch_mask = rearrange(torch.all(torch.stack([input_ != idx for idx in ignore_indices]), dim=0), "b s -> (b s)")
+                batch_masks.append(batch_mask)
+                num_representations += batch_mask.int().sum()
+
 
         representations = torch.cat(batch_representations, dim=0)
+        mask = torch.cat(batch_masks, dim=0)
         representations = rearrange(representations, "b s h -> (b s) h")
+        representations = representations[mask]
 
         initial_inducing_points = _get_initial_inducing_points(
             representations.cpu().numpy(), self.num_inducing_points
