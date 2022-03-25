@@ -95,7 +95,7 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
                     prior_pi=prior_pi,
                     posterior_mu_init=posterior_mu_init,
                     posterior_rho_init=posterior_rho_init,
-                )
+                ).to(device)
                 for _ in range(num_layers)
             ],
             dropout=dropout,

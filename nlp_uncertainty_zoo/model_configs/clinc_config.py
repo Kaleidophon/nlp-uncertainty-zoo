@@ -316,6 +316,7 @@ CLINC_MODEL_PARAMS = {
         "kernel_type": "Matern32",
         "input_size": 768,
         "is_sequence_classifier": True,
+        "sequence_length": 512
     },
     "ddu_transformer": {
         "batch_size": 32,
