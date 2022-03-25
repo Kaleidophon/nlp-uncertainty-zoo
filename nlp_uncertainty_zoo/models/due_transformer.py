@@ -17,7 +17,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 # PROJECT
-from nlp_uncertainty_zoo.models.due_utils import  _get_initial_inducing_points, _get_initial_lengthscale, GP
+from nlp_uncertainty_zoo.models.due_utils import _get_initial_inducing_points, _get_initial_lengthscale, GP
 from nlp_uncertainty_zoo.models.spectral import (
     SpectralTransformerModule,
     SpectralBertModule,

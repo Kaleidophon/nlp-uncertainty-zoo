@@ -239,7 +239,7 @@ class LayerWiseLSTM(nn.Module):
         hidden: Tuple[torch.FloatTensor, torch.FloatTensor],
     ) -> Tuple[torch.FloatTensor, Tuple[torch.FloatTensor, torch.FloatTensor]]:
         hx, cx = hidden
-        new_hx, new_cx = torch.zeros(hx.shape, device=self.device), torch.zeros(cx, device=self.device)
+        new_hx, new_cx = torch.zeros(hx.shape, device=self.device), torch.zeros(cx.shape, device=self.device)
 
         for l, layer in enumerate(self.layers):
             out, (new_hx[l, :], new_cx[l, :]) = layer(input_, (hx[l, :], cx[l, :]))
