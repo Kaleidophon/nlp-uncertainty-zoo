@@ -103,8 +103,6 @@ class DUEMixin:
         if self.is_sequence_classifier:
             out = self.get_sequence_representation(out)
 
-        out = self.layer_norm(out)
-        out = torch.log_softmax(out, dim=-1)
         out = rearrange(out, "b s h -> (b s) h").float()
 
         if ignore_mask is not None:
