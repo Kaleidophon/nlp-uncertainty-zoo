@@ -94,17 +94,22 @@ class DUEMixin:
             mixing_weights=False,
         ).to(self.device)
         self.loss_function = VariationalELBO(
-            self.likelihood, self.gp, num_data=len(train_data)
+            self.likelihood, self.gp, num_data=len(train_data),
         ).to(self.device)
 
-    def forward(self, input_: torch.LongTensor, **kwargs):
+    def forward(self, input_: torch.LongTensor, ignore_mask: Optional[torch.BoolTensor] = None, **kwargs):
         out = self.get_hidden(input_, **kwargs)
 
         if self.is_sequence_classifier:
             out = self.get_sequence_representation(out)
 
         out = self.layer_norm(out)
+        out = torch.log_softmax(out, dim=-1)
         out = rearrange(out, "b s h -> (b s) h").float()
+
+        if ignore_mask is not None:
+            out = out[ignore_mask]
+
         mvn = self.gp(out)
 
         return mvn
@@ -347,6 +352,7 @@ class DUEBertModule(SpectralBertModule, MultiPredictionMixin, DUEMixin):
         kernel_type: str,
         is_sequence_classifier: bool,
         device: Device,
+        ignore_label: int = -100,
         **build_params,
     ):
         super().__init__(
@@ -357,6 +363,7 @@ class DUEBertModule(SpectralBertModule, MultiPredictionMixin, DUEMixin):
             device,
             **build_params,
         )
+        self.ignore_label = ignore_label
         MultiPredictionMixin.__init__(self, num_predictions)
         DUEMixin.__init__(self, num_inducing_samples, num_inducing_points, kernel_type)
 
@@ -446,7 +453,10 @@ class DUEBert(Model):
         if not self.module.is_sequence_classifier:
             y = rearrange(y, "b t -> (b t)")
 
-        preds = DUEMixin.forward(self.module, X, **kwargs)
+        ignore_mask = y != self.module.ignore_label
+        y = y[ignore_mask]
+
+        preds = DUEMixin.forward(self.module, X, ignore_mask=ignore_mask, **kwargs)
         loss = -self.module.loss_function(preds, y)
 
         return loss
