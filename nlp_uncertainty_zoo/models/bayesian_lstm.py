@@ -99,6 +99,7 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
                 for _ in range(num_layers)
             ],
             dropout=dropout,
+            device=device
         )
 
     def get_logits(
