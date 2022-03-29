@@ -232,6 +232,7 @@ class LanguageModellingSampler(Subsampler):
             ),
             stats,
         )
+        del stats
 
         # Compute probability of sampling an instance based on class and sentence length
         instance_probs = np.zeros(len(data_source))
@@ -272,6 +273,8 @@ class LanguageModellingSampler(Subsampler):
             # Mask out the sampled indices so they cannot be sampled again and re-normalize the distribution
             instance_probs[index : index + offset] = 0
             instance_probs /= sum(instance_probs)
+
+        del self.seq_length_freqs, self.length2instances, seq_length_probs, instance_probs
 
 
 class SequenceClassificationSampler(Subsampler):
