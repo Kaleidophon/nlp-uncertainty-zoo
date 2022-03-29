@@ -67,6 +67,7 @@ class ModifiedDataCollatorForLanguageModeling(DataCollatorForLanguageModeling):
             # ### Custom Modification ###
             labels = labels[:, 1:]
             batch["input_ids"] = batch["input_ids"][:, :-1]
+            batch["attention_mask"] = batch["attention_mask"][:, :-1]
             # ### Custom Modifcation End ###
 
             if self.tokenizer.pad_token_id is not None:
