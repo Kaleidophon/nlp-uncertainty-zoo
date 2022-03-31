@@ -9,6 +9,7 @@ from typing import Optional, Dict, Any
 
 # EXT
 import numpy as np
+from sklearn.decomposition import PCA
 import torch
 from einops import rearrange
 from torch.utils.data import DataLoader
@@ -29,11 +30,19 @@ class DDUMixin:
     code redundancies.
     """
 
-    def __init__(self, input_size: int, output_size: int):
+    def __init__(self, input_size: int, output_size: int, projection_size: Optional[int] = None):
+
+        self.projection_size = projection_size
+        self.gda_size = input_size if projection_size is None else projection_size
+        self.pca = None
+
         # Parameters for Gaussian Discriminant Analysis
-        self.mu = torch.zeros(output_size, input_size)
+        self.mu = torch.zeros(
+            output_size,
+            self.gda_size
+        )
         self.Sigma = torch.stack(
-            [torch.eye(input_size, input_size) for _ in range(self.output_size)]
+            [torch.eye(self.gda_size, self.gda_size) for _ in range(self.output_size)]
         )
         self.determinants = torch.zeros(output_size)
 
@@ -69,6 +78,13 @@ class DDUMixin:
 
             hiddens = torch.cat(hiddens, dim=0)
             all_labels = torch.cat(all_labels, dim=0)
+
+            # Do PCA first before fitting to reduce memory usage
+            if self.projection_size is not None:
+                device = hidden.device
+                self.pca = PCA(n_components=self.projection_size)
+                self.pca.fit(hiddens.cpu().detach().numpy())
+                hiddens = torch.FloatTensor(self.pca.transform(hiddens.cpu().detach().numpy())).to(device)
 
             for cls in labels.unique():
                 num_batch_classes = (all_labels == cls).long().sum()
@@ -108,6 +124,10 @@ class DDUMixin:
             else rearrange(hidden, "b s i -> (b s) i")
         )
 
+        if self.pca is not None:
+            device = hidden.device
+            hidden = torch.FloatTensor(self.pca.transform(hidden.cpu().detach().numpy())).to(device)
+
         hidden = hidden.unsqueeze(1)  # (batch_size x seq_length) x 1 x input_size
         hidden = hidden.repeat(1, self.output_size, 1)
         diff = hidden - self.mu  # (batch_size x seq_length) x output_size x input_size
@@ -143,6 +163,7 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
         num_heads: int,
         sequence_length: int,
         spectral_norm_upper_bound: float,
+        projection_size: int,
         is_sequence_classifier: bool,
         device: Device,
         **build_params,
@@ -170,6 +191,8 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
             Number of self-attention heads per layer.
         sequence_length: int
             Maximum sequence length in dataset. Used to initialize positional embeddings.
+        projection_size: int
+            Size hidden dimensions are projected to using PCA to save memory if given.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
@@ -190,7 +213,7 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
             is_sequence_classifier,
             device,
         )
-        DDUMixin.__init__(self, input_size, output_size)
+        DDUMixin.__init__(self, input_size, output_size, projection_size)
 
     def get_uncertainty(
         self,
@@ -276,6 +299,7 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
         bert_name: str,
         output_size: int,
         spectral_norm_upper_bound: float,
+        projection_size: int,
         is_sequence_classifier: bool,
         device: Device,
         **build_params,
@@ -288,7 +312,7 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
             device,
             **build_params,
         )
-        DDUMixin.__init__(self, self.bert.config.hidden_size, output_size)
+        DDUMixin.__init__(self, self.bert.config.hidden_size, output_size, projection_size)
 
     def get_uncertainty(
         self,
