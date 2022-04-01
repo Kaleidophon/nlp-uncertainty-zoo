@@ -63,7 +63,7 @@ class DDUMixin:
                 attention_mask, input_ids, labels = (
                     batch["attention_mask"],
                     batch["input_ids"],
-                    batch["label"],
+                    batch["labels"],
                 )
 
                 hidden = self.get_hidden(input_ids, attention_mask=attention_mask)
