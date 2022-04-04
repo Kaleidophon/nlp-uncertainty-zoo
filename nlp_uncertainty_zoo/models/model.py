@@ -345,6 +345,7 @@ class Model(ABC):
                 progress_bar,
                 wandb_run,
             )
+            train_loss = torch.zeros(1)
 
             # Update progress bar and summary writer
             if verbose:
@@ -361,7 +362,7 @@ class Model(ABC):
                 self.module.eval()
 
                 with torch.no_grad():
-                    val_loss = self.eval(valid_split)
+                    val_loss = self.eval(valid_split, wandb_run=wandb_run)
 
                 if wandb_run is not None:
                     import wandb
@@ -460,7 +461,7 @@ class Model(ABC):
         """
         return self.module.get_uncertainty(input_, metric_name, *args, **kwargs)
 
-    def eval(self, data_split: DataLoader) -> torch.Tensor:
+    def eval(self, data_split: DataLoader, wandb_run: Optional[WandBRun] = None) -> torch.Tensor:
         """
         Evaluate a data split.
 
@@ -468,6 +469,9 @@ class Model(ABC):
         ----------
         data_split: DataSplit
             Data split the model should be evaluated on.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
 
         Returns
         -------
