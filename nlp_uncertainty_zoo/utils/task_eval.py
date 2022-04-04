@@ -103,8 +103,8 @@ def evaluate(
                 if tokenizer is not None:
                     seq = tokenizer.decode(seq)
 
-                score = scores[s, :]
-                prediction_file.write(f"{seq}\t{score:.4f}\n")
+                score_string = " ".join([f"{score:.4f}" for score in scores[s, :].tolist()])
+                prediction_file.write(f"{seq}\t{score_string}\n")
 
     score = eval_post_func(cum_scores / norm)
 

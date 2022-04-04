@@ -78,7 +78,6 @@ class DUEMixin:
                 batch_masks.append(batch_mask)
                 num_representations += batch_mask.int().sum()
 
-
         representations = torch.cat(batch_representations, dim=0)
         mask = torch.cat(batch_masks, dim=0)
         representations = rearrange(representations, "b s h -> (b s) h")

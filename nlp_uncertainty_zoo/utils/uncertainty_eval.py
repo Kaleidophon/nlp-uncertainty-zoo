@@ -8,9 +8,6 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 from scipy.stats import kendalltau
 
 
-# TODO: Implement coverage metrics
-
-
 def aupr(y_true: np.array, y_pred: np.array) -> float:
     """
     Return the area under the precision-recall curve for a pseudo binary classification task, where in- and
@@ -126,7 +123,7 @@ def sce(y_true: np.array, y_pred: np.array, num_bins: int = 10) -> float:
     return sce
 
 
-def ace(y_true: np.array, y_pred: np.array, num_ranges: int = 4) -> float:
+def ace(y_true: np.array, y_pred: np.array, num_ranges: int = 10) -> float:
     """
      Measure the Adaptive Calibration Error (ACE) by [2], an version of the static calibration error that uses ranges
      instead of bins. Every range contains the same number of predictions.
@@ -155,7 +152,7 @@ def ace(y_true: np.array, y_pred: np.array, num_ranges: int = 4) -> float:
     confs = np.sort(np.max(y_pred, axis=1))
     step = int(np.floor(N / num_ranges))  # Inputs per range
     thresholds = np.repeat(
-        np.array([confs[i] for i in range(0, N, step)])[np.newaxis, ...], N, axis=0
+        np.array([confs[i] for i in range(step, N, step)])[np.newaxis, ...], N, axis=0
     )  # Get the thresholds corresponding to ranges
 
     max_preds = np.repeat(
@@ -188,7 +185,7 @@ def ace(y_true: np.array, y_pred: np.array, num_ranges: int = 4) -> float:
     return ace
 
 
-def coverage_percentage(y_true: np.array, y_pred: np.array, alpha: float, eps: float = 1e-8):
+def coverage_percentage(y_true: np.array, y_pred: np.array, alpha: float = 0.05):
     """
     Return the percentage of times the true prediction was contained in the 1 - alpha prediction set. Based on the work
     by [3].
@@ -204,8 +201,6 @@ def coverage_percentage(y_true: np.array, y_pred: np.array, alpha: float, eps: f
          Categorical probability distribution for each input.
     alpha: float
         Probability mass threshold.
-    eps: float
-        Small number to avoid floating point precision problems.
 
     Returns
     -------
@@ -234,7 +229,7 @@ def coverage_percentage(y_true: np.array, y_pred: np.array, alpha: float, eps: f
     return coverage_percentage
 
 
-def coverage_width(y_pred: np.array, alpha: float, eps: float = 1e-8):
+def coverage_width(y_pred: np.array, alpha: float = 0.05, eps: float = 1e-8):
     """
     Return the width of the 1 - alpha prediction set. Based on the work by [3].
 
@@ -247,7 +242,7 @@ def coverage_width(y_pred: np.array, alpha: float, eps: float = 1e-8):
          Categorical probability distribution for each input.
     alpha: float
         Probability mass threshold.
-     eps: float
+    eps: float
         Small number to avoid floating point precision problems.
 
     Returns
