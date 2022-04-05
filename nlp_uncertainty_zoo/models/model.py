@@ -368,7 +368,7 @@ class Model(ABC):
                     wandb.log({"epoch_val_loss": val_loss.item()})
 
                 if val_loss < best_val_loss:
-                    best_val_loss = val_loss
+                    best_val_loss = val_loss.item()
 
                     if early_stopping:
                         best_model = dict(self.__dict__)
