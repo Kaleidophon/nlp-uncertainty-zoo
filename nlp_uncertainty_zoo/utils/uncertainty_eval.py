@@ -4,6 +4,7 @@ Module to implement different metrics the quality of uncertainty metrics.
 
 # EXT
 import numpy as np
+import pandas as pd
 from sklearn.metrics import average_precision_score, roc_auc_score
 from scipy.stats import kendalltau
 
@@ -67,6 +68,47 @@ def kendalls_tau(losses: np.array, uncertainties: np.array) -> float:
         Kendall's tau, between -1 and 1.
     """
     return kendalltau(losses, uncertainties)[0]
+
+
+def ece(y_true: np.array, y_pred: np.array, n_bins: int = 10) -> float:
+    """
+
+    Calculate the Expected Calibration Error: for each bin, the absolute difference between
+    the mean fraction of positives and the average predicted probability is taken. The ECE is
+    the weighed mean of these differences.
+
+    Parameters
+    ----------
+    y: np.ndarray
+        The true labels.
+    y_pred: np.ndarray
+        The predicted probabilities
+    n_bins: int
+        The number of bins to use.
+    Returns
+    -------
+    ece: float
+        The expected calibration error.
+    """
+    n = len(y_pred)
+    bins = np.arange(0.0, 1.0, 1.0 / n_bins)
+    y_pred = np.max(y_pred, axis=-1)
+    bins_per_prediction = np.digitize(y_pred, bins)
+
+    df = pd.DataFrame({"y_pred": y_pred, "y": y_true, "pred_bins": bins_per_prediction})
+
+    grouped_by_bins = df.groupby("pred_bins")
+    # calculate the mean y and predicted probabilities per bin
+    binned = grouped_by_bins.mean()
+
+    # calculate the number of items per bin
+    binned_counts = grouped_by_bins["y"].count()
+
+    # calculate the proportion of data per bin
+    binned["weight"] = binned_counts / n
+
+    weighed_diff = abs(binned["y_pred"] - binned["y"]) * binned["weight"]
+    return weighed_diff.sum()
 
 
 def sce(y_true: np.array, y_pred: np.array, num_bins: int = 10) -> float:
@@ -260,7 +302,7 @@ def coverage_width(y_pred: np.array, alpha: float = 0.05, eps: float = 1e-8):
 
     # Use argmax to find first class for which the 1 - alpha threshold is surpassed - all other classes are outside
     # of the prediction set.
-    widths = np.argmax(thresholded_cum_probs, axis=1).astype(float)
+    widths = np.argmax(thresholded_cum_probs, axis=1).astype(float) + 1
 
     # Compute average width
     average_width = np.mean(widths)
