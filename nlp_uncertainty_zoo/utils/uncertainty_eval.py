@@ -152,7 +152,7 @@ def ace(y_true: np.array, y_pred: np.array, num_ranges: int = 10) -> float:
     confs = np.sort(np.max(y_pred, axis=1))
     step = int(np.floor(N / num_ranges))  # Inputs per range
     thresholds = np.repeat(
-        np.array([confs[i] for i in range(step, N, step)])[np.newaxis, ...], N, axis=0
+        np.array([confs[i] for i in range(0, step * num_ranges, step)])[np.newaxis, ...], N, axis=0
     )  # Get the thresholds corresponding to ranges
 
     max_preds = np.repeat(

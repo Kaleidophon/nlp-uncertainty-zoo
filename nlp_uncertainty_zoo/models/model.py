@@ -345,7 +345,6 @@ class Model(ABC):
                 progress_bar,
                 wandb_run,
             )
-            train_loss = torch.zeros(1)
 
             # Update progress bar and summary writer
             if verbose:
