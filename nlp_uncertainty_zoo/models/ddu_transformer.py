@@ -61,8 +61,8 @@ class DDUMixin:
 
             for i, batch in enumerate(data_split):
                 attention_mask, input_ids, labels = (
-                    batch["attention_mask"],
-                    batch["input_ids"],
+                    batch["attention_mask"].to(self.device),
+                    batch["input_ids"].to(self.device),
                     batch["labels"],
                 )
 
