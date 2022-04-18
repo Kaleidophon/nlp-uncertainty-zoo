@@ -10,7 +10,7 @@ Define common methods of models. This done by separating the logic into two part
 from abc import ABC, abstractmethod
 from datetime import datetime
 import dill
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Generator
 import os
 
 # EX
@@ -327,37 +327,73 @@ class Model(ABC):
             Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        num_epochs = self.model_params["num_epochs"]
+        num_training_steps = self.model_params["num_training_steps"]
         best_val_loss = np.inf
+        grad_clip = self.model_params.get("grad_clip", np.inf)
+        validation_interval = self.model_params["validation_interval"]
         early_stopping_pat = self.model_params.get("early_stopping_pat", np.inf)
         early_stopping = self.model_params.get("early_stopping", True)
         num_no_improvements = 0
-        total_steps = num_epochs * len(train_split)
-        progress_bar = tqdm(total=total_steps) if verbose else None
+        progress_bar = tqdm(total=num_training_steps) if verbose else None
         best_model = dict(self.__dict__)
 
-        for epoch in range(self.model_params["num_epochs"]):
+        def batch_generator(train_split: DataLoader) -> Generator[Dict[str, torch.Tensor], None, None]:
+            """
+            Quick generator that outputs batches indefinitely.
+            """
+            while True:
+                for batch in train_split:
+                    yield batch
+
+        for training_step, batch in enumerate(batch_generator(train_split)):
+
+            if training_step == num_training_steps:
+                break
+
             self.module.train()
 
-            train_loss = self._epoch_iter(
-                epoch,
-                train_split,
-                progress_bar,
-                wandb_run,
+            attention_mask, input_ids, labels = (
+                batch["attention_mask"].to(self.device),
+                batch["input_ids"].to(self.device),
+                batch["labels"].to(self.device),
             )
+
+            batch_loss = self.get_loss(
+                input_ids,
+                labels,
+                attention_mask=attention_mask,
+                wandb_run=wandb_run,
+            )
+
+            if self.module.training:
+                batch_loss.backward()
+                clip_grad_norm_(self.module.parameters(), grad_clip)
+                self.optimizer.step()
+                self.optimizer.zero_grad(
+                    set_to_none=True
+                )  # Save memory by setting to None
+
+                # Update learning rate
+                if self.scheduler:
+                    self.scheduler.step()
+
+            batch_loss = batch_loss.cpu().detach().item()
+            if batch_loss == np.inf or np.isnan(batch_loss):
+                raise ValueError(f"Loss became NaN or inf during step {training_step + 1}.")
 
             # Update progress bar and summary writer
             if verbose:
+                percentage = (training_step + 1) / num_training_steps * 100
                 progress_bar.set_description(
-                    f"Epoch {epoch + 1} / {num_epochs}: Train Loss {train_loss.item():.4f}"
+                    f"Step {training_step + 1} / {num_training_steps} ({percentage:.2f} %): Train Loss {batch_loss:.4f}"
                 )
                 progress_bar.update(1)
 
             if wandb_run is not None:
-                wandb_run.log({"epoch_train_loss": train_loss.item()})
+                wandb_run.log({"epoch_train_loss": batch_loss})
 
             # Get validation loss
-            if valid_split is not None:
+            if valid_split is not None and num_training_steps % validation_interval == 0:
                 self.module.eval()
 
                 with torch.no_grad():
@@ -378,13 +414,6 @@ class Model(ABC):
 
                     if num_no_improvements > early_stopping_pat:
                         break
-
-            # Update scheduler
-            if (
-                self.scheduler
-                and self.model_params.get("scheduler_step_or_epoch", "") == "epoch"
-            ):
-                self.scheduler.step(epoch=epoch)
 
         # Set current model to best model found, otherwise use last
         if early_stopping:
@@ -411,7 +440,7 @@ class Model(ABC):
         # Make a nice result dict for knockknock
         result_dict = {
             "model_name": self.model_name,
-            "train_loss": train_loss.item(),
+            "train_loss": batch_loss,
             "best_val_loss": best_val_loss,
         }
 
@@ -478,92 +507,30 @@ class Model(ABC):
             Loss on evaluation split.
         """
         self.module.eval()
-        loss = self._epoch_iter(0, data_split)
-        self.module.train()
+        loss = torch.zeros(1)
 
-        return loss
-
-    def _epoch_iter(
-        self,
-        epoch: int,
-        data_split: DataLoader,
-        progress_bar: Optional[tqdm] = None,
-        wandb_run: Optional[WandBRun] = None,
-    ) -> torch.Tensor:
-        """
-        Perform one training epoch.
-
-        Parameters
-        ----------
-        epoch: int
-            Number of the current epoch.
-        data_split: DataSplit
-            Current data split.
-        progress_bar: Optional[tqdm]
-            Progress bar used to display information about current run.
-        wandb_run: Optional[WandBRun] = None
-            Weights & Biases run to track training statistics.
-        """
-        grad_clip = self.model_params.get("grad_clip", np.inf)
-        epoch_loss = torch.zeros(1)
-        num_batches = len(data_split)
-
-        for i, batch in enumerate(data_split):
-
+        for batch in data_split:
             attention_mask, input_ids, labels = (
                 batch["attention_mask"].to(self.device),
                 batch["input_ids"].to(self.device),
                 batch["labels"].to(self.device),
             )
-
-            global_batch_num = epoch * len(data_split) + i
             batch_loss = self.get_loss(
-                global_batch_num,
                 input_ids,
                 labels,
                 attention_mask=attention_mask,
                 wandb_run=wandb_run,
             )
 
-            # Update progress bar and summary writer
-            if progress_bar is not None:
-                progress_bar.set_description(
-                    f"Epoch {epoch + 1}: {i+1}/{num_batches} | Loss {batch_loss.item():.4f}"
-                )
-                progress_bar.update(1)
+            loss += batch_loss.cpu().detach()
 
-            if wandb_run is not None:
-                batch_info = {"batch_train_loss": batch_loss.detach().item()}
+        self.module.train()
 
-                if self.scheduler is not None:
-                    batch_info["Batch learning rate"] = self.scheduler.get_last_lr()[0]
+        return loss
 
-                wandb_run.log(batch_info)
-
-            epoch_loss += batch_loss.cpu().detach()
-
-            if epoch_loss == np.inf or np.isnan(epoch_loss):
-                raise ValueError(f"Loss became NaN or inf during epoch {epoch + 1}.")
-
-            if self.module.training:
-                batch_loss.backward()
-                clip_grad_norm_(self.module.parameters(), grad_clip)
-                self.optimizer.step()
-                self.optimizer.zero_grad(
-                    set_to_none=True
-                )  # Save memory by setting to None
-
-                if (
-                    self.scheduler is not None
-                    and self.model_params.get("scheduler_step_or_epoch", "") == "step"
-                ):
-                    self.scheduler.step()
-
-        return epoch_loss
 
     def get_loss(
         self,
-        n_batch: int,
         X: torch.Tensor,
         y: torch.Tensor,
         wandb_run: Optional[WandBRun] = None,
@@ -575,8 +542,6 @@ class Model(ABC):
 
         Parameters
         ----------
-        n_batch: int
-            Number of the current batch.
         X: torch.Tensor
             Batch input.
         y: torch.Tensor

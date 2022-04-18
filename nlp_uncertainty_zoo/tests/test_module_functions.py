@@ -36,6 +36,7 @@ NUM_CLASSES = 6
 NUM_PREDICTIONS = 5
 BATCH_SIZE = 4
 SEQUENCE_LENGTH = 12
+NUM_TRAINING_STEPS = 2
 
 
 class MockDatasetBuilder(ABC):
@@ -138,7 +139,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             mock_dataset = self.mock_dataset_builder.build(BATCH_SIZE)
 
             # Change some parameters to fit the test environment
-            model_params["num_epochs"] = 1
+            model_params["num_training_steps"] = NUM_TRAINING_STEPS
             model_params["vocab_size"] = self.mock_dataset_builder.num_types
             model_params["output_size"] = self.mock_dataset_builder.num_classes
             model_params["is_sequence_classifier"] = isinstance(
