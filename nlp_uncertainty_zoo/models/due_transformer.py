@@ -55,9 +55,6 @@ class DUEMixin:
         num_instances: int
             Number of instances being sampled to initialize the GP inducing points and length scale.
         """
-        # Compute how many batches need to be sampled to initialize the inducing points when using batches of
-        # batch_size and length sequence_length
-        batch_size = train_data.dataset[0]["input_ids"].shape[0]
 
         # Extract feature representations for sampled batches
         batch_representations = []
@@ -304,7 +301,6 @@ class DUETransformer(Model):
 
     def get_loss(
         self,
-        n_batch: int,
         X: torch.Tensor,
         y: torch.Tensor,
         wandb_run: Optional[WandBRun] = None,
@@ -428,7 +424,6 @@ class DUEBert(Model):
 
     def get_loss(
         self,
-        n_batch: int,
         X: torch.Tensor,
         y: torch.Tensor,
         wandb_run: Optional[WandBRun] = None,

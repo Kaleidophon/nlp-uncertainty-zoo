@@ -15,16 +15,16 @@ CLINC_MODEL_PARAMS = {
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
-        "num_epochs": 40,  # Changed from 55 in original
+        "num_training_steps": 18480,  # Changed from 55 in original
+        "validation_interval": 469,
         # "early_stopping_pat": 10,
         "grad_clip": 10,
         "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
         "optimizer_class": optim.SGD,
         "scheduler_class": scheduler.MultiStepLR,
-        "scheduler_step_or_epoch": "epoch",
         "scheduler_kwargs": {
             "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
-            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "milestones": torch.LongTensor(range(13, 54, 1)) * 426,
         },
         "num_layers": 2,
         "hidden_size": 650,
@@ -40,16 +40,16 @@ CLINC_MODEL_PARAMS = {
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
-        "num_epochs": 40,  # Changed from 55 in original
+        "num_training_steps": 18480,  # Changed from 55 in original
+        "validation_interval": 469,
         # "early_stopping_pat": 10,
         "grad_clip": 10,
         "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
         "optimizer_class": optim.SGD,
         "scheduler_class": scheduler.MultiStepLR,
-        "scheduler_step_or_epoch": "epoch",
         "scheduler_kwargs": {
             "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
-            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "milestones": torch.LongTensor(range(13, 54, 1)) * 426,
         },
         "num_layers": 2,
         "hidden_size": 650,
@@ -66,15 +66,15 @@ CLINC_MODEL_PARAMS = {
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
-        "num_epochs": 40,  # Changed from 55 in original
+        "num_training_steps": 18480,  # Changed from 55 in original
+        "validation_interval": 469,
         # "early_stopping_pat": 10,
         "grad_clip": 10,
         "optimizer_class": optim.SGD,
         "scheduler_class": scheduler.MultiStepLR,
-        "scheduler_step_or_epoch": "epoch",
         "scheduler_kwargs": {
             "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
-            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "milestones": torch.LongTensor(range(13, 54, 1)) * 426,
         },
         "num_layers": 2,
         "hidden_size": 650,
@@ -96,15 +96,15 @@ CLINC_MODEL_PARAMS = {
         "early_stopping": True,
         "weight_decay": 0,
         "lr": 1,
-        "num_epochs": 40,  # Changed from 55 in original
+        "num_training_steps": 18480,  # Changed from 55 in original
+        "validation_interval": 469,
         # "early_stopping_pat": 10,
         "grad_clip": 10,
         "optimizer_class": optim.SGD,
         "scheduler_class": scheduler.MultiStepLR,
-        "scheduler_step_or_epoch": "epoch",
         "scheduler_kwargs": {
             "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
-            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "milestones": torch.LongTensor(range(13, 54, 1)) * 426,
         },
         "num_layers": 2,
         "hidden_size": 650,
@@ -123,15 +123,15 @@ CLINC_MODEL_PARAMS = {
         "early_stopping": True,
         "weight_decay": 1e-7,
         "lr": 1,
-        "num_epochs": 55,  # Changed from 55 in original
+        "num_training_steps": 105200,  # Changed from 55 in original
+        "validation_interval": 469,
         # "early_stopping_pat": 10,
         "grad_clip": 10,
         "init_weight": 0.04,  # Hacky way to include this for replication, this prob. won't be used anywhere else
         "scheduler_class": scheduler.MultiStepLR,
-        "scheduler_step_or_epoch": "epoch",
         "scheduler_kwargs": {
             "gamma": 0.8695,  # 1 / 1.15; in the Zaremba implementation you divide by gamma,
-            "milestones": torch.LongTensor(range(13, 54, 1)),
+            "milestones": torch.LongTensor(range(13, 54, 1)) * 426,
         },
         "num_layers": 2,
         "hidden_size": 1500,
@@ -146,11 +146,11 @@ CLINC_MODEL_PARAMS = {
     "transformer": {
         "batch_size": 32,
         "lr": 0.05,
-        "num_epochs": 55,
+        "num_training_steps": 105200,
+        "validation_interval": 469,
         "grad_clip": 10,
         "optimizer_class": optim.Adam,
         "scheduler_class": transformers.get_linear_schedule_with_warmup,
-        "scheduler_step_or_epoch": "step",
         "scheduler_kwargs": {
             # Warmup prob: 0.1, training steps: 469
             "num_warmup_steps": 469 * 80 * 0.1,
@@ -170,11 +170,11 @@ CLINC_MODEL_PARAMS = {
     "variational_transformer": {
         "batch_size": 32,
         "lr": 0.05,
-        "num_epochs": 55,
+        "num_training_steps": 105200,
+        "validation_interval": 469,
         "grad_clip": 10,
         "optimizer_class": optim.Adam,
         "scheduler_class": transformers.get_linear_schedule_with_warmup,
-        "scheduler_step_or_epoch": "step",
         "scheduler_kwargs": {
             # Warmup prob: 0.1, training steps: 469
             "num_warmup_steps": 469 * 80 * 0.1,
@@ -196,11 +196,11 @@ CLINC_MODEL_PARAMS = {
         "bert_name": "bert-base-uncased",
         "batch_size": 32,
         "lr": 0.05,
-        "num_epochs": 55,
+        "num_training_steps": 105200,
+        "validation_interval": 469,
         "grad_clip": 10,
         "optimizer_class": optim.Adam,
         "scheduler_class": transformers.get_linear_schedule_with_warmup,
-        "scheduler_step_or_epoch": "step",
         "scheduler_kwargs": {
             # Warmup prob: 0.1, training steps: 469
             "num_warmup_steps": 469 * 80 * 0.1,
@@ -217,9 +217,9 @@ CLINC_MODEL_PARAMS = {
         "lr": 5e-3,
         "length_scale": 2,
         "weight_decay": 0.1,
-        "num_epochs": 40,
+        "num_training_steps": 18480,
+        "validation_interval": 469,
         "scheduler_class": transformers.get_linear_schedule_with_warmup,
-        "scheduler_step_or_epoch": "step",
         "scheduler_kwargs": {
             # Warmup prob: 0.1, training steps: 469
             "num_warmup_steps": 469 * 40 * 0.1,
@@ -249,9 +249,9 @@ CLINC_MODEL_PARAMS = {
         "lr": 5e-3,
         "length_scale": 2,
         "weight_decay": 0.1,
-        "num_epochs": 40,
+        "num_training_steps": 18480,
+        "validation_interval": 469,
         "scheduler_class": transformers.get_linear_schedule_with_warmup,
-        "scheduler_step_or_epoch": "step",
         "scheduler_kwargs": {
             # Warmup prob: 0.1, training steps: 469
             "num_warmup_steps": 469 * 40 * 0.1,
@@ -270,10 +270,10 @@ CLINC_MODEL_PARAMS = {
     "due_transformer": {
         "batch_size": 32,
         "lr": 5e-3,
-        "num_epochs": 80,
+        "num_training_steps": 105200,
+        "validation_interval": 469,
         "optimizer_class": optim.Adam,
         "scheduler_class": transformers.get_linear_schedule_with_warmup,
-        "scheduler_step_or_epoch": "step",
         "scheduler_kwargs": {
             # Warmup prob: 0.1, training steps: 469
             "num_warmup_steps": 469 * 80 * 0.1,
@@ -299,10 +299,10 @@ CLINC_MODEL_PARAMS = {
         "bert_name": "bert-base-uncased",
         "batch_size": 32,
         "lr": 5e-3,
-        "num_epochs": 80,
+        "num_training_steps": 105200,
+        "validation_interval": 469,
         "optimizer_class": optim.Adam,
         "scheduler_class": transformers.get_linear_schedule_with_warmup,
-        "scheduler_step_or_epoch": "step",
         "scheduler_kwargs": {
             # Warmup prob: 0.1, training steps: 469
             "num_warmup_steps": 469 * 80 * 0.1,
@@ -321,7 +321,8 @@ CLINC_MODEL_PARAMS = {
     "ddu_transformer": {
         "batch_size": 32,
         "lr": 5e-5,
-        "num_epochs": 40,
+        "num_training_steps": 18480,
+        "validation_interval": 469,
         "num_layers": 6,
         "hidden_size": 768,
         "num_heads": 10,
@@ -342,5 +343,6 @@ CLINC_MODEL_PARAMS = {
         "sequence_length": 35,
         "is_sequence_classifier": True,
         "spectral_norm_upper_bound": 0.95,
+        "validation_interval": 469,
     },
 }
