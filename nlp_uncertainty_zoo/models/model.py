@@ -383,9 +383,8 @@ class Model(ABC):
 
             # Update progress bar and summary writer
             if verbose:
-                percentage = (training_step + 1) / num_training_steps * 100
                 progress_bar.set_description(
-                    f"Step {training_step + 1} / {num_training_steps} ({percentage:.2f} %): Train Loss {batch_loss:.4f}"
+                    f"Step {training_step + 1}: Train Loss {batch_loss:.4f}"
                 )
                 progress_bar.update(1)
 
@@ -393,7 +392,7 @@ class Model(ABC):
                 wandb_run.log({"epoch_train_loss": batch_loss})
 
             # Get validation loss
-            if valid_split is not None and num_training_steps % validation_interval == 0:
+            if valid_split is not None and training_step % validation_interval == 0 and training_step > 0:
                 self.module.eval()
 
                 with torch.no_grad():
