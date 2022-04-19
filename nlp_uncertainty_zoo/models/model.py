@@ -377,7 +377,7 @@ class Model(ABC):
                 self.scheduler.step(epoch=training_step)
 
                 if wandb_run is not None:
-                    wandb_run.log({"Batch learning rate": self.scheduler.get_last_lr()[0]})
+                    wandb_run.log({"batch_learning_rate": self.scheduler.get_last_lr()[0]}, step=training_step)
 
             batch_loss = batch_loss.cpu().detach().item()
             if batch_loss == np.inf or np.isnan(batch_loss):
@@ -391,7 +391,7 @@ class Model(ABC):
                 progress_bar.update(1)
 
             if wandb_run is not None:
-                wandb_run.log({"epoch_train_loss": batch_loss})
+                wandb_run.log({"batch_train_loss": batch_loss}, step=training_step)
 
             # Get validation loss
             if valid_split is not None and training_step % validation_interval == 0 and training_step > 0:
@@ -402,7 +402,7 @@ class Model(ABC):
 
                 if wandb_run is not None:
                     import wandb
-                    wandb.log({"epoch_val_loss": val_loss.item()})
+                    wandb.log({"val_loss": val_loss.item()}, step=training_step)
 
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss.item()
