@@ -365,20 +365,19 @@ class Model(ABC):
                 wandb_run=wandb_run,
             )
 
-            if self.module.training:
-                batch_loss.backward()
-                clip_grad_norm_(self.module.parameters(), grad_clip)
-                self.optimizer.step()
-                self.optimizer.zero_grad(
-                    set_to_none=True
-                )  # Save memory by setting to None
+            batch_loss.backward()
+            clip_grad_norm_(self.module.parameters(), grad_clip)
+            self.optimizer.step()
+            self.optimizer.zero_grad(
+                set_to_none=True
+            )  # Save memory by setting to None
 
-                # Update learning rate
-                if self.scheduler:
-                    self.scheduler.step()
+            # Update learning rate
+            if self.scheduler is not None:
+                self.scheduler.step(epoch=training_step)
 
-                    if wandb_run is not None:
-                        wandb_run.log({"Batch learning rate": self.scheduler.get_last_lr()[0]})
+                if wandb_run is not None:
+                    wandb_run.log({"Batch learning rate": self.scheduler.get_last_lr()[0]})
 
             batch_loss = batch_loss.cpu().detach().item()
             if batch_loss == np.inf or np.isnan(batch_loss):
