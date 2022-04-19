@@ -377,6 +377,9 @@ class Model(ABC):
                 if self.scheduler:
                     self.scheduler.step()
 
+                    if wandb_run is not None:
+                        wandb_run.log({"Batch learning rate": self.scheduler.get_last_lr()[0]})
+
             batch_loss = batch_loss.cpu().detach().item()
             if batch_loss == np.inf or np.isnan(batch_loss):
                 raise ValueError(f"Loss became NaN or inf during step {training_step + 1}.")
@@ -521,12 +524,11 @@ class Model(ABC):
                 wandb_run=wandb_run,
             )
 
-            loss += batch_loss.cpu().detach()
+            loss += batch_loss.detach().cpu()
 
         self.module.train()
 
         return loss
-
 
     def get_loss(
         self,
