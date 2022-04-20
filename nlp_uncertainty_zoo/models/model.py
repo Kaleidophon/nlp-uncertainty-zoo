@@ -374,7 +374,7 @@ class Model(ABC):
 
             # Update learning rate
             if self.scheduler is not None:
-                self.scheduler.step(epoch=training_step)
+                self.scheduler.step()
 
                 if wandb_run is not None:
                     wandb_run.log({"batch_learning_rate": self.scheduler.get_last_lr()[0]})
