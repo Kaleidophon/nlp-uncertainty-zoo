@@ -8,6 +8,7 @@ Define common methods of models. This done by separating the logic into two part
 
 # STD
 from abc import ABC, abstractmethod
+from collections import Counter
 from datetime import datetime
 import dill
 from typing import Dict, Any, Optional, Generator
@@ -281,6 +282,7 @@ class Model(ABC):
         self.model_dir = model_dir
         self.model_params = model_params
         self.device = device
+        self.loss_weights = None
         self.to(device)
 
         # Initialize optimizer and scheduler
@@ -310,6 +312,7 @@ class Model(ABC):
         train_split: DataLoader,
         valid_split: Optional[DataLoader] = None,
         verbose: bool = True,
+        weight_loss: bool = False,
         wandb_run: Optional[WandBRun] = None,
     ):
         """
@@ -323,6 +326,8 @@ class Model(ABC):
             Validation set the model is being evaluated on if given.
         verbose: bool
             Whether to display information about current loss.
+        weight_loss: bool
+            Weight classes in loss function. Default is False.
         wandb_run: Optional[WandBRun]
             Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
@@ -336,6 +341,26 @@ class Model(ABC):
         num_no_improvements = 0
         progress_bar = tqdm(total=num_training_steps) if verbose else None
         best_model = dict(self.__dict__)
+
+        # Compute loss weights
+        if weight_loss:
+            counter = Counter()
+
+            for batch in train_split:
+                labels = batch["labels"]
+
+                # Flatten label lists with sum(), then filter ignore label
+                counter.update(filter(lambda label: label != -100, sum(labels.tolist(), [])))
+
+            self.loss_weights = torch.zeros(self.module.output_size)
+
+            for key, freq in counter.items():
+                self.loss_weights[key] = freq
+
+            del counter
+
+            self.loss_weights /= torch.sum(self.loss_weights)
+            self.loss_weights = 1 - self.loss_weights
 
         def batch_generator(train_split: DataLoader) -> Generator[Dict[str, torch.Tensor], None, None]:
             """
@@ -556,7 +581,7 @@ class Model(ABC):
         """
 
         loss_function = nn.CrossEntropyLoss(
-            ignore_index=-100
+            ignore_index=-100, weight=self.loss_weights
         )  # Index that is used for non-masked tokens for MLM
         preds = self.module.forward(X, **kwargs)
 

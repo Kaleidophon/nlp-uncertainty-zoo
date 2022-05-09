@@ -67,7 +67,7 @@ def kendalls_tau(losses: np.array, uncertainties: np.array) -> float:
     float
         Kendall's tau, between -1 and 1.
     """
-    return kendalltau(losses, uncertainties, nan_policy="omit")[0]
+    return kendalltau(losses, uncertainties, nan_policy="omit", method="asymptotic")[0]
 
 
 def ece(y_true: np.array, y_pred: np.array, n_bins: int = 10) -> float:
