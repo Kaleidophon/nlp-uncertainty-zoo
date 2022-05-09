@@ -352,7 +352,7 @@ class Model(ABC):
                 # Flatten label lists with sum(), then filter ignore label
                 counter.update(filter(lambda label: label != -100, sum(labels.tolist(), [])))
 
-            self.loss_weights = torch.zeros(self.module.output_size)
+            self.loss_weights = torch.zeros(self.module.output_size, device=self.device)
 
             for key, freq in counter.items():
                 self.loss_weights[key] = freq
@@ -581,7 +581,7 @@ class Model(ABC):
         """
 
         loss_function = nn.CrossEntropyLoss(
-            ignore_index=-100, weight=self.loss_weights.to(self.device)
+            ignore_index=-100, weight=self.loss_weights
         )  # Index that is used for non-masked tokens for MLM
         preds = self.module.forward(X, **kwargs)
 
