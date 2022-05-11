@@ -5,7 +5,7 @@ s`Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_.
 
 # STD
 import math
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 # EXT
 import numpy as np
@@ -30,16 +30,16 @@ class DDUMixin:
     code redundancies.
     """
 
-    def __init__(self, input_size: int, output_size: int, projection_size: Optional[int] = None):
+    def __init__(self, input_size: int, output_size: int, ignore_indices: List[int], projection_size: Optional[int] = None):
 
+        self.ignore_indices = ignore_indices
         self.projection_size = projection_size
         self.gda_size = input_size if projection_size is None else projection_size
         self.pca = None
 
         # Parameters for Gaussian Discriminant Analysis
         self.mu = torch.zeros(
-            output_size,
-            self.gda_size
+            output_size, self.gda_size
         )
         self.Sigma = torch.stack(
             [torch.eye(self.gda_size, self.gda_size) for _ in range(self.output_size)]
@@ -60,6 +60,7 @@ class DDUMixin:
             hiddens, all_labels = [], []
 
             for i, batch in enumerate(data_split):
+
                 attention_mask, input_ids, labels = (
                     batch["attention_mask"].to(self.device),
                     batch["input_ids"].to(self.device),
@@ -67,12 +68,20 @@ class DDUMixin:
                 )
 
                 hidden = self.get_hidden(input_ids, attention_mask=attention_mask)
-                hidden = (
-                    self.get_sequence_representation(hidden).squeeze(1)
-                    if self.is_sequence_classifier
-                    else torch.flatten(hidden, end_dim=1)
-                )
-                labels = torch.flatten(labels)
+
+                if not self.is_sequence_classifier:
+                    # Filter our labels and activations for uninformative classes like PAD
+                    batch_mask = torch.all(
+                        torch.stack([input_ids != idx for idx in self.ignore_indices]), dim=0
+                    )
+                    labels = labels[batch_mask]
+                    hidden = hidden[batch_mask]
+
+                else:
+                    hidden = (
+                        self.get_sequence_representation(hidden).squeeze(1)
+                    )
+
                 hiddens.append(hidden)
                 all_labels.append(labels)
 
@@ -87,14 +96,18 @@ class DDUMixin:
                 hiddens = torch.FloatTensor(self.pca.transform(hiddens.cpu().detach().numpy())).to(device)
 
             for cls in labels.unique():
+
+                if cls == -100:
+                    continue
+
                 num_batch_classes = (all_labels == cls).long().sum()
 
                 if num_batch_classes == 0:
                     continue
 
-                self.mu[cls] = hiddens[labels == cls].mean(dim=0)
+                self.mu[cls] = hiddens[all_labels == cls].mean(dim=0)
                 self.Sigma[cls] = torch.FloatTensor(
-                    np.cov(hiddens[labels == cls].T.numpy())
+                    np.cov(hiddens[all_labels == cls].T.numpy())
                 ) * (num_batch_classes - 1)
 
                 self.determinants[cls] = torch.det(
@@ -165,6 +178,7 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
         spectral_norm_upper_bound: float,
         projection_size: int,
         is_sequence_classifier: bool,
+        ignore_indices: List[int],
         device: Device,
         **build_params,
     ):
@@ -196,6 +210,8 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
+        ignore_indices: List[int]
+            Token indices to ignore when fitting the Gaussian Discriminant Analysis.
         device: Device
             Device the model is located on.
         """
@@ -213,7 +229,7 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
             is_sequence_classifier,
             device,
         )
-        DDUMixin.__init__(self, input_size, output_size, projection_size)
+        DDUMixin.__init__(self, input_size, output_size, ignore_indices, projection_size)
 
     def get_uncertainty(
         self,
@@ -301,6 +317,7 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
         spectral_norm_upper_bound: float,
         projection_size: int,
         is_sequence_classifier: bool,
+        ignore_indices: List[int],
         device: Device,
         **build_params,
     ):
@@ -312,7 +329,7 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
             device,
             **build_params,
         )
-        DDUMixin.__init__(self, self.bert.config.hidden_size, output_size, projection_size)
+        DDUMixin.__init__(self, self.bert.config.hidden_size, output_size, ignore_indices, projection_size)
 
     def get_uncertainty(
         self,
