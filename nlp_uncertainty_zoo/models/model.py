@@ -170,7 +170,6 @@ class Module(ABC, nn.Module):
     def get_uncertainty(
         self,
         input_: torch.LongTensor,
-        *args,
         metric_name: Optional[str] = None,
         **kwargs,
     ) -> torch.FloatTensor:
@@ -193,7 +192,7 @@ class Module(ABC, nn.Module):
         if metric_name is None:
             metric_name = self.default_uncertainty_metric
 
-        logits = self.get_logits(input_, *args, **kwargs)
+        logits = self.get_logits(input_, **kwargs)
 
         with torch.no_grad():
             if metric_name in self.single_prediction_uncertainty_metrics:
