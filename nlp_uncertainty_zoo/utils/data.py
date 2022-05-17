@@ -128,6 +128,7 @@ class DatasetBuilder(ABC):
         self.sampler_class = sampler_class
         self.sampler_kwargs = sampler_kwargs
         self.num_jobs = num_jobs
+        self.label_encoder = None
 
         # To be set after calling build()
         self.dataset = None
@@ -297,7 +298,7 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                 [self.dataset[split]["labels"] for split in self.splits],
             )
             labeling_func = lambda inst: {
-                "labels": label_encoder.transform([inst["labels"]])[0]
+                "labels": self.label_encoder.transform([inst["labels"]])[0]
             }
 
         elif self.type == "token_classification":
@@ -310,12 +311,12 @@ class ClassificationDatasetBuilder(DatasetBuilder):
                 ],
             )
             labeling_func = lambda inst: {
-                "labels": label_encoder.transform(inst["labels"].split(" "))
+                "labels": self.label_encoder.transform(inst["labels"].split(" "))
             }
 
         # Encode classes
-        label_encoder = LabelEncoder()
-        label_encoder.fit(list(classes))
+        self.label_encoder = LabelEncoder()
+        self.label_encoder.fit(list(classes))
 
         # Replace with classes with labels
         self.dataset = self.dataset.map(

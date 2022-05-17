@@ -86,7 +86,7 @@ class DDUMixin:
                 all_labels.append(labels)
 
             hiddens = torch.cat(hiddens, dim=0)
-            all_labels = torch.cat(all_labels, dim=0)
+            all_labels = torch.cat(all_labels, dim=0).to(self.device)
 
             # Do PCA first before fitting to reduce memory usage
             if self.projection_size is not None:
