@@ -107,8 +107,8 @@ class DDUMixin:
 
                 self.mu[cls] = hiddens[all_labels == cls].mean(dim=0)
                 self.Sigma[cls] = torch.FloatTensor(
-                    np.cov(hiddens[all_labels == cls].T.numpy())
-                ) * (num_batch_classes - 1)
+                    np.cov(hiddens[all_labels == cls].T.cpu().detach().numpy())
+                ).to(self.device) * (num_batch_classes - 1)
 
                 self.determinants[cls] = torch.det(
                     self.Sigma[cls, :, :]
