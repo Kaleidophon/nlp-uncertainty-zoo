@@ -49,7 +49,7 @@ def softmax_gap(logits: torch.FloatTensor) -> torch.FloatTensor:
     probs = torch.softmax(logits, dim=-1)
     max_prob, max_idx = torch.max(probs, dim=-1)
     probs[:, :, max_idx] = 0
-    gap = max_prob - torch.max(probs, dim=-1)[0]
+    gap = 1 - (max_prob - torch.max(probs, dim=-1)[0])
 
     return gap
 
