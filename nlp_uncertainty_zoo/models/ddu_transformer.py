@@ -361,7 +361,7 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
                 return self.gmm_predict(input_)
 
         else:
-            return super().get_uncertainty(input_, metric_name, *args, **kwargs)
+            return super().get_uncertainty(input_, metric_name=metric_name, **kwargs)
 
 
 class DDUBert(Model):

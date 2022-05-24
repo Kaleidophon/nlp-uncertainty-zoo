@@ -208,7 +208,7 @@ class SNGPModule(nn.Module):
         out = 0
         for _ in range(num_predictions):
             # Now actually sample logits from posterior
-            logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8))
+            logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8), device=self.device)
 
             logits_scale = torch.sqrt(1 + post_var * self.gp_mean_field_factor)
             logits /= logits_scale

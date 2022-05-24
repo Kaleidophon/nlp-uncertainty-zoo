@@ -244,7 +244,6 @@ class MultiPredictionMixin:
                 "mutual_information": metrics.mutual_information,
             }
         )
-        self.default_uncertainty_metric = "variance"
 
 
 class Model(ABC):
