@@ -231,38 +231,6 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
         )
         DDUMixin.__init__(self, input_size, output_size, ignore_indices, projection_size)
 
-    def get_uncertainty(
-        self,
-        input_: torch.LongTensor,
-        *args,
-        metric_name: Optional[str] = None,
-        **kwargs,
-    ) -> torch.FloatTensor:
-        """
-        Get the uncertainty scores for the current batch.
-
-        Parameters
-        ----------
-        input_: torch.LongTensor
-            (Batch of) Indexed input sequences.
-        metric_name: str
-            Name of uncertainty metric being used.
-
-        Returns
-        -------
-        torch.FloatTensor
-            Uncertainty scores for the current batch.
-        """
-        if metric_name is None:
-            metric_name = self.default_uncertainty_metric
-
-        if metric_name == "log_prob":
-            with torch.no_grad():
-                return self.gmm_predict(input_)
-
-        else:
-            return super().get_uncertainty(input_, metric_name)
-
 
 class DDUTransformer(Model):
     def __init__(
@@ -301,6 +269,7 @@ class DDUTransformer(Model):
         """
         self.module.eval()  # Disable dropout
         self.module.gmm_fit(data_split)
+        self.module.single_prediction_uncertainty_metrics["log_prob"] = self.module.gmm_predict
         self.module.train()
 
 
