@@ -134,7 +134,7 @@ def mutual_information(logits: torch.FloatTensor, eps: float = 1e-5) -> torch.Fl
        Mutual information for the current batch.
     """
     probs = torch.softmax(logits, dim=-1)
-    mutual_info = -(probs.mean(dim=1) * torch.log(probs.mean(dim=1))).sum(dim=-1) + (
+    mutual_info = -(probs.mean(dim=1) * torch.log(probs.mean(dim=1) + eps)).sum(dim=-1) + (
         probs * torch.log(probs + eps)
     ).sum(dim=-1).mean(dim=1)
 
