@@ -249,6 +249,13 @@ class SNGPModule(nn.Module):
         if num_predictions is None:
             num_predictions = self.num_predictions
 
+        # In case the Sigma matrix wasn't inverted yet, make sure that it is here.
+        # Also set inversed_sigma to False again in case this is called during validation so that the matrix will be
+        # updated over the training time again.
+        if not self.inversed_sigma:
+            self.invert_sigma_hat()
+            self.inversed_sigma = False
+
         post_mean, Phi = self._get_features(x)
 
         # Compute posterior variance
