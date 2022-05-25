@@ -54,7 +54,7 @@ def softmax_gap(logits: torch.FloatTensor) -> torch.FloatTensor:
     return gap
 
 
-def predictive_entropy(logits: torch.FloatTensor) -> torch.FloatTensor:
+def predictive_entropy(logits: torch.FloatTensor, eps: float = 1e-5) -> torch.FloatTensor:
     """
     Compute predictive entropy for a tensor of batch_size x seq_len x output_size.
 
@@ -69,7 +69,7 @@ def predictive_entropy(logits: torch.FloatTensor) -> torch.FloatTensor:
         Predictive entropy for the current batch.
     """
     probs = torch.softmax(logits, dim=-1)
-    pred_entropy = -(probs * torch.log(probs)).sum(dim=-1)
+    pred_entropy = -(probs * torch.log(probs + eps)).sum(dim=-1)
 
     return pred_entropy
 
