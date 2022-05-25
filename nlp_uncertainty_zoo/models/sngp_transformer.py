@@ -258,10 +258,10 @@ class SNGPModule(nn.Module):
         for k in range(self.output_size):
             post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
 
-        all_logits = torch.zeros(batch_size, num_predictions, self.output_size)
+        all_logits = torch.zeros(batch_size, num_predictions, self.output_size, device=self.device)
         for i in range(num_predictions):
             # Now actually sample logits from posterior
-            logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8))
+            logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8), device=self.device)
             logits_scale = torch.sqrt(1 + post_var * self.gp_mean_field_factor)
             logits /= logits_scale
             all_logits[:, i, :] = logits

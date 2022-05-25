@@ -116,7 +116,7 @@ def variance(logits: torch.FloatTensor) -> torch.FloatTensor:
     return var
 
 
-def mutual_information(logits: torch.FloatTensor) -> torch.FloatTensor:
+def mutual_information(logits: torch.FloatTensor, eps: float = 1e-5) -> torch.FloatTensor:
     """
     Compute the mutual information as defined in [3] given a number of predictions. Thus, this metric expects
     a logit tensor of size batch_size x num_predictions x seq_len x output_size.
@@ -135,7 +135,7 @@ def mutual_information(logits: torch.FloatTensor) -> torch.FloatTensor:
     """
     probs = torch.softmax(logits, dim=-1)
     mutual_info = -(probs.mean(dim=1) * torch.log(probs.mean(dim=1))).sum(dim=-1) + (
-        probs * torch.log(probs)
+        probs * torch.log(probs + eps)
     ).sum(dim=-1).mean(dim=1)
 
     return mutual_info
