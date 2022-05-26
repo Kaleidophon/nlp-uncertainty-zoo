@@ -230,7 +230,7 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
     def eval(self, *args):
         super().eval()
 
-        for module in self._modules.values():
+        for module in self.modules():
             if isinstance(module, torch.nn.Dropout):
                 module.train()
 
