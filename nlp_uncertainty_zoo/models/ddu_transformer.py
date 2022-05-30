@@ -350,10 +350,10 @@ class DDUBert(Model):
         )
 
     def _finetune(
-        self,
-        data_split: DataLoader,
-        verbose: bool,
-        wandb_run: Optional[WandBRun] = None,
+            self,
+            data_split: DataLoader,
+            verbose: bool,
+            wandb_run: Optional[WandBRun] = None,
     ):
         """
         As an additional step after training, DDU fits a Gaussian Discriminant Analysis model to
@@ -371,4 +371,5 @@ class DDUBert(Model):
         """
         self.module.eval()  # Disable dropout
         self.module.gmm_fit(data_split)
+        self.module.single_prediction_uncertainty_metrics["log_prob"] = self.module.gmm_predict
         self.module.train()

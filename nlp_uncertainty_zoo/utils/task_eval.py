@@ -56,8 +56,9 @@ def evaluate(
         else:
             batch_size, seq_len = labels.shape[0], 1
 
-        predictions = model.predict(input_ids, attention_mask=attention_mask)
-        predictions = rearrange(predictions, "b t p -> (b t) p")
+        with torch.no_grad():
+            predictions = model.predict(input_ids, attention_mask=attention_mask)
+            predictions = rearrange(predictions, "b t p -> (b t) p")
 
         if seq_len > 1:
             labels = rearrange(labels, "b l -> (b l)")

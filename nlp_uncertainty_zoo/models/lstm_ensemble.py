@@ -102,9 +102,11 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
 
         members = list(self.ensemble_members._modules.values())
 
-        return torch.stack(
+        out = torch.stack(
             [member(input_) for member in q * members + members[:r]], dim=1
         )
+
+        return out
 
     def forward(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
         preds = self.get_logits(input_).mean(dim=1)
