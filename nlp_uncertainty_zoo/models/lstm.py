@@ -297,17 +297,17 @@ class CellWiseLSTM(nn.Module):
 
         # Unpack hidden
         hx, cx = hidden
-        new_hx, new_cx = torch.zeros(hx.shape, device=self.device), torch.zeros(cx.shape, device=self.device)
 
         for t in range(sequence_length):
             input_t = input_[:, t, :]
 
             for layer, cell in enumerate(self.cells):
-                new_hx[layer, :], new_cx[layer, :] = cell(
+                input_t = self.dropout(input_t)
+                new_hx, new_cx = cell(
                     input_t, (hx[layer, :], cx[layer, :])
                 )
-                input_t = self.dropout(hx[layer, :])
+                input_t = new_hx
 
-            new_output[:, t] = hx[-1, :, :]
+            new_output[:, t] = new_hx
 
         return new_output, (new_hx, new_cx)
