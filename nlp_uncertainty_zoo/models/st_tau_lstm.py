@@ -139,6 +139,10 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
         for i, cell in enumerate(cells):
             self.register_parameter(f"temperature_{i+1}", cell.temperature)
 
+            # Register original LSTM cell parameters
+            for name, parameter in cell.named_parameters():
+                self.register_parameter(f"{name.replace('.', '_')}_{i+1}", parameter)
+
         # Override LSTM
         self.lstm = CellWiseLSTM(
             input_size,
