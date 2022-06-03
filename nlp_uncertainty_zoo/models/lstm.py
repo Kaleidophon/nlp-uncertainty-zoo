@@ -305,13 +305,12 @@ class CellWiseLSTM(nn.Module):
 
             for layer, cell in enumerate(self.cells):
                 input_t = self.dropout(input_t)
-                new_hx, new_cx = cell(
+                input_t, (new_hx, new_cx) = cell(
                     input_t, (hx[layer, :], cx[layer, :])
                 )
                 hidden_states[layer, :] = new_hx
                 cell_states[layer, :] = new_cx
-                input_t = new_hx
 
-            new_output[:, t] = new_hx
+            new_output[:, t] = input_t
 
         return new_output, (hidden_states, cell_states)

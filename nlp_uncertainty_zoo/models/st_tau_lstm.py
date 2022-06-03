@@ -57,14 +57,14 @@ class STTauCell(nn.LSTMCell):
         self,
         input: torch.Tensor,
         hx: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         hidden, cell = super().forward(input, hx)
 
         logits = self.centroid_kernel(hidden)
         samples = F.gumbel_softmax(logits, tau=self.temperature)
         new_hidden = samples @ self.centroid_kernel.weight
 
-        return new_hidden, cell
+        return hidden, (new_hidden, cell)
 
 
 class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
