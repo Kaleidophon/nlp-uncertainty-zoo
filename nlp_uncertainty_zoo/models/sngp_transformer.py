@@ -6,6 +6,7 @@ Implementation of a Spectral-normalized Gaussian Process transformer as presente
 # STD
 import math
 from typing import Tuple, Optional, Dict, Any
+import warnings
 
 # EXT
 from einops import rearrange
@@ -280,7 +281,12 @@ class SNGPModule(nn.Module):
         Invert the sigma hat matrix. Because its one matrix per class, we invert one slice of a tensor here at a time.
         """
         for k in range(self.output_size):
-            self.sigma_hat[k, :, :] = torch.inverse(self.sigma_hat_inv[k, :, :])
+            try:
+                self.sigma_hat[k, :, :] = torch.inverse(self.sigma_hat_inv[k, :, :])
+
+            except RuntimeError:
+                warnings.warn(f"Matrix for class {k + 1} could not be inverted, compute pseudo-inverse instead.")
+                self.sigma_hat[k, :, :] = torch.linalg.pinv(self.sigma_hat_inv[k, :, :])
 
         self.inversed_sigma = True
 
@@ -576,6 +582,7 @@ class SNGPBert(Model):
             model_dir,
             device,
         )
+        self.weight_decay_beta = model_params["weight_decay_beta"]
 
     def _finetune(
         self,
@@ -584,3 +591,17 @@ class SNGPBert(Model):
         wandb_run: Optional[WandBRun] = None,
     ):
         self.module.sngp_layer.invert_sigma_hat()
+
+    def get_loss(
+        self,
+        X: torch.Tensor,
+        y: torch.Tensor,
+        wandb_run: Optional[WandBRun] = None,
+        **kwargs,
+    ) -> torch.Tensor:
+        loss = super().get_loss(X, y, wandb_run, **kwargs)
+
+        loss += self.weight_decay_beta / 2 * torch.norm(self.module.sngp_layer.Beta.weight)
+
+        return loss
+

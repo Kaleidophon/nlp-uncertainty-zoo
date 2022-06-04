@@ -137,7 +137,7 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
 
         # No idea why this one is necessary but it is
         for i, cell in enumerate(cells):
-            self.register_parameter(f"temperature_{i+1}", cell.temperature)
+            self.register_parameter(f"temperature_{i + 1}", cell.temperature)
 
             # Register original LSTM cell parameters
             for name, parameter in cell.named_parameters():
