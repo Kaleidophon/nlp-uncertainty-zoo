@@ -34,12 +34,11 @@ class SNGPModule(nn.Module):
     def __init__(
         self,
         hidden_size: int,
-        last_layer_size: int,
         output_size: int,
         ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
-        gp_mean_field_factor: float,
+        kernel_amplitude: float,
         num_predictions: int,
         device: Device,
         **build_params,
@@ -63,9 +62,8 @@ class SNGPModule(nn.Module):
         beta_length_scale: float
             Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
             initialized from.
-        gp_mean_field_factor: float
-            Multiplicative factor used in the mean-field approximation for the posterior mean of the softmax
-            Gaussian process, based on `Lu et al. (2021) <https://arxiv.org/pdf/2006.07584.pdf>'_.
+        kernel_amplitude: float
+            Kernel amplitude used when computing GP features.
         num_predictions: int
             Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
         device: Device
@@ -75,18 +73,17 @@ class SNGPModule(nn.Module):
         self.device = device
 
         self.hidden_size = hidden_size
-        self.last_layer_size = last_layer_size
         self.output_size = output_size
         self.ridge_factor = ridge_factor
         self.scaling_coefficient = scaling_coefficient
         self.beta_length_scale = beta_length_scale
-        self.gp_mean_field_factor = gp_mean_field_factor
+        self.kernel_amplitude = kernel_amplitude
         self.num_predictions = num_predictions
 
         # ### Init parameters
 
         # Random, frozen output layer
-        self.output = nn.Linear(self.hidden_size, self.last_layer_size)
+        self.output = nn.Linear(self.hidden_size, self.output_size)
         # Change init of weights and biases following Liu et al. (2020)
         self.output.weight.data.normal_(0, 0.05)
         self.output.bias.data.uniform_(0, 2 * math.pi)
@@ -96,19 +93,17 @@ class SNGPModule(nn.Module):
         self.output.bias.requires_grad = False
 
         # Bundle all beta_k vectors into a matrix
-        self.Beta = nn.Linear(last_layer_size, output_size)
+        self.Beta = nn.Linear(output_size, output_size)
         self.Beta.weight.data.normal_(0, beta_length_scale)
         self.Beta.bias.data = torch.zeros(output_size)
 
-        # Initialize inverse of sigma hat, one matrix per class
-        self.sigma_hat_inv = (
-            torch.stack([torch.eye(last_layer_size) for _ in range(output_size)], dim=0)
-            * self.ridge_factor
-        ).to(device)
-        self.sigma_hat = torch.zeros(
-            output_size, last_layer_size, last_layer_size, device=device
-        )
+        # Initialize inverse of sigma hat, one matrix in total to save memory
+        self.sigma_hat_inv = torch.eye(output_size, device=self.device) * self.beta_length_scale
+        self.sigma_hat = torch.zeros(output_size, output_size, device=device)
         self.inversed_sigma = False
+
+        # Multivariate normal distributions that beta columns are sampled from after inverting sigma hat
+        self.beta_dists = [None for _ in range(output_size)]
 
     def _get_features(
         self, x: torch.FloatTensor
@@ -126,7 +121,7 @@ class SNGPModule(nn.Module):
         Tuple[torch.FloatTensor, torch.FloatTensor]
             Tensors of posterior mean and Phi matrix.
         """
-        Phi = math.sqrt(2 / self.last_layer_size) * torch.cos(
+        Phi = math.sqrt(2 * self.kernel_amplitude ** 2 / self.output_size) * torch.cos(
             self.output(-x)
         )  # batch_size x last_layer_size
         # Logits: batch_size x last_layer_size @ last_layer_size x output_size -> batch_size x output_size
@@ -135,7 +130,7 @@ class SNGPModule(nn.Module):
         return post_mean, Phi
 
     def forward(
-        self, x: torch.FloatTensor, update_sigma_hat_inv: bool = False
+        self, x: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
         Forward pass for SNGP layer.
@@ -144,8 +139,6 @@ class SNGPModule(nn.Module):
         ----------
         x: torch.FloatTensor
             Last hidden state of underlying model.
-        update_sigma_hat_inv: bool
-            Indicate whether the inverted sigma hat matrix should be updated (only during last training epoch).
 
         Returns
         -------
@@ -154,22 +147,27 @@ class SNGPModule(nn.Module):
         """
         logits, Phi = self._get_features(x)
 
-        if update_sigma_hat_inv:
+        if self.training:
             with torch.no_grad():
-                probs = F.softmax(logits, dim=-1)  # batch_size x output_size
-                Phi = Phi.unsqueeze(2)  # Make it batch_size x last_layer_size x 1
+                probs = F.softmax(logits, dim=-1)  # batch_size x seq_len x output_size
+                max_probs = torch.max(probs, dim=-1)[0]  # batch_size x seq_len
+                max_probs = max_probs * (1 - max_probs)
+
+                Phi = Phi.unsqueeze(-1)  # Make it batch_size x last_layer_size x 1
 
                 # Vectorized version of eq. 9
-                # P: probs * (1 - probs): batch_size x num_classes
-                # PhiPhi: bos,bso->boo: Outer product along batch_dimension;
-                # b: batch_size; o, p: last_layer_size; s: 1
-                # Results in num_classes x last_layer_size x last_layer_size tensor to update sigma_hat_inv
-                P = (probs * (1 - probs)).T
-                PhiPhi = torch.einsum("bos,bsp->bop", Phi, torch.transpose(Phi, 1, 2))
-                self.sigma_hat_inv *= self.scaling_coefficient
-                self.sigma_hat += (1 - self.scaling_coefficient) * torch.einsum(
-                    "kb,bop->kop", P, PhiPhi
+                # b: batch size
+                # s: sequence length
+                # o, p: output size
+                # z: singleton dimension
+                # Integrate multiplication with max_probs into einsum to avoid producing another 4D tensor
+                PhiPhi = torch.einsum(
+                    "bsoz,bszp->op",
+                    Phi * max_probs.unsqueeze(-1).unsqueeze(-1),
+                    torch.transpose(Phi, 2, 3)
                 )
+                self.sigma_hat_inv *= self.scaling_coefficient
+                self.sigma_hat_inv += (1 - self.scaling_coefficient) * PhiPhi
 
         return logits
 
@@ -191,39 +189,9 @@ class SNGPModule(nn.Module):
             Class probabilities for current batch.
         """
 
-        assert (
-            self.inversed_sigma
-        ), "Sigma_hat matrix hasn't been inverted yet. Use invert_sigma_hat()."
+        logits = self.get_logits(x, num_predictions)
 
-        if num_predictions is None:
-            num_predictions = self.num_predictions
-
-        post_mean, Phi = self._get_features(x)
-
-        # Compute posterior variance
-        Phi = Phi.unsqueeze(2)  # Make it batch_size x last_layer_size x 1
-        # Instance-wise outer-product: batch_size x last_layer_size x last_layer_size
-        PhiPhi = torch.einsum("bos,bsp->bop", Phi, torch.transpose(Phi, 1, 2))
-        post_var = torch.einsum("bop,pok->bk", PhiPhi, self.sigma_hat.T)
-
-        out = 0
-        for _ in range(num_predictions):
-            # Now actually sample logits from posterior
-            logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8), device=self.device)
-
-            logits_scale = torch.sqrt(1 + post_var * self.gp_mean_field_factor)
-            logits /= logits_scale
-
-            # Adjust logits with mean field factor like done in implementation
-            # here: https://github.com/google/uncertainty-baselines/blob/e854dfad5637cfae3561b67654c9c42ccabbe845/baseli
-            # nes/clinc_intent/sngp.py#L408 and here: https://github.com/google/edward2/blob/89b59c1f3310266b0eaf175a7a
-            # 28b048c727aaa2/edward2/tensorflow/layers/utils.py#L394
-            # and originally based on this (https://arxiv.org/pdf/2006.07584.pdf) paper.
-
-            preds = torch.softmax(logits, dim=-1)
-            out += preds
-
-        out /= num_predictions
+        out = F.softmax(logits, dim=-1).mean(dim=1)
 
         return out
 
@@ -245,7 +213,6 @@ class SNGPModule(nn.Module):
         torch.FloatTensor
             Logits for the current batch.
         """
-        batch_size = x.shape[0]
 
         if num_predictions is None:
             num_predictions = self.num_predictions
@@ -257,38 +224,55 @@ class SNGPModule(nn.Module):
             self.invert_sigma_hat()
             self.inversed_sigma = False
 
-        post_mean, Phi = self._get_features(x)
+        if num_predictions is None:
+            num_predictions = self.num_predictions
 
-        # Compute posterior variance
-        post_var = torch.zeros(
-            Phi.shape[0], self.output_size, device=self.device
-        )  # batch_size x output_size
-        for k in range(self.output_size):
-            post_var[:, k] = torch.diag(Phi @ self.sigma_hat[k, :, :] @ Phi.T)
+        _, Phi = self._get_features(x)
 
-        all_logits = torch.zeros(batch_size, num_predictions, self.output_size, device=self.device)
-        for i in range(num_predictions):
-            # Now actually sample logits from posterior
-            logits = torch.normal(post_mean, torch.sqrt(post_var + 1e-8)).to(self.device)
-            logits_scale = torch.sqrt(1 + post_var * self.gp_mean_field_factor)
-            logits /= logits_scale
-            all_logits[:, i, :] = logits
+        # Sample num_predictions Beta matrices
+        beta_samples = torch.stack(
+            [
+                dist.rsample((num_predictions, ))
+                for dist in self.beta_dists
+            ],
+            dim=-1
+        )
 
-        return all_logits
+        # Because we just stacked num_predictions samples for every column of the beta matrix, we now have to switch
+        # the last two dimensions to obtain a num_predictions Beta matrices
+        beta_samples = rearrange(beta_samples, "n c r -> n r c")
+
+        # Now compute different logits using betas sampled from the Laplace posterior. This operation is a batch
+        # instance-wise time step-wise multiplication of features with one Beta matrix per num_predictions.
+        # b: batch
+        # s: sequence length
+        # k: number of classes
+        # n: number of predictions
+        logits = torch.einsum("bsk,nkk->bnsk", Phi, beta_samples)
+
+        return logits
 
     def invert_sigma_hat(self) -> None:
         """
-        Invert the sigma hat matrix. Because its one matrix per class, we invert one slice of a tensor here at a time.
+        Invert the sigma hat matrix.
         """
-        for k in range(self.output_size):
-            try:
-                self.sigma_hat[k, :, :] = torch.inverse(self.sigma_hat_inv[k, :, :])
+        try:
+            self.sigma_hat = torch.inverse(self.sigma_hat_inv)
 
-            except RuntimeError:
-                warnings.warn(f"Matrix for class {k + 1} could not be inverted, compute pseudo-inverse instead.")
-                self.sigma_hat[k, :, :] = torch.linalg.pinv(self.sigma_hat_inv[k, :, :])
+        except RuntimeError:
+            warnings.warn(f"Matrix could not be inverted, compute pseudo-inverse instead.")
+            self.sigma_hat = torch.linalg.pinv(self.sigma_hat_inv)
 
         self.inversed_sigma = True
+
+        # Create multivariate normal distributions to sample columns from Beta matrix from. Updated every time
+        # sigma_hat is updated since it sigma_hat is the covariance matrix used.
+        self.beta_dists = [
+            torch.distributions.multivariate_normal.MultivariateNormal(
+                self.Beta.weight.data[:, k], covariance_matrix=self.sigma_hat,
+            )
+            for k in range(self.output_size)
+        ]
 
 
 class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
@@ -302,7 +286,6 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         vocab_size: int,
         input_size: int,
         hidden_size: int,
-        last_layer_size: int,
         output_size: int,
         input_dropout: float,
         dropout: float,
@@ -312,7 +295,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
-        gp_mean_field_factor: float,
+        kernel_amplitude: float,
         num_predictions: int,
         is_sequence_classifier: bool,
         device: Device,
@@ -333,8 +316,6 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
             Size of hidden representations.
         output_size: int
             Size of output of model.
-        last_layer_size: int
-            Size of last layer before output layer. Called D_L in the original paper.
         input_dropout: float
             Input dropout added to embeddings.
         dropout: float
@@ -353,9 +334,8 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         beta_length_scale: float
             Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
             initialized from.
-        gp_mean_field_factor: float
-            Multiplicative factor used in the mean-field approcimation for the posterior mean of the softmax
-            Gaussian process, based on `Lu et al. (2021) <https://arxiv.org/pdf/2006.07584.pdf>'_.
+        kernel_amplitude: float
+            Kernel amplitude used when computing GP features.
         num_predictions: int
             Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
         is_sequence_classifier: bool
@@ -382,12 +362,11 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
 
         self.sngp_layer = SNGPModule(
             input_size,
-            last_layer_size,
             output_size,
             ridge_factor,
             scaling_coefficient,
             beta_length_scale,
-            gp_mean_field_factor,
+            kernel_amplitude,
             num_predictions,
             device,
         )
@@ -489,13 +468,12 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
     def __init__(
         self,
         bert_name: str,
-        last_layer_size: int,
         output_size: int,
         spectral_norm_upper_bound: float,
         ridge_factor: float,
         scaling_coefficient: float,
         beta_length_scale: float,
-        gp_mean_field_factor: float,
+        kernel_amplitude: float,
         num_predictions: int,
         is_sequence_classifier: bool,
         device: Device,
@@ -513,16 +491,33 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
         hidden_size = self.bert.config.hidden_size
         self.sngp_layer = SNGPModule(
             hidden_size,
-            last_layer_size,
             output_size,
             ridge_factor,
             scaling_coefficient,
             beta_length_scale,
-            gp_mean_field_factor,
+            kernel_amplitude,
             num_predictions,
             device,
         )
         self.layer_norm = nn.LayerNorm([hidden_size])
+
+    def forward(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
+        attention_mask = kwargs["attention_mask"]
+        return_dict = self.bert.forward(input_, attention_mask, return_dict=True)
+
+        if self.is_sequence_classifier:
+            cls_activations = return_dict["last_hidden_state"][:, 0, :]
+            out = torch.tanh(self.bert.pooler.dense(cls_activations))
+            out = self.layer_norm(out)
+            out = out.unsqueeze(1)
+
+        else:
+            activations = return_dict["last_hidden_state"]
+            out = self.layer_norm(activations)
+
+        out = self.sngp_layer.forward(out)
+
+        return out
 
     def get_logits(
         self,
@@ -551,20 +546,28 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
         if not num_predictions:
             num_predictions = self.num_predictions
 
-        batch_size = input_.shape[0]
-        sequence_length = input_.shape[1] if not self.is_sequence_classifier else 1
         out = self.get_hidden(input_, **kwargs)
-        out = rearrange(out, "b t p -> (b t) p")
         out = self.sngp_layer.get_logits(out, num_predictions=num_predictions)
-        out = rearrange(out, "(b t) n p -> b n t p", b=batch_size, t=sequence_length)
 
         return out
 
     def predict(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
-        logits = self.get_logits(input_, *args, **kwargs).mean(dim=1)
-        probabilities = F.softmax(logits, dim=-1)
+        attention_mask = kwargs["attention_mask"]
+        return_dict = self.bert.forward(input_, attention_mask, return_dict=True)
 
-        return probabilities
+        if self.is_sequence_classifier:
+            cls_activations = return_dict["last_hidden_state"][:, 0, :]
+            out = torch.tanh(self.bert.pooler.dense(cls_activations))
+            out = self.layer_norm(out)
+            out = out.unsqueeze(1)
+
+        else:
+            activations = return_dict["last_hidden_state"]
+            out = self.layer_norm(activations)
+
+        probs = self.sngp_layer.predict(out)
+
+        return probs
 
 
 class SNGPBert(Model):
