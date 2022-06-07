@@ -102,6 +102,12 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
             device=device
         )
 
+        for i, layer in enumerate(self.lstm.layers):
+
+            # Register original Bayesian LSTM layer parameters
+            for name, parameter in layer.named_parameters():
+                self.register_parameter(f"{name.replace('.', '_')}_{i+1}", parameter)
+
     def get_logits(
         self,
         input_: torch.LongTensor,

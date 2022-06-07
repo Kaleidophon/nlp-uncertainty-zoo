@@ -3,18 +3,17 @@ Implementation of an ensemble of LSTMs.
 """
 
 # STD
-from itertools import cycle, islice
 from typing import Optional, Dict, Any
 
 # EXT
+from einops import rearrange
 import torch
 from torch import nn as nn
-from torch.nn import functional as F
 
 # PROJECT
 from nlp_uncertainty_zoo.models.lstm import LSTMModule
 from nlp_uncertainty_zoo.models.model import Module, MultiPredictionMixin, Model
-from nlp_uncertainty_zoo.utils.custom_types import Device
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
 class LSTMEnsembleModule(Module, MultiPredictionMixin):
@@ -71,6 +70,7 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         )
         MultiPredictionMixin.__init__(self, ensemble_size)
 
+        self.ensemble_size = ensemble_size
         self.ensemble_members = nn.ModuleList(
             [
                 LSTMModule(
@@ -109,7 +109,7 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         return out
 
     def forward(self, input_: torch.LongTensor, *args, **kwargs) -> torch.FloatTensor:
-        preds = self.get_logits(input_).mean(dim=1)
+        preds = self.get_logits(input_)
 
         return preds
 
@@ -163,3 +163,29 @@ class LSTMEnsemble(Model):
             model_dir,
             device,
         )
+
+    def get_loss(
+        self,
+        X: torch.Tensor,
+        y: torch.Tensor,
+        wandb_run: Optional[WandBRun] = None,
+        **kwargs,
+    ) -> torch.Tensor:
+        loss_function = nn.CrossEntropyLoss(
+            ignore_index=-100, weight=self.loss_weights
+        )  # Index that is used for non-masked tokens for MLM
+        loss = torch.zeros(1, device=self.device)
+        preds = self.module.forward(X, **kwargs)
+
+        for n in range(self.module.ensemble_size):
+
+            loss += loss_function(
+                rearrange(preds[:, n], "b t p -> (b t) p"),
+                rearrange(y, "b l -> (b l)")
+                if not self.module.is_sequence_classifier
+                else y,
+            )
+
+        loss /= self.module.ensemble_size
+
+        return loss

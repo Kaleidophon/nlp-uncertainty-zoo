@@ -124,6 +124,7 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
                 for in_size in [input_size] + [hidden_size] * (num_layers - 1)
             ]
         )
+
         self.embeddings = nn.Embedding(vocab_size, input_size)
         self.decoder = nn.Linear(hidden_size, output_size)
 

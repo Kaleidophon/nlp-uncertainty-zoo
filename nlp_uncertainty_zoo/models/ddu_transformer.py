@@ -146,12 +146,13 @@ class DDUMixin:
         diff = hidden - self.mu  # (batch_size x seq_length) x output_size x input_size
         diff_t = rearrange(diff, "b o i -> b i o")
 
-        probs = (
-            1
-            / (2 * math.pi * self.determinants + 1e-6)
-            * torch.exp(
-                -0.5 * torch.einsum("boi,oii,bio->bo", diff, self.Sigma, diff_t)
-            )
+        probs = torch.log(
+            1 - (
+                1 / (2 * math.pi * self.determinants + 1e-6)
+                * torch.exp(
+                    -0.5 * torch.einsum("boi,oii,bio->bo", diff, self.Sigma, diff_t)
+                )
+            ) + 1e-6
         )  # (batch_size x seq_length) x output_size
         probs = rearrange(probs, "(b s) o -> b s o", b=batch_size)
 
