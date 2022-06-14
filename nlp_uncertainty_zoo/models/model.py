@@ -389,6 +389,7 @@ class Model(ABC):
             )
 
             batch_loss.backward()
+
             clip_grad_norm_(self.module.parameters(), grad_clip)
             self.optimizer.step()
             self.optimizer.zero_grad(
