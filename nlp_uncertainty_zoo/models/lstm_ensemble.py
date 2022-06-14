@@ -6,7 +6,7 @@ Implementation of an ensemble of LSTMs.
 from collections import Counter
 from typing import Optional, Dict, Any, Generator, List
 import os
-import datetime
+from datetime import datetime
 
 # EXT
 from torch.utils.data import DataLoader
