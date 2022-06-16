@@ -262,9 +262,12 @@ class LSTMEnsemble(Model):
 
             batch_loss = torch.stack(batch_losses).mean().detach()  # Still get mean for tracking purposes
 
+            # Clip the parameter gradients member-wise
+            for member in self.module.ensemble_members:
+                clip_grad_norm_(member.parameters(), grad_clip)
+
             ### Change end
 
-            clip_grad_norm_(self.module.parameters(), grad_clip)
             self.optimizer.step()
             self.optimizer.zero_grad(
                 set_to_none=True
