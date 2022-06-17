@@ -9,6 +9,7 @@ import os
 from datetime import datetime
 
 # EXT
+import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.nn.utils import clip_grad_norm_
 import dill
@@ -171,6 +172,26 @@ class LSTMEnsemble(Model):
             model_dir,
             device,
         )
+
+        # Override optimizer and scheduler
+        optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
+        self.optimizer = optimizer_class(
+            params=[
+                {
+                    "params": self.module.ensemble_members[i].parameters(),
+                    "lr": self.model_params["lr"],
+                    "weight_decay": self.model_params.get("weight_decay", 0)
+                }
+                for i in range(self.module.ensemble_size)
+            ]
+        )
+
+        self.scheduler = None
+        if "scheduler_class" in self.model_params:
+            scheduler_class = self.model_params["scheduler_class"]
+            self.scheduler = scheduler_class(
+                self.optimizer, **self.model_params["scheduler_kwargs"]
+            )
 
     def fit(
         self,
