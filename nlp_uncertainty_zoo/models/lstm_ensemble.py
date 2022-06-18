@@ -173,26 +173,33 @@ class LSTMEnsemble(Model):
             device,
         )
 
+        if "init_weight" in model_params:
+            init_weight = model_params["init_weight"]
+
+            for member in self.module.ensemble_members:
+                for layer_weights in member.lstm.all_weights:
+                    for param in layer_weights:
+                        param.data.uniform_(-init_weight, init_weight)
+
         # Override optimizer and scheduler
         optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
-        self.optimizers = [
-            optimizer_class(
-                **{
+        self.optimizer = optimizer_class(
+            params=[
+                {
                     "params": self.module.ensemble_members[i].parameters(),
                     "lr": self.model_params["lr"],
                     "weight_decay": self.model_params.get("weight_decay", 0)
                 }
-            )
-            for i in range(self.module.ensemble_size)
-        ]
+                for i in range(self.module.ensemble_size)
+            ]
+        )
 
-        self.schedulers = None
+        self.scheduler = None
         if "scheduler_class" in self.model_params:
             scheduler_class = self.model_params["scheduler_class"]
-            self.schedulers = [
-                scheduler_class(optimizer, **self.model_params["scheduler_kwargs"])
-                for optimizer in self.optimizers
-            ]
+            self.scheduler = scheduler_class(
+                self.optimizer, **self.model_params["scheduler_kwargs"]
+            )
 
     def fit(
         self,
@@ -280,7 +287,7 @@ class LSTMEnsemble(Model):
             )
 
             for batch_loss in batch_losses:
-                batch_loss.backward()
+                batch_loss.backward(retain_graph=True)
 
             batch_loss = torch.stack(batch_losses).mean().detach()  # Still get mean for tracking purposes
 
@@ -290,20 +297,17 @@ class LSTMEnsemble(Model):
 
             ### Change end
 
-            for optimizer in self.optimizers:
-                optimizer.step()
-                optimizer.zero_grad(
-                    set_to_none=True
-                )  # Save memory by setting to None
+            self.optimizer.step()
+            self.optimizer.zero_grad(
+                set_to_none=True
+            )  # Save memory by setting to None
 
             # Update learning rate
-            if self.schedulers is not None:
-
-                for scheduler in self.schedulers:
-                    scheduler.step()
+            if self.scheduler is not None:
+                self.scheduler.step()
 
                 if wandb_run is not None:
-                    wandb_run.log({"batch_learning_rate": self.schedulers[0].get_last_lr()[0]})
+                    wandb_run.log({"batch_learning_rate": self.scheduler.get_last_lr()[0]})
 
             batch_loss = batch_loss.cpu().detach().item()
             if batch_loss == np.inf or np.isnan(batch_loss):
@@ -410,14 +414,12 @@ class LSTMEnsemble(Model):
             ignore_index=-100, weight=self.loss_weights
         )  # Index that is used for non-masked tokens for MLM
         total_loss = []
-        preds = [
-            member.forward(X, **kwargs) for member in list(self.module.ensemble_members._modules.values())
-        ]
+        preds = self.module.forward(X, **kwargs)
 
         for n in range(self.module.ensemble_size):
 
             loss = loss_function(
-                rearrange(preds[n], "b t p -> (b t) p"),
+                rearrange(preds[:, n], "b t p -> (b t) p"),
                 rearrange(y, "b l -> (b l)")
                 if not self.module.is_sequence_classifier
                 else y,
