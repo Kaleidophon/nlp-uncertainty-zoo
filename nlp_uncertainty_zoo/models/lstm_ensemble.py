@@ -112,7 +112,7 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         members = list(self.ensemble_members._modules.values())
 
         out = torch.stack(
-            [member(input_) for member in q * members + members[:r]], dim=1
+            [member.get_logits(input_) for member in q * members + members[:r]], dim=1
         )
 
         return out
@@ -406,12 +406,14 @@ class LSTMEnsemble(Model):
             ignore_index=-100, weight=self.loss_weights
         )  # Index that is used for non-masked tokens for MLM
         total_loss = []
-        preds = self.module.forward(X, **kwargs)
+        preds = [
+            member.forward(X, **kwargs) for member in list(self.module.ensemble_members._modules.values())
+        ]
 
         for n in range(self.module.ensemble_size):
 
             loss = loss_function(
-                rearrange(preds[:, n], "b t p -> (b t) p"),
+                rearrange(preds[n], "b t p -> (b t) p"),
                 rearrange(y, "b l -> (b l)")
                 if not self.module.is_sequence_classifier
                 else y,
