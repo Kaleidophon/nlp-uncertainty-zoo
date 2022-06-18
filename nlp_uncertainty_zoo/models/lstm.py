@@ -242,8 +242,9 @@ class LayerWiseLSTM(nn.Module):
         new_hx, new_cx = torch.zeros(hx.shape, device=self.device), torch.zeros(cx.shape, device=self.device)
 
         for l, layer in enumerate(self.layers):
+            input_ = self.dropout(input_)
             out, (new_hx[l, :], new_cx[l, :]) = layer(input_, (hx[l, :], cx[l, :]))
-            input_ = self.dropout(out)
+            input_ = out
 
         return out, (new_hx, new_cx)
 
