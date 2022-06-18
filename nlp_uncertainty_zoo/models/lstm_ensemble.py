@@ -175,23 +175,24 @@ class LSTMEnsemble(Model):
 
         # Override optimizer and scheduler
         optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
-        self.optimizer = optimizer_class(
-            params=[
-                {
+        self.optimizers = [
+            optimizer_class(
+                **{
                     "params": self.module.ensemble_members[i].parameters(),
                     "lr": self.model_params["lr"],
                     "weight_decay": self.model_params.get("weight_decay", 0)
                 }
-                for i in range(self.module.ensemble_size)
-            ]
-        )
+            )
+            for i in range(self.module.ensemble_size)
+        ]
 
-        self.scheduler = None
+        self.schedulers = None
         if "scheduler_class" in self.model_params:
             scheduler_class = self.model_params["scheduler_class"]
-            self.scheduler = scheduler_class(
-                self.optimizer, **self.model_params["scheduler_kwargs"]
-            )
+            self.schedulers = [
+                scheduler_class(optimizer, **self.model_params["scheduler_kwargs"])
+                for optimizer in self.optimizers
+            ]
 
     def fit(
         self,
@@ -279,7 +280,7 @@ class LSTMEnsemble(Model):
             )
 
             for batch_loss in batch_losses:
-                batch_loss.backward(retain_graph=True)
+                batch_loss.backward()
 
             batch_loss = torch.stack(batch_losses).mean().detach()  # Still get mean for tracking purposes
 
@@ -289,17 +290,20 @@ class LSTMEnsemble(Model):
 
             ### Change end
 
-            self.optimizer.step()
-            self.optimizer.zero_grad(
-                set_to_none=True
-            )  # Save memory by setting to None
+            for optimizer in self.optimizers:
+                optimizer.step()
+                optimizer.zero_grad(
+                    set_to_none=True
+                )  # Save memory by setting to None
 
             # Update learning rate
-            if self.scheduler is not None:
-                self.scheduler.step()
+            if self.schedulers is not None:
+
+                for scheduler in self.schedulers:
+                    scheduler.step()
 
                 if wandb_run is not None:
-                    wandb_run.log({"batch_learning_rate": self.scheduler.get_last_lr()[0]})
+                    wandb_run.log({"batch_learning_rate": self.schedulers[0].get_last_lr()[0]})
 
             batch_loss = batch_loss.cpu().detach().item()
             if batch_loss == np.inf or np.isnan(batch_loss):
