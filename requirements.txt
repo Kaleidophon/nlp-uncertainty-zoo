@@ -13,3 +13,4 @@ gpytorch
 scipy
 dill
 joblib
+alpaca-ml==0.8.2
