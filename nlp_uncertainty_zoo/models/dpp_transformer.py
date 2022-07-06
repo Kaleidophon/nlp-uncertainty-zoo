@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional
 
 # EXT
 from alpaca.uncertainty_estimator.masks import build_mask
+from einops import rearrange
 import torch
 import torch.nn.functional as F
 
@@ -20,10 +21,11 @@ from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 class DropoutDPP(torch.nn.Module):
+    dropout_id = -1
+
     def __init__(
         self,
         p: float,
-        activate=False,
         mask_name="dpp",
         max_n=100,
         max_frac=0.4,
@@ -31,7 +33,6 @@ class DropoutDPP(torch.nn.Module):
     ):
         super().__init__()
 
-        self.activate = activate
         self.p = p
         self.p_init = p
 
@@ -41,12 +42,25 @@ class DropoutDPP(torch.nn.Module):
         self.max_frac = max_frac
         self.coef = coef
 
+        self.curr_dropout_id = DropoutDPP.update()
+
+    @classmethod
+    def update(cls):
+        cls.dropout_id += 1
+        return cls.dropout_id
+
     def forward(self, x: torch.Tensor):
         if self.training:
             return F.dropout(x, self.p, training=True)
+
         else:
-            if not self.activate:
-                return x
+            # For attention weights
+            if len(x.shape) == 4:
+                return F.dropout(x, self.p, training=True)
+
+            batch_size = x.shape[0]
+
+            x = rearrange(x, "b t p -> (b t) p")
 
             sum_mask = self.get_mask(x)
 
@@ -61,6 +75,7 @@ class DropoutDPP(torch.nn.Module):
                 frac_nonzero = self.calc_non_zero_neurons(sum_mask)
 
             res = x * sum_mask / i
+            res = rearrange(res, "(b t) p -> b t p", b=batch_size)
 
             return res
 
@@ -127,6 +142,9 @@ class DPPBertModule(VariationalBertModule):
                     current_obj = getattr(current_obj, obj)
 
                 setattr(current_obj, target_obj, dpp_module)
+
+    def eval(self, *args):
+        torch.nn.Module.eval(self)
 
 
 class DPPBert(Model):
