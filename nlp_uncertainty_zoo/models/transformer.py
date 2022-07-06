@@ -51,8 +51,7 @@ class TransformerModule(Module):
         output_size: int
             Size of output of model.
         input_dropout: float
-            Dropout on word embeddings. Dropout application corresponds to `Gal & Ghahramani (2016)
-            <https://papers.nips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf>`_.
+            Dropout on word embeddings.
         dropout: float
             Dropout rate.
         num_heads: int

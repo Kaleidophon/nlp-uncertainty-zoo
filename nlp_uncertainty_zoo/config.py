@@ -20,8 +20,7 @@ from nlp_uncertainty_zoo.models.bayesian_lstm import BayesianLSTM
 from nlp_uncertainty_zoo.models.st_tau_lstm import STTauLSTM
 from nlp_uncertainty_zoo.models.transformer import Transformer
 from nlp_uncertainty_zoo.models.ddu_transformer import DDUTransformer, DDUBert
-from nlp_uncertainty_zoo.models.dpp_transformer import DPPBert
-from nlp_uncertainty_zoo.models.due_transformer import DUETransformer, DUEBert
+from nlp_uncertainty_zoo.models.dpp_transformer import DPPBert, DPPTransformer
 from nlp_uncertainty_zoo.models.sngp_transformer import SNGPTransformer, SNGPBert
 
 # AVAILABLE DATASETS AND MODELS
@@ -48,9 +47,8 @@ AVAILABLE_MODELS = {
     "sngp_bert": SNGPBert,
     "ddu_transformer": DDUTransformer,
     "ddu_bert": DDUBert,
+    "dpp_transformer": DPPTransformer,
     "dpp_bert": DPPBert,
-    "due_transformer": DUETransformer,
-    "due_bert": DUEBert,
 }
 
 # MODEL HYPERPARAMETERS

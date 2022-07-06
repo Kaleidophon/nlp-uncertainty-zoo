@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 with open("requirements.txt") as f:
@@ -8,7 +8,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="nlp-uncertainty-zoo",
-    version="1.0.0",
+    version="0.9.0",
     author="Dennis Ulmer",
     description="PyTorch Implementation of Models used for Uncertainty Estimation in Natural Language Processing.",
     long_description=long_description,

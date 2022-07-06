@@ -604,6 +604,7 @@ class SNGPBert(Model):
     ) -> torch.Tensor:
         loss = super().get_loss(X, y, wandb_run, **kwargs)
 
+        # Compute weight decay for beta matrix separately
         loss += self.weight_decay_beta / 2 * torch.norm(self.module.sngp_layer.Beta.weight)
 
         return loss

@@ -1,6 +1,6 @@
 """
 Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by
-s`Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_.
+ `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_.
 """
 
 # STD

@@ -3,19 +3,14 @@ Define Bert modules used in this project and make them consistent with the other
 """
 
 # EXT
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.utils import clip_grad_norm_
-from typing import Optional
-from torch.utils.data import DataLoader
-from tqdm import tqdm
 from transformers import BertModel
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Module
-from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
+from nlp_uncertainty_zoo.utils.custom_types import Device
 
 
 class BertModule(Module):

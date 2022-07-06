@@ -17,12 +17,10 @@ from nlp_uncertainty_zoo.models.ddu_transformer import (
     DDUTransformer,
 )
 from nlp_uncertainty_zoo.models.dpp_transformer import (
+    DPPTransformerModule,
+    DPPTransformer,
     DPPBertModule,
     DPPBert
-)
-from nlp_uncertainty_zoo.models.due_transformer import (
-    DUETransformerModule,
-    DUETransformer,
 )
 from nlp_uncertainty_zoo.models.sngp_transformer import SNGPModule, SNGPTransformer
 from nlp_uncertainty_zoo.models.transformer import TransformerModule, Transformer

@@ -5,11 +5,11 @@ from nlp_uncertainty_zoo.models.ddu_transformer import (
     DDUBert,
     DDUBertModule,
 )
-from nlp_uncertainty_zoo.models.due_transformer import (
-    DUETransformer,
-    DUETransformerModule,
-    DUEBert,
-    DUEBertModule,
+from nlp_uncertainty_zoo.models.dpp_transformer import (
+    DPPTransformer,
+    DPPTransformerModule,
+    DPPBert,
+    DPPBertModule
 )
 from nlp_uncertainty_zoo.models.lstm import LSTM, LSTMModule
 from nlp_uncertainty_zoo.models.lstm_ensemble import LSTMEnsemble, LSTMEnsembleModule
