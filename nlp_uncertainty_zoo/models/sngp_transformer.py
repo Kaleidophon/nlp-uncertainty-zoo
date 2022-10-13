@@ -420,12 +420,8 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         if not num_predictions:
             num_predictions = self.num_predictions
 
-        batch_size = input_.shape[0]
-        sequence_length = input_.shape[1] if not self.is_sequence_classifier else 1
         out = self.get_hidden(input_)
-        out = rearrange(out, "b t p -> (b t) p")
         out = self.sngp_layer.get_logits(out, num_predictions=num_predictions)
-        out = rearrange(out, "(b t) n p -> b n t p", b=batch_size, t=sequence_length)
 
         return out
 
@@ -479,6 +475,35 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
         device: Device,
         **build_params,
     ):
+        """
+        Initialize a BERT with spectrally-normalized Gaussian Process output layer.
+
+        Parameters
+        ----------
+        bert_name: str
+            Name of the underlying BERT, as specified in HuggingFace transformers.
+        output_size: int
+            Number of classes.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+        ridge_factor: float
+            Factor that identity sigma hat matrices of the SNGP layer are multiplied by.
+        scaling_coefficient: float
+            Momentum factor that is used when updating the sigma hat matrix of the SNGP layer during the last training
+            epoch.
+        beta_length_scale: float
+            Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
+            initialized from.
+        kernel_amplitude: float
+            Kernel amplitude used when computing GP features.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
             bert_name,
             output_size,

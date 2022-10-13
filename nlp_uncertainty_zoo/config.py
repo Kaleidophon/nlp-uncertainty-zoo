@@ -3,12 +3,7 @@ This module puts all the hyper-, training and preprocessing parameters used in t
 """
 
 # PROJECT
-from nlp_uncertainty_zoo.utils.data import (
-    PennTreebankBuilder,
-    ClincBuilder,
-    DanPlusBuilder,
-)
-import nlp_uncertainty_zoo.model_configs as configs
+from nlp_uncertainty_zoo.defaults import LANGUAGE_MODELLING_DEFAULT_PARAMS, SEQUENCE_CLASSIFICATION_DEFAULT_PARAMS
 from nlp_uncertainty_zoo.models.variational_transformer import (
     VariationalTransformer,
     VariationalBert,
@@ -23,17 +18,7 @@ from nlp_uncertainty_zoo.models.ddu_transformer import DDUTransformer, DDUBert
 from nlp_uncertainty_zoo.models.dpp_transformer import DPPBert, DPPTransformer
 from nlp_uncertainty_zoo.models.sngp_transformer import SNGPTransformer, SNGPBert
 
-# AVAILABLE DATASETS AND MODELS
-AVAILABLE_DATASETS = {
-    "ptb": PennTreebankBuilder,
-    "clinc": ClincBuilder,
-    "dan+": DanPlusBuilder,
-}
-DATASET_TASKS = {
-    "ptb": "language_modelling",
-    "clinc": "sequence_classification",
-    "dan+": "token_classification",
-}
+# AVAILABLE MODELS
 AVAILABLE_MODELS = {
     "lstm": LSTM,
     "lstm_ensemble": LSTMEnsemble,
@@ -51,9 +36,7 @@ AVAILABLE_MODELS = {
     "dpp_bert": DPPBert,
 }
 
-# MODEL HYPERPARAMETERS
-# Hyperparameters by dataset and model
-MODEL_PARAMS = {
-    "ptb": configs.PTB_MODEL_PARAMS,
-    "clinc": configs.CLINC_MODEL_PARAMS,
+DEFAULT_PARAMS = {
+    "language_modelling": LANGUAGE_MODELLING_DEFAULT_PARAMS,
+    "sequence_classification": SEQUENCE_CLASSIFICATION_DEFAULT_PARAMS
 }

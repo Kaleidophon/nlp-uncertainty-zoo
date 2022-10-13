@@ -225,36 +225,6 @@ class LanguageModellingDatasetBuilder(DatasetBuilder):
         return self.dataloaders
 
 
-class PennTreebankBuilder(LanguageModellingDatasetBuilder):
-    """
-    Dataset class for the Penn Treebank.
-    """
-
-    def __init__(
-        self,
-        data_dir: str,
-        max_length: int,
-        sampler_class: Optional[Type] = None,
-        sampler_kwargs: Optional[SamplerKwargs] = None,
-        num_jobs: Optional[int] = 1,
-    ):
-        super().__init__(
-            name="ptb",
-            data_dir=data_dir,
-            splits={
-                "train": f"{data_dir}/ptb/ptb.train.txt",
-                "valid": f"{data_dir}/ptb/ptb.valid.txt",
-                "test": f"{data_dir}/ptb/ptb.test.txt",
-            },
-            type_="next_token_prediction",
-            tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
-            max_length=max_length,
-            sampler_class=sampler_class,
-            sampler_kwargs=sampler_kwargs,
-            num_jobs=num_jobs,
-        )
-
-
 class ClassificationDatasetBuilder(DatasetBuilder):
     """
     DatasetBuilder for classification datasets. This includes sequence classification and token classification /
@@ -432,67 +402,3 @@ class ClassificationDatasetBuilder(DatasetBuilder):
         }
 
         return self.dataloaders
-
-
-class ClincBuilder(ClassificationDatasetBuilder):
-    """
-    Dataset class for the CLINC OOS dataset.
-    """
-
-    def __init__(
-        self,
-        data_dir: str,
-        max_length: int,
-        sampler_class: Optional[Type] = None,
-        sampler_kwargs: Optional[SamplerKwargs] = None,
-        num_jobs: Optional[int] = 1,
-    ):
-        super().__init__(
-            name="clinc",
-            data_dir=data_dir,
-            splits={
-                "train": f"{data_dir}/clinc/train.csv",
-                "valid": f"{data_dir}/clinc/val.csv",
-                "test": f"{data_dir}/clinc/test.csv",
-                "ood_test": f"{data_dir}/clinc/oos_test.csv",
-            },
-            type_="sequence_classification",
-            tokenizer=BertTokenizer.from_pretrained("bert-base-cased"),
-            max_length=max_length,
-            sampler_class=sampler_class,
-            sampler_kwargs=sampler_kwargs,
-            num_jobs=num_jobs,
-        )
-
-
-class DanPlusBuilder(ClassificationDatasetBuilder):
-    """
-    Dataset class for the Dan+ dataset.
-    """
-
-    def __init__(
-        self,
-        data_dir: str,
-        max_length: int,
-        sampler_class: Optional[Type] = None,
-        sampler_kwargs: Optional[SamplerKwargs] = None,
-        num_jobs: Optional[int] = 1,
-    ):
-        super().__init__(
-            name="dan+",
-            data_dir=data_dir,
-            splits={
-                "train": f"{data_dir}/danplus/train.csv",
-                "valid": f"{data_dir}/danplus/val.csv",
-                "test": f"{data_dir}/danplus/test.csv",
-                "ood_test": f"{data_dir}/danplus/ood_test.csv",
-            },
-            type_="token_classification",
-            tokenizer=BertTokenizerFast.from_pretrained(
-                "alexanderfalk/danbert-small-cased"
-            ),
-            max_length=max_length,
-            sampler_class=sampler_class,
-            sampler_kwargs=sampler_kwargs,
-            num_jobs=num_jobs,
-        )
