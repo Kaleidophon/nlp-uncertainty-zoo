@@ -4,11 +4,15 @@ This repository contains implementations of several models used for uncertainty 
 implemented in PyTorch. You can install the repository using pip:
 
     pip3 install nlp-uncertainty-zoo
-    @TODO: Publish repo as package
 
 If you are using the repository in your academic research, please cite the paper below:
 
     @TODO: Add citation
+
+Certain parts of this repository are still incomplete, but will come soon (I promise!):
+
+- [ ] Build proper documentation
+- [ ] Add demo jupyter notebook
 
 ### Included models
 
@@ -91,3 +95,5 @@ a corresponding `Model` and `Module` class, inheriting from the classes of the s
 the logits of a model and output an uncertainty score (the higher the score, the more uncertain the model). The function should output 
   a batch_size x sequence_length matrix, with batch_size x 1 for sequence classification tasks. After finishing the implementation, you can 
   add the metric to the `single_prediction_uncertainty_metrics` of the `models.model.Model` class and `multi_prediction_uncertainty_metrics` of `models.model.MultiPredictionMixin` (if applicable).
+  
+You would like to add something else? Create an issue or contact me at dennis {dot} ulmer {at} mailbox {dot} org!
