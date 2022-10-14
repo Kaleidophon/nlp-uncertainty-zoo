@@ -26,12 +26,31 @@ from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 class DDUMixin:
     """
     Implementation of the functions used by the Deep Deterministic Uncertainty (DDU) Transformer by
-    `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_. as a Mixin class. This is done to avoid
-    code redundancies.
+    `Mukhoti et al. (2021) <https://arxiv.org/pdf/2102.11582.pdf>`_. as a Mixin class. This is done to avoid code
+    redundancies.
     """
 
-    def __init__(self, input_size: int, output_size: int, ignore_indices: List[int], projection_size: Optional[int] = None):
+    def __init__(
+        self,
+        input_size: int,
+        output_size: int,
+        ignore_indices: List[int],
+        projection_size: Optional[int] = None
+    ):
+        """
+        Initialize a DDUMixin.
 
+        Parameters
+        ----------
+        input_size: int
+            Dimensionality of input to the Gaussian Mixture Model layer.
+        output_size: int
+            Number of classes.
+        ignore_indices: List[int]
+            List of indices for which activations should be ignored when fitting the GMM.
+        projection_size: Optional[int]
+            If given, project hidden activations into a subspace with dimensionality projection_size. Default is None.
+        """
         self.ignore_indices = ignore_indices
         self.projection_size = projection_size
         self.gda_size = input_size if projection_size is None else projection_size
@@ -351,10 +370,10 @@ class DDUBert(Model):
         )
 
     def _finetune(
-            self,
-            data_split: DataLoader,
-            verbose: bool,
-            wandb_run: Optional[WandBRun] = None,
+        self,
+        data_split: DataLoader,
+        verbose: bool,
+        wandb_run: Optional[WandBRun] = None,
     ):
         """
         As an additional step after training, DDU fits a Gaussian Discriminant Analysis model to

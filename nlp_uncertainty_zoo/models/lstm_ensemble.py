@@ -368,7 +368,6 @@ class LSTMEnsemble(Model):
                 _use_new_zipfile_serialization=False,
             )
 
-        # Make a nice result dict for knockknock
         result_dict = {
             "model_name": self.model_name,
             "train_loss": batch_loss,

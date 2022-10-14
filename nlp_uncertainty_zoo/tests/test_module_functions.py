@@ -20,15 +20,13 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 # PROJECT
-from nlp_uncertainty_zoo.config import AVAILABLE_MODELS, MODEL_PARAMS
+from nlp_uncertainty_zoo.config import AVAILABLE_MODELS, DEFAULT_PARAMS
 from nlp_uncertainty_zoo.models.model import Model, MultiPredictionMixin
 from nlp_uncertainty_zoo.models import TransformerModule
 
 # CONST
-# Specify the datasets whose parameters are going to be used to initialize models. The datasets themselves will not be
-# used.
-TAKE_LANGUAGE_MODELING_HYPERPARAMS_FROM = "ptb"
-TAKE_SEQUENCE_CLASSIFICATION_HYPERPARAMS_FROM = "clinc"
+TAKE_LANGUAGE_MODELING_HYPERPARAMS_FROM = "language_modelling"
+TAKE_SEQUENCE_CLASSIFICATION_HYPERPARAMS_FROM = "sequence_classification"
 # Constants used for testing
 NUM_INSTANCES = 16
 NUM_TYPES = 30
@@ -135,7 +133,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
 
         def _init_and_train_model(model_name: str) -> Tuple[str, Model]:
 
-            model_params = MODEL_PARAMS[self.dataset_name][model_name]
+            model_params = DEFAULT_PARAMS[self.dataset_name][model_name]
             mock_dataset = self.mock_dataset_builder.build(BATCH_SIZE)
 
             # Change some parameters to fit the test environment
@@ -177,6 +175,8 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
 
                 self._test_module_functions(trained_model)
                 self._test_uncertainty_metrics(trained_model)
+
+                del trained_model  # Free up memory
 
     def _test_module_functions(self, model: Model):
         """

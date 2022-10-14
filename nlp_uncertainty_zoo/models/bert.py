@@ -1,5 +1,5 @@
 """
-Define Bert modules used in this project and make them consistent with the other models in the repository.
+Define BERT modules used in this project and make them consistent with the other models in the repository.
 """
 
 # EXT
@@ -26,6 +26,21 @@ class BertModule(Module):
         device: Device,
         **build_params,
     ):
+        """
+        Initialize a BERT module.
+
+        Parameters
+        ----------
+        bert_name: str
+            Name of the underlying BERT, as specified in HuggingFace transformers.
+        output_size: int
+            Number of classes.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        device: Device
+            Device the model should be moved to.
+        """
 
         bert = BertModel.from_pretrained(bert_name).to(device)
         hidden_size = bert.config.hidden_size

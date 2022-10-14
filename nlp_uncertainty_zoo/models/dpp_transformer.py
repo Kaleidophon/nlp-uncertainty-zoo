@@ -251,7 +251,7 @@ class DPPBertModule(VariationalBertModule):
         Parameters
         ----------
         bert_name: str
-            Name of the BERT to be used.
+            Name of the underlying BERT, as specified in HuggingFace transformers.
         dropout: float
             Dropout probability.
         num_predictions: int

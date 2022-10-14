@@ -1,9 +1,7 @@
 torch>=1.9.0
 numpy>=1.19.5
-codecarbon>=1.1.0
 wandb>=0.12.5
 scikit-learn>=0.24.1
-knockknock>=0.1.8.1
 transformers>=4.5.1
 einops>=0.3.0
 datasets>=1.6.2

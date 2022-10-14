@@ -24,3 +24,10 @@ from nlp_uncertainty_zoo.models.dpp_transformer import (
 )
 from nlp_uncertainty_zoo.models.sngp_transformer import SNGPModule, SNGPTransformer
 from nlp_uncertainty_zoo.models.transformer import TransformerModule, Transformer
+
+from nlp_uncertainty_zoo.utils.data import (
+    ClassificationDatasetBuilder,
+    LanguageModellingDatasetBuilder
+)
+
+from nlp_uncertainty_zoo.config import AVAILABLE_MODELS, DEFAULT_PARAMS
