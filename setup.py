@@ -13,7 +13,7 @@ setup(
     description="PyTorch Implementation of Models used for Uncertainty Estimation in Natural Language Processing.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Kaleidophon/deep-significance",
+    url="https://github.com/Kaleidophon/nlp-uncertainty-zoo",
     classifiers=[
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -31,5 +31,4 @@ setup(
     ],
     packages=find_packages(exclude=["docs", "dist"]),
     install_requires=required,
-    dependency_links=["git+https://github.com/y0ast/DUE.git#egg=due-0.1"],
 )
