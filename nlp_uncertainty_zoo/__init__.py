@@ -1,3 +1,8 @@
+"""
+.. include:: ../README.md
+"""
+__docformat__ = "restructuredtext"
+
 # Expose some common imports
 from nlp_uncertainty_zoo.models.variational_transformer import (
     VariationalTransformer,
