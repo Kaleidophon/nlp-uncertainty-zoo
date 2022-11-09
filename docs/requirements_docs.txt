@@ -1,0 +1,7 @@
+sphinxbootstrap4theme>=0.6.0
+sphinxemoji>=0.1.8
+mistune==0.8.4
+readme2tex>=0.0.1b2
+m2r>=0.2.1
+recommonmark>=0.7.1
+numpydoc>=1.1.0

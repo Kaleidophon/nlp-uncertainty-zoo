@@ -1,4 +1,4 @@
-# :robot::speech_balloon::question: nlp-uncertainty-zoo
+# |:robot:| |:speech_balloon:| |:question:|  nlp-uncertainty-zoo
 
 This repository contains implementations of several models used for uncertainty estimation in Natural Language processing,
 implemented in PyTorch. You can install the repository using pip:
