@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>|:robot:| |:speech_balloon:| |:question:| nlp-uncertainty-zoo &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          nlp-uncertainty-zoo</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.html">nlp_uncertainty_zoo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html">nlp_uncertainty_zoo.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html">nlp_uncertainty_zoo.models.bayesian_lstm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html">nlp_uncertainty_zoo.models.bert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">nlp_uncertainty_zoo.models.ddu_transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html">nlp_uncertainty_zoo.models.dpp_transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html">nlp_uncertainty_zoo.models.lstm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html">nlp_uncertainty_zoo.models.lstm_ensemble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html">nlp_uncertainty_zoo.models.model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">nlp_uncertainty_zoo.models.sngp_transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">nlp_uncertainty_zoo.models.spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">nlp_uncertainty_zoo.models.transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">nlp_uncertainty_zoo.models.transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html">nlp_uncertainty_zoo.models.variational_lstm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html">nlp_uncertainty_zoo.models.variational_transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.html">nlp_uncertainty_zoo.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">nlp_uncertainty_zoo.utils.custom_types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">nlp_uncertainty_zoo.utils.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">nlp_uncertainty_zoo.utils.metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">nlp_uncertainty_zoo.utils.samplers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html">nlp_uncertainty_zoo.utils.task_eval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html">nlp_uncertainty_zoo.utils.uncertainty_eval</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">|:robot:| |:speech_balloon:| |:question:|  nlp-uncertainty-zoo</a><ul>
+<li><a class="reference internal" href="#included-models">Included models</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#repository-structure">Repository structure</a></li>
+<li><a class="reference internal" href="#other-features">Other features</a></li>
+<li><a class="reference internal" href="#contributing">Contributing</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/README_DOCS.md.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="robot-speech-balloon-question-nlp-uncertainty-zoo">
+<h1>|:robot:| |:speech_balloon:| |:question:|  nlp-uncertainty-zoo<a class="headerlink" href="#robot-speech-balloon-question-nlp-uncertainty-zoo" title="Permalink to this heading">¶</a></h1>
+<p>This repository contains implementations of several models used for uncertainty estimation in Natural Language processing,
+implemented in PyTorch. You can install the repository using pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">nlp</span><span class="o">-</span><span class="n">uncertainty</span><span class="o">-</span><span class="n">zoo</span>
+</pre></div>
+</div>
+<p>If you are using the repository in your academic research, please cite the paper below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">ulmer2022exploring</span><span class="p">,</span>
+  <span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="n">Exploring</span> <span class="n">Predictive</span> <span class="n">Uncertainty</span> <span class="ow">and</span> <span class="n">Calibration</span> <span class="ow">in</span> <span class="n">NLP</span><span class="p">:</span> <span class="n">A</span> <span class="n">Study</span> <span class="n">on</span> <span class="n">the</span> <span class="n">Impact</span> <span class="n">of</span> <span class="n">Method</span> \<span class="o">&amp;</span> <span class="n">Data</span> <span class="n">Scarcity</span><span class="p">},</span>
+  <span class="n">author</span><span class="o">=</span><span class="p">{</span><span class="n">Ulmer</span><span class="p">,</span> <span class="n">Dennis</span> <span class="ow">and</span> <span class="n">Frellsen</span><span class="p">,</span> <span class="n">Jes</span> <span class="ow">and</span> <span class="n">Hardmeier</span><span class="p">,</span> <span class="n">Christian</span><span class="p">},</span>
+  <span class="n">journal</span><span class="o">=</span><span class="p">{</span><span class="n">arXiv</span> <span class="n">preprint</span> <span class="n">arXiv</span><span class="p">:</span><span class="mf">2210.15452</span><span class="p">},</span>
+  <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2022</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Certain parts of this repository are still incomplete, but will come soon (I promise!):</p>
+<ul class="simple">
+<li><p>[x] Build proper documentation</p></li>
+<li><p>[ ] Add demo jupyter notebook</p></li>
+</ul>
+<section id="included-models">
+<h2>Included models<a class="headerlink" href="#included-models" title="Permalink to this heading">¶</a></h2>
+<p>The following models are implemented in the repository. They can all be imported by using <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">nlp-uncertainty-zoo</span> <span class="pre">import</span> <span class="pre">&lt;MODEL&gt;</span></code>.
+For transformer-based model, furthermore a version of a model is available that uses a pre-trained BERT from the HuggingFace <code class="docutils literal notranslate"><span class="pre">transformers</span></code>.</p>
+<p>| Name | Description | Implementation | Paper |
+|—|—|—|—|
+| LSTM | Vanilla LSTM | <code class="docutils literal notranslate"><span class="pre">LSTM</span></code> | <a class="reference external" href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.676.4320&amp;rep=rep1&amp;type=pdf">Hochreiter &amp; Schmidhuber, 1997</a> |
+| LSTM Ensemble | Ensemble of LSTMs | <code class="docutils literal notranslate"><span class="pre">LSTMEnsemble</span></code> | <a class="reference external" href="https://proceedings.neurips.cc/paper/2017/file/9ef2ed4b7fd2c810847ffa5fa85bce38-Paper.pdf">Lakshminarayanan et al., 2017</a> |
+| Bayesian LSTM | LSTM implementing Bayes-by-backprop <a class="reference external" href="http://proceedings.mlr.press/v37/blundell15.pdf">Blundell et al, 2015</a> | <code class="docutils literal notranslate"><span class="pre">BayesianLSTM</span></code> | <a class="reference external" href="https://arxiv.org/pdf/1704.02798.pdf">Fortunato et al, 2017</a> |
+| ST-tau LSTM | LSTM modelling transitions of a finite-state-automaton | <code class="docutils literal notranslate"><span class="pre">STTauLSTM</span></code> | <a class="reference external" href="https://openreview.net/pdf?id=9EKHN1jOlA">Wang et al., 2021</a> |
+| Variational LSTM | LSTM with MC Dropout <a class="reference external" href="http://proceedings.mlr.press/v48/gal16.pdf">(Gal &amp; Ghahramani, 2016a)</a> | <code class="docutils literal notranslate"><span class="pre">VariationalLSTM</span></code> | <a class="reference external" href="https://proceedings.neurips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf">Gal &amp; Ghahramani, 2016b</a> |
+| DDU Transformer, DDU BERT | Transformer / BERT with Gaussian Mixture Model fit to hidden features | <code class="docutils literal notranslate"><span class="pre">DDUTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">DDUBert</span></code> | <a class="reference external" href="https://arxiv.org/pdf/2102.11582.pdf">Mukhoti et al, 2021</a> |
+| Variational Transformer, Variational BERT | Transformer / BERT with MC Dropout <a class="reference external" href="http://proceedings.mlr.press/v48/gal16.pdf">(Gal &amp; Ghahramani, 2016a)</a> | <code class="docutils literal notranslate"><span class="pre">VariationalTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">VariationalBert</span></code> | <a class="reference external" href="https://arxiv.org/pdf/2006.08344.pdf">Xiao et al., 2021</a> |
+| DPP Transformer, DPP Bert | Transformer / BERT using determinantal point process dropout | <code class="docutils literal notranslate"><span class="pre">DPPTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">DPPBert</span></code> | <a class="reference external" href="https://aclanthology.org/2021.eacl-main.157">Shelmanov et al., 2021</a> |
+| SNGP Transformer, SNGP BERT | Spectrally-normalized transformer / BERT using a Gaussian Process output layer | <code class="docutils literal notranslate"><span class="pre">SNGPTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">SNGPBert</span></code> | <a class="reference external" href="http://arxiv.org/abs/2205.00403">Liu et al., 2022</a> |</p>
+<p>Contributions to include even more approaches are much appreciated!</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
+<p>Each model comes in two versions, for instance <code class="docutils literal notranslate"><span class="pre">LSTMEnsemble</span></code> and <code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule</span></code>. The first one is supposed to be
+used as an out-of-the-box solution, encapsulating all training logic and convenience functions. These include fitting
+the model, prediction, getting the uncertainty for an input batch using a specific metric.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">LSTMEnsemble</span><span class="p">(</span><span class="o">**</span><span class="n">network_params</span><span class="p">,</span> <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">is_sequence_classifer</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_split</span><span class="o">=</span><span class="n">train_dataloader</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_logits</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_sequence_representation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">metric_name</span><span class="o">=</span><span class="s2">&quot;mutual_information&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In comparison, the <code class="docutils literal notranslate"><span class="pre">-Module</span></code> class is supposed to me more simple and bare-bones, only containing the core model logic.
+It is intended for research purposes, and for others who would like to embed the model into their own code base. While
+the model class (e.g. <code class="docutils literal notranslate"><span class="pre">LSTMEnsemble</span></code>) inherits from <code class="docutils literal notranslate"><span class="pre">Model</span></code> and would require to implement certain methods, any <code class="docutils literal notranslate"><span class="pre">Module</span></code> class
+sticks closely to <code class="docutils literal notranslate"><span class="pre">torch.nn.Module</span></code>.</p>
+<p>To check what arguments are required to initialize and use different models, check <a class="reference external" href="http://nlpuncertaintyzoo.dennisulmer.eu/">the documentation here</a>.</p>
+<p>Also, check out the demo provided here (&#64;TODO: Create quick demo)</p>
+</section>
+<section id="repository-structure">
+<h2>Repository structure<a class="headerlink" href="#repository-structure" title="Permalink to this heading">¶</a></h2>
+<p>The repository has the following structure:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">models</span></code>: All model implementations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tests</span></code>: Unit tests. So far, only contains rudimentary tests to check that all output shapes are consistent between models and functions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils</span></code>: Utility code (see below)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils/custom_types.py</span></code>: Custom types used in the repository for type annotations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils/data.py</span></code>: Module containing data collators, and data builders - which build the dataloaders for a type of task and a specific dataset. Currently, language modelling, sequence labeling and sequence classification are supported.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils/metrics.py</span></code>: Implementations of uncertainty metrics.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils/samplers.py</span></code>: Dataset subsamplers for language modelling, sequence labelling and sequence classification.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils/task_eval.py</span></code>: Functions used to evaluate task performance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils/uncertainty_eval.py</span></code>: Function used to evaluate uncertainty quality.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config.py</span></code>: Define available datasets, model and tasks.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">defaults.py</span></code>: Define default config parameters for sequence classification and language modelling (<strong>Note</strong>: These might not be very good parameters).</p></li>
+</ul>
+</section>
+<section id="other-features">
+<h2>Other features<a class="headerlink" href="#other-features" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Weights &amp; Biases integration</strong>: You can track your experiments easily with weights &amp; biases by passing a <code class="docutils literal notranslate"><span class="pre">wandb_run</span></code> argument to <code class="docutils literal notranslate"><span class="pre">model.fit()</span></code>!</p></li>
+<li><p><strong>Easy fine-tuning via HuggingFace</strong>: You can fine-tune arbitrary BERT models using their name from HuggingFace’s <code class="docutils literal notranslate"><span class="pre">transformers</span></code>.</p></li>
+</ul>
+</section>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this heading">¶</a></h2>
+<p>This repository is by no means perfect nor complete. If you find any bugs, please report them using the issue template,
+and, if you also happen to provide a fix, create a pull request! A GitHub template is provided for that as well.</p>
+<p>You would like to make a new addition to the repository? Follow the steps below:</p>
+<ul class="simple">
+<li><p><strong>Adding a new model</strong>: To add a new model, add a new module in the <code class="docutils literal notranslate"><span class="pre">models</span></code> directory. You will also need to implement
+a corresponding <code class="docutils literal notranslate"><span class="pre">Model</span></code> and <code class="docutils literal notranslate"><span class="pre">Module</span></code> class, inheriting from the classes of the same name in <code class="docutils literal notranslate"><span class="pre">models/model.py</span></code> and implementing all
+required functions. <code class="docutils literal notranslate"><span class="pre">Model</span></code> is supposed to be an out-of-the-box solution that you can start experimenting right away, whil
+<code class="docutils literal notranslate"><span class="pre">Module</span></code> should only include the most basic model logic in order to be easy to integrate into other codebases and allow tinkering.</p></li>
+<li><p><strong>Adding a new uncertainty metric</strong>: To add a new uncertainty metric, add the function to <code class="docutils literal notranslate"><span class="pre">utils/metrics.py</span></code>. The function should take
+the logits of a model and output an uncertainty score (the higher the score, the more uncertain the model). The function should output
+a batch_size x sequence_length matrix, with batch_size x 1 for sequence classification tasks. After finishing the implementation, you can
+add the metric to the <code class="docutils literal notranslate"><span class="pre">single_prediction_uncertainty_metrics</span></code> of the <code class="docutils literal notranslate"><span class="pre">models.model.Model</span></code> class and <code class="docutils literal notranslate"><span class="pre">multi_prediction_uncertainty_metrics</span></code> of <code class="docutils literal notranslate"><span class="pre">models.model.MultiPredictionMixin</span></code> (if applicable).</p></li>
+</ul>
+<p>You would like to add something else? Create an issue or contact me at dennis {dot} ulmer {at} mailbox {dot} org!</p>
+</section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2022, Dennis Ulmer.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
