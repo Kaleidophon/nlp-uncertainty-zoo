@@ -6,4 +6,5 @@ mv ../README.md ../README.mm
 make clean && make html
 mv ../README.mm ../README.md
 cp -r _build/html/* ./
+rm -r _build/html/*
 cd ..
