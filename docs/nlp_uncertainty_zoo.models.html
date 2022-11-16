@@ -277,30 +277,21 @@ of the <cite>__init__()</cite> method and some mandatory methods that have to be
 </section>
 <section id="the-module-class">
 <h1>The <cite>Module</cite> class<a class="headerlink" href="#the-module-class" title="Permalink to this heading">¶</a></h1>
-<p>The <cite>Module</cite> class is supposed to mirror PyTorch’s <cite>nn.Module</cite> class, only including the bare-bones logic of the
+<p>The <a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module" title="nlp_uncertainty_zoo.models.model.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.Module</span></code></a> class is supposed to mirror PyTorch’s <cite>nn.Module&lt;https://pytorch.org/docs/stable/generated/torch.nn.Module.html&gt;_</cite> class, only including the bare-bones logic of the
 model. By default, input parameters include the number of layers, as well as the sizes for the model vocabulary, embeddings
 (<cite>input_size</cite>), hidden activations and number of classes (<cite>output_size</cite>).</p>
 <p>One also needs to specify the PyTorch <cite>device</cite> (like “cpu” or “cuda”) and whether the model is used for sequence classification
 (<cite>is_sequence_classifier=True</cite>) or sequence labelling (<cite>is_sequence_classifier=False</cite>). Other kind of tasks like regression,
 parsing or generation are not supported at the moment.</p>
 <p>The following methods have to be implemented by every subclass of <cite>Module</cite>:</p>
-<ul class="simple">
-<li><p><cite>get_logits()</cite>: Return the logits for a given input, which come in the form of</p></li>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>get_logits()</cite>: Return the logits for a given input, which come in the form of a <cite>torch.FloatTensor</cite> with dimensions <cite>batch_size x sequence_length x output_size</cite> for models with only a single prediction or <cite>batch_size x num_predictions x sequence_length x output_size</cite> for models with multiple predictions, such as MC Dropout or ensembles. If the model is a sequence classifier, <cite>sequence_length</cite> will be 1.</p></li>
+<li><p><cite>predict()</cite>: Same as <cite>get_logits()</cite>, except that values on the last axis are actual probabilities summing up to 1.</p></li>
+<li><p><cite>get_sequence_representation()</cite>: Returns the representation of a sequence of a certain model as a <cite>torch.FloatTensor</cite> of size <cite>batch_size x hidden_size</cite>. For <cite>BERT</cite> and <cite>transformer</cite> models, the sequence representation is obtained by using the top-layer hidden activations of the first time step (often corresponding to the <cite>[CLS]</cite> token) after an additional pooler layer, or the last step hidden activations of the last layer of the unidirectional <cite>LSTM</cite> classes.</p></li>
+<li><p><cite>get_uncertainty()</cite>: Return the uncertainty estimates for an input batch, with the return tensor possessing the same shape as with <cite>get_logits()</cite> or <cite>predict()</cite>. If no value is specified for <cite>metric_name</cite>, the metric stored in the attribute <cite>default_uncertainty_metric</cite> is used (which usually refers to predictive entropy. If another metric should be used, one of the names in the keys of the attributes <cite>single_prediction_uncertainty_metrics</cite> or <cite>multi_prediction_uncertainty_metrics</cite>.</p></li>
 </ul>
-<p>a <cite>torch.FloatTensor</cite> with dimensions <cite>batch_size x sequence_length x output_size</cite> for models with only a single prediction
-or <cite>batch_size x num_predictions x sequence_length x output_size</cite> for models with multiple predictions, such as MC Dropout or
-ensembles. If the model is a sequence classifier, <cite>sequence_length</cite> will be 1.
-* <cite>predict()</cite>: Same as <cite>get_logits()</cite>, except that values on the last axis are actual probabilities summing up to 1.
-* <cite>get_sequence_representation()</cite>: Returns the representation of a sequence of a certain model as a <cite>torch.FloatTensor</cite>
-of size <cite>batch_size x hidden_size</cite>. For <cite>BERT</cite> and <cite>transformer</cite> models, the sequence representation is obtained by
-using the top-layer hidden activations of the first time step (often corresponding to the
-<cite>[CLS]</cite> token) after an additional pooler layer, or the last step hidden activations of the last layer
-of the unidirectional <cite>LSTM</cite> classes.
-* <cite>get_uncertainty()</cite>: Return the uncertainty estimates for an input batch, with the return tensor possessing the same shape
-as with <cite>get_logits()</cite> or <cite>predict()</cite>. If no value is specified for <cite>metric_name</cite>, the metric
-stored in the attribute <cite>default_uncertainty_metric</cite> is used (which usually refers to predictive entropy.
-If another metric should be used, one of the names in the keys of the attributes <cite>single_prediction_uncertainty_metrics</cite>
-or <cite>multi_prediction_uncertainty_metrics</cite>.</p>
+</div></blockquote>
 </section>
 <section id="the-model-class">
 <h1>The <cite>Model</cite> class<a class="headerlink" href="#the-model-class" title="Permalink to this heading">¶</a></h1>
@@ -310,7 +301,7 @@ as a dictionary of keyword arguments that is passed to the <cite>__init__()</cit
 The <cite>model_dir</cite> is an optional argument that specified the path to which the model is saved during training.</p>
 <p>The user mainly interacts with the <cite>Model</cite> class using the <cite>fit()</cite>, <cite>predict()</cite> and <cite>get_uncertainty()</cite> functions,
 where the latter two mirror the function implementations in <cite>Module</cite>. <cite>fit()</cite> expects a training and validation set
-<cite>torch.utils.data.DataLoader</cite> instances.</p>
+<cite>torch.utils.data.DataLoader&lt;https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader&gt;_</cite> instances.</p>
 </section>
 <section id="module-nlp_uncertainty_zoo.models">
 <span id="documentation"></span><h1>Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models" title="Permalink to this heading">¶</a></h1>
