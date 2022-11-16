@@ -45,7 +45,7 @@ The `model_dir` is an optional argument that specified the path to which the mod
 
 The user mainly interacts with the `Model` class using the `fit()`, `predict()` and `get_uncertainty()` functions,
 where the latter two mirror the function implementations in `Module`. `fit()` expects a training and validation set
-`torch.utils.data.DataLoader` instances. 
+`torch.utils.data.DataLoader` instances.
 
 Documentation
 =============
