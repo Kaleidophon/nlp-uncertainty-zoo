@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>nlp_uncertainty_zoo.models.bert &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <title>BERT &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="nlp_uncertainty_zoo.models.ddu_transformer" href="nlp_uncertainty_zoo.models.ddu_transformer.html" />
-    <link rel="prev" title="nlp_uncertainty_zoo.models.bayesian_lstm" href="nlp_uncertainty_zoo.models.bayesian_lstm.html" />
+    <link rel="prev" title="Bayesian LSTM" href="nlp_uncertainty_zoo.models.bayesian_lstm.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -61,8 +61,10 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#the-module-class">The <cite>Module</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#module-nlp_uncertainty_zoo.models">Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html">nlp_uncertainty_zoo.models.bayesian_lstm</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nlp_uncertainty_zoo.models.bert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html">Bayesian LSTM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html#module-nlp_uncertainty_zoo.models.bayesian_lstm">Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.bert">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">nlp_uncertainty_zoo.models.ddu_transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html">nlp_uncertainty_zoo.models.dpp_transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html">nlp_uncertainty_zoo.models.lstm</a></li>
@@ -96,7 +98,8 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.models.bert</a><ul>
+<li><a class="reference internal" href="#">BERT</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.bert">Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bert.BertModel"><code class="docutils literal notranslate"><span class="pre">BertModel</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bert.BertModel.forward"><code class="docutils literal notranslate"><span class="pre">BertModel.forward()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bert.BertModel.get_input_embeddings"><code class="docutils literal notranslate"><span class="pre">BertModel.get_input_embeddings()</span></code></a></li>
@@ -134,7 +137,7 @@
               
                 
   <li>
-    <a href="nlp_uncertainty_zoo.models.bayesian_lstm.html" title="Previous Chapter: nlp_uncertainty_zoo.models.bayesian_lstm"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; nlp_uncertain...</span>
+    <a href="nlp_uncertainty_zoo.models.bayesian_lstm.html" title="Previous Chapter: Bayesian LSTM"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Bayesian LSTM</span>
     </a>
   </li>
   <li>
@@ -172,9 +175,22 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <section id="nlp-uncertainty-zoo-models-bert">
-<h1>nlp_uncertainty_zoo.models.bert<a class="headerlink" href="#nlp-uncertainty-zoo-models-bert" title="Permalink to this heading">¶</a></h1>
-<span class="target" id="module-nlp_uncertainty_zoo.models.bert"></span><p>Define BERT modules used in this project and make them consistent with the other models in the repository.</p>
+  <section id="bert">
+<h1>BERT<a class="headerlink" href="#bert" title="Permalink to this heading">¶</a></h1>
+<p>This module includes classes to enable compatibility with BERT models (<a class="reference external" href="https://arxiv.org/pdf/1810.04805.pdf&amp;usg=ALkJrhhzxlCL6yTht2BRmH9atgvKFxHsxQ">Devlin et al., 2018</a>) that are stored in the <a class="reference external" href="https://huggingface.co/models">HuggingFace hub</a>.
+For instance, in the work this package was originally developed for (<a class="reference external" href="https://arxiv.org/pdf/2210.15452.pdf">Ulmer et al., 2022</a>), three different <cite>BERTs</cite> were used:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The original, English BERT by <a class="reference external" href="https://arxiv.org/pdf/1810.04805.pdf&amp;usg=ALkJrhhzxlCL6yTht2BRmH9atgvKFxHsxQ">Devlin et al. (2018)</a> (<cite>bert-base-uncased</cite>).</p></li>
+<li><p>The Danish BERT developed by <a class="reference external" href="https://aclanthology.org/2020.lrec-1.565.pdf">Hvingelby et al. (2020)</a> (<cite>alexanderfalk/danbert-small-cased</cite>).</p></li>
+<li><p>The Finnish BERT provided by <a class="reference external" href="https://arxiv.org/pdf/1912.07076.pdf">Virtanen et al. (2019)</a> (<cite>TurkuNLP/bert-base-finnish-cased-v1</cite>).</p></li>
+</ul>
+</div></blockquote>
+<p>The BERT model that is supposed to be used can be specified by using the <cite>bert_name</cite> argument for <code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert.BertModule.__init__()</span></code>.</p>
+</section>
+<section id="module-nlp_uncertainty_zoo.models.bert">
+<span id="documentation"></span><h1>Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.bert" title="Permalink to this heading">¶</a></h1>
+<p>Define BERT modules used in this project and make them consistent with the other models in the repository.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.bert.BertModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.bert.</span></span><span class="sig-name descname"><span class="pre">BertModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_pooling_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.bert.BertModel" title="Permalink to this definition">¶</a></dt>
