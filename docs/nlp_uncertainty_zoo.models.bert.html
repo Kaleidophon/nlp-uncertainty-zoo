@@ -16,7 +16,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="nlp_uncertainty_zoo.models.ddu_transformer" href="nlp_uncertainty_zoo.models.ddu_transformer.html" />
+    <link rel="next" title="DDU Transformer" href="nlp_uncertainty_zoo.models.ddu_transformer.html" />
     <link rel="prev" title="Bayesian LSTM" href="nlp_uncertainty_zoo.models.bayesian_lstm.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -62,11 +62,13 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#module-nlp_uncertainty_zoo.models">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html">Bayesian LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html#module-nlp_uncertainty_zoo.models.bayesian_lstm">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html#bayesian-lstm-module-documentation">Bayesian LSTM Module Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">BERT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.bert">Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">nlp_uncertainty_zoo.models.ddu_transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html">nlp_uncertainty_zoo.models.dpp_transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.bert">BERT Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">DDU Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#module-nlp_uncertainty_zoo.models.ddu_transformer">DDU Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html">DPP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html#module-nlp_uncertainty_zoo.models.dpp_transformer">DPP Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html">nlp_uncertainty_zoo.models.lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html">nlp_uncertainty_zoo.models.lstm_ensemble</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html">nlp_uncertainty_zoo.models.model</a></li>
@@ -99,7 +101,7 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">BERT</a></li>
-<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.bert">Documentation</a><ul>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.bert">BERT Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bert.BertModel"><code class="docutils literal notranslate"><span class="pre">BertModel</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bert.BertModel.forward"><code class="docutils literal notranslate"><span class="pre">BertModel.forward()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bert.BertModel.get_input_embeddings"><code class="docutils literal notranslate"><span class="pre">BertModel.get_input_embeddings()</span></code></a></li>
@@ -141,7 +143,7 @@
     </a>
   </li>
   <li>
-    <a href="nlp_uncertainty_zoo.models.ddu_transformer.html" title="Next Chapter: nlp_uncertainty_zoo.models.ddu_transformer"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">nlp_uncertain... &raquo;</span>
+    <a href="nlp_uncertainty_zoo.models.ddu_transformer.html" title="Next Chapter: DDU Transformer"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">DDU Transformer &raquo;</span>
     </a>
   </li>
               
@@ -189,7 +191,7 @@ For instance, in the work this package was originally developed for (<a class="r
 <p>The BERT model that is supposed to be used can be specified by using the <cite>bert_name</cite> argument for <code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert.BertModule.__init__()</span></code>.</p>
 </section>
 <section id="module-nlp_uncertainty_zoo.models.bert">
-<span id="documentation"></span><h1>Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.bert" title="Permalink to this heading">¶</a></h1>
+<span id="bert-module-documentation"></span><h1>BERT Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.bert" title="Permalink to this heading">¶</a></h1>
 <p>Define BERT modules used in this project and make them consistent with the other models in the repository.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.bert.BertModel">

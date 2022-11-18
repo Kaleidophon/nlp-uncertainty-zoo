@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>nlp_uncertainty_zoo.models.dpp_transformer &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <title>DPP Transformer &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="nlp_uncertainty_zoo.models.lstm" href="nlp_uncertainty_zoo.models.lstm.html" />
-    <link rel="prev" title="nlp_uncertainty_zoo.models.ddu_transformer" href="nlp_uncertainty_zoo.models.ddu_transformer.html" />
+    <link rel="prev" title="DDU Transformer" href="nlp_uncertainty_zoo.models.ddu_transformer.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -62,11 +62,13 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#module-nlp_uncertainty_zoo.models">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html">Bayesian LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html#module-nlp_uncertainty_zoo.models.bayesian_lstm">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html#bayesian-lstm-module-documentation">Bayesian LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html">BERT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert">Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">nlp_uncertainty_zoo.models.ddu_transformer</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nlp_uncertainty_zoo.models.dpp_transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert">BERT Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">DDU Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#module-nlp_uncertainty_zoo.models.ddu_transformer">DDU Transformer Module Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DPP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.dpp_transformer">DPP Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html">nlp_uncertainty_zoo.models.lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html">nlp_uncertainty_zoo.models.lstm_ensemble</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html">nlp_uncertainty_zoo.models.model</a></li>
@@ -98,7 +100,8 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.models.dpp_transformer</a><ul>
+<li><a class="reference internal" href="#">DPP Transformer</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.dpp_transformer">DPP Transformer Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBert"><code class="docutils literal notranslate"><span class="pre">DPPBert</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule"><code class="docutils literal notranslate"><span class="pre">DPPBertModule</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule.eval"><code class="docutils literal notranslate"><span class="pre">DPPBertModule.eval()</span></code></a></li>
@@ -158,7 +161,7 @@
               
                 
   <li>
-    <a href="nlp_uncertainty_zoo.models.ddu_transformer.html" title="Previous Chapter: nlp_uncertainty_zoo.models.ddu_transformer"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; nlp_uncertain...</span>
+    <a href="nlp_uncertainty_zoo.models.ddu_transformer.html" title="Previous Chapter: DDU Transformer"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; DDU Transformer</span>
     </a>
   </li>
   <li>
@@ -196,9 +199,22 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <section id="nlp-uncertainty-zoo-models-dpp-transformer">
-<h1>nlp_uncertainty_zoo.models.dpp_transformer<a class="headerlink" href="#nlp-uncertainty-zoo-models-dpp-transformer" title="Permalink to this heading">¶</a></h1>
-<span class="target" id="module-nlp_uncertainty_zoo.models.dpp_transformer"></span><p>Implementing MC Dropout estimates using Determinantal Point Processes by
+  <section id="dpp-transformer">
+<h1>DPP Transformer<a class="headerlink" href="#dpp-transformer" title="Permalink to this heading">¶</a></h1>
+<p>This module includes an implementation of the transformers using deep determinantal point processes by <a class="reference external" href="https://aclanthology.org/2021.eacl-main.157.pdf">Shelmanov et al. (2021)</a>.
+The idea is very related to using Monte Carlo dropout (see <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#module-nlp_uncertainty_zoo.models.variational_transformer" title="nlp_uncertainty_zoo.models.variational_transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer</span></code></a>).
+The difference is that dropout masks are constructed using correlation kernel between neurons, in order to obtain less correlated predictions overall.</p>
+<p>In this model, we implement two versions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.dpp_transformer.DPPTransformer</span></code> / <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.dpp_transformer.DPPTransformerModule</span></code>: DPPs applied to a transformer trained from scratch. See <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#module-nlp_uncertainty_zoo.models.transformer" title="nlp_uncertainty_zoo.models.transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.transformer</span></code></a> for more information on how to use the <cite>Transformer</cite> model &amp; module.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.dpp_transformer.DPPBert</span></code> / <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.dpp_transformer.DPPBertModule</span></code>:  DPPs applied to pre-trained and then fine-tuned. See <a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert" title="nlp_uncertainty_zoo.models.bert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert</span></code></a> for more information on how to use the <cite>Bert</cite> model &amp; module.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="module-nlp_uncertainty_zoo.models.dpp_transformer">
+<span id="dpp-transformer-module-documentation"></span><h1>DPP Transformer Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.dpp_transformer" title="Permalink to this heading">¶</a></h1>
+<p>Implementing MC Dropout estimates using Determinantal Point Processes by
 <cite>Shelmanov et al. (2021) &lt;https://aclanthology.org/2021.eacl-main.157.pdf&gt;_</cite>. Code is a modified version of
 <cite>their codebase &lt;https://github.com/skoltech-nlp/certain-transformer&gt;_</cite>.</p>
 <dl class="py class">

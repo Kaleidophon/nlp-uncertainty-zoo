@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>nlp_uncertainty_zoo.models.ddu_transformer &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <title>DDU Transformer &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -16,7 +16,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="nlp_uncertainty_zoo.models.dpp_transformer" href="nlp_uncertainty_zoo.models.dpp_transformer.html" />
+    <link rel="next" title="DPP Transformer" href="nlp_uncertainty_zoo.models.dpp_transformer.html" />
     <link rel="prev" title="BERT" href="nlp_uncertainty_zoo.models.bert.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -62,11 +62,13 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#module-nlp_uncertainty_zoo.models">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html">Bayesian LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html#module-nlp_uncertainty_zoo.models.bayesian_lstm">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html#bayesian-lstm-module-documentation">Bayesian LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html">BERT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert">Documentation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nlp_uncertainty_zoo.models.ddu_transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html">nlp_uncertainty_zoo.models.dpp_transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert">BERT Module Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DDU Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.ddu_transformer">DDU Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html">DPP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html#module-nlp_uncertainty_zoo.models.dpp_transformer">DPP Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html">nlp_uncertainty_zoo.models.lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html">nlp_uncertainty_zoo.models.lstm_ensemble</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html">nlp_uncertainty_zoo.models.model</a></li>
@@ -98,7 +100,8 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.models.ddu_transformer</a><ul>
+<li><a class="reference internal" href="#">DDU Transformer</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.ddu_transformer">DDU Transformer Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.ddu_transformer.DDUBert"><code class="docutils literal notranslate"><span class="pre">DDUBert</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.ddu_transformer.DDUBertModule"><code class="docutils literal notranslate"><span class="pre">DDUBertModule</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.ddu_transformer.DDUBertModule.get_uncertainty"><code class="docutils literal notranslate"><span class="pre">DDUBertModule.get_uncertainty()</span></code></a></li>
@@ -172,7 +175,7 @@
     </a>
   </li>
   <li>
-    <a href="nlp_uncertainty_zoo.models.dpp_transformer.html" title="Next Chapter: nlp_uncertainty_zoo.models.dpp_transformer"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">nlp_uncertain... &raquo;</span>
+    <a href="nlp_uncertainty_zoo.models.dpp_transformer.html" title="Next Chapter: DPP Transformer"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">DPP Transformer &raquo;</span>
     </a>
   </li>
               
@@ -206,9 +209,24 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <section id="nlp-uncertainty-zoo-models-ddu-transformer">
-<h1>nlp_uncertainty_zoo.models.ddu_transformer<a class="headerlink" href="#nlp-uncertainty-zoo-models-ddu-transformer" title="Permalink to this heading">¶</a></h1>
-<span class="target" id="module-nlp_uncertainty_zoo.models.ddu_transformer"></span><dl class="simple">
+  <section id="ddu-transformer">
+<h1>DDU Transformer<a class="headerlink" href="#ddu-transformer" title="Permalink to this heading">¶</a></h1>
+<p>This module includes an implementation of the Deep Deterministic Uncertainty (DDU) transformer by <a class="reference external" href="http://arxiv.org/abs/2102.11582">Mukhoti et al. (2021)</a>.
+The approach involves fine-tuning a transformer, and then fitting a Gaussian Mixture Model (GMM) on its activations.
+Model uncertainty is then computed based on the log probability of an input based on its encoding under the GMM.</p>
+<p>In this model, we implement two versions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.ddu_transformer.DDUTransformer</span></code> / <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.ddu_transformer.DDUTransformerModule</span></code>: DDU applied to a transformer trained from scratch. See <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#module-nlp_uncertainty_zoo.models.transformer" title="nlp_uncertainty_zoo.models.transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.transformer</span></code></a> for more information on how to use the <cite>Transformer</cite> model &amp; module.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.ddu_transformer.DDUBert</span></code> / <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.ddu_transformer.DDUBertModule</span></code>:  DDU applied to pre-trained and then fine-tuned. See <a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert" title="nlp_uncertainty_zoo.models.bert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert</span></code></a> for more information on how to use the <cite>Bert</cite> model &amp; module.</p></li>
+</ul>
+</div></blockquote>
+<p>Internally, the Gaussian mixture model is fit in the <code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert.DDUBert._finetune()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert.DDUTransformer._finetune()</span></code> method, which should be called using the data’s validation split.</p>
+<p>All the important model info is also encapsulated in the <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.ddu_transformer.DDUMixin</span></code> class in order to avoid code redundancies.</p>
+</section>
+<section id="module-nlp_uncertainty_zoo.models.ddu_transformer">
+<span id="ddu-transformer-module-documentation"></span><h1>DDU Transformer Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.ddu_transformer" title="Permalink to this heading">¶</a></h1>
+<dl class="simple">
 <dt>Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by</dt><dd><p><a class="reference external" href="https://arxiv.org/pdf/2102.11582.pdf">Mukhoti et al. (2021)</a>.</p>
 </dd>
 </dl>
@@ -393,9 +411,9 @@ this estimate can still be inaccurate, because (1) an otherwise complete batch c
 be broken into multiple ones and (2) more than one batch worth of samples can be
 dropped when <a class="reference internal" href="#nlp_uncertainty_zoo.models.ddu_transformer.DataLoader.drop_last" title="nlp_uncertainty_zoo.models.ddu_transformer.DataLoader.drop_last"><code class="xref py py-attr docutils literal notranslate"><span class="pre">drop_last</span></code></a> is set. Unfortunately, PyTorch can not detect such
 cases in general.</p>
-<p>See <a href="#id4"><span class="problematic" id="id5">`Dataset Types`_</span></a> for more details on these two types of datasets and how
+<p>See <a href="#id5"><span class="problematic" id="id6">`Dataset Types`_</span></a> for more details on these two types of datasets and how
 <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code> interacts with
-<a href="#id6"><span class="problematic" id="id7">`Multi-process data loading`_</span></a>.</p>
+<a href="#id7"><span class="problematic" id="id8">`Multi-process data loading`_</span></a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>

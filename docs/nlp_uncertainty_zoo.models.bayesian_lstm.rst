@@ -7,8 +7,8 @@ During inference, we sample one parameter set from these distributions to make a
 
 In this case, we implement the Bayesian LSTM using the `Blitz <https://github.com/piEsposito/blitz-bayesian-deep-learning>`_ package.
 
-Documentation
-=============
+Bayesian LSTM Module Documentation
+============================
 
 .. automodule:: nlp_uncertainty_zoo.models.bayesian_lstm
    :imported-members:

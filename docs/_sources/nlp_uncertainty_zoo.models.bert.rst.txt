@@ -10,8 +10,8 @@ For instance, in the work this package was originally developed for (`Ulmer et a
 
 The BERT model that is supposed to be used can be specified by using the `bert_name` argument for :py:meth:`nlp_uncertainty_zoo.models.bert.BertModule.__init__()`.
 
-Documentation
-=============
+BERT Module Documentation
+=========================
 
 .. automodule:: nlp_uncertainty_zoo.models.bert
    :imported-members:

@@ -62,11 +62,13 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.html#module-nlp_uncertainty_zoo.models">Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bayesian LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.bayesian_lstm">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#bayesian-lstm-module-documentation">Bayesian LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html">BERT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert">Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">nlp_uncertainty_zoo.models.ddu_transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html">nlp_uncertainty_zoo.models.dpp_transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert">BERT Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">DDU Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#module-nlp_uncertainty_zoo.models.ddu_transformer">DDU Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html">DPP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.dpp_transformer.html#module-nlp_uncertainty_zoo.models.dpp_transformer">DPP Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html">nlp_uncertainty_zoo.models.lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html">nlp_uncertainty_zoo.models.lstm_ensemble</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html">nlp_uncertainty_zoo.models.model</a></li>
@@ -99,7 +101,7 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">Bayesian LSTM</a></li>
-<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.bayesian_lstm">Documentation</a><ul>
+<li><a class="reference internal" href="#bayesian-lstm-module-documentation">Bayesian LSTM Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTM"><code class="docutils literal notranslate"><span class="pre">BayesianLSTM</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule"><code class="docutils literal notranslate"><span class="pre">BayesianLSTMModule</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule.get_logits"><code class="docutils literal notranslate"><span class="pre">BayesianLSTMModule.get_logits()</span></code></a></li>
@@ -189,9 +191,9 @@ The idea is that instead of learning one single value per parameter, we learn a 
 During inference, we sample one parameter set from these distributions to make a prediction.</p>
 <p>In this case, we implement the Bayesian LSTM using the <a class="reference external" href="https://github.com/piEsposito/blitz-bayesian-deep-learning">Blitz</a> package.</p>
 </section>
-<section id="module-nlp_uncertainty_zoo.models.bayesian_lstm">
-<span id="documentation"></span><h1>Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.bayesian_lstm" title="Permalink to this heading">¶</a></h1>
-<p>Implement the Bayesian Bayes-by-backprop LSTM by <a class="reference external" href="https://arxiv.org/pdf/1704.02798.pdf">Fortunato et al. (2017)</a>.</p>
+<section id="bayesian-lstm-module-documentation">
+<h1>Bayesian LSTM Module Documentation<a class="headerlink" href="#bayesian-lstm-module-documentation" title="Permalink to this heading">¶</a></h1>
+<span class="target" id="module-nlp_uncertainty_zoo.models.bayesian_lstm"></span><p>Implement the Bayesian Bayes-by-backprop LSTM by <a class="reference external" href="https://arxiv.org/pdf/1704.02798.pdf">Fortunato et al. (2017)</a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTM">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.bayesian_lstm.</span></span><span class="sig-name descname"><span class="pre">BayesianLSTM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTM" title="Permalink to this definition">¶</a></dt>
