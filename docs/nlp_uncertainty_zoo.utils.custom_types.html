@@ -74,8 +74,10 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-module-class">The <cite>Module</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models">Models Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">nlp_uncertainty_zoo.models.sngp_transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">nlp_uncertainty_zoo.models.spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">SNGP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#module-nlp_uncertainty_zoo.models.sngp_transformer">SNGP Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#module-nlp_uncertainty_zoo.models.spectral">Spectral Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">nlp_uncertainty_zoo.models.transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
@@ -102,15 +104,7 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.utils.custom_types</a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.custom_types.Dict"><code class="docutils literal notranslate"><span class="pre">Dict</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.custom_types.HiddenDict"><code class="docutils literal notranslate"><span class="pre">HiddenDict</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.custom_types.HiddenStates"><code class="docutils literal notranslate"><span class="pre">HiddenStates</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.custom_types.List"><code class="docutils literal notranslate"><span class="pre">List</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.custom_types.Tuple"><code class="docutils literal notranslate"><span class="pre">Tuple</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.custom_types.WandBRun"><code class="docutils literal notranslate"><span class="pre">WandBRun</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">nlp_uncertainty_zoo.utils.custom_types</a></li>
 </ul>
 </ul>
 </li>
@@ -161,47 +155,6 @@
   <section id="nlp-uncertainty-zoo-utils-custom-types">
 <h1>nlp_uncertainty_zoo.utils.custom_types<a class="headerlink" href="#nlp-uncertainty-zoo-utils-custom-types" title="Permalink to this heading">¶</a></h1>
 <span class="target" id="module-nlp_uncertainty_zoo.utils.custom_types"></span><p>Define custom types for this project.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.custom_types.Dict">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.custom_types.</span></span><span class="sig-name descname"><span class="pre">Dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">empty</span> <span class="pre">dictionary</span> <span class="pre">dict(mapping)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">from</span> <span class="pre">a</span> <span class="pre">mapping</span> <span class="pre">object's</span> <span class="pre">(key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value)</span> <span class="pre">pairs</span> <span class="pre">dict(iterable)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">as</span> <span class="pre">if</span> <span class="pre">via:</span> <span class="pre">d</span> <span class="pre">=</span> <span class="pre">{}</span> <span class="pre">for</span> <span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span> <span class="pre">in</span> <span class="pre">iterable:</span> <span class="pre">d[k]</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">dict(**kwargs)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">name=value</span> <span class="pre">pairs</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">keyword</span> <span class="pre">argument</span> <span class="pre">list.</span>&#160; <span class="pre">For</span> <span class="pre">example:</span>&#160; <span class="pre">dict(one=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two=2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.custom_types.Dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">KT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">VT</span></code>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.custom_types.HiddenDict">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.custom_types.</span></span><span class="sig-name descname"><span class="pre">HiddenDict</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.custom_types.HiddenDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FloatTensor</span></code>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.custom_types.HiddenStates">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.custom_types.</span></span><span class="sig-name descname"><span class="pre">HiddenStates</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.custom_types.HiddenStates" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.Tuple" title="typing.Tuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">FloatTensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FloatTensor</span></code>]</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.custom_types.List">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.custom_types.</span></span><span class="sig-name descname"><span class="pre">List</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.custom_types.List" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableSequence</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.custom_types.Tuple">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.custom_types.</span></span><span class="sig-name descname"><span class="pre">Tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.custom_types.Tuple" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<p>Tuple type; Tuple[X, Y] is the cross-product type of X and Y.</p>
-<p>Example: Tuple[T1, T2] is a tuple of two elements corresponding
-to type variables T1 and T2.  Tuple[int, float, str] is a tuple
-of an int, a float and a string.</p>
-<p>To specify a variable-length tuple of homogeneous type, use Tuple[T, …].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.custom_types.WandBRun">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.custom_types.</span></span><span class="sig-name descname"><span class="pre">WandBRun</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.custom_types.WandBRun" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></p>
-</dd></dl>
-
 </section>
 
 

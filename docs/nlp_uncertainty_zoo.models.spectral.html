@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>nlp_uncertainty_zoo.models.spectral &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <title>Spectral &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -14,11 +14,10 @@
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="nlp_uncertainty_zoo.models.st_tau_lstm" href="nlp_uncertainty_zoo.models.st_tau_lstm.html" />
-    <link rel="prev" title="nlp_uncertainty_zoo.models.sngp_transformer" href="nlp_uncertainty_zoo.models.sngp_transformer.html" />
+    <link rel="prev" title="SNGP Transformer" href="nlp_uncertainty_zoo.models.sngp_transformer.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -75,8 +74,10 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-module-class">The <cite>Module</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models">Models Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">nlp_uncertainty_zoo.models.sngp_transformer</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nlp_uncertainty_zoo.models.spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">SNGP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#module-nlp_uncertainty_zoo.models.sngp_transformer">SNGP Transformer Module Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.spectral">Spectral Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">nlp_uncertainty_zoo.models.transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
@@ -103,29 +104,10 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.models.spectral</a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.BertModule"><code class="docutils literal notranslate"><span class="pre">BertModule</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.BertModule.forward"><code class="docutils literal notranslate"><span class="pre">BertModule.forward()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.BertModule.get_hidden"><code class="docutils literal notranslate"><span class="pre">BertModule.get_hidden()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.BertModule.get_logits"><code class="docutils literal notranslate"><span class="pre">BertModule.get_logits()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.BertModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">BertModule.get_sequence_representation()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.BertModule.predict"><code class="docutils literal notranslate"><span class="pre">BertModule.predict()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.BertModule.training"><code class="docutils literal notranslate"><span class="pre">BertModule.training</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">Spectral</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.spectral">Spectral Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralBertModule"><code class="docutils literal notranslate"><span class="pre">SpectralBertModule</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralBertModule.training"><code class="docutils literal notranslate"><span class="pre">SpectralBertModule.training</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm"><code class="docutils literal notranslate"><span class="pre">SpectralNorm</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.apply"><code class="docutils literal notranslate"><span class="pre">SpectralNorm.apply()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.compute_weight"><code class="docutils literal notranslate"><span class="pre">SpectralNorm.compute_weight()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.dim"><code class="docutils literal notranslate"><span class="pre">SpectralNorm.dim</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.eps"><code class="docutils literal notranslate"><span class="pre">SpectralNorm.eps</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.n_power_iterations"><code class="docutils literal notranslate"><span class="pre">SpectralNorm.n_power_iterations</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.name"><code class="docutils literal notranslate"><span class="pre">SpectralNorm.name</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.remove"><code class="docutils literal notranslate"><span class="pre">SpectralNorm.remove()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.reshape_weight_to_matrix"><code class="docutils literal notranslate"><span class="pre">SpectralNorm.reshape_weight_to_matrix()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormFC"><code class="docutils literal notranslate"><span class="pre">SpectralNormFC</span></code></a><ul>
@@ -137,21 +119,10 @@
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormFC.name"><code class="docutils literal notranslate"><span class="pre">SpectralNormFC.name</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormLoadStateDictPreHook"><code class="docutils literal notranslate"><span class="pre">SpectralNormLoadStateDictPreHook</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormStateDictHook"><code class="docutils literal notranslate"><span class="pre">SpectralNormStateDictHook</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule"><code class="docutils literal notranslate"><span class="pre">SpectralTransformerModule</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule.training"><code class="docutils literal notranslate"><span class="pre">SpectralTransformerModule.training</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule"><code class="docutils literal notranslate"><span class="pre">TransformerModule</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.forward"><code class="docutils literal notranslate"><span class="pre">TransformerModule.forward()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.get_hidden"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_hidden()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.get_logits"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_logits()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_sequence_representation()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.training"><code class="docutils literal notranslate"><span class="pre">TransformerModule.training</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.spectral_norm_fc"><code class="docutils literal notranslate"><span class="pre">spectral_norm_fc()</span></code></a></li>
 </ul>
 </li>
@@ -164,7 +135,7 @@
               
                 
   <li>
-    <a href="nlp_uncertainty_zoo.models.sngp_transformer.html" title="Previous Chapter: nlp_uncertainty_zoo.models.sngp_transformer"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; nlp_uncertain...</span>
+    <a href="nlp_uncertainty_zoo.models.sngp_transformer.html" title="Previous Chapter: SNGP Transformer"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; SNGP Transformer</span>
     </a>
   </li>
   <li>
@@ -202,9 +173,31 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <section id="nlp-uncertainty-zoo-models-spectral">
-<h1>nlp_uncertainty_zoo.models.spectral<a class="headerlink" href="#nlp-uncertainty-zoo-models-spectral" title="Permalink to this heading">¶</a></h1>
-<span class="target" id="module-nlp_uncertainty_zoo.models.spectral"></span><p>Implement a superclass for transformer models that use spectral normalization to meet the bi-Lipschitz condition.
+  <section id="spectral">
+<h1>Spectral<a class="headerlink" href="#spectral" title="Permalink to this heading">¶</a></h1>
+<p>This module contains transformer implementations using spectral normalization, used for instance by <a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#module-nlp_uncertainty_zoo.models.ddu_transformer" title="nlp_uncertainty_zoo.models.ddu_transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.ddu_transformer</span></code></a> or <a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#module-nlp_uncertainty_zoo.models.sngp_transformer" title="nlp_uncertainty_zoo.models.sngp_transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer</span></code></a>.
+The main idea is that the functions learned by normal network should fulfill a bi-Lipschitz constraint (see <a class="reference external" href="http://arxiv.org/abs/2102.11582">Mukhoti et al. (2021)</a>):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>On the one hand, models should smooth in order to avoid for instance adversarial attacks and promote robustness</p></li>
+<li><p>On the other hand, models should still be sensitive enough to detect out-of-distribution examples.</p></li>
+</ul>
+</div></blockquote>
+<p>In networks using residual connections (as contained inside the transformer architecture), this condition can be approximately fulfilled using spectral normalization, where the spectral norm (the largest singular value) of weight matrices is upper-bounded by some constant (chosen by the users).
+In practice, the spectral normalization is applied as a hook to model parameters after every training step.</p>
+<p>In this module, we implement two versions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule" title="nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule</span></code></a>: Spectral normalization applied to a transformer trained from scratch. See <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#module-nlp_uncertainty_zoo.models.transformer" title="nlp_uncertainty_zoo.models.transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.transformer</span></code></a> for more information on how to use the <cite>Transformer</cite> model &amp; module.</p></li>
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralBertModule" title="nlp_uncertainty_zoo.models.spectral.SpectralBertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.spectral.SpectralBertModule</span></code></a>:  Spectral normalization applied to pre-trained and then fine-tuned. See <a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert" title="nlp_uncertainty_zoo.models.bert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert</span></code></a> for more information on how to use the <cite>Bert</cite> model &amp; module.</p></li>
+</ul>
+</div></blockquote>
+<p>The main logic is contained in <a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormFC" title="nlp_uncertainty_zoo.models.spectral.SpectralNormFC"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.spectral.SpectralNormFC</span></code></a> and <a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.spectral_norm_fc" title="nlp_uncertainty_zoo.models.spectral.spectral_norm_fc"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.spectral.spectral_norm_fc()</span></code></a> which were copied
+verbatim from <a class="reference external" href="https://github.com/y0ast/DUE">the repository of Joost van Amsterfoort</a> due to import issues.</p>
+</section>
+<section id="module-nlp_uncertainty_zoo.models.spectral">
+<span id="spectral-module-documentation"></span><h1>Spectral Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.spectral" title="Permalink to this heading">¶</a></h1>
+<p>Implement a superclass for transformer models that use spectral normalization to meet the bi-Lipschitz condition.
 The following models inherit from this class:</p>
 <ul class="simple">
 <li><p>Spectral-normalized Gaussian Process (SNGP) Transformer (<cite>Liu et al., 2020 &lt;https://arxiv.org/pdf/2006.10108.pdf&gt;</cite>)</p></li>
@@ -214,106 +207,6 @@ The following models inherit from this class:</p>
 * Deep Deterministic Uncertainty (DDU) Transformer (<cite>Mukhoti et al., 2021 &lt;https://arxiv.org/pdf/2102.11582.pdf&gt;</cite>)</p>
 <p>Utility functions from the repository of Joost van Amsterfoort (<a class="reference external" href="https://github.com/y0ast/DUE">https://github.com/y0ast/DUE</a>) copied in here to avoid
 import issues, since the original repository is not available as a Python package.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.BertModule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">BertModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bert_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.BertModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.Module" title="nlp_uncertainty_zoo.models.model.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
-<p>Define a BERT module that implements all the functions implemented in Module.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.BertModule.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.BertModule.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Forward pass of the model.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-<dt><strong>Returns</strong></dt><dd></dd>
-<dt><strong>——-</strong></dt><dd></dd>
-<dt><strong>torch.FloatTensor</strong></dt><dd><p>Output predictions for input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.BertModule.get_hidden">
-<span class="sig-name descname"><span class="pre">get_hidden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.BertModule.get_hidden" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.BertModule.get_logits">
-<span class="sig-name descname"><span class="pre">get_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.BertModule.get_logits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
-num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
-metrics defined in nlp_uncertainty_zoo.metrics.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Logits for current input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.BertModule.get_sequence_representation">
-<span class="sig-name descname"><span class="pre">get_sequence_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hidden</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FloatTensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.BertModule.get_sequence_representation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define how the representation for an entire sequence is extracted from a number of hidden states. This is
-relevant in sequence classification. For example, this could be the last hidden state for a unidirectional LSTM
-or the first hidden state for a transformer, adding a pooler layer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>hidden: torch.FloatTensor</strong></dt><dd><p>Hidden states of a model for a sequence.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Representation for the current sequence.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.BertModule.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.BertModule.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Output a probability distribution over classes given an input. Results in a tensor of size batch_size x seq_len
-x output_size or batch_size x num_predictions x seq_len x output_size depending on the model type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Logits for current input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.BertModule.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.BertModule.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralBertModule">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">SpectralBertModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bert_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_norm_upper_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralBertModule" title="Permalink to this definition">¶</a></dt>
@@ -327,55 +220,9 @@ x output_size or batch_size x num_predictions x seq_len x output_size depending 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">SpectralNorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_power_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm.apply">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_power_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm" title="torch.nn.utils.spectral_norm.SpectralNorm"><span class="pre">SpectralNorm</span></a></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.apply" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm.compute_weight">
-<span class="sig-name descname"><span class="pre">compute_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_power_iteration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.compute_weight" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm.dim">
-<span class="sig-name descname"><span class="pre">dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.dim" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm.eps">
-<span class="sig-name descname"><span class="pre">eps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.eps" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm.n_power_iterations">
-<span class="sig-name descname"><span class="pre">n_power_iterations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.n_power_iterations" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm.remove">
-<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.remove" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNorm.reshape_weight_to_matrix">
-<span class="sig-name descname"><span class="pre">reshape_weight_to_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm.reshape_weight_to_matrix" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNormFC">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">SpectralNormFC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_power_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormFC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNorm" title="torch.nn.utils.spectral_norm.SpectralNorm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectralNorm</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SpectralNorm</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNormFC.apply">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_power_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormFC" title="nlp_uncertainty_zoo.models.spectral.SpectralNormFC"><span class="pre">SpectralNormFC</span></a></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormFC.apply" title="Permalink to this definition">¶</a></dt>
@@ -409,18 +256,6 @@ x output_size or batch_size x num_predictions x seq_len x output_size depending 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNormLoadStateDictPreHook">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">SpectralNormLoadStateDictPreHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormLoadStateDictPreHook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralNormStateDictHook">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">SpectralNormStateDictHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralNormStateDictHook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">SpectralTransformerModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_norm_upper_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule" title="nlp_uncertainty_zoo.models.transformer.TransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerModule</span></code></a></p>
@@ -430,109 +265,6 @@ x output_size or batch_size x num_predictions x seq_len x output_size depending 
 <span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule.training" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.TransformerModule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">TransformerModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.Module" title="nlp_uncertainty_zoo.models.model.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
-<p>Implementation of a transformer for classification.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.TransformerModule.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Forward pass of the model.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Output predictions for input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.TransformerModule.get_hidden">
-<span class="sig-name descname"><span class="pre">get_hidden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.get_hidden" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.TransformerModule.get_logits">
-<span class="sig-name descname"><span class="pre">get_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.get_logits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
-num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
-metrics defined in nlp_uncertainty_zoo.metrics.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Logits for current input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.TransformerModule.get_sequence_representation">
-<span class="sig-name descname"><span class="pre">get_sequence_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hidden</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FloatTensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.get_sequence_representation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define how the representation for an entire sequence is extracted from a number of hidden states. This is
-relevant in sequence classification. In this case this is done by using the first hidden state and adding a
-pooler layer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>hidden: torch.FloatTensor</strong></dt><dd><p>Hidden states of a model for a sequence.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Representation for the current sequence.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.TransformerModule.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.TransformerModule.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.spectral.normalize">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.spectral.</span></span><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.spectral.normalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Performs <span class="math notranslate nohighlight">\(L_p\)</span> normalization of inputs over specified dimension.</p>
-<p>For a tensor <code class="xref py py-attr docutils literal notranslate"><span class="pre">input</span></code> of sizes <span class="math notranslate nohighlight">\((n_0, ..., n_{dim}, ..., n_k)\)</span>, each
-<span class="math notranslate nohighlight">\(n_{dim}\)</span> -element vector <span class="math notranslate nohighlight">\(v\)</span> along dimension <code class="xref py py-attr docutils literal notranslate"><span class="pre">dim</span></code> is transformed as</p>
-<div class="math notranslate nohighlight">
-\[v = \frac{v}{\max(\lVert v \rVert_p, \epsilon)}.\]</div>
-<p>With the default arguments it uses the Euclidean norm over vectors along dimension <span class="math notranslate nohighlight">\(1\)</span> for normalization.</p>
-<dl>
-<dt>Args:</dt><dd><p>input: input tensor of any shape
-p (float): the exponent value in the norm formulation. Default: 2
-dim (int): the dimension to reduce. Default: 1
-eps (float): small value to avoid division by zero. Default: 1e-12
-out (Tensor, optional): the output tensor. If <code class="xref py py-attr docutils literal notranslate"><span class="pre">out</span></code> is used, this</p>
-<blockquote>
-<div><p>operation won’t be differentiable.</p>
-</div></blockquote>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">

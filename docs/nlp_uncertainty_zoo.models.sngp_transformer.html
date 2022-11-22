@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>nlp_uncertainty_zoo.models.sngp_transformer &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <title>SNGP Transformer &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -16,7 +16,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="nlp_uncertainty_zoo.models.spectral" href="nlp_uncertainty_zoo.models.spectral.html" />
+    <link rel="next" title="Spectral" href="nlp_uncertainty_zoo.models.spectral.html" />
     <link rel="prev" title="Models" href="nlp_uncertainty_zoo.models.model.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -74,8 +74,10 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-module-class">The <cite>Module</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models">Models Documentation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nlp_uncertainty_zoo.models.sngp_transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">nlp_uncertainty_zoo.models.spectral</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SNGP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.sngp_transformer">SNGP Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#module-nlp_uncertainty_zoo.models.spectral">Spectral Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">nlp_uncertainty_zoo.models.transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
@@ -102,32 +104,8 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.models.sngp_transformer</a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader"><code class="docutils literal notranslate"><span class="pre">DataLoader</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.batch_size"><code class="docutils literal notranslate"><span class="pre">DataLoader.batch_size</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.check_worker_number_rationality"><code class="docutils literal notranslate"><span class="pre">DataLoader.check_worker_number_rationality()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.dataset"><code class="docutils literal notranslate"><span class="pre">DataLoader.dataset</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last"><code class="docutils literal notranslate"><span class="pre">DataLoader.drop_last</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.multiprocessing_context"><code class="docutils literal notranslate"><span class="pre">DataLoader.multiprocessing_context</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.num_workers"><code class="docutils literal notranslate"><span class="pre">DataLoader.num_workers</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.pin_memory"><code class="docutils literal notranslate"><span class="pre">DataLoader.pin_memory</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.prefetch_factor"><code class="docutils literal notranslate"><span class="pre">DataLoader.prefetch_factor</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.sampler"><code class="docutils literal notranslate"><span class="pre">DataLoader.sampler</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.timeout"><code class="docutils literal notranslate"><span class="pre">DataLoader.timeout</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Dict"><code class="docutils literal notranslate"><span class="pre">Dict</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.eval"><code class="docutils literal notranslate"><span class="pre">Model.eval()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.fit"><code class="docutils literal notranslate"><span class="pre">Model.fit()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.get_loss"><code class="docutils literal notranslate"><span class="pre">Model.get_loss()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.get_uncertainty"><code class="docutils literal notranslate"><span class="pre">Model.get_uncertainty()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.load"><code class="docutils literal notranslate"><span class="pre">Model.load()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.predict"><code class="docutils literal notranslate"><span class="pre">Model.predict()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.to"><code class="docutils literal notranslate"><span class="pre">Model.to()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.MultiPredictionMixin"><code class="docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></a></li>
+<li><a class="reference internal" href="#">SNGP Transformer</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.sngp_transformer">SNGP Transformer Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert"><code class="docutils literal notranslate"><span class="pre">SNGPBert</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert.get_loss"><code class="docutils literal notranslate"><span class="pre">SNGPBert.get_loss()</span></code></a></li>
 </ul>
@@ -156,17 +134,6 @@
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.training"><code class="docutils literal notranslate"><span class="pre">SNGPTransformerModule.training</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SpectralBertModule"><code class="docutils literal notranslate"><span class="pre">SpectralBertModule</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SpectralBertModule.training"><code class="docutils literal notranslate"><span class="pre">SpectralBertModule.training</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SpectralTransformerModule"><code class="docutils literal notranslate"><span class="pre">SpectralTransformerModule</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SpectralTransformerModule.training"><code class="docutils literal notranslate"><span class="pre">SpectralTransformerModule.training</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.Tuple"><code class="docutils literal notranslate"><span class="pre">Tuple</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.WandBRun"><code class="docutils literal notranslate"><span class="pre">WandBRun</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.rearrange"><code class="docutils literal notranslate"><span class="pre">rearrange()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -182,7 +149,7 @@
     </a>
   </li>
   <li>
-    <a href="nlp_uncertainty_zoo.models.spectral.html" title="Next Chapter: nlp_uncertainty_zoo.models.spectral"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">nlp_uncertain... &raquo;</span>
+    <a href="nlp_uncertainty_zoo.models.spectral.html" title="Next Chapter: Spectral"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Spectral &raquo;</span>
     </a>
   </li>
               
@@ -216,323 +183,37 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <section id="nlp-uncertainty-zoo-models-sngp-transformer">
-<h1>nlp_uncertainty_zoo.models.sngp_transformer<a class="headerlink" href="#nlp-uncertainty-zoo-models-sngp-transformer" title="Permalink to this heading">¶</a></h1>
-<span class="target" id="module-nlp_uncertainty_zoo.models.sngp_transformer"></span><p>Implementation of a Spectral-normalized Gaussian Process transformer as presented in
+  <section id="sngp-transformer">
+<h1>SNGP Transformer<a class="headerlink" href="#sngp-transformer" title="Permalink to this heading">¶</a></h1>
+<p>The Spectral-normalized Gaussian Process transformer consists of a transformer-based feature extractor, on which then a Gaussian Process output layer is fitted.
+This idea was proposed by <a class="reference external" href="https://arxiv.org/pdf/2205.00403.pdf">Liu et al. (2020)</a>, and is an instance of
+Deep Kernel learning <a class="reference external" href="https://arxiv.org/pdf/1511.02222.pdf">(Wilson et al., 2015)</a>.
+The spectral aspect is further explained in <a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#module-nlp_uncertainty_zoo.models.spectral" title="nlp_uncertainty_zoo.models.spectral"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.spectral</span></code></a>, since the spectral normalization
+is also shared by other models.</p>
+<p>In this module, we implement two versions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer" title="nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer</span></code></a> / <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule" title="nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule</span></code></a>: SNGP applied to a transformer trained from scratch. See <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#module-nlp_uncertainty_zoo.models.transformer" title="nlp_uncertainty_zoo.models.transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.transformer</span></code></a> for more information on how to use the <cite>Transformer</cite> model &amp; module.</p></li>
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert" title="nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert</span></code></a> / <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPBertModule" title="nlp_uncertainty_zoo.models.sngp_transformer.SNGPBertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.SNGPBertModule</span></code></a>:  SNGP applied to pre-trained and then fine-tuned. See <a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert" title="nlp_uncertainty_zoo.models.bert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert</span></code></a> for more information on how to use the <cite>Bert</cite> model &amp; module.</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer" title="nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer</span></code></a> / <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule" title="nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule</span></code></a> were included for completeness, but might not be very stable.
+In <a class="reference external" href="https://arxiv.org/pdf/2210.15452.pdf">Ulmer et al. (2022)</a>, it was already found that even with pre-trained BERT models as feature extractors, training was quite unstable, and would probably be even more unstable when training the underlying transformer from scratch.</p>
+</div>
+<p>All the important model logic is encapsulated in the <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPModule" title="nlp_uncertainty_zoo.models.sngp_transformer.SNGPModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.SNGPModule</span></code></a> class in order to avoid code redundancies.
+Since many NLP tasks involve many classes, we use the approximation detailed in <a class="reference external" href="https://arxiv.org/pdf/2205.00403.pdf">Appendix A.1 in the paper</a>.
+To be able to compute uncertainty metrics like <a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#nlp_uncertainty_zoo.utils.metrics.mutual_information" title="nlp_uncertainty_zoo.utils.metrics.mutual_information"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.metrics.mutual_information()</span></code></a>, we choose to <strong>not</strong> use the mean-field approximation of the posterior in equation (7).</p>
+</section>
+<section id="module-nlp_uncertainty_zoo.models.sngp_transformer">
+<span id="sngp-transformer-module-documentation"></span><h1>SNGP Transformer Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.sngp_transformer" title="Permalink to this heading">¶</a></h1>
+<p>Implementation of a Spectral-normalized Gaussian Process transformer as presented in
 <a class="reference external" href="https://arxiv.org/pdf/2006.10108.pdf">Liu et al. (2020)</a>.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">DataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span><span class="p"><span class="pre">[</span></span><span class="pre">T_co</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.Sampler" title="torch.utils.data.sampler.Sampler"><span class="pre">Sampler</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_sampler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.Sampler" title="torch.utils.data.sampler.Sampler"><span class="pre">Sampler</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collate_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.List" title="typing.List"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pin_memory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_last</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_init_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiprocessing_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefetch_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">persistent_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T_co</span></code>]</p>
-<p>Data loader. Combines a dataset and a sampler, and provides an iterable over
-the given dataset.</p>
-<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code> supports both map-style and
-iterable-style datasets with single- or multi-process loading, customizing
-loading order and optional automatic batching (collation) and memory pinning.</p>
-<p>See <code class="xref py py-mod docutils literal notranslate"><span class="pre">torch.utils.data</span></code> documentation page for more details.</p>
-<dl>
-<dt>Args:</dt><dd><p>dataset (Dataset): dataset from which to load the data.
-batch_size (int, optional): how many samples per batch to load</p>
-<blockquote>
-<div><p>(default: <code class="docutils literal notranslate"><span class="pre">1</span></code>).</p>
-</div></blockquote>
-<dl class="simple">
-<dt>shuffle (bool, optional): set to <code class="docutils literal notranslate"><span class="pre">True</span></code> to have the data reshuffled</dt><dd><p>at every epoch (default: <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p>
-</dd>
-<dt>sampler (Sampler or Iterable, optional): defines the strategy to draw</dt><dd><p>samples from the dataset. Can be any <code class="docutils literal notranslate"><span class="pre">Iterable</span></code> with <code class="docutils literal notranslate"><span class="pre">__len__</span></code>
-implemented. If specified, <code class="xref py py-attr docutils literal notranslate"><span class="pre">shuffle</span></code> must not be specified.</p>
-</dd>
-<dt>batch_sampler (Sampler or Iterable, optional): like <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.sampler" title="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.sampler"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sampler</span></code></a>, but</dt><dd><p>returns a batch of indices at a time. Mutually exclusive with
-<a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.batch_size" title="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.batch_size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">batch_size</span></code></a>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">shuffle</span></code>, <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.sampler" title="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.sampler"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sampler</span></code></a>,
-and <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last" title="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last"><code class="xref py py-attr docutils literal notranslate"><span class="pre">drop_last</span></code></a>.</p>
-</dd>
-<dt>num_workers (int, optional): how many subprocesses to use for data</dt><dd><p>loading. <code class="docutils literal notranslate"><span class="pre">0</span></code> means that the data will be loaded in the main process.
-(default: <code class="docutils literal notranslate"><span class="pre">0</span></code>)</p>
-</dd>
-<dt>collate_fn (callable, optional): merges a list of samples to form a</dt><dd><p>mini-batch of Tensor(s).  Used when using batched loading from a
-map-style dataset.</p>
-</dd>
-<dt>pin_memory (bool, optional): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the data loader will copy Tensors</dt><dd><p>into CUDA pinned memory before returning them.  If your data elements
-are a custom type, or your <code class="xref py py-attr docutils literal notranslate"><span class="pre">collate_fn</span></code> returns a batch that is a custom type,
-see the example below.</p>
-</dd>
-<dt>drop_last (bool, optional): set to <code class="docutils literal notranslate"><span class="pre">True</span></code> to drop the last incomplete batch,</dt><dd><p>if the dataset size is not divisible by the batch size. If <code class="docutils literal notranslate"><span class="pre">False</span></code> and
-the size of dataset is not divisible by the batch size, then the last batch
-will be smaller. (default: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p>
-</dd>
-<dt>timeout (numeric, optional): if positive, the timeout value for collecting a batch</dt><dd><p>from workers. Should always be non-negative. (default: <code class="docutils literal notranslate"><span class="pre">0</span></code>)</p>
-</dd>
-<dt>worker_init_fn (callable, optional): If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, this will be called on each</dt><dd><p>worker subprocess with the worker id (an int in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">num_workers</span> <span class="pre">-</span> <span class="pre">1]</span></code>) as
-input, after seeding and before data loading. (default: <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p>
-</dd>
-<dt>generator (torch.Generator, optional): If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, this RNG will be used</dt><dd><p>by RandomSampler to generate random indexes and multiprocessing to generate
-<cite>base_seed</cite> for workers. (default: <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p>
-</dd>
-<dt>prefetch_factor (int, optional, keyword-only arg): Number of samples loaded</dt><dd><p>in advance by each worker. <code class="docutils literal notranslate"><span class="pre">2</span></code> means there will be a total of
-2 * num_workers samples prefetched across all workers. (default: <code class="docutils literal notranslate"><span class="pre">2</span></code>)</p>
-</dd>
-<dt>persistent_workers (bool, optional): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the data loader will not shutdown</dt><dd><p>the worker processes after a dataset has been consumed once. This allows to
-maintain the workers <cite>Dataset</cite> instances alive. (default: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>If the <code class="docutils literal notranslate"><span class="pre">spawn</span></code> start method is used, <code class="xref py py-attr docutils literal notranslate"><span class="pre">worker_init_fn</span></code>
-cannot be an unpicklable object, e.g., a lambda function. See
-<span class="xref std std-ref">multiprocessing-best-practices</span> on more details related
-to multiprocessing in PyTorch.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><code class="docutils literal notranslate"><span class="pre">len(dataloader)</span></code> heuristic is based on the length of the sampler used.
-When <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.dataset" title="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.dataset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">dataset</span></code></a> is an <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code>,
-it instead returns an estimate based on <code class="docutils literal notranslate"><span class="pre">len(dataset)</span> <span class="pre">/</span> <span class="pre">batch_size</span></code>, with proper
-rounding depending on <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last" title="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last"><code class="xref py py-attr docutils literal notranslate"><span class="pre">drop_last</span></code></a>, regardless of multi-process loading
-configurations. This represents the best guess PyTorch can make because PyTorch
-trusts user <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.dataset" title="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.dataset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">dataset</span></code></a> code in correctly handling multi-process
-loading to avoid duplicate data.</p>
-<p>However, if sharding results in multiple workers having incomplete last batches,
-this estimate can still be inaccurate, because (1) an otherwise complete batch can
-be broken into multiple ones and (2) more than one batch worth of samples can be
-dropped when <a class="reference internal" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last" title="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last"><code class="xref py py-attr docutils literal notranslate"><span class="pre">drop_last</span></code></a> is set. Unfortunately, PyTorch can not detect such
-cases in general.</p>
-<p>See <a href="#id2"><span class="problematic" id="id3">`Dataset Types`_</span></a> for more details on these two types of datasets and how
-<code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code> interacts with
-<a href="#id4"><span class="problematic" id="id5">`Multi-process data loading`_</span></a>.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>See <span class="xref std std-ref">reproducibility</span>, and <span class="xref std std-ref">dataloader-workers-random-seed</span>, and
-<span class="xref std std-ref">data-loading-randomness</span> notes for random seed related questions.</p>
-</div>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.batch_size">
-<span class="sig-name descname"><span class="pre">batch_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.batch_size" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.check_worker_number_rationality">
-<span class="sig-name descname"><span class="pre">check_worker_number_rationality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.check_worker_number_rationality" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.dataset">
-<span class="sig-name descname"><span class="pre">dataset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dataset</span><span class="p"><span class="pre">[</span></span><span class="pre">T_co</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.dataset" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last">
-<span class="sig-name descname"><span class="pre">drop_last</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.drop_last" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.multiprocessing_context">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multiprocessing_context</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.multiprocessing_context" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.num_workers">
-<span class="sig-name descname"><span class="pre">num_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.num_workers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.pin_memory">
-<span class="sig-name descname"><span class="pre">pin_memory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.pin_memory" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.prefetch_factor">
-<span class="sig-name descname"><span class="pre">prefetch_factor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.prefetch_factor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.sampler">
-<span class="sig-name descname"><span class="pre">sampler</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.Sampler" title="torch.utils.data.sampler.Sampler"><span class="pre">Sampler</span></a></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.sampler" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.timeout">
-<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.DataLoader.timeout" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Dict">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">Dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">empty</span> <span class="pre">dictionary</span> <span class="pre">dict(mapping)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">from</span> <span class="pre">a</span> <span class="pre">mapping</span> <span class="pre">object's</span> <span class="pre">(key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value)</span> <span class="pre">pairs</span> <span class="pre">dict(iterable)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">as</span> <span class="pre">if</span> <span class="pre">via:</span> <span class="pre">d</span> <span class="pre">=</span> <span class="pre">{}</span> <span class="pre">for</span> <span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span> <span class="pre">in</span> <span class="pre">iterable:</span> <span class="pre">d[k]</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">dict(**kwargs)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">name=value</span> <span class="pre">pairs</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">keyword</span> <span class="pre">argument</span> <span class="pre">list.</span>&#160; <span class="pre">For</span> <span class="pre">example:</span>&#160; <span class="pre">dict(one=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two=2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">KT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">VT</span></code>]</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Model">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.ABC" title="abc.ABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>Abstract model class. It is a wrapper that defines data loading, batching, training and evaluation loops, so that
-the core module class can only define the model’s forward pass.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Model.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.DataLoader" title="torch.utils.data.dataloader.DataLoader"><span class="pre">DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate a data split.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>data_split: DataSplit</strong></dt><dd><p>Data split the model should be evaluated on.</p>
-</dd>
-<dt><strong>wandb_run: Optional[WandBRun]</strong></dt><dd><p>Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
-tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.Tensor</dt><dd><p>Loss on evaluation split.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Model.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.DataLoader" title="torch.utils.data.dataloader.DataLoader"><span class="pre">DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.DataLoader" title="torch.utils.data.dataloader.DataLoader"><span class="pre">DataLoader</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit the model to training data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>train_split: DataLoader</strong></dt><dd><p>Dataset the model is being trained on.</p>
-</dd>
-<dt><strong>valid_split: Optional[DataLoader]</strong></dt><dd><p>Validation set the model is being evaluated on if given.</p>
-</dd>
-<dt><strong>verbose: bool</strong></dt><dd><p>Whether to display information about current loss.</p>
-</dd>
-<dt><strong>weight_loss: bool</strong></dt><dd><p>Weight classes in loss function. Default is False.</p>
-</dd>
-<dt><strong>wandb_run: Optional[WandBRun]</strong></dt><dd><p>Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
-tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Model.get_loss">
-<span class="sig-name descname"><span class="pre">get_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.get_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get loss for a single batch. This just uses cross-entropy loss, but can be adjusted in subclasses by overwriting
-this function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>X: torch.Tensor</strong></dt><dd><p>Batch input.</p>
-</dd>
-<dt><strong>y: torch.Tensor</strong></dt><dd><p>Batch labels.</p>
-</dd>
-<dt><strong>wandb_run: Optional[WandBRun] = None</strong></dt><dd><p>Weights and Biases run to track training statistics.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.Tensor</dt><dd><p>Batch loss.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Model.get_uncertainty">
-<span class="sig-name descname"><span class="pre">get_uncertainty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.get_uncertainty" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the uncertainty scores for the current batch.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-<dt><strong>metric_name: Optional[str]</strong></dt><dd><p>Name of uncertainty metric being used. If None, use metric defined under the default_uncertainty_metric
-attribute.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Uncertainty scores for the current batch.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Model.load">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load model from path.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>model_path: str</strong></dt><dd><p>Path model was saved to.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>Model</dt><dd><p>Loaded model.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Model.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a prediction for some input.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>X: torch.Tensor</strong></dt><dd><p>Input data points.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.Tensor</dt><dd><p>Predictions.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Model.to">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Model.to" title="Permalink to this definition">¶</a></dt>
-<dd><p>Move model to another device.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>device: Device</strong></dt><dd><p>Device the model should be moved to.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.MultiPredictionMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">MultiPredictionMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_predictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.MultiPredictionMixin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Mixin class that is used to bundle certain methods for modules that use multiple predictions to estimate
-uncertainty.</p>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">SNGPBert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#nlp_uncertainty_zoo.models.variational_transformer.Model" title="nlp_uncertainty_zoo.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">SNGPBert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert.get_loss">
 <span class="sig-name descname"><span class="pre">get_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPBert.get_loss" title="Permalink to this definition">¶</a></dt>
@@ -563,7 +244,7 @@ this function.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SNGPBertModule">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">SNGPBertModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bert_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_norm_upper_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ridge_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_coefficient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_length_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_predictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPBertModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#nlp_uncertainty_zoo.models.spectral.SpectralBertModule" title="nlp_uncertainty_zoo.models.spectral.SpectralBertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectralBertModule</span></code></a>, <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#nlp_uncertainty_zoo.models.variational_transformer.MultiPredictionMixin" title="nlp_uncertainty_zoo.models.model.MultiPredictionMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#nlp_uncertainty_zoo.models.spectral.SpectralBertModule" title="nlp_uncertainty_zoo.models.spectral.SpectralBertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectralBertModule</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></p>
 <p>Implementation of a spectral-normalized Gaussian Process transformer, based on a fine-tuned Bert.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SNGPBertModule.forward">
@@ -724,14 +405,14 @@ specified during initialization is used.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">SNGPTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#nlp_uncertainty_zoo.models.variational_transformer.Model" title="nlp_uncertainty_zoo.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">SNGPTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">SNGPTransformerModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_norm_upper_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ridge_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_coefficient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_length_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_predictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule" title="nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectralTransformerModule</span></code></a>, <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#nlp_uncertainty_zoo.models.variational_transformer.MultiPredictionMixin" title="nlp_uncertainty_zoo.models.model.MultiPredictionMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule" title="nlp_uncertainty_zoo.models.spectral.SpectralTransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectralTransformerModule</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></p>
 <p>Implementation of a spectral-normalized Gaussian Process transformer.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.forward">
@@ -808,96 +489,6 @@ x output_size or batch_size x num_predictions x seq_len x output_size depending 
 <span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.training" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SpectralBertModule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">SpectralBertModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bert_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_norm_upper_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SpectralBertModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule" title="nlp_uncertainty_zoo.models.bert.BertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">BertModule</span></code></a></p>
-<p>Implementation of a BERT model that uses spectral normalization.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SpectralBertModule.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SpectralBertModule.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SpectralTransformerModule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">SpectralTransformerModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_norm_upper_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SpectralTransformerModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule" title="nlp_uncertainty_zoo.models.transformer.TransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerModule</span></code></a></p>
-<p>Implementation of a spectrally-normalized transformer. Used as a base for models like SNGP and DDU.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.SpectralTransformerModule.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.SpectralTransformerModule.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.Tuple">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">Tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.Tuple" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<p>Tuple type; Tuple[X, Y] is the cross-product type of X and Y.</p>
-<p>Example: Tuple[T1, T2] is a tuple of two elements corresponding
-to type variables T1 and T2.  Tuple[int, float, str] is a tuple
-of an int, a float and a string.</p>
-<p>To specify a variable-length tuple of homogeneous type, use Tuple[T, …].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.WandBRun">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">WandBRun</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.WandBRun" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.sngp_transformer.rearrange">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer.</span></span><span class="sig-name descname"><span class="pre">rearrange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">axes_lengths</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.sngp_transformer.rearrange" title="Permalink to this definition">¶</a></dt>
-<dd><p>einops.rearrange is a reader-friendly smart element reordering for multidimensional tensors.
-This operation includes functionality of transpose (axes permutation), reshape (view), squeeze, unsqueeze,
-stack, concatenate and other operations.</p>
-<p>Examples for rearrange operation:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># suppose we have a set of 32 images in &quot;h w c&quot; format (height-width-channel)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">)]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># stack along first (batch) axis, output is a single array</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rearrange</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s1">&#39;b h w c -&gt; b h w c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(32, 30, 40, 3)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># concatenate images along height (vertical axis), 960 = 32 * 30</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rearrange</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s1">&#39;b h w c -&gt; (b h) w c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(960, 40, 3)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># concatenated images along horizontal axis, 1280 = 32 * 40</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rearrange</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s1">&#39;b h w c -&gt; h (b w) c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(30, 1280, 3)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># reordered axes to &quot;b c h w&quot; format for deep learning</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rearrange</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s1">&#39;b h w c -&gt; b c h w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(32, 3, 30, 40)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># flattened each image into a vector, 3600 = 30 * 40 * 3</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rearrange</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s1">&#39;b h w c -&gt; b (c h w)&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(32, 3600)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># split each image into 4 smaller (top-left, top-right, bottom-left, bottom-right), 128 = 32 * 2 * 2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rearrange</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s1">&#39;b (h1 h) (w1 w) c -&gt; (b h1 w1) h w c&#39;</span><span class="p">,</span> <span class="n">h1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">w1</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(128, 15, 20, 3)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># space-to-depth operation</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rearrange</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s1">&#39;b (h h1) (w w1) c -&gt; b h w (c h1 w1)&#39;</span><span class="p">,</span> <span class="n">h1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">w1</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(32, 15, 20, 12)</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tensor</strong> – tensor of any supported library (e.g. numpy.ndarray, tensorflow, pytorch, mxnet.ndarray).
-list of tensors is also accepted, those should be of the same type and shape</p></li>
-<li><p><strong>pattern</strong> – string, rearrangement pattern</p></li>
-<li><p><strong>axes_lengths</strong> – any additional specifications for dimensions</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>tensor of the same type as input. If possible, a view to the original tensor is returned.</p>
-</dd>
-</dl>
-<p>When composing axes, C-order enumeration used (consecutive elements have different last axis)
-Find more examples in einops tutorial.</p>
 </dd></dl>
 
 </section>

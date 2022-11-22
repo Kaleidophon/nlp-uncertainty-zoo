@@ -43,7 +43,6 @@ Models Documentation
 ====================
 
 .. automodule:: nlp_uncertainty_zoo.models
-   :imported-members:
    :members:
    :show-inheritance:
    :undoc-members:

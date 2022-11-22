@@ -74,8 +74,10 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-module-class">The <cite>Module</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models">Models Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">nlp_uncertainty_zoo.models.sngp_transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">nlp_uncertainty_zoo.models.spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">SNGP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#module-nlp_uncertainty_zoo.models.sngp_transformer">SNGP Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#module-nlp_uncertainty_zoo.models.spectral">Spectral Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">nlp_uncertainty_zoo.models.transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
@@ -103,35 +105,6 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">nlp_uncertainty_zoo.models.variational_transformer</a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule"><code class="docutils literal notranslate"><span class="pre">BertModule</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.forward"><code class="docutils literal notranslate"><span class="pre">BertModule.forward()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_hidden"><code class="docutils literal notranslate"><span class="pre">BertModule.get_hidden()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_logits"><code class="docutils literal notranslate"><span class="pre">BertModule.get_logits()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">BertModule.get_sequence_representation()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.predict"><code class="docutils literal notranslate"><span class="pre">BertModule.predict()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.training"><code class="docutils literal notranslate"><span class="pre">BertModule.training</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Dict"><code class="docutils literal notranslate"><span class="pre">Dict</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.eval"><code class="docutils literal notranslate"><span class="pre">Model.eval()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.fit"><code class="docutils literal notranslate"><span class="pre">Model.fit()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.get_loss"><code class="docutils literal notranslate"><span class="pre">Model.get_loss()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.get_uncertainty"><code class="docutils literal notranslate"><span class="pre">Model.get_uncertainty()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.load"><code class="docutils literal notranslate"><span class="pre">Model.load()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.predict"><code class="docutils literal notranslate"><span class="pre">Model.predict()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.to"><code class="docutils literal notranslate"><span class="pre">Model.to()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.MultiPredictionMixin"><code class="docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule"><code class="docutils literal notranslate"><span class="pre">TransformerModule</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.forward"><code class="docutils literal notranslate"><span class="pre">TransformerModule.forward()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_hidden"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_hidden()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_logits"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_logits()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_sequence_representation()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.training"><code class="docutils literal notranslate"><span class="pre">TransformerModule.training</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalBert"><code class="docutils literal notranslate"><span class="pre">VariationalBert</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalBertModule"><code class="docutils literal notranslate"><span class="pre">VariationalBertModule</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalBertModule.eval"><code class="docutils literal notranslate"><span class="pre">VariationalBertModule.eval()</span></code></a></li>
@@ -201,367 +174,16 @@
 <h1>nlp_uncertainty_zoo.models.variational_transformer<a class="headerlink" href="#nlp-uncertainty-zoo-models-variational-transformer" title="Permalink to this heading">¶</a></h1>
 <span class="target" id="module-nlp_uncertainty_zoo.models.variational_transformer"></span><p>Implement the variational transformer, as presented by <a class="reference external" href="https://arxiv.org/pdf/2006.08344.pdf">(Xiao et al., 2021)</a>.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.BertModule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">BertModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bert_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.Module" title="nlp_uncertainty_zoo.models.model.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
-<p>Define a BERT module that implements all the functions implemented in Module.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.BertModule.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Forward pass of the model.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-<dt><strong>Returns</strong></dt><dd></dd>
-<dt><strong>——-</strong></dt><dd></dd>
-<dt><strong>torch.FloatTensor</strong></dt><dd><p>Output predictions for input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_hidden">
-<span class="sig-name descname"><span class="pre">get_hidden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_hidden" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_logits">
-<span class="sig-name descname"><span class="pre">get_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_logits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
-num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
-metrics defined in nlp_uncertainty_zoo.metrics.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Logits for current input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_sequence_representation">
-<span class="sig-name descname"><span class="pre">get_sequence_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hidden</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FloatTensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.get_sequence_representation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define how the representation for an entire sequence is extracted from a number of hidden states. This is
-relevant in sequence classification. For example, this could be the last hidden state for a unidirectional LSTM
-or the first hidden state for a transformer, adding a pooler layer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>hidden: torch.FloatTensor</strong></dt><dd><p>Hidden states of a model for a sequence.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Representation for the current sequence.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.BertModule.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Output a probability distribution over classes given an input. Results in a tensor of size batch_size x seq_len
-x output_size or batch_size x num_predictions x seq_len x output_size depending on the model type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Logits for current input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.BertModule.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.BertModule.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Dict">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">Dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">empty</span> <span class="pre">dictionary</span> <span class="pre">dict(mapping)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">from</span> <span class="pre">a</span> <span class="pre">mapping</span> <span class="pre">object's</span> <span class="pre">(key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value)</span> <span class="pre">pairs</span> <span class="pre">dict(iterable)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">as</span> <span class="pre">if</span> <span class="pre">via:</span> <span class="pre">d</span> <span class="pre">=</span> <span class="pre">{}</span> <span class="pre">for</span> <span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span> <span class="pre">in</span> <span class="pre">iterable:</span> <span class="pre">d[k]</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">dict(**kwargs)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">name=value</span> <span class="pre">pairs</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">keyword</span> <span class="pre">argument</span> <span class="pre">list.</span>&#160; <span class="pre">For</span> <span class="pre">example:</span>&#160; <span class="pre">dict(one=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two=2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">KT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">VT</span></code>]</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Model">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.ABC" title="abc.ABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>Abstract model class. It is a wrapper that defines data loading, batching, training and evaluation loops, so that
-the core module class can only define the model’s forward pass.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Model.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.DataLoader" title="torch.utils.data.dataloader.DataLoader"><span class="pre">DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate a data split.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>data_split: DataSplit</strong></dt><dd><p>Data split the model should be evaluated on.</p>
-</dd>
-<dt><strong>wandb_run: Optional[WandBRun]</strong></dt><dd><p>Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
-tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.Tensor</dt><dd><p>Loss on evaluation split.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Model.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.DataLoader" title="torch.utils.data.dataloader.DataLoader"><span class="pre">DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.DataLoader" title="torch.utils.data.dataloader.DataLoader"><span class="pre">DataLoader</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit the model to training data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>train_split: DataLoader</strong></dt><dd><p>Dataset the model is being trained on.</p>
-</dd>
-<dt><strong>valid_split: Optional[DataLoader]</strong></dt><dd><p>Validation set the model is being evaluated on if given.</p>
-</dd>
-<dt><strong>verbose: bool</strong></dt><dd><p>Whether to display information about current loss.</p>
-</dd>
-<dt><strong>weight_loss: bool</strong></dt><dd><p>Weight classes in loss function. Default is False.</p>
-</dd>
-<dt><strong>wandb_run: Optional[WandBRun]</strong></dt><dd><p>Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
-tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Model.get_loss">
-<span class="sig-name descname"><span class="pre">get_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.get_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get loss for a single batch. This just uses cross-entropy loss, but can be adjusted in subclasses by overwriting
-this function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>X: torch.Tensor</strong></dt><dd><p>Batch input.</p>
-</dd>
-<dt><strong>y: torch.Tensor</strong></dt><dd><p>Batch labels.</p>
-</dd>
-<dt><strong>wandb_run: Optional[WandBRun] = None</strong></dt><dd><p>Weights and Biases run to track training statistics.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.Tensor</dt><dd><p>Batch loss.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Model.get_uncertainty">
-<span class="sig-name descname"><span class="pre">get_uncertainty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.get_uncertainty" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the uncertainty scores for the current batch.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-<dt><strong>metric_name: Optional[str]</strong></dt><dd><p>Name of uncertainty metric being used. If None, use metric defined under the default_uncertainty_metric
-attribute.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Uncertainty scores for the current batch.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Model.load">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load model from path.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>model_path: str</strong></dt><dd><p>Path model was saved to.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>Model</dt><dd><p>Loaded model.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Model.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a prediction for some input.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>X: torch.Tensor</strong></dt><dd><p>Input data points.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.Tensor</dt><dd><p>Predictions.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.Model.to">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.Model.to" title="Permalink to this definition">¶</a></dt>
-<dd><p>Move model to another device.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>device: Device</strong></dt><dd><p>Device the model should be moved to.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.MultiPredictionMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">MultiPredictionMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_predictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.MultiPredictionMixin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Mixin class that is used to bundle certain methods for modules that use multiple predictions to estimate
-uncertainty.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.TransformerModule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">TransformerModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.Module" title="nlp_uncertainty_zoo.models.model.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
-<p>Implementation of a transformer for classification.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Forward pass of the model.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Output predictions for input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_hidden">
-<span class="sig-name descname"><span class="pre">get_hidden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_hidden" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_logits">
-<span class="sig-name descname"><span class="pre">get_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LongTensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_logits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the logits for an input. Results in a tensor of size batch_size x seq_len x output_size or batch_size x
-num_predictions x seq_len x output_size depending on the model type. Used to create inputs for the uncertainty
-metrics defined in nlp_uncertainty_zoo.metrics.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_: torch.LongTensor</strong></dt><dd><p>(Batch of) Indexed input sequences.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Logits for current input.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_sequence_representation">
-<span class="sig-name descname"><span class="pre">get_sequence_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hidden</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FloatTensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.get_sequence_representation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define how the representation for an entire sequence is extracted from a number of hidden states. This is
-relevant in sequence classification. In this case this is done by using the first hidden state and adding a
-pooler layer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>hidden: torch.FloatTensor</strong></dt><dd><p>Hidden states of a model for a sequence.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd><p>Representation for the current sequence.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.TransformerModule.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.VariationalBert">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">VariationalBert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalBert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model" title="nlp_uncertainty_zoo.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">VariationalBert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalBert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <p>Variational version of BERT.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.VariationalBertModule">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">VariationalBertModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bert_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_predictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalBertModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule" title="nlp_uncertainty_zoo.models.bert.BertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">BertModule</span></code></a>, <a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.MultiPredictionMixin" title="nlp_uncertainty_zoo.models.model.MultiPredictionMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule" title="nlp_uncertainty_zoo.models.bert.BertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">BertModule</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></p>
 <p>Implementation of Variational Transformer by <a class="reference external" href="https://arxiv.org/pdf/2006.08344.pdf">Xiao et al., (2021)</a> for BERT.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.VariationalBertModule.eval">
@@ -634,15 +256,15 @@ x output_size or batch_size x num_predictions x seq_len x output_size depending 
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.VariationalTransformer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">VariationalTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalTransformer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.Model" title="nlp_uncertainty_zoo.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">VariationalTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <p>Module for the variational transformer.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.VariationalTransformerModule">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer.</span></span><span class="sig-name descname"><span class="pre">VariationalTransformerModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_predictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.variational_transformer.VariationalTransformerModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule" title="nlp_uncertainty_zoo.models.transformer.TransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerModule</span></code></a>, <a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_transformer.MultiPredictionMixin" title="nlp_uncertainty_zoo.models.model.MultiPredictionMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule" title="nlp_uncertainty_zoo.models.transformer.TransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerModule</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPredictionMixin</span></code></p>
 <p>Implementation of Variational Transformer by <a class="reference external" href="https://arxiv.org/pdf/2006.08344.pdf">Xiao et al., (2021)</a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_transformer.VariationalTransformerModule.eval">

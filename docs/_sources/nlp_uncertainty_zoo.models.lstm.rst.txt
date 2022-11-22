@@ -9,7 +9,6 @@ LSTM Module Documentation
 =========================
 
 .. automodule:: nlp_uncertainty_zoo.models.lstm
-   :imported-members:
    :members:
    :show-inheritance:
    :undoc-members:

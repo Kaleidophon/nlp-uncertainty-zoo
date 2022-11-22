@@ -5,7 +5,7 @@ This module includes an implementation of the Deep Deterministic Uncertainty (DD
 The approach involves fine-tuning a transformer, and then fitting a Gaussian Mixture Model (GMM) on its activations.
 Model uncertainty is then computed based on the log probability of an input based on its encoding under the GMM.
 
-In this model, we implement two versions:
+In this module, we implement two versions:
 
     * :py:class:`nlp_uncertainty_zoo.models.ddu_transformer.DDUTransformer` / :py:class:`nlp_uncertainty_zoo.models.ddu_transformer.DDUTransformerModule`: DDU applied to a transformer trained from scratch. See :py:mod:`nlp_uncertainty_zoo.models.transformer` for more information on how to use the `Transformer` model & module.
     * :py:class:`nlp_uncertainty_zoo.models.ddu_transformer.DDUBert` / :py:class:`nlp_uncertainty_zoo.models.ddu_transformer.DDUBertModule`:  DDU applied to pre-trained and then fine-tuned. See :py:mod:`nlp_uncertainty_zoo.models.bert` for more information on how to use the `Bert` model & module.
@@ -18,7 +18,6 @@ DDU Transformer Module Documentation
 ====================================
 
 .. automodule:: nlp_uncertainty_zoo.models.ddu_transformer
-   :imported-members:
    :members:
    :show-inheritance:
    :undoc-members:

@@ -74,8 +74,10 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-module-class">The <cite>Module</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models">Models Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">nlp_uncertainty_zoo.models.sngp_transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">nlp_uncertainty_zoo.models.spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">SNGP Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#module-nlp_uncertainty_zoo.models.sngp_transformer">SNGP Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#module-nlp_uncertainty_zoo.models.spectral">Spectral Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">nlp_uncertainty_zoo.models.transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">nlp_uncertainty_zoo.models.st_tau_lstm</a></li>
@@ -103,43 +105,13 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">nlp_uncertainty_zoo.utils.samplers</a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.ABC"><code class="docutils literal notranslate"><span class="pre">ABC</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Counter"><code class="docutils literal notranslate"><span class="pre">Counter</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Counter.copy"><code class="docutils literal notranslate"><span class="pre">Counter.copy()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Counter.elements"><code class="docutils literal notranslate"><span class="pre">Counter.elements()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Counter.fromkeys"><code class="docutils literal notranslate"><span class="pre">Counter.fromkeys()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Counter.most_common"><code class="docutils literal notranslate"><span class="pre">Counter.most_common()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Counter.subtract"><code class="docutils literal notranslate"><span class="pre">Counter.subtract()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Counter.update"><code class="docutils literal notranslate"><span class="pre">Counter.update()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Dict"><code class="docutils literal notranslate"><span class="pre">Dict</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.LanguageModellingSampler"><code class="docutils literal notranslate"><span class="pre">LanguageModellingSampler</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.List"><code class="docutils literal notranslate"><span class="pre">List</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Parallel"><code class="docutils literal notranslate"><span class="pre">Parallel</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Parallel.dispatch_next"><code class="docutils literal notranslate"><span class="pre">Parallel.dispatch_next()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Parallel.dispatch_one_batch"><code class="docutils literal notranslate"><span class="pre">Parallel.dispatch_one_batch()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Parallel.print_progress"><code class="docutils literal notranslate"><span class="pre">Parallel.print_progress()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Parallel.retrieve"><code class="docutils literal notranslate"><span class="pre">Parallel.retrieve()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Sampler"><code class="docutils literal notranslate"><span class="pre">Sampler</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.SequenceClassificationSampler"><code class="docutils literal notranslate"><span class="pre">SequenceClassificationSampler</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Sized"><code class="docutils literal notranslate"><span class="pre">Sized</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Subsampler"><code class="docutils literal notranslate"><span class="pre">Subsampler</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.TokenClassificationSampler"><code class="docutils literal notranslate"><span class="pre">TokenClassificationSampler</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Tuple"><code class="docutils literal notranslate"><span class="pre">Tuple</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.abstractmethod"><code class="docutils literal notranslate"><span class="pre">abstractmethod()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.create_probs_from_dict"><code class="docutils literal notranslate"><span class="pre">create_probs_from_dict()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.defaultdict"><code class="docutils literal notranslate"><span class="pre">defaultdict</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.defaultdict.copy"><code class="docutils literal notranslate"><span class="pre">defaultdict.copy()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.defaultdict.default_factory"><code class="docutils literal notranslate"><span class="pre">defaultdict.default_factory</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.delayed"><code class="docutils literal notranslate"><span class="pre">delayed()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.merge_freq_dicts"><code class="docutils literal notranslate"><span class="pre">merge_freq_dicts()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.merge_instance_dicts"><code class="docutils literal notranslate"><span class="pre">merge_instance_dicts()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.reduce"><code class="docutils literal notranslate"><span class="pre">reduce()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -194,150 +166,8 @@
 <span class="target" id="module-nlp_uncertainty_zoo.utils.samplers"></span><p>Sampler used to sub-sample different types of datasets. In each class, some statistics about the distribution of inputs
 is built, and then indices of instances from the dataset are subs-ampled based on these statistics.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.ABC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">ABC</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.ABC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Helper class that provides a standard way to create an ABC using
-inheritance.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Counter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">Counter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Counter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-<p>Dict subclass for counting hashable items.  Sometimes called a bag
-or multiset.  Elements are stored as dictionary keys and their counts
-are stored as dictionary values.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;abcdeabcdabcaba&#39;</span><span class="p">)</span>  <span class="c1"># count elements from a string</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                <span class="c1"># three most common elements</span>
-<span class="go">[(&#39;a&#39;, 5), (&#39;b&#39;, 4), (&#39;c&#39;, 3)]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>                       <span class="c1"># list all unique elements</span>
-<span class="go">[&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">elements</span><span class="p">()))</span>   <span class="c1"># list elements with repetitions</span>
-<span class="go">&#39;aaaaabbbbcccdde&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">sum</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>                 <span class="c1"># total of all counts</span>
-<span class="go">15</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span>                          <span class="c1"># count of letter &#39;a&#39;</span>
-<span class="go">5</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="s1">&#39;shazam&#39;</span><span class="p">:</span>           <span class="c1"># update counts from an iterable</span>
-<span class="gp">... </span>    <span class="n">c</span><span class="p">[</span><span class="n">elem</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>                <span class="c1"># by adding 1 to each element&#39;s count</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span>                          <span class="c1"># now there are seven &#39;a&#39;</span>
-<span class="go">7</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]</span>                      <span class="c1"># remove all &#39;b&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]</span>                          <span class="c1"># now there are zero &#39;b&#39;</span>
-<span class="go">0</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;simsalabim&#39;</span><span class="p">)</span>       <span class="c1"># make another counter</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                     <span class="c1"># add in the second counter</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span>                          <span class="c1"># now there are nine &#39;a&#39;</span>
-<span class="go">9</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>                       <span class="c1"># empty the counter</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span>
-<span class="go">Counter()</span>
-</pre></div>
-</div>
-<p>Note:  If a count is set to zero or reduced to zero, it will remain
-in the counter until the entry is deleted or the counter is cleared:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;aaabbc&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">2</span>                     <span class="c1"># reduce the count of &#39;b&#39; by two</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>                 <span class="c1"># &#39;b&#39; is still in, but its count is zero</span>
-<span class="go">[(&#39;a&#39;, 3), (&#39;c&#39;, 1), (&#39;b&#39;, 0)]</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Counter.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Counter.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a shallow copy.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Counter.elements">
-<span class="sig-name descname"><span class="pre">elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Counter.elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Iterator over elements repeating each as many times as its count.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;ABCABC&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">elements</span><span class="p">())</span>
-<span class="go">[&#39;A&#39;, &#39;A&#39;, &#39;B&#39;, &#39;B&#39;, &#39;C&#39;, &#39;C&#39;]</span>
-</pre></div>
-</div>
-<p># Knuth’s example for prime factors of 1836:  2**2 * 3**3 * 17**1
-&gt;&gt;&gt; prime_factors = Counter({2: 2, 3: 3, 17: 1})
-&gt;&gt;&gt; product = 1
-&gt;&gt;&gt; for factor in prime_factors.elements():     # loop over factors
-…     product <a href="#id1"><span class="problematic" id="id2">*</span></a>= factor                       # and multiply them
-&gt;&gt;&gt; product
-1836</p>
-<p>Note, if an element’s count has been set to zero or is a negative
-number, elements() will ignore it.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Counter.fromkeys">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromkeys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Counter.fromkeys" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new dict with keys from iterable and values equal to value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Counter.most_common">
-<span class="sig-name descname"><span class="pre">most_common</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Counter.most_common" title="Permalink to this definition">¶</a></dt>
-<dd><p>List the n most common elements and their counts from the most
-common to the least.  If n is None, then list all element counts.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;abcdeabcdabcaba&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="go">[(&#39;a&#39;, 5), (&#39;b&#39;, 4), (&#39;c&#39;, 3)]</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Counter.subtract">
-<span class="sig-name descname"><span class="pre">subtract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Counter.subtract" title="Permalink to this definition">¶</a></dt>
-<dd><p>Like dict.update() but subtracts counts instead of replacing them.
-Counts can be reduced below zero.  Both the inputs and outputs are
-allowed to contain zero and negative counts.</p>
-<p>Source can be an iterable, a dictionary, or another Counter instance.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;which&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="s1">&#39;witch&#39;</span><span class="p">)</span>             <span class="c1"># subtract elements from another iterable</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;watch&#39;</span><span class="p">))</span>    <span class="c1"># subtract elements from another counter</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;h&#39;</span><span class="p">]</span>                          <span class="c1"># 2 in which, minus 1 in witch, minus 1 in watch</span>
-<span class="go">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span>                          <span class="c1"># 1 in which, minus 1 in witch, minus 1 in watch</span>
-<span class="go">-1</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Counter.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Counter.update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Like dict.update() but add counts instead of replacing them.</p>
-<p>Source can be an iterable, a dictionary, or another Counter instance.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;which&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s1">&#39;witch&#39;</span><span class="p">)</span>           <span class="c1"># add elements from another iterable</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;watch&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                 <span class="c1"># add elements from another counter</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;h&#39;</span><span class="p">]</span>                      <span class="c1"># four &#39;h&#39; in which, witch, and watch</span>
-<span class="go">4</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Dict">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">Dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">empty</span> <span class="pre">dictionary</span> <span class="pre">dict(mapping)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">from</span> <span class="pre">a</span> <span class="pre">mapping</span> <span class="pre">object's</span> <span class="pre">(key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value)</span> <span class="pre">pairs</span> <span class="pre">dict(iterable)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">as</span> <span class="pre">if</span> <span class="pre">via:</span> <span class="pre">d</span> <span class="pre">=</span> <span class="pre">{}</span> <span class="pre">for</span> <span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span> <span class="pre">in</span> <span class="pre">iterable:</span> <span class="pre">d[k]</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">dict(**kwargs)</span> <span class="pre">-&gt;</span> <span class="pre">new</span> <span class="pre">dictionary</span> <span class="pre">initialized</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">name=value</span> <span class="pre">pairs</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">keyword</span> <span class="pre">argument</span> <span class="pre">list.</span>&#160; <span class="pre">For</span> <span class="pre">example:</span>&#160; <span class="pre">dict(one=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two=2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">KT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">VT</span></code>]</p>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.LanguageModellingSampler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">LanguageModellingSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Sized" title="collections.abc.Sized"><span class="pre">Sized</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Tuple" title="typing.Tuple"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.LanguageModellingSampler" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">LanguageModellingSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sized</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.LanguageModellingSampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Subsampler" title="nlp_uncertainty_zoo.utils.samplers.Subsampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Subsampler</span></code></a></p>
 <p>Sampler specific to language modelling. The sub-sampling strategy here is to approximately maintain the same
 distribution of sentence lengths as in the original corpus, and to maintain contiguous paragraphs of text spanning
@@ -345,347 +175,32 @@ multiple sentences.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.List">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">List</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.List" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableSequence</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Parallel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">Parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_dispatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'2</span> <span class="pre">*</span> <span class="pre">n_jobs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nbytes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1M'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmap_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Parallel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></p>
-<p>Helper class for readable parallel mapping.</p>
-<p>Read more in the <span class="xref std std-ref">User Guide</span>.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>n_jobs: int, default: None</strong></dt><dd><p>The maximum number of concurrently running jobs, such as the number
-of Python worker processes when backend=”multiprocessing”
-or the size of the thread-pool when backend=”threading”.
-If -1 all CPUs are used. If 1 is given, no parallel computing code
-is used at all, which is useful for debugging. For n_jobs below -1,
-(n_cpus + 1 + n_jobs) are used. Thus for n_jobs = -2, all
-CPUs but one are used.
-None is a marker for ‘unset’ that will be interpreted as n_jobs=1
-(sequential execution) unless the call is performed under a
-parallel_backend context manager that sets another value for
-n_jobs.</p>
-</dd>
-<dt><strong>backend: str, ParallelBackendBase instance or None, default: ‘loky’</strong></dt><dd><p>Specify the parallelization backend implementation.
-Supported backends are:</p>
-<ul class="simple">
-<li><p>“loky” used by default, can induce some
-communication and memory overhead when exchanging input and
-output data with the worker Python processes.</p></li>
-<li><p>“multiprocessing” previous process-based backend based on
-<cite>multiprocessing.Pool</cite>. Less robust than <cite>loky</cite>.</p></li>
-<li><p>“threading” is a very low-overhead backend but it suffers
-from the Python Global Interpreter Lock if the called function
-relies a lot on Python objects. “threading” is mostly useful
-when the execution bottleneck is a compiled extension that
-explicitly releases the GIL (for instance a Cython loop wrapped
-in a “with nogil” block or an expensive call to a library such
-as NumPy).</p></li>
-<li><p>finally, you can register backends by calling
-register_parallel_backend. This will allow you to implement
-a backend of your liking.</p></li>
-</ul>
-<p>It is not recommended to hard-code the backend name in a call to
-Parallel in a library. Instead it is recommended to set soft hints
-(prefer) or hard constraints (require) so as to make it possible
-for library users to change the backend from the outside using the
-parallel_backend context manager.</p>
-</dd>
-<dt><strong>prefer: str in {‘processes’, ‘threads’} or None, default: None</strong></dt><dd><p>Soft hint to choose the default backend if no specific backend
-was selected with the parallel_backend context manager. The
-default process-based backend is ‘loky’ and the default
-thread-based backend is ‘threading’. Ignored if the <code class="docutils literal notranslate"><span class="pre">backend</span></code>
-parameter is specified.</p>
-</dd>
-<dt><strong>require: ‘sharedmem’ or None, default None</strong></dt><dd><p>Hard constraint to select the backend. If set to ‘sharedmem’,
-the selected backend will be single-host and thread-based even
-if the user asked for a non-thread based backend with
-parallel_backend.</p>
-</dd>
-<dt><strong>verbose: int, optional</strong></dt><dd><p>The verbosity level: if non zero, progress messages are
-printed. Above 50, the output is sent to stdout.
-The frequency of the messages increases with the verbosity level.
-If it more than 10, all iterations are reported.</p>
-</dd>
-<dt><strong>timeout: float, optional</strong></dt><dd><p>Timeout limit for each task to complete.  If any task takes longer
-a TimeOutError will be raised. Only applied when n_jobs != 1</p>
-</dd>
-<dt><strong>pre_dispatch: {‘all’, integer, or expression, as in ‘3*n_jobs’}</strong></dt><dd><p>The number of batches (of tasks) to be pre-dispatched.
-Default is ‘2*n_jobs’. When batch_size=”auto” this is reasonable
-default and the workers should never starve.</p>
-</dd>
-<dt><strong>batch_size: int or ‘auto’, default: ‘auto’</strong></dt><dd><p>The number of atomic tasks to dispatch at once to each
-worker. When individual evaluations are very fast, dispatching
-calls to workers can be slower than sequential computation because
-of the overhead. Batching fast computations together can mitigate
-this.
-The <code class="docutils literal notranslate"><span class="pre">'auto'</span></code> strategy keeps track of the time it takes for a batch
-to complete, and dynamically adjusts the batch size to keep the time
-on the order of half a second, using a heuristic. The initial batch
-size is 1.
-<code class="docutils literal notranslate"><span class="pre">batch_size=&quot;auto&quot;</span></code> with <code class="docutils literal notranslate"><span class="pre">backend=&quot;threading&quot;</span></code> will dispatch
-batches of a single task at a time as the threading backend has
-very little overhead and using larger batch size has not proved to
-bring any gain in that case.</p>
-</dd>
-<dt><strong>temp_folder: str, optional</strong></dt><dd><p>Folder to be used by the pool for memmapping large arrays
-for sharing memory with worker processes. If None, this will try in
-order:</p>
-<ul class="simple">
-<li><p>a folder pointed by the JOBLIB_TEMP_FOLDER environment
-variable,</p></li>
-<li><p>/dev/shm if the folder exists and is writable: this is a
-RAM disk filesystem available by default on modern Linux
-distributions,</p></li>
-<li><p>the default system temporary folder that can be
-overridden with TMP, TMPDIR or TEMP environment
-variables, typically /tmp under Unix operating systems.</p></li>
-</ul>
-<p>Only active when backend=”loky” or “multiprocessing”.</p>
-</dd>
-<dt><strong>max_nbytes int, str, or None, optional, 1M by default</strong></dt><dd><p>Threshold on the size of arrays passed to the workers that
-triggers automated memory mapping in temp_folder. Can be an int
-in Bytes, or a human-readable string, e.g., ‘1M’ for 1 megabyte.
-Use None to disable memmapping of large arrays.
-Only active when backend=”loky” or “multiprocessing”.</p>
-</dd>
-<dt><strong>mmap_mode: {None, ‘r+’, ‘r’, ‘w+’, ‘c’}</strong></dt><dd><p>Memmapping mode for numpy arrays passed to workers.
-See ‘max_nbytes’ parameter documentation for more details.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>This object uses workers to compute in parallel the application of a
-function to many different arguments. The main functionality it brings
-in addition to using the raw multiprocessing or concurrent.futures API
-are (see examples for details):</p>
-<ul class="simple">
-<li><p>More readable code, in particular since it avoids
-constructing list of arguments.</p></li>
-<li><dl class="simple">
-<dt>Easier debugging:</dt><dd><ul>
-<li><p>informative tracebacks even when the error happens on
-the client side</p></li>
-<li><p>using ‘n_jobs=1’ enables to turn off parallel computing
-for debugging without changing the codepath</p></li>
-<li><p>early capture of pickling errors</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p>An optional progress meter.</p></li>
-<li><p>Interruption of multiprocesses jobs with ‘Ctrl-C’</p></li>
-<li><p>Flexible pickling control for the communication to and from
-the worker processes.</p></li>
-<li><p>Ability to use shared memory efficiently with worker
-processes for large numpy-based datastructures.</p></li>
-</ul>
-<p class="rubric">Examples</p>
-<p>A simple example:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">sqrt</span><span class="p">)(</span><span class="n">i</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-<span class="go">[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]</span>
-</pre></div>
-</div>
-<p>Reshaping the output when the function has several return
-values:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">modf</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">modf</span><span class="p">)(</span><span class="n">i</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">r</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span>
-<span class="go">(0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">i</span>
-<span class="go">(0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0)</span>
-</pre></div>
-</div>
-<p>The progress meter: the higher the value of <cite>verbose</cite>, the more
-messages:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">10</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">sleep</span><span class="p">)(</span><span class="mf">.2</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> 
-<span class="go">[Parallel(n_jobs=2)]: Done   1 tasks      | elapsed:    0.6s</span>
-<span class="go">[Parallel(n_jobs=2)]: Done   4 tasks      | elapsed:    0.8s</span>
-<span class="go">[Parallel(n_jobs=2)]: Done  10 out of  10 | elapsed:    1.4s finished</span>
-</pre></div>
-</div>
-<p>Traceback example, note how the line of the error is indicated
-as well as the values of the parameter passed to the function that
-triggered the exception, even though the traceback happens in the
-child process:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">heapq</span> <span class="kn">import</span> <span class="n">nlargest</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">nlargest</span><span class="p">)(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="s1">&#39;abcde&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> 
-<span class="go">#...</span>
-<span class="go">---------------------------------------------------------------------------</span>
-<span class="go">Sub-process traceback:</span>
-<span class="go">---------------------------------------------------------------------------</span>
-<span class="go">TypeError                                          Mon Nov 12 11:37:46 2012</span>
-<span class="go">PID: 12934                                    Python 2.7.3: /usr/bin/python</span>
-<span class="go">...........................................................................</span>
-<span class="go">/usr/lib/python2.7/heapq.pyc in nlargest(n=2, iterable=3, key=None)</span>
-<span class="go">    419         if n &gt;= size:</span>
-<span class="go">    420             return sorted(iterable, key=key, reverse=True)[:n]</span>
-<span class="go">    421</span>
-<span class="go">    422     # When key is none, use simpler decoration</span>
-<span class="go">    423     if key is None:</span>
-<span class="go">--&gt; 424         it = izip(iterable, count(0,-1))                    # decorate</span>
-<span class="go">    425         result = _nlargest(n, it)</span>
-<span class="go">    426         return map(itemgetter(0), result)                   # undecorate</span>
-<span class="go">    427</span>
-<span class="go">    428     # General case, slowest method</span>
-<span class="go"> TypeError: izip argument #1 must support iteration</span>
-<span class="go">___________________________________________________________________________</span>
-</pre></div>
-</div>
-<p>Using pre_dispatch in a producer/consumer situation, where the
-data is generated on the fly. Note how the producer is first
-called 3 times before the parallel loop is initiated, and then
-called to generate new data on the fly:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">producer</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
-<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Produced </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="k">yield</span> <span class="n">i</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">pre_dispatch</span><span class="o">=</span><span class="s1">&#39;1.5*n_jobs&#39;</span><span class="p">)(</span>
-<span class="gp">... </span>               <span class="n">delayed</span><span class="p">(</span><span class="n">sqrt</span><span class="p">)(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">producer</span><span class="p">())</span> 
-<span class="go">Produced 0</span>
-<span class="go">Produced 1</span>
-<span class="go">Produced 2</span>
-<span class="go">[Parallel(n_jobs=2)]: Done 1 jobs     | elapsed:  0.0s</span>
-<span class="go">Produced 3</span>
-<span class="go">[Parallel(n_jobs=2)]: Done 2 jobs     | elapsed:  0.0s</span>
-<span class="go">Produced 4</span>
-<span class="go">[Parallel(n_jobs=2)]: Done 3 jobs     | elapsed:  0.0s</span>
-<span class="go">Produced 5</span>
-<span class="go">[Parallel(n_jobs=2)]: Done 4 jobs     | elapsed:  0.0s</span>
-<span class="go">[Parallel(n_jobs=2)]: Done 6 out of 6 | elapsed:  0.0s remaining: 0.0s</span>
-<span class="go">[Parallel(n_jobs=2)]: Done 6 out of 6 | elapsed:  0.0s finished</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Parallel.dispatch_next">
-<span class="sig-name descname"><span class="pre">dispatch_next</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Parallel.dispatch_next" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dispatch more data for parallel processing</p>
-<p>This method is meant to be called concurrently by the multiprocessing
-callback. We rely on the thread-safety of dispatch_one_batch to protect
-against concurrent consumption of the unprotected iterator.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Parallel.dispatch_one_batch">
-<span class="sig-name descname"><span class="pre">dispatch_one_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterator</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Parallel.dispatch_one_batch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prefetch the tasks for the next batch and dispatch them.</p>
-<p>The effective size of the batch is computed here.
-If there are no more jobs to dispatch, return False, else return True.</p>
-<p>The iterator consumption and dispatching is protected by the same
-lock so calling this function should be thread safe.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Parallel.print_progress">
-<span class="sig-name descname"><span class="pre">print_progress</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Parallel.print_progress" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display the process of the parallel execution only a fraction
-of time, controlled by self.verbose.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Parallel.retrieve">
-<span class="sig-name descname"><span class="pre">retrieve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Parallel.retrieve" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Sampler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">Sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Sized" title="collections.abc.Sized"><span class="pre">Sized</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Sampler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T_co</span></code>]</p>
-<p>Base class for all Samplers.</p>
-<p>Every Sampler subclass has to provide an <code class="xref py py-meth docutils literal notranslate"><span class="pre">__iter__()</span></code> method, providing a
-way to iterate over indices of dataset elements, and a <code class="xref py py-meth docutils literal notranslate"><span class="pre">__len__()</span></code> method
-that returns the length of the returned iterators.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">__len__()</span></code> method isn’t strictly required by
-<code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code>, but is expected in any
-calculation involving the length of a <code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
-</div>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.SequenceClassificationSampler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">SequenceClassificationSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Sized" title="collections.abc.Sized"><span class="pre">Sized</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.SequenceClassificationSampler" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">SequenceClassificationSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sized</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.SequenceClassificationSampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Subsampler" title="nlp_uncertainty_zoo.utils.samplers.Subsampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Subsampler</span></code></a></p>
 <p>Sampler specific to sequence classification. The strategy here is to approximately maintain the same class
 distribution as in the original corpus, and to a lesser extent the same sequence length distribution.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Sized">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">Sized</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Sized" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Subsampler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">Subsampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Sized" title="collections.abc.Sized"><span class="pre">Sized</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Subsampler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Sampler" title="torch.utils.data.sampler.Sampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sampler</span></code></a>, <a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.ABC" title="abc.ABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">Subsampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sized</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Subsampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Sampler</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Abstract base class of any sampler that sub-samples a dataset to a given target size.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.TokenClassificationSampler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">TokenClassificationSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Sized" title="collections.abc.Sized"><span class="pre">Sized</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.TokenClassificationSampler" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">TokenClassificationSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sized</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.TokenClassificationSampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.Subsampler" title="nlp_uncertainty_zoo.utils.samplers.Subsampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Subsampler</span></code></a></p>
 <p>Sampler specific to sequence classification. The strategy here is to approximately maintain the same class
 distribution as in the original corpus, and to a lesser extent the same sequence length distribution. Compared to
 the SequenceClassificationSampler, all labels of a sequence are considered.</p>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.Tuple">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">Tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.Tuple" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<p>Tuple type; Tuple[X, Y] is the cross-product type of X and Y.</p>
-<p>Example: Tuple[T1, T2] is a tuple of two elements corresponding
-to type variables T1 and T2.  Tuple[int, float, str] is a tuple
-of an int, a float and a string.</p>
-<p>To specify a variable-length tuple of homogeneous type, use Tuple[T, …].</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.abstractmethod">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">abstractmethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">funcobj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.abstractmethod" title="Permalink to this definition">¶</a></dt>
-<dd><p>A decorator indicating abstract methods.</p>
-<p>Requires that the metaclass is ABCMeta or derived from it.  A
-class that has a metaclass derived from ABCMeta cannot be
-instantiated unless all of its abstract methods are overridden.
-The abstract methods can be called using any of the normal
-‘super’ call mechanisms.</p>
-<p>Usage:</p>
-<blockquote>
-<div><dl>
-<dt>class C(metaclass=ABCMeta):</dt><dd><p>&#64;abstractmethod
-def my_abstract_method(self, …):</p>
-<blockquote>
-<div><p>…</p>
-</div></blockquote>
-</dd>
-</dl>
-</div></blockquote>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.create_probs_from_dict">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">create_probs_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.create_probs_from_dict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">create_probs_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.create_probs_from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Auxiliary function creating a numpy array containing a categorical distribution over integers from
 a dictionary of frequencies.</p>
 <dl class="field-list simple">
@@ -707,38 +222,9 @@ key in freq_dict.</p>
 </dl>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.defaultdict">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">defaultdict</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.defaultdict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-<p>defaultdict(default_factory[, …]) –&gt; dict with default factory</p>
-<p>The default factory is called without arguments to produce
-a new value when a key is not present, in __getitem__ only.
-A defaultdict compares equal to a dict with the same items.
-All remaining arguments are treated the same as if they were
-passed to the dict constructor, including keyword arguments.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.defaultdict.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">a</span> <span class="pre">shallow</span> <span class="pre">copy</span> <span class="pre">of</span> <span class="pre">D.</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.defaultdict.copy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.defaultdict.default_factory">
-<span class="sig-name descname"><span class="pre">default_factory</span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.defaultdict.default_factory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Factory for default value called by __missing__().</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.delayed">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">delayed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.delayed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decorator used to capture the arguments of a function.</p>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.merge_freq_dicts">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">merge_freq_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqs_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqs_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.merge_freq_dicts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">merge_freq_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqs_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqs_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.merge_freq_dicts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merge two dictionaries of frequencies. Used for creating data statistics before sub-sampling, where statistics for
 each instance are collected via different jobs and then merged.</p>
 <dl class="field-list simple">
@@ -761,7 +247,7 @@ each instance are collected via different jobs and then merged.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.merge_instance_dicts">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">merge_instance_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lengths_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.List" title="typing.List"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lengths_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.List" title="typing.List"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.Dict" title="typing.Dict"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#nlp_uncertainty_zoo.utils.samplers.List" title="typing.List"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.merge_instance_dicts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">merge_instance_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lengths_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lengths_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.merge_instance_dicts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merge two dictionaries of instances lights, where inputs are grouped by a common characteristic, e.g. length. Used
 for creating data statistics before sub-sampling, where statistics for each instance are collected via different
 jobs and then merged.</p>
@@ -781,17 +267,6 @@ jobs and then merged.</p>
 </dl>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.samplers.reduce">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.samplers.</span></span><span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">value</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.samplers.reduce" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a function of two arguments cumulatively to the items of a sequence,
-from left to right, so as to reduce the sequence to a single value.
-For example, reduce(lambda x, y: x+y, [1, 2, 3, 4, 5]) calculates
-((((1+2)+3)+4)+5).  If initial is present, it is placed before the items
-of the sequence in the calculation, and serves as a default when the
-sequence is empty.</p>
 </dd></dl>
 
 </section>
