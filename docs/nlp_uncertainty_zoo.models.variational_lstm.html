@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>nlp_uncertainty_zoo.models.variational_lstm &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <title>Variational LSTM &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -16,7 +16,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="nlp_uncertainty_zoo.models.variational_transformer" href="nlp_uncertainty_zoo.models.variational_transformer.html" />
+    <link rel="next" title="Variational Transformer" href="nlp_uncertainty_zoo.models.variational_transformer.html" />
     <link rel="prev" title="Transformer" href="nlp_uncertainty_zoo.models.transformer.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -86,8 +86,10 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html#module-nlp_uncertainty_zoo.models.st_tau_lstm">ST-tau LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#module-nlp_uncertainty_zoo.models.transformer">Transformer Module Documentation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nlp_uncertainty_zoo.models.variational_lstm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html">nlp_uncertainty_zoo.models.variational_transformer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Variational LSTM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.variational_lstm">Variational LSTM Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html">Variational Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#variational-transformer-module-documentation">Variational Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.html">nlp_uncertainty_zoo.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">nlp_uncertainty_zoo.utils.custom_types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">nlp_uncertainty_zoo.utils.data</a></li>
@@ -108,7 +110,8 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.models.variational_lstm</a><ul>
+<li><a class="reference internal" href="#">Variational LSTM</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.variational_lstm">Variational LSTM Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_lstm.VariationalDropout"><code class="docutils literal notranslate"><span class="pre">VariationalDropout</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_lstm.VariationalDropout.forward"><code class="docutils literal notranslate"><span class="pre">VariationalDropout.forward()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.models.variational_lstm.VariationalDropout.sample"><code class="docutils literal notranslate"><span class="pre">VariationalDropout.sample()</span></code></a></li>
@@ -141,7 +144,7 @@
     </a>
   </li>
   <li>
-    <a href="nlp_uncertainty_zoo.models.variational_transformer.html" title="Next Chapter: nlp_uncertainty_zoo.models.variational_transformer"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">nlp_uncertain... &raquo;</span>
+    <a href="nlp_uncertainty_zoo.models.variational_transformer.html" title="Next Chapter: Variational Transformer"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Variational T... &raquo;</span>
     </a>
   </li>
               
@@ -175,9 +178,21 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <section id="nlp-uncertainty-zoo-models-variational-lstm">
-<h1>nlp_uncertainty_zoo.models.variational_lstm<a class="headerlink" href="#nlp-uncertainty-zoo-models-variational-lstm" title="Permalink to this heading">¶</a></h1>
-<span class="target" id="module-nlp_uncertainty_zoo.models.variational_lstm"></span><p>Implementation of a variational LSTM, as presented by
+  <section id="variational-lstm">
+<h1>Variational LSTM<a class="headerlink" href="#variational-lstm" title="Permalink to this heading">¶</a></h1>
+<p>The variational LSTM is a Bayesian LSTM-variant that produces multiple different predictions by using different dropout masks.
+Dropout <a class="reference external" href="https://www.jmlr.org/papers/volume15/srivastava14a/srivastava14a.pdf?utm_content=buffer79b43&amp;utm_medium=social&amp;utm_source=twitter.com&amp;utm_campaign=buffer,">(Srivastava et al., 2014)</a>
+is a regulation technique that randomly sets connections between neurons in a neural network to zero during training in order to avoid co-adaption during training.
+Importantly, this technique is disabled during inference.
+In their work, <a class="reference external" href="http://proceedings.mlr.press/v48/gal16.pdf">Gal &amp; Ghahramani (2016a)</a> propose to use Dropout during inference as well in order to approximate the weight posterior of neural networks.
+In a follow-up work, <a class="reference external" href="https://proceedings.neurips.cc/paper/2016/file/076a0c97d09cf1a0ec3e19c7f2529f2b-Paper.pdf">Gal &amp; Ghahramani (2016b)</a> apply this technique to recurrent neural networks as well:
+Most importantly, the technique is not just applied naively, but it is made sure that the same type of connection share the same dropout mask across time steps (see Figure 1 in the paper).</p>
+<p>In the original work, the authors also use a specific kind of dropout for the embedding layer, which hurt performance and slowed down training when we replicated results, and which was conseqeuently omitted.
+The application of MC Dropout to transformers can be found in <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#module-nlp_uncertainty_zoo.models.variational_transformer" title="nlp_uncertainty_zoo.models.variational_transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer</span></code></a>.</p>
+</section>
+<section id="module-nlp_uncertainty_zoo.models.variational_lstm">
+<span id="variational-lstm-module-documentation"></span><h1>Variational LSTM Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.variational_lstm" title="Permalink to this heading">¶</a></h1>
+<p>Implementation of a variational LSTM, as presented by
 <cite>Gal &amp; Ghrahramani (2016b) &lt;https://arxiv.org/pdf/1512.05287.pdf&gt;</cite>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.variational_lstm.VariationalDropout">
