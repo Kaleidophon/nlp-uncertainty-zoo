@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>nlp_uncertainty_zoo.utils.data &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <title>Data &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="nlp_uncertainty_zoo.utils.metrics" href="nlp_uncertainty_zoo.utils.metrics.html" />
-    <link rel="prev" title="nlp_uncertainty_zoo.utils.custom_types" href="nlp_uncertainty_zoo.utils.custom_types.html" />
+    <link rel="next" title="Uncertainty metrics" href="nlp_uncertainty_zoo.utils.metrics.html" />
+    <link rel="prev" title="Custom Types" href="nlp_uncertainty_zoo.utils.custom_types.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -91,9 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html">Variational Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#variational-transformer-module-documentation">Variational Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.html">nlp_uncertainty_zoo.utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">nlp_uncertainty_zoo.utils.custom_types</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nlp_uncertainty_zoo.utils.data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">nlp_uncertainty_zoo.utils.metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">nlp_uncertainty_zoo.utils.samplers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html">nlp_uncertainty_zoo.utils.task_eval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html">nlp_uncertainty_zoo.utils.uncertainty_eval</a></li>
@@ -110,7 +113,8 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.utils.data</a><ul>
+<li><a class="reference internal" href="#">Data</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder"><code class="docutils literal notranslate"><span class="pre">ClassificationDatasetBuilder</span></code></a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">ClassificationDatasetBuilder.build()</span></code></a></li>
 </ul>
@@ -141,11 +145,11 @@
               
                 
   <li>
-    <a href="nlp_uncertainty_zoo.utils.custom_types.html" title="Previous Chapter: nlp_uncertainty_zoo.utils.custom_types"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; nlp_uncertain...</span>
+    <a href="nlp_uncertainty_zoo.utils.custom_types.html" title="Previous Chapter: Custom Types"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Custom Types</span>
     </a>
   </li>
   <li>
-    <a href="nlp_uncertainty_zoo.utils.metrics.html" title="Next Chapter: nlp_uncertainty_zoo.utils.metrics"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">nlp_uncertain... &raquo;</span>
+    <a href="nlp_uncertainty_zoo.utils.metrics.html" title="Next Chapter: Uncertainty metrics"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Uncertainty metrics &raquo;</span>
     </a>
   </li>
               
@@ -179,9 +183,30 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <section id="nlp-uncertainty-zoo-utils-data">
-<h1>nlp_uncertainty_zoo.utils.data<a class="headerlink" href="#nlp-uncertainty-zoo-utils-data" title="Permalink to this heading">¶</a></h1>
-<span class="target" id="module-nlp_uncertainty_zoo.utils.data"></span><p>Module to implement data reading and batching functionalities.</p>
+  <section id="data">
+<h1>Data<a class="headerlink" href="#data" title="Permalink to this heading">¶</a></h1>
+<p>The contents of this module are mostly concerned with creating compatibility with the
+<a class="reference external" href="https://huggingface.co/docs/transformers/index">Huggingface transformers package</a>.
+Specifically, the <a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder" title="nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.DatasetBuilder</span></code></a> class tries to provide an easy interface to
+load local datasets and utilizing the Huggingface code.
+Furthermore, it supports the easy use of custom samplers defined in the <a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#module-nlp_uncertainty_zoo.utils.samplers" title="nlp_uncertainty_zoo.utils.samplers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.samplers</span></code></a> module,
+that produce representative sub-samples of training sets for different tasks.
+These were for instance used in <a class="reference external" href="https://arxiv.org/pdf/2210.15452.pdf">Ulmer et al. (2022)</a> to show how the quality of uncertainty estimates behaves as a function of the available training data.</p>
+<p>The following dataset builder classes are included:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder" title="nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.DatasetBuilder</span></code></a>: Abstract superclass that can be used for inheritance in order to support new task types.</p></li>
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder" title="nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder</span></code></a>: Dataset builder used for language modelling, including both “classic” language modelling and masked language modelling. To indicate which type of language modelling us used, either <cite>“next_token_prediction”</cite> or <cite>“mlm”</cite> should be specified for the <cite>type_</cite> argument during initialization.</p></li>
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder" title="nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder</span></code></a>: As the name suggests, this class is aimed at classification problems, both in terms of sequence labelling and sequence prediction. This is again specified by passing <cite>“sequence_classification”</cite> or <cite>“token_classification”</cite> in the <cite>type_</cite> argument during initialization. Dataset files are expected to be in the <cite>.csv</cite> format with tab-separated columns containing the sentence and label(s). When using sequence labelling, labels spanning multiple subword tokens will only be assigned to the first part, while the other subword tokens receive a <cite>-100</cite> label.</p></li>
+</ul>
+</div></blockquote>
+<p>Furthermore, the module constain a modified version of Huggingface’s <cite>DataCollatorForLanguageModeling &lt;:py:class:`nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder</cite>: &gt;`_:
+It seemed that for the classical next token prediction, the collator wouldn’t produce the right offset between tokens and labels, i.e. the next tokens to be predicted.
+The <a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling" title="nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling</span></code></a> provides a minimal modification of the original code to ensure this property.</p>
+</section>
+<section id="module-nlp_uncertainty_zoo.utils.data">
+<span id="data-module-documentation"></span><h1>Data Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.utils.data" title="Permalink to this heading">¶</a></h1>
+<p>Module to implement data reading and batching functionalities.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.data.</span></span><span class="sig-name descname"><span class="pre">ClassificationDatasetBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PreTrainedTokenizerBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder" title="Permalink to this definition">¶</a></dt>

@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>nlp_uncertainty_zoo.utils.metrics &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
+    <title>Uncertainty metrics &#8212; nlp-uncertainty-zoo 0.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="nlp_uncertainty_zoo.utils.samplers" href="nlp_uncertainty_zoo.utils.samplers.html" />
-    <link rel="prev" title="nlp_uncertainty_zoo.utils.data" href="nlp_uncertainty_zoo.utils.data.html" />
+    <link rel="prev" title="Data" href="nlp_uncertainty_zoo.utils.data.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -91,9 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html">Variational Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#variational-transformer-module-documentation">Variational Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.html">nlp_uncertainty_zoo.utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">nlp_uncertainty_zoo.utils.custom_types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">nlp_uncertainty_zoo.utils.data</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nlp_uncertainty_zoo.utils.metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Uncertainty metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">nlp_uncertainty_zoo.utils.samplers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html">nlp_uncertainty_zoo.utils.task_eval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html">nlp_uncertainty_zoo.utils.uncertainty_eval</a></li>
@@ -110,7 +113,8 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">nlp_uncertainty_zoo.utils.metrics</a><ul>
+<li><a class="reference internal" href="#">Uncertainty metrics</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a><ul>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.metrics.dempster_shafer"><code class="docutils literal notranslate"><span class="pre">dempster_shafer()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.metrics.max_prob"><code class="docutils literal notranslate"><span class="pre">max_prob()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.metrics.mutual_information"><code class="docutils literal notranslate"><span class="pre">mutual_information()</span></code></a></li>
@@ -128,7 +132,7 @@
               
                 
   <li>
-    <a href="nlp_uncertainty_zoo.utils.data.html" title="Previous Chapter: nlp_uncertainty_zoo.utils.data"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; nlp_uncertain...</span>
+    <a href="nlp_uncertainty_zoo.utils.data.html" title="Previous Chapter: Data"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Data</span>
     </a>
   </li>
   <li>
@@ -166,9 +170,17 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <section id="nlp-uncertainty-zoo-utils-metrics">
-<h1>nlp_uncertainty_zoo.utils.metrics<a class="headerlink" href="#nlp-uncertainty-zoo-utils-metrics" title="Permalink to this heading">¶</a></h1>
-<span class="target" id="module-nlp_uncertainty_zoo.utils.metrics"></span><p>Define some uncertainty metrics for neural discriminators. These usually operate on the predicted logits unless
+  <section id="uncertainty-metrics">
+<h1>Uncertainty metrics<a class="headerlink" href="#uncertainty-metrics" title="Permalink to this heading">¶</a></h1>
+<p>This module constains all general-purpose uncertainty metrics used by models in the repository.
+An uncertainty metric quantified the uncertainty of a model in its prediction, where higher values of the metric indicate a higher uncertainty.
+Uncertainty metrics take the unnormalized logits of a model as an input.
+Some metrics might not be included here, since they are model-specified, see for instance <a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#nlp_uncertainty_zoo.models.ddu_transformer.DDUMixin.gmm_predict" title="nlp_uncertainty_zoo.models.ddu_transformer.DDUMixin.gmm_predict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.ddu_transformer.DDUMixin.gmm_predict()</span></code></a>, which
+becomes the <cite>log_prob</cite> metric for <a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#nlp_uncertainty_zoo.models.ddu_transformer.DDUTransformer" title="nlp_uncertainty_zoo.models.ddu_transformer.DDUTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.ddu_transformer.DDUTransformer</span></code></a> and <a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#nlp_uncertainty_zoo.models.ddu_transformer.DDUBert" title="nlp_uncertainty_zoo.models.ddu_transformer.DDUBert"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.ddu_transformer.DDUBert</span></code></a>.</p>
+</section>
+<section id="module-nlp_uncertainty_zoo.utils.metrics">
+<span id="metric-module-documentation"></span><h1>Metric Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.utils.metrics" title="Permalink to this heading">¶</a></h1>
+<p>Define some uncertainty metrics for neural discriminators. These usually operate on the predicted logits unless
 specified otherwise.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.metrics.dempster_shafer">

@@ -18,6 +18,8 @@ from nlp_uncertainty_zoo.models.variational_transformer import VariationalBertMo
 from nlp_uncertainty_zoo.models.model import Model
 from nlp_uncertainty_zoo.utils.custom_types import Device
 
+# TODO: Add temperature scaling to fix calibration problem (see paper end of section 3.2)
+
 
 class DropoutDPP(torch.nn.Module):
     """

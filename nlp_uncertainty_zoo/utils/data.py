@@ -14,10 +14,8 @@ import torch
 from torch.utils.data import DataLoader
 from datasets import load_dataset
 from transformers import (
-    BertTokenizerFast,
     PreTrainedTokenizerBase,
     DataCollatorForLanguageModeling,
-    BertTokenizer,
 )
 from transformers.data.data_collator import BatchEncoding, _collate_batch
 
