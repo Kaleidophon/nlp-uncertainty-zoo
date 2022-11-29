@@ -3,7 +3,6 @@ Implementation of evaluation logic.
 """
 
 # STD
-import codecs
 from collections import defaultdict
 from typing import Dict
 
@@ -13,8 +12,6 @@ from einops import rearrange
 from sklearn.metrics import accuracy_score, f1_score
 import torch
 from torch.utils.data import DataLoader
-from torch.nn.functional import nll_loss
-from typing import Optional
 from transformers import PreTrainedTokenizerBase
 
 
