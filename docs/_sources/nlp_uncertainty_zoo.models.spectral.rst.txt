@@ -2,7 +2,7 @@ Spectral
 ========
 
 This module contains transformer implementations using spectral normalization, used for instance by :py:mod:`nlp_uncertainty_zoo.models.ddu_transformer` or :py:mod:`nlp_uncertainty_zoo.models.sngp_transformer`.
-The main idea is that the functions learned by normal network should fulfill a bi-Lipschitz constraint (see `Mukhoti et al. (2021) <http://arxiv.org/abs/2102.11582>`_):
+The main idea is that the functions learned by normal network should fulfill a bi-Lipschitz constraint (see `Mukhoti et al., 2021<http://arxiv.org/abs/2102.11582>`_):
 
     * On the one hand, models should smooth in order to avoid for instance adversarial attacks and promote robustness
     * On the other hand, models should still be sensitive enough to detect out-of-distribution examples.

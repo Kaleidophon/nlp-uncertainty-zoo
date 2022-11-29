@@ -2,10 +2,10 @@
 Implement a superclass for transformer models that use spectral normalization to meet the bi-Lipschitz condition.
 The following models inherit from this class:
 
-* Spectral-normalized Gaussian Process (SNGP) Transformer (`Liu et al., 2020 <https://arxiv.org/pdf/2006.10108.pdf>`)
+* Spectral-normalized Gaussian Process (SNGP) Transformer (`Liu et al., 2020 <https://arxiv.org/pdf/2006.10108.pdf>`_)
 * Deterministic Uncertainty Estimation (DUE) Transformer
-(`Van Amersfoort et al., 2021 <https://arxiv.org/pdf/2102.11409.pdf>`)
-* Deep Deterministic Uncertainty (DDU) Transformer (`Mukhoti et al., 2021 <https://arxiv.org/pdf/2102.11582.pdf>`)
+(`Van Amersfoort et al., 2021 <https://arxiv.org/pdf/2102.11409.pdf>`_)
+* Deep Deterministic Uncertainty (DDU) Transformer (`Mukhoti et al., 2021 <https://arxiv.org/pdf/2102.11582.pdf>`_)
 
 Utility functions from the repository of Joost van Amsterfoort (https://github.com/y0ast/DUE) copied in here to avoid
 import issues, since the original repository is not available as a Python package.

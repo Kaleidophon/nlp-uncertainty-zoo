@@ -42,7 +42,7 @@ where the latter two mirror the function implementations in `Module`. :py:meth:`
 Models Documentation
 ====================
 
-.. automodule:: nlp_uncertainty_zoo.models
+.. automodule:: nlp_uncertainty_zoo.models.model
    :members:
    :show-inheritance:
    :undoc-members:

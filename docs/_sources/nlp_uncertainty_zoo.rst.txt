@@ -8,7 +8,7 @@ Natural Language Processing applications. As of now, it is focused on sequence l
 For more background info and information and usage, please refer to the `README` on the `landing page <http://dennisulmer.eu/nlp-uncertainty-zoo/>`_.
 On the highest level, the repository comprises multiple packages, including
 
-    * :py:mod:`nlp_uncertainty_zoo.models`: All model implemmentations.
+    * :py:mod:`nlp_uncertainty_zoo.models`: All model implementations.
     * :py:mod:`nlp_uncertainty_zoo.utils`: Miscellaneous modules implementing uncertainty metrics, evaluation logic for task performance as well as calibration and uncertainty qualitaty evaluation methods. Also includes code for data management.
 
 Please refer to the resource above for more information.

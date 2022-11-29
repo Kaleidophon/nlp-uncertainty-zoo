@@ -73,7 +73,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-module-class">The <cite>Module</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-model-class">The <cite>Model</cite> class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models">Models Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models.model">Models Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">SNGP Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#module-nlp_uncertainty_zoo.models.sngp_transformer">SNGP Transformer Module Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Spectral</a></li>
@@ -188,7 +188,7 @@
   <section id="spectral">
 <h1>Spectral<a class="headerlink" href="#spectral" title="Permalink to this heading">¶</a></h1>
 <p>This module contains transformer implementations using spectral normalization, used for instance by <a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#module-nlp_uncertainty_zoo.models.ddu_transformer" title="nlp_uncertainty_zoo.models.ddu_transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.ddu_transformer</span></code></a> or <a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#module-nlp_uncertainty_zoo.models.sngp_transformer" title="nlp_uncertainty_zoo.models.sngp_transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.sngp_transformer</span></code></a>.
-The main idea is that the functions learned by normal network should fulfill a bi-Lipschitz constraint (see <a class="reference external" href="http://arxiv.org/abs/2102.11582">Mukhoti et al. (2021)</a>):</p>
+The main idea is that the functions learned by normal network should fulfill a bi-Lipschitz constraint (see <a href="#id1"><span class="problematic" id="id2">`Mukhoti et al., 2021&lt;http://arxiv.org/abs/2102.11582&gt;`_</span></a>):</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>On the one hand, models should smooth in order to avoid for instance adversarial attacks and promote robustness</p></li>
@@ -212,11 +212,11 @@ verbatim from <a class="reference external" href="https://github.com/y0ast/DUE">
 <p>Implement a superclass for transformer models that use spectral normalization to meet the bi-Lipschitz condition.
 The following models inherit from this class:</p>
 <ul class="simple">
-<li><p>Spectral-normalized Gaussian Process (SNGP) Transformer (<cite>Liu et al., 2020 &lt;https://arxiv.org/pdf/2006.10108.pdf&gt;</cite>)</p></li>
+<li><p>Spectral-normalized Gaussian Process (SNGP) Transformer (<a class="reference external" href="https://arxiv.org/pdf/2006.10108.pdf">Liu et al., 2020</a>)</p></li>
 <li><p>Deterministic Uncertainty Estimation (DUE) Transformer</p></li>
 </ul>
-<p>(<cite>Van Amersfoort et al., 2021 &lt;https://arxiv.org/pdf/2102.11409.pdf&gt;</cite>)
-* Deep Deterministic Uncertainty (DDU) Transformer (<cite>Mukhoti et al., 2021 &lt;https://arxiv.org/pdf/2102.11582.pdf&gt;</cite>)</p>
+<p>(<a class="reference external" href="https://arxiv.org/pdf/2102.11409.pdf">Van Amersfoort et al., 2021</a>)
+* Deep Deterministic Uncertainty (DDU) Transformer (<a class="reference external" href="https://arxiv.org/pdf/2102.11582.pdf">Mukhoti et al., 2021</a>)</p>
 <p>Utility functions from the repository of Joost van Amsterfoort (<a class="reference external" href="https://github.com/y0ast/DUE">https://github.com/y0ast/DUE</a>) copied in here to avoid
 import issues, since the original repository is not available as a Python package.</p>
 <dl class="py class">
