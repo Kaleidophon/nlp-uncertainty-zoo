@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from datetime import datetime
 import dill
-from typing import Dict, Any, Optional, Generator
+from typing import Dict, Optional, Generator, Callable
 import os
 
 # EX
@@ -229,6 +229,16 @@ class Module(ABC, nn.Module):
 
         return num_parameters
 
+    @property
+    def available_uncertainty_metrics(self) -> Dict[str, Callable]:
+        """
+        Return a dictionary of all available uncertainty metrics of the current model.
+        """
+        return {
+            **self.single_prediction_uncertainty_metrics,
+            **self.multi_prediction_uncertainty_metrics
+        }
+
 
 class MultiPredictionMixin:
     """
@@ -256,9 +266,9 @@ class Model(ABC):
         self,
         model_name: str,
         module_class: type,
-        model_params: Dict[str, Any],
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params,
     ):
         """
         Initialize a module.
@@ -269,10 +279,10 @@ class Model(ABC):
             Name of the model.
         module_class: type
             Class of the model that is being wrapped.
-        model_params: Dict[str, Any]
-            Parameters to initialize the model.
         device: Device
             The device the model is located on.
+         model_params: Dict[str, Any]
+            Parameters to initialize the model.
         """
         self.model_name = model_name
         self.module_class = module_class
@@ -283,6 +293,10 @@ class Model(ABC):
         self.loss_weights = None
         self.to(device)
 
+        # Prepare for ** operator even when empty
+        if self.model_params["scheduler_kwargs"] is None:
+            self.model_params["scheduler_kwargs"] = {}
+
         # Initialize optimizer and scheduler
         optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
         self.optimizer = optimizer_class(
@@ -292,7 +306,11 @@ class Model(ABC):
         )
 
         self.scheduler = None
-        if "scheduler_class" in self.model_params:
+
+        if (
+            self.model_params.get("scheduler_class", None) is not None and
+            self.model_params.get("scheduler_kwargs", None) is not None
+        ):
             scheduler_class = self.model_params["scheduler_class"]
             self.scheduler = scheduler_class(
                 self.optimizer, **self.model_params["scheduler_kwargs"]
@@ -308,10 +326,16 @@ class Model(ABC):
     def fit(
         self,
         train_split: DataLoader,
+        num_training_steps: int,
         valid_split: Optional[DataLoader] = None,
-        verbose: bool = True,
         weight_loss: bool = False,
+        grad_clip: float = 10,
+        validation_interval: Optional[int] = None,
+        early_stopping_pat: int = np.inf,
+        early_stopping: bool = False,
+        verbose: bool = True,
         wandb_run: Optional[WandBRun] = None,
+        **training_kwargs
     ):
         """
         Fit the model to training data.
@@ -320,22 +344,31 @@ class Model(ABC):
         ----------
         train_split: DataLoader
             Dataset the model is being trained on.
+        num_training_steps: int
+            Number of training steps until completion.
         valid_split: Optional[DataLoader]
             Validation set the model is being evaluated on if given.
         verbose: bool
             Whether to display information about current loss.
         weight_loss: bool
             Weight classes in loss function. Default is False.
+        grad_clip: float
+            Parameter grad norm value before it will be clipped. Default is 10.
+        validation_interval: Optional[int]
+            Interval of training steps between validations on the validation set. If None, the model is evaluated after
+            each pass through the training data.
+        early_stopping_pat: int
+            Patience in number of training steps before early stopping kicks in. Default is np.inf.
+        early_stopping: bool
+            Whether early stopping should be used. Default is False.
         wandb_run: Optional[WandBRun]
             Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        num_training_steps = self.model_params["num_training_steps"]
+        if validation_interval is None:
+            validation_interval = len(train_split)
+
         best_val_loss = np.inf
-        grad_clip = self.model_params.get("grad_clip", np.inf)
-        validation_interval = self.model_params["validation_interval"]
-        early_stopping_pat = self.model_params.get("early_stopping_pat", np.inf)
-        early_stopping = self.model_params.get("early_stopping", True)
         num_no_improvements = 0
         progress_bar = tqdm(total=num_training_steps) if verbose else None
         best_model = dict(self.__dict__)

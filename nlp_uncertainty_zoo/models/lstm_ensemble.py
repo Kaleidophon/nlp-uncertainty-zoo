@@ -4,12 +4,13 @@ Implementation of an ensemble of LSTMs.
 
 # STD
 from collections import Counter
-from typing import Optional, Dict, Any, Generator, List
+from typing import Optional, Dict, Generator, List, Type, Any
 import os
 from datetime import datetime
 
 # EXT
 import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
 from torch.utils.data import DataLoader
 from torch.nn.utils import clip_grad_norm_
 import dill
@@ -44,7 +45,7 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         **build_params,
     ):
         """
-        Initialize an LSTM.
+        Initialize a LSTM module.
 
         Parameters
         ----------
@@ -161,77 +162,147 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
 class LSTMEnsemble(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        num_layers: int = 2,
+        input_size: int = 650,
+        hidden_size: int = 650,
+        dropout: float = 0.223,
+        ensemble_size: int = 10,
+        init_weight: Optional[float] = 0.5848,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.4931,
+        weight_decay: float = 0.001357,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
+        """
+        Initialize a LSTM ensemble.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Number of input vocabulary.
+        output_size: int
+            Number of classes.
+        num_layers: int
+            Number of layers.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        dropout: float
+            Dropout probability.
+        ensemble_size: int
+            Number of members in the ensemble. Default is 10.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step. Default is True.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        device: Device
+            Device the model should be moved to.
+        """
         super().__init__(
             "lstm_ensemble",
             LSTMEnsembleModule,
-            model_params,
-            model_dir,
-            device,
+            num_layers=num_layers,
+            vocab_size=vocab_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            output_size=output_size,
+            dropout=dropout,
+            ensemble_size=ensemble_size,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
         )
 
-        if "init_weight" in model_params:
-            init_weight = model_params["init_weight"]
-
+        if init_weight is not None:
             for member in self.module.ensemble_members:
                 for layer_weights in member.lstm.all_weights:
                     for param in layer_weights:
                         param.data.uniform_(-init_weight, init_weight)
 
         # Override optimizer and scheduler
-        optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
         self.optimizer = optimizer_class(
             params=[
                 {
                     "params": self.module.ensemble_members[i].parameters(),
-                    "lr": self.model_params["lr"],
-                    "weight_decay": self.model_params.get("weight_decay", 0)
+                    "lr": lr,
+                    "weight_decay": weight_decay
                 }
                 for i in range(self.module.ensemble_size)
             ]
         )
 
-        self.scheduler = None
-        if "scheduler_class" in self.model_params:
-            scheduler_class = self.model_params["scheduler_class"]
+        if scheduler_class is not None:
             self.scheduler = scheduler_class(
-                self.optimizer, **self.model_params["scheduler_kwargs"]
+                self.optimizer, **scheduler_kwargs
             )
 
     def fit(
         self,
         train_split: DataLoader,
+        num_training_steps: int,
         valid_split: Optional[DataLoader] = None,
-        verbose: bool = True,
         weight_loss: bool = False,
+        grad_clip: float = 10,
+        validation_interval: Optional[int] = None,
+        early_stopping_pat: int = np.inf,
+        early_stopping: bool = False,
+        verbose: bool = True,
         wandb_run: Optional[WandBRun] = None,
+        **training_kwargs
     ):
         """
-        Fit the model to training data.
+        Fit the model to training data. This is a slightly modified function compared to the Model class to accommodate
+        ensemble training.
 
         Parameters
         ----------
         train_split: DataLoader
             Dataset the model is being trained on.
+        num_training_steps: int
+            Number of training steps until completion.
         valid_split: Optional[DataLoader]
             Validation set the model is being evaluated on if given.
         verbose: bool
             Whether to display information about current loss.
         weight_loss: bool
             Weight classes in loss function. Default is False.
+        grad_clip: float
+            Parameter grad norm value before it will be clipped. Default is 10.
+        validation_interval: Optional[int]
+            Interval of training steps between validations on the validation set. If None, the model is evaluated after
+            each pass through the training data.
+        early_stopping_pat: int
+            Patience in number of training steps before early stopping kicks in. Default is np.inf.
+        early_stopping: bool
+            Whether early stopping should be used. Default is False.
         wandb_run: Optional[WandBRun]
             Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        num_training_steps = self.model_params["num_training_steps"]
+        if validation_interval is None:
+            validation_interval = len(train_split)
+
         best_val_loss = np.inf
-        grad_clip = self.model_params.get("grad_clip", np.inf)
-        validation_interval = self.model_params["validation_interval"]
-        early_stopping_pat = self.model_params.get("early_stopping_pat", np.inf)
-        early_stopping = self.model_params.get("early_stopping", True)
         num_no_improvements = 0
         progress_bar = tqdm(total=num_training_steps) if verbose else None
         best_model = dict(self.__dict__)

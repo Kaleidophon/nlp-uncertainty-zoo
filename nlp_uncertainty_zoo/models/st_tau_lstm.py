@@ -3,12 +3,14 @@ Implement the ST-tau LSTM by `Wang et al. (2021) <https://openreview.net/pdf?id=
 """
 
 # STD
-from typing import Optional, Tuple, Dict, Any
+from typing import Optional, Tuple, Dict, Any, Type
 
 # EXT
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
 
 # PROJECT
 from nlp_uncertainty_zoo.models.lstm import CellWiseLSTM, LSTMModule
@@ -194,14 +196,40 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
 class STTauLSTM(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        input_size: int,
+        hidden_size: int,
+        num_layers: int,
+        dropout: float,
+        num_centroids: int,
+        num_predictions: int,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.4931,
+        weight_decay: float = 0.001357,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
         super().__init__(
             "st_tau_lstm",
             STTauLSTMModule,
-            model_params,
-            model_dir,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            dropout=dropout,
+            num_centroids=num_centroids,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
         )

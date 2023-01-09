@@ -2,15 +2,21 @@
 Define BERT modules used in this project and make them consistent with the other models in the repository.
 """
 
+from typing import Type, Optional, Dict, Any
+
 # EXT
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import BertModel
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
+from torch.utils.data import DataLoader
+from transformers import BertModel as HFBertModel  # Rename to avoid collision
 
 # PROJECT
-from nlp_uncertainty_zoo.models.model import Module
-from nlp_uncertainty_zoo.utils.custom_types import Device
+from nlp_uncertainty_zoo.models.model import Module, Model
+from nlp_uncertainty_zoo.utils.custom_types import Device, WandBRun
 
 
 class BertModule(Module):
@@ -24,6 +30,7 @@ class BertModule(Module):
         output_size: int,
         is_sequence_classifier: bool,
         device: Device,
+        bert_class: Type[HFBertModel] = HFBertModel,
         **build_params,
     ):
         """
@@ -40,9 +47,11 @@ class BertModule(Module):
             made at every time step.
         device: Device
             Device the model should be moved to.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used. Default is BertModel from the Huggingface transformers package.
         """
 
-        bert = BertModel.from_pretrained(bert_name).to(device)
+        bert = bert_class.from_pretrained(bert_name).to(device)
         hidden_size = bert.config.hidden_size
 
         super().__init__(
@@ -168,3 +177,88 @@ class BertModule(Module):
             activations = return_dict["last_hidden_state"]
 
         return activations
+
+
+class BertModel(Model):
+    """
+    Define a BERT model. The only purpose this serves it to provide a warmup_proportion for fit(). Since the number of
+    training steps is only defined in fit(), it means we can only define the scheduler in that method.
+    """
+    def __init__(
+        self,
+        model_name: str,
+        bert_name: str,
+        bert_module: Type[BertModule],
+        output_size: int,
+        is_sequence_classifier: bool,
+        lr: float,
+        weight_decay: float,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
+        model_dir: Optional[str] = None,
+        bert_class: Type[HFBertModel] = HFBertModel,
+        device: Device = "cpu",
+        **model_params,
+    ):
+        super().__init__(
+            model_name=model_name,
+            bert_name=bert_name,
+            module_class=bert_module,
+            output_size=output_size,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            bert_class=bert_class,
+            device=device,
+            **model_params,
+        )
+
+    def fit(
+        self,
+        train_split: DataLoader,
+        num_training_steps: int,
+        warmup_proportion: float = 0.1,
+        valid_split: Optional[DataLoader] = None,
+        weight_loss: bool = False,
+        grad_clip: float = 10,
+        validation_interval: Optional[int] = None,
+        early_stopping_pat: int = np.inf,
+        early_stopping: bool = False,
+        verbose: bool = True,
+        wandb_run: Optional[WandBRun] = None,
+        **training_kwargs
+    ):
+        assert 0 <= warmup_proportion <= 1, f"warmup_proportion should be in [0, 1], {warmup_proportion} found."
+
+        if self.model_params.get("scheduler_class", None) is not None:
+            scheduler_class = self.model_params["scheduler_class"]
+            scheduler_kwargs = self.model_params.get("scheduler_kwargs", {})
+            scheduler_kwargs = {
+                # Warmup prob: 0.1
+                "num_warmup_steps": int(num_training_steps * warmup_proportion),
+                "num_training_steps": num_training_steps,
+                **scheduler_kwargs
+            }
+            self.scheduler = scheduler_class(
+                self.optimizer, **scheduler_kwargs
+            )
+
+        # Now call rest of function
+        super().fit(
+            train_split=train_split,
+            num_training_steps=num_training_steps,
+            valid_split=valid_split,
+            weight_loss=weight_loss,
+            grad_clip=grad_clip,
+            validation_interval=validation_interval,
+            early_stopping_pat=early_stopping_pat,
+            early_stopping=early_stopping,
+            verbose=verbose,
+            wandb_run=wandb_run,
+            **training_kwargs
+        )

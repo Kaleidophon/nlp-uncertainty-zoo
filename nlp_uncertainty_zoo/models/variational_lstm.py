@@ -4,12 +4,14 @@ Implementation of a variational LSTM, as presented by
 """
 
 # STD
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Type
 
 # EXT
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Module, MultiPredictionMixin, Model
@@ -361,21 +363,50 @@ class VariationalLSTM(Model):
 
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        input_size: int,
+        hidden_size: int,
+        num_layers: int,
+        embedding_dropout: float,
+        layer_dropout: float,
+        time_dropout: float,
+        num_predictions: int,
+        init_weight: Optional[float] = 0.5848,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.4931,
+        weight_decay: float = 0.001357,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
         super().__init__(
             "variational_lstm",
             VariationalLSTMModule,
-            model_params,
-            model_dir,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            embedding_dropout=embedding_dropout,
+            layer_dropout=layer_dropout,
+            time_dropout=time_dropout,
+            num_predictions=num_predictions,
+            init_weight=init_weight,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
         )
 
         # Only for Gal & Ghahramani replication, I know this isn't pretty
-        if "init_weight" in model_params:
-            init_weight = model_params["init_weight"]
+        if init_weight is not None:
 
             for cell in self.module.lstm_layers:
                 cell.weight_hh.data.uniform_(-init_weight, init_weight)

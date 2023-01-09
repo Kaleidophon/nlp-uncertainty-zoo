@@ -3,14 +3,18 @@ Implement the variational transformer, as presented by `(Xiao et al., 2021) <htt
 """
 
 # STD
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Type
 
 # EXT
 import torch
 import torch.nn.functional as F
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
+import transformers
+from transformers import BertModel as HFBertModel  # Rename to avoid collision
 
 # PROJECT
-from nlp_uncertainty_zoo.models.bert import BertModule
+from nlp_uncertainty_zoo.models.bert import BertModule, BertModel
 from nlp_uncertainty_zoo.models.model import Model, MultiPredictionMixin
 from nlp_uncertainty_zoo.models.transformer import TransformerModule
 from nlp_uncertainty_zoo.utils.custom_types import Device
@@ -151,7 +155,7 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
         **build_params,
     ):
         """
-        Initialize a transformer.
+        Initialize a variational BERT module.
 
         Parameters
         ----------
@@ -254,22 +258,68 @@ class VariationalTransformer(Model):
         )
 
 
-class VariationalBert(Model):
+class VariationalBert(BertModel):
     """
     Variational version of BERT.
     """
 
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        bert_name: str,
+        output_size: int,
+        dropout: float = 0.4362,
+        num_predictions: int = 10,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.00009742,
+        weight_decay: float = 0.02731,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = transformers.get_linear_schedule_with_warmup,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
+        bert_class: Type[HFBertModel] = HFBertModel,
         device: Device = "cpu",
     ):
-        bert_name = model_params["bert_name"]
+        """
+        Initialize a variational BERT.
+
+        Parameters
+        ----------
+        bert_name: str
+            Name of the BERT to be used.
+        dropout: float
+            Dropout probability.
+        num_predictions: int
+            Number of predictions with different dropout masks.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
-            f"variational-{bert_name}",
-            VariationalBertModule,
-            model_params,
-            model_dir,
-            device,
+            model_name=f"variational-{bert_name}",
+            bert_name=bert_name,
+            bert_module=VariationalBertModule,
+            output_size=output_size,
+            dropout=dropout,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            bert_class=bert_class,
+            device=device,
         )

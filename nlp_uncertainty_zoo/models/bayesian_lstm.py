@@ -3,11 +3,12 @@ Implement the Bayesian Bayes-by-backprop LSTM by `Fortunato et al. (2017) <https
 """
 
 # STD
-from typing import Dict, Any, Optional
+from typing import Optional
 
 # EXT
 import torch
 import torch.nn.functional as F
+import torch.optim as optim
 from blitz.modules import BayesianLSTM as BlitzBayesianLSTM
 
 # PROJECT
@@ -23,11 +24,11 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
+        num_layers: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
         dropout: float,
         prior_sigma_1: float,
         prior_sigma_2: float,
@@ -40,20 +41,20 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
         **build_params,
     ):
         """
-        Initialize a Bayesian LSTM.
+        Initialize a Bayesian LSTM module.
 
         Parameters
         ----------
-        num_layers: int
-            Number of layers.
         vocab_size: int
             Number of input vocabulary.
+        output_size: int
+            Number of classes.
+        num_layers: int
+            Number of layers.
         input_size: int
             Dimensionality of input to the first layer (embedding size).
         hidden_size: int
             Size of hidden units.
-        output_size: int
-            Number of classes.
         dropout: float
             Dropout probability.
         posterior_rho_init: float
@@ -150,14 +151,86 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
 class BayesianLSTM(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        num_layers: int = 2,
+        input_size: int = 650,
+        hidden_size: int = 650,
+        dropout: float = 0.3868,
+        prior_sigma_1: float = 0.7664,
+        prior_sigma_2: float = 0.851,
+        prior_pi: float = 0.11,
+        posterior_mu_init: float = -0.0425,
+        posterior_rho_init: float = -6,
+        num_predictions: int = 10,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.1114,
+        weight_decay: float = 0.003016,
+        optimizer_class: optim.Optimizer = optim.Adam,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
+        """
+        Initialize a Bayesian LSTM.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Number of input vocabulary.
+        output_size: int
+            Number of classes.
+        num_layers: int
+            Number of layers. Default is 2.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size). Default is 650.
+        hidden_size: int
+            Size of hidden units. Default is 650.
+        dropout: float
+            Dropout probability. Default is 0.3868.
+        prior_sigma_1: float
+            Prior sigma on the mixture prior distribution 1. Default is 0.7664.
+        prior_sigma_2: float
+            Prior sigma on the mixture prior distribution 2. Default is 0.851.
+        prior_pi: float
+            Mixture weight of the prior. Default is 0.11.
+        posterior_mu_init: float
+            Posterior mean for the weight mu init. Default is -0.0425.
+        posterior_rho_init: float
+            Posterior mean for the weight rho init. Default is -6.
+        num_predictions: int
+            Number of predictions (forward passes) used to make predictions. Default is 10.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step. Default is True.
+        lr: float
+            Learning rate. Default is 0.114.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.003016.
+        optimizer_class: optim.Optimizer
+            Optimizer class. Default is Adam.
+        device: Device
+            Device the model should be moved to.
+        """
+
         super().__init__(
             "bayesian_lstm",
             BayesianLSTMModule,
-            model_params,
             model_dir,
             device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            num_layers=num_layers,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            dropout=dropout,
+            prior_sigma_1=prior_sigma_1,
+            prior_sigma_2=prior_sigma_2,
+            prior_pi=prior_pi,
+            posterior_mu_init=posterior_mu_init,
+            posterior_rho_init=posterior_rho_init,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class
         )

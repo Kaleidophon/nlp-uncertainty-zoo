@@ -5,7 +5,7 @@ Implementation of a Spectral-normalized Gaussian Process transformer as presente
 
 # STD
 import math
-from typing import Tuple, Optional, Dict, Any
+from typing import Tuple, Optional, Dict, Any, Type
 import warnings
 
 # EXT
@@ -14,6 +14,8 @@ import torch
 from torch import nn as nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
 
 # PROJECT
 from nlp_uncertainty_zoo.models.spectral import (
@@ -435,16 +437,56 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
 class SNGPTransformer(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        num_layers: int,
+        input_size: int,
+        hidden_size: int,
+        input_dropout: float,
+        dropout: float,
+        num_heads: int,
+        sequence_length: int,
+        spectral_norm_upper_bound: float,
+        ridge_factor: float,
+        scaling_coefficient: float,
+        beta_length_scale: float,
+        kernel_amplitude: float,
+        num_predictions: int,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.4931,
+        weight_decay: float = 0.001357,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
         super().__init__(
             "sngp_transformer",
             SNGPTransformerModule,
-            model_params,
-            model_dir,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            num_layers=num_layers,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            ridge_factor=ridge_factor,
+            scaling_coefficient=scaling_coefficient,
+            beta_length_scale=beta_length_scale,
+            kernel_amplitude=kernel_amplitude,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
         )
 
     def _finetune(
@@ -598,19 +640,46 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
 class SNGPBert(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        bert_name: str,
+        output_size: int,
+        spectral_norm_upper_bound: float,
+        ridge_factor: float,
+        scaling_coefficient: float,
+        beta_length_scale: float,
+        kernel_amplitude: float,
+        num_predictions: int,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.4931,
+        weight_decay: float = 0.001357,
+        weight_decay_beta = 0.01,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
-        bert_name = model_params["bert_name"]
         super().__init__(
             f"sngp-{bert_name}",
             SNGPBertModule,
-            model_params,
-            model_dir,
-            device,
+            bert_name=bert_name,
+            output_size=output_size,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            ridge_factor=ridge_factor,
+            scaling_coefficient=scaling_coefficient,
+            beta_length_scale=beta_length_scale,
+            kernel_amplitude=kernel_amplitude,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            weight_decay_beta=weight_decay_beta,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
         )
-        self.weight_decay_beta = model_params["weight_decay_beta"]
+        self.weight_decay_beta = weight_decay_beta
 
     def _finetune(
         self,

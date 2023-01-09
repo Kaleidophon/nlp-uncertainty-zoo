@@ -5,13 +5,15 @@ Implementing MC Dropout estimates using Determinantal Point Processes by
 """
 
 # STD
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Type
 
 # EXT
 from alpaca.uncertainty_estimator.masks import build_mask
 from einops import rearrange
 import torch
 import torch.nn.functional as F
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
 
 # PROJECT
 from nlp_uncertainty_zoo.models.variational_transformer import VariationalBertModule, VariationalTransformerModule
@@ -219,16 +221,46 @@ class DPPTransformer(Model):
 
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        input_size: int,
+        num_layers: int,
+        hidden_size: int,
+        input_dropout: float,
+        dropout: float,
+        num_heads: int,
+        sequence_length: int,
+        num_predictions: int,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.4931,
+        weight_decay: float = 0.001357,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
         super().__init__(
             f"dpp-transformer",
             DPPTransformerModule,
-            model_params,
-            model_dir,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            num_layers=num_layers,
+            hidden_size=hidden_size,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
         )
 
 
@@ -303,15 +335,32 @@ class DPPBert(Model):
 
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        bert_name: str,
+        output_size: int,
+        dropout: float,
+        num_predictions: int,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.4931,
+        weight_decay: float = 0.001357,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
-        bert_name = model_params["bert_name"]
         super().__init__(
             f"dpp-{bert_name}",
             DPPBertModule,
-            model_params,
-            model_dir,
-            device,
+            bert_name=bert_name,
+            output_size=output_size,
+            dropout=dropout,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
         )

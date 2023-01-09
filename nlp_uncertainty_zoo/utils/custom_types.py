@@ -3,7 +3,7 @@ Define custom types for this project.
 """
 
 # STD
-from typing import List, Union, Dict, Tuple
+from typing import List, Union, Dict, Tuple, Any
 
 # EXT
 import torch
