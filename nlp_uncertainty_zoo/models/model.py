@@ -279,10 +279,10 @@ class Model(ABC):
             Name of the model.
         module_class: type
             Class of the model that is being wrapped.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
         device: Device
             The device the model is located on.
-         model_params: Dict[str, Any]
-            Parameters to initialize the model.
         """
         self.model_name = model_name
         self.module_class = module_class

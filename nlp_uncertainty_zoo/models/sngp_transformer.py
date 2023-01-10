@@ -284,11 +284,11 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -308,16 +308,16 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
 
         Parameters
         ----------
-        num_layers: int
-            Number of model layers.
         vocab_size: int
             Vocabulary size.
+        output_size: int
+            Size of output of model.
         input_size: int
             Dimensionality of input to model.
         hidden_size: int
             Size of hidden representations.
-        output_size: int
-            Size of output of model.
+        num_layers: int
+            Number of model layers.
         input_dropout: float
             Input dropout added to embeddings.
         dropout: float
@@ -347,11 +347,11 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
             Device the model is located on.
         """
         super().__init__(
-            num_layers,
             vocab_size,
+            output_size,
             input_size,
             hidden_size,
-            output_size,
+            num_layers,
             input_dropout,
             dropout,
             num_heads,
@@ -363,14 +363,14 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         MultiPredictionMixin.__init__(self, num_predictions)
 
         self.sngp_layer = SNGPModule(
-            input_size,
-            output_size,
-            ridge_factor,
-            scaling_coefficient,
-            beta_length_scale,
-            kernel_amplitude,
-            num_predictions,
-            device,
+            input_size=input_size,
+            output_size=output_size,
+            ridge_factor=ridge_factor,
+            scaling_coefficient=scaling_coefficient,
+            beta_length_scale=beta_length_scale,
+            kernel_amplitude=kernel_amplitude,
+            num_predictions=num_predictions,
+            device=device,
         )
         self.layer_norm = nn.LayerNorm([input_size])
 
@@ -439,9 +439,9 @@ class SNGPTransformer(Model):
         self,
         vocab_size: int,
         output_size: int,
-        num_layers: int,
         input_size: int,
         hidden_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -461,14 +461,69 @@ class SNGPTransformer(Model):
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
+        """
+        Initialize a SNGP transformer model.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Vocabulary size.
+        output_size: int
+            Size of output of model.
+        input_size: int
+            Dimensionality of input to model.
+        hidden_size: int
+            Size of hidden representations.
+        num_layers: int
+            Number of model layers.
+        input_dropout: float
+            Input dropout added to embeddings.
+        dropout: float
+            Dropout rate.
+        num_heads: int
+            Number of self-attention heads per layer.
+        sequence_length: int
+            Maximum sequence length in dataset. Used to initialize positional embeddings.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+        ridge_factor: float
+            Factor that identity sigma hat matrices of the SNGP layer are multiplied by.
+        scaling_coefficient: float
+            Momentum factor that is used when updating the sigma hat matrix of the SNGP layer during the last training
+            epoch.
+        beta_length_scale: float
+            Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
+            initialized from.
+        kernel_amplitude: float
+            Kernel amplitude used when computing GP features.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
             "sngp_transformer",
             SNGPTransformerModule,
             vocab_size=vocab_size,
             output_size=output_size,
-            num_layers=num_layers,
             input_size=input_size,
             hidden_size=hidden_size,
+            num_layers=num_layers,
             input_dropout=input_dropout,
             dropout=dropout,
             num_heads=num_heads,
@@ -658,6 +713,49 @@ class SNGPBert(Model):
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
+        """
+        Initialize a BERT model with spectrally-normalized Gaussian Process output layer.
+
+        Parameters
+        ----------
+        bert_name: str
+            Name of the underlying BERT, as specified in HuggingFace transformers.
+        output_size: int
+            Number of classes.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+        ridge_factor: float
+            Factor that identity sigma hat matrices of the SNGP layer are multiplied by.
+        scaling_coefficient: float
+            Momentum factor that is used when updating the sigma hat matrix of the SNGP layer during the last training
+            epoch.
+        beta_length_scale: float
+            Factor for the variance parameter of the normal distribution all beta parameters of the SNGP layer are
+            initialized from.
+        kernel_amplitude: float
+            Kernel amplitude used when computing GP features.
+        num_predictions: int
+            Number of predictions sampled from the GP in the SNGP layer to come to the final prediction.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        weight_decay: float
+            Separate weight decay term for the Beta matrix. Default is 0.01.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
             f"sngp-{bert_name}",
             SNGPBertModule,

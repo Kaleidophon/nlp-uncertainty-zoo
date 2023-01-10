@@ -26,9 +26,9 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
         self,
         vocab_size: int,
         output_size: int,
-        num_layers: int,
         input_size: int,
         hidden_size: int,
+        num_layers: int,
         dropout: float,
         prior_sigma_1: float,
         prior_sigma_2: float,
@@ -49,12 +49,12 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
             Number of input vocabulary.
         output_size: int
             Number of classes.
-        num_layers: int
-            Number of layers.
         input_size: int
             Dimensionality of input to the first layer (embedding size).
         hidden_size: int
             Size of hidden units.
+        num_layers: int
+            Number of layers.
         dropout: float
             Dropout probability.
         posterior_rho_init: float
@@ -76,11 +76,11 @@ class BayesianLSTMModule(LSTMModule, MultiPredictionMixin):
             Device the model should be moved to.
         """
         super().__init__(
-            num_layers,
             vocab_size,
+            output_size,
             input_size,
             hidden_size,
-            output_size,
+            num_layers,
             dropout,
             is_sequence_classifier,
             device,
@@ -153,9 +153,9 @@ class BayesianLSTM(Model):
         self,
         vocab_size: int,
         output_size: int,
-        num_layers: int = 2,
         input_size: int = 650,
         hidden_size: int = 650,
+        num_layers: int = 2,
         dropout: float = 0.3868,
         prior_sigma_1: float = 0.7664,
         prior_sigma_2: float = 0.851,
@@ -179,12 +179,12 @@ class BayesianLSTM(Model):
             Number of input vocabulary.
         output_size: int
             Number of classes.
-        num_layers: int
-            Number of layers. Default is 2.
         input_size: int
             Dimensionality of input to the first layer (embedding size). Default is 650.
         hidden_size: int
             Size of hidden units. Default is 650.
+        num_layers: int
+            Number of layers. Default is 2.
         dropout: float
             Dropout probability. Default is 0.3868.
         prior_sigma_1: float
@@ -208,6 +208,8 @@ class BayesianLSTM(Model):
             Weight decay term for optimizer. Default is 0.003016.
         optimizer_class: optim.Optimizer
             Optimizer class. Default is Adam.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
         device: Device
             Device the model should be moved to.
         """
@@ -215,13 +217,11 @@ class BayesianLSTM(Model):
         super().__init__(
             "bayesian_lstm",
             BayesianLSTMModule,
-            model_dir,
-            device,
             vocab_size=vocab_size,
             output_size=output_size,
-            num_layers=num_layers,
             input_size=input_size,
             hidden_size=hidden_size,
+            num_layers=num_layers,
             dropout=dropout,
             prior_sigma_1=prior_sigma_1,
             prior_sigma_2=prior_sigma_2,
@@ -232,5 +232,7 @@ class BayesianLSTM(Model):
             is_sequence_classifier=is_sequence_classifier,
             lr=lr,
             weight_decay=weight_decay,
-            optimizer_class=optimizer_class
+            optimizer_class=optimizer_class,
+            device=device,
+            model_dir=model_dir
         )

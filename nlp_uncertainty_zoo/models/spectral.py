@@ -156,11 +156,11 @@ class SpectralTransformerModule(TransformerModule):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -176,16 +176,16 @@ class SpectralTransformerModule(TransformerModule):
         Parameters
         ----------
 
-        num_layers: int
-            Number of model layers.
         vocab_size: int
             Vocabulary size.
+        output_size: int
+            Size of output of model.
         input_size: int
             Dimensionality of input to model.
         hidden_size: int
             Size of hidden representations.
-        output_size: int
-            Size of output of model.
+        num_layers: int
+            Number of model layers.
         input_dropout: float
             Dropout on word embeddings.
         dropout: float

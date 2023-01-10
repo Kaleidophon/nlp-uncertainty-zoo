@@ -195,9 +195,9 @@ class LSTM(Model):
         self,
         vocab_size: int,
         output_size: int,
-        num_layers: int = 2,
         input_size: int = 650,
         hidden_size: int = 650,
+        num_layers: int = 2,
         dropout: float = 0.223,
         init_weight: Optional[float] = 0.5848,
         is_sequence_classifier: bool = True,
@@ -218,12 +218,12 @@ class LSTM(Model):
             Number of input vocabulary.
         output_size: int
             Number of classes.
-        num_layers: int
-            Number of layers.
         input_size: int
             Dimensionality of input to the first layer (embedding size).
         hidden_size: int
             Size of hidden units.
+        num_layers: int
+            Number of layers.
         dropout: float
             Dropout probability.
         is_sequence_classifier: bool
@@ -239,17 +239,19 @@ class LSTM(Model):
             Learning rate scheduler class. Default is None.
         scheduler_kwargs: Optional[Dict[str, Any]]
             Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
         device: Device
             Device the model should be moved to.
         """
         super().__init__(
             "lstm",
             LSTMModule,
-            num_layers=num_layers,
             vocab_size=vocab_size,
+            output_size=output_size,
             input_size=input_size,
             hidden_size=hidden_size,
-            output_size=output_size,
+            num_layers=num_layers,
             dropout=dropout,
             is_sequence_classifier=is_sequence_classifier,
             lr=lr,

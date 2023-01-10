@@ -188,11 +188,11 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -209,16 +209,16 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
 
         Parameters
         ----------
-        num_layers: int
-            Number of model layers.
         vocab_size: int
             Vocabulary size.
+        output_size: int
+            Size of output of model.
         input_size: int
             Dimensionality of input to model.
         hidden_size: int
             Size of hidden representations.
-        output_size: int
-            Size of output of model.
+        num_layers: int
+            Number of model layers.
         input_dropout: float
             Input dropout added to embeddings.
         dropout: float
@@ -262,14 +262,14 @@ class DDUTransformer(Model):
         vocab_size: int,
         output_size: int,
         input_size: int = 512,
-        num_layers: int = 6,
         hidden_size: int = 512,
+        projection_size: int = 64,
+        num_layers: int = 6,
         input_dropout: float = 0.4362,
         dropout: float = 0.4362,
         num_heads: int = 16,
         sequence_length: int = 128,
         spectral_norm_upper_bound: float = 0.9211,
-        projection_size: int = 64,
         ignore_indices: List[int] = tuple(),
         is_sequence_classifier: bool = True,
         lr: float = 0.4931,
@@ -291,10 +291,12 @@ class DDUTransformer(Model):
             Size of output of model.
         input_size: int
             Dimensionality of input to model. Default is 512.
-        num_layers: int
-            Number of model layers. Default is 6.
         hidden_size: int
             Size of hidden representations. Default is 512.
+        projection_size: int
+            Size hidden dimensions are projected to using PCA to save memory if given. Default is 64.
+        num_layers: int
+            Number of model layers. Default is 6.
         input_dropout: float
             Dropout rate. Default is 0.4362.
         dropout: float
@@ -303,13 +305,25 @@ class DDUTransformer(Model):
             Number of self-attention heads per layer. Default is 16.
         sequence_length: int
             Maximum sequence length in dataset. Used to initialize positional embeddings. Default is 128.
-        projection_size: int
-            Size hidden dimensions are projected to using PCA to save memory if given. Default is 64.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+        ignore_indices: List[int]
+            Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step. Default is True.
-        ignore_indices: List[int]
-            Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
         device: Device
             Device the model is located on.
         """
@@ -374,8 +388,8 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
         self,
         bert_name: str,
         output_size: int,
-        spectral_norm_upper_bound: float,
         projection_size: int,
+        spectral_norm_upper_bound: float,
         is_sequence_classifier: bool,
         ignore_indices: List[int],
         device: Device,
@@ -390,10 +404,10 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
             Name of the underlying BERT, as specified in HuggingFace transformers.
         output_size: int
             Number of classes.
-        spectral_norm_upper_bound: float
-            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
         projection_size: int
             Size hidden dimensions are projected to using PCA to save memory if given.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
@@ -450,8 +464,8 @@ class DDUBert(Model):
         self,
         bert_name: str,
         output_size: int,
-        spectral_norm_upper_bound: float = 0.9211,
         projection_size: int = 64,
+        spectral_norm_upper_bound: float = 0.9211,
         ignore_indices: List[int] = tuple(),
         is_sequence_classifier: bool = True,
         lr: float = 0.4931,
@@ -471,17 +485,29 @@ class DDUBert(Model):
             Name of the underlying BERT, as specified in HuggingFace transformers.
         output_size: int
             Number of classes.
-        spectral_norm_upper_bound: float
-            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
         projection_size: int
             Size hidden dimensions are projected to using PCA to save memory if given.
-        is_sequence_classifier: bool
-            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
-            made at every time step.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
         ignore_indices: List[int]
             Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step. Default is True.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
         device: Device
-            Device the model should be moved to.
+            Device the model is located on.
         """
         super().__init__(
             f"ddu-{bert_name}",

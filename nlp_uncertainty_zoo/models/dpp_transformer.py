@@ -145,11 +145,11 @@ class DropoutDPP(torch.nn.Module):
 class DPPTransformerModule(VariationalTransformerModule):
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -164,16 +164,16 @@ class DPPTransformerModule(VariationalTransformerModule):
 
         Parameters
         ----------
-        num_layers: int
-            Number of model layers.
         vocab_size: int
             Vocabulary size.
+        output_size: int
+            Size of output of model.
         input_size: int
             Dimensionality of input to model.
         hidden_size: int
             Size of hidden representations.
-        output_size: int
-            Size of output of model.
+        num_layers: int
+            Number of model layers.
         input_dropout: float
             Dropout on word embeddings.
         dropout: float
@@ -191,11 +191,11 @@ class DPPTransformerModule(VariationalTransformerModule):
             Device the model is located on.
         """
         super().__init__(
-            num_layers,
             vocab_size,
+            output_size,
             input_size,
             hidden_size,
-            output_size,
+            num_layers,
             input_dropout,
             dropout,
             num_heads,
@@ -224,8 +224,8 @@ class DPPTransformer(Model):
         vocab_size: int,
         output_size: int,
         input_size: int,
-        num_layers: int,
         hidden_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -240,14 +240,57 @@ class DPPTransformer(Model):
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
+        """
+        Initialize a DPP transformer model.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Vocabulary size.
+        output_size: int
+            Size of output of model.
+        input_size: int
+            Dimensionality of input to model.
+        hidden_size: int
+            Size of hidden representations.
+        num_layers: int
+            Number of model layers.
+        input_dropout: float
+            Dropout on word embeddings.
+        dropout: float
+            Dropout rate.
+        num_heads: int
+            Number of self-attention heads per layer.
+        sequence_length: int
+            Maximum sequence length in dataset. Used to initialize positional embeddings.
+        num_predictions: int
+            Number of predictions with different dropout masks.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
             f"dpp-transformer",
             DPPTransformerModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,
-            num_layers=num_layers,
             hidden_size=hidden_size,
+            num_layers=num_layers,
             input_dropout=input_dropout,
             dropout=dropout,
             num_heads=num_heads,
@@ -348,6 +391,37 @@ class DPPBert(Model):
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
+        """
+        Initialize a DPP Bert.
+
+        Parameters
+        ----------
+        bert_name: str
+            Name of the underlying BERT, as specified in HuggingFace transformers.
+        output_size: int
+            Number of classes.
+        dropout: float
+            Dropout rate.
+        num_predictions: int
+            Number of predictions with different dropout masks.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step. Default is True.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
             f"dpp-{bert_name}",
             DPPBertModule,

@@ -76,11 +76,11 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         dropout: float,
         num_centroids: int,
         num_predictions: int,
@@ -93,16 +93,16 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
 
         Parameters
         ----------
-        num_layers: int
-            Number of layers.
         vocab_size: int
             Number of input vocabulary.
+        output_size: int
+            Number of classes.
         input_size: int
             Dimensionality of input to the first layer (embedding size).
         hidden_size: int
             Size of hidden units.
-        output_size: int
-            Number of classes.
+        num_layers: int
+            Number of layers.
         dropout: float
             Dropout probability.
         num_centroids: int
@@ -116,11 +116,11 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
             Device the model should be moved to.
         """
         super().__init__(
-            num_layers,
             vocab_size,
+            output_size,
             input_size,
             hidden_size,
-            output_size,
+            num_layers,
             dropout,
             is_sequence_classifier,
             device,
@@ -213,6 +213,47 @@ class STTauLSTM(Model):
         model_dir: Optional[str] = None,
         device: Device = "cpu",
     ):
+        """
+        Initialize a ST-tau LSTM model.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Number of input vocabulary.
+        output_size: int
+            Number of classes.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size).
+        hidden_size: int
+            Size of hidden units.
+        num_layers: int
+            Number of layers.
+        dropout: float
+            Dropout probability.
+        num_centroids: int
+            Number of states in the underlying finite-state automaton.
+        num_predictions: int
+            Number of predictions (forward passes) used to make predictions.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        weight_decay: float
+            Separate weight decay term for the Beta matrix. Default is 0.01.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
             "st_tau_lstm",
             STTauLSTMModule,

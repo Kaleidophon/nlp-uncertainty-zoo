@@ -188,7 +188,6 @@ class BertModel(Model):
         self,
         model_name: str,
         bert_name: str,
-        bert_module: Type[BertModule],
         output_size: int,
         is_sequence_classifier: bool,
         lr: float,
@@ -201,10 +200,41 @@ class BertModel(Model):
         device: Device = "cpu",
         **model_params,
     ):
+        """
+        Initialize a BERT model.
+
+        Parameters
+        ----------
+        model_name: str
+            Name of the model.
+        bert_name: str
+            Name of the underlying BERT, as specified in HuggingFace transformers.
+        output_size: int
+            Number of classes.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used. Default is BertModel from the Huggingface transformers package.
+        device: Device
+            Device the model is located on.
+        """
+
         super().__init__(
             model_name=model_name,
             bert_name=bert_name,
-            module_class=bert_module,
             output_size=output_size,
             is_sequence_classifier=is_sequence_classifier,
             lr=lr,
@@ -233,6 +263,36 @@ class BertModel(Model):
         wandb_run: Optional[WandBRun] = None,
         **training_kwargs
     ):
+        """
+        Fit the model to training data.
+
+        Parameters
+        ----------
+        train_split: DataLoader
+            Dataset the model is being trained on.
+        num_training_steps: int
+            Number of training steps until completion.
+        warmup_proportion: float
+            Percentage of warmup steps for triangular learning rate schedule. Default is 0.1.
+        valid_split: Optional[DataLoader]
+            Validation set the model is being evaluated on if given.
+        verbose: bool
+            Whether to display information about current loss.
+        weight_loss: bool
+            Weight classes in loss function. Default is False.
+        grad_clip: float
+            Parameter grad norm value before it will be clipped. Default is 10.
+        validation_interval: Optional[int]
+            Interval of training steps between validations on the validation set. If None, the model is evaluated after
+            each pass through the training data.
+        early_stopping_pat: int
+            Patience in number of training steps before early stopping kicks in. Default is np.inf.
+        early_stopping: bool
+            Whether early stopping should be used. Default is False.
+        wandb_run: Optional[WandBRun]
+            Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
+            tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
+        """
         assert 0 <= warmup_proportion <= 1, f"warmup_proportion should be in [0, 1], {warmup_proportion} found."
 
         if self.model_params.get("scheduler_class", None) is not None:
