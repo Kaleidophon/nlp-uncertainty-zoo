@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
+import transformers
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model, Module
@@ -170,18 +171,18 @@ class Transformer(Model):
         self,
         vocab_size: int,
         output_size: int,
-        input_size: int,
-        hidden_size: int,
-        num_layers: int,
-        input_dropout: float,
-        dropout: float,
-        num_heads: int,
-        sequence_length: int,
+        input_size: int = 512,
+        hidden_size: int = 512,
+        num_layers: int = 6,
+        input_dropout: float = 0.2,
+        dropout: float = 0.1,
+        num_heads: int = 16,
+        sequence_length: int = 128,
         is_sequence_classifier: bool = True,
-        lr: float = 0.4931,
-        weight_decay: float = 0.001357,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
-        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
@@ -221,10 +222,11 @@ class Transformer(Model):
             Separate weight decay term for the Beta matrix. Default is 0.01.
         optimizer_class: Type[optim.Optimizer]
             Optimizer class. Default is Adam.
-        scheduler_class: Optional[Type[scheduler._LRScheduler]]
-            Learning rate scheduler class. Default is None.
+        scheduler_class: Type[scheduler._LRScheduler]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
         scheduler_kwargs: Optional[Dict[str, Any]]
-            Keyword arguments for learning rate scheduler. Default is None.
+            Keyword arguments for learning rate scheduler. If None, training length and warmup proportion will be set
+            based on the arguments of fit(). Default is None.
         model_dir: Optional[str]
             Directory that model should be saved to.
         device: Device

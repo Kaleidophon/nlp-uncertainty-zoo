@@ -365,17 +365,17 @@ class VariationalLSTM(Model):
         self,
         vocab_size: int,
         output_size: int,
-        input_size: int,
-        hidden_size: int,
-        num_layers: int,
-        embedding_dropout: float,
-        layer_dropout: float,
-        time_dropout: float,
-        num_predictions: int,
-        init_weight: Optional[float] = 0.5848,
+        input_size: int = 650,
+        hidden_size: int = 650,
+        num_layers: int = 2,
+        embedding_dropout: float = 0.15,
+        layer_dropout: float = 0.15,
+        time_dropout: float = 0.15,
+        num_predictions: int = 10,
+        init_weight: Optional[float] = 0.6,
         is_sequence_classifier: bool = True,
-        lr: float = 0.4931,
-        weight_decay: float = 0.001357,
+        lr: float = 0.5,
+        weight_decay: float = 0.001,
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
         scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
@@ -393,28 +393,26 @@ class VariationalLSTM(Model):
         output_size: int
             Number of classes.
         input_size: int
-            Dimensionality of input to the first layer (embedding size).
+            Dimensionality of input to the first layer (embedding size). Default is 650.
         hidden_size: int
-            Size of hidden units.
+            Size of hidden units. Default is 650.
         num_layers: int
-            Number of layers.
+            Number of layers. Default is 2.
         embedding_dropout: float
-            Dropout probability for the input embeddings.
+            Dropout probability for the input embeddings. Default is 0.15.
         layer_dropout: float
-            Dropout probability for hidden states between layers.
+            Dropout probability for hidden states between layers. Default is 0.15.
         time_dropout: float
-            Dropout probability for hidden states between time steps.
+            Dropout probability for hidden states between time steps. Default is 0.15.
         num_predictions: int
-            Number of predictions (forward passes) used to make predictions.
+            Number of predictions (forward passes) used to make predictions. Default is 10.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
         lr: float
-            Learning rate. Default is 0.4931.
+            Learning rate. Default is 0.5.
         weight_decay: float
-            Weight decay term for optimizer. Default is 0.001357.
-        weight_decay: float
-            Separate weight decay term for the Beta matrix. Default is 0.01.
+            Weight decay term for optimizer. Default is 0.001.
         optimizer_class: Type[optim.Optimizer]
             Optimizer class. Default is Adam.
         scheduler_class: Optional[Type[scheduler._LRScheduler]]

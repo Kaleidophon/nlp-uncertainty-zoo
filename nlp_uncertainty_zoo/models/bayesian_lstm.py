@@ -156,16 +156,16 @@ class BayesianLSTM(Model):
         input_size: int = 650,
         hidden_size: int = 650,
         num_layers: int = 2,
-        dropout: float = 0.3868,
-        prior_sigma_1: float = 0.7664,
-        prior_sigma_2: float = 0.851,
-        prior_pi: float = 0.11,
-        posterior_mu_init: float = -0.0425,
+        dropout: float = 0.3,
+        prior_sigma_1: float = 0.7,
+        prior_sigma_2: float = 0.8,
+        prior_pi: float = 0.1,
+        posterior_mu_init: float = -0.04,
         posterior_rho_init: float = -6,
         num_predictions: int = 10,
         is_sequence_classifier: bool = True,
-        lr: float = 0.1114,
-        weight_decay: float = 0.003016,
+        lr: float = 0.1,
+        weight_decay: float = 0.001,
         optimizer_class: optim.Optimizer = optim.Adam,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
@@ -187,15 +187,15 @@ class BayesianLSTM(Model):
         num_layers: int
             Number of layers. Default is 2.
         dropout: float
-            Dropout probability. Default is 0.3868.
+            Dropout probability. Default is 0.3.
         prior_sigma_1: float
-            Prior sigma on the mixture prior distribution 1. Default is 0.7664.
+            Prior sigma on the mixture prior distribution 1. Default is 0.7.
         prior_sigma_2: float
-            Prior sigma on the mixture prior distribution 2. Default is 0.851.
+            Prior sigma on the mixture prior distribution 2. Default is 0.8.
         prior_pi: float
-            Mixture weight of the prior. Default is 0.11.
+            Mixture weight of the prior. Default is 0.1.
         posterior_mu_init: float
-            Posterior mean for the weight mu init. Default is -0.0425.
+            Posterior mean for the weight mu init. Default is -0.04.
         posterior_rho_init: float
             Posterior mean for the weight rho init. Default is -6.
         num_predictions: int
@@ -204,9 +204,9 @@ class BayesianLSTM(Model):
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step. Default is True.
         lr: float
-            Learning rate. Default is 0.114.
+            Learning rate. Default is 0.1.
         weight_decay: float
-            Weight decay term for optimizer. Default is 0.003016.
+            Weight decay term for optimizer. Default is 0.001.
         optimizer_class: optim.Optimizer
             Optimizer class. Default is Adam.
         model_dir: Optional[str]

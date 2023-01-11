@@ -15,6 +15,7 @@ from einops import rearrange
 from torch.utils.data import DataLoader
 import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
+import transformers
 
 # PROJECT
 from nlp_uncertainty_zoo.models.spectral import (
@@ -265,17 +266,17 @@ class DDUTransformer(Model):
         hidden_size: int = 512,
         projection_size: int = 64,
         num_layers: int = 6,
-        input_dropout: float = 0.4362,
-        dropout: float = 0.4362,
+        input_dropout: float = 0.2,
+        dropout: float = 0.1,
         num_heads: int = 16,
         sequence_length: int = 128,
-        spectral_norm_upper_bound: float = 0.9211,
+        spectral_norm_upper_bound: float = 0.95,
         ignore_indices: List[int] = tuple(),
         is_sequence_classifier: bool = True,
-        lr: float = 0.4931,
-        weight_decay: float = 0.001357,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
-        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
@@ -299,30 +300,32 @@ class DDUTransformer(Model):
         num_layers: int
             Number of model layers. Default is 6.
         input_dropout: float
-            Dropout rate. Default is 0.4362.
+            Dropout rate. Default is 0.2.
         dropout: float
-            Dropout rate. Default is 0.4362.
+            Dropout rate. Default is 0.1.
         num_heads: int
             Number of self-attention heads per layer. Default is 16.
         sequence_length: int
             Maximum sequence length in dataset. Used to initialize positional embeddings. Default is 128.
         spectral_norm_upper_bound: float
-            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it. Default is
+            0.95.
         ignore_indices: List[int]
             Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step. Default is True.
         lr: float
-            Learning rate. Default is 0.4931.
+            Learning rate. Default is 0.001.
         weight_decay: float
-            Weight decay term for optimizer. Default is 0.001357.
+            Weight decay term for optimizer. Default is 0.01.
         optimizer_class: Type[optim.Optimizer]
             Optimizer class. Default is Adam.
         scheduler_class: Optional[Type[scheduler._LRScheduler]]
-            Learning rate scheduler class. Default is None.
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
         scheduler_kwargs: Optional[Dict[str, Any]]
-            Keyword arguments for learning rate scheduler. Default is None.
+            Keyword arguments for learning rate scheduler. If None, training length and warmup proportion will be set
+            based on the arguments of fit(). Default is None.
         model_dir: Optional[str]
             Directory that model should be saved to.
         device: Device
@@ -467,13 +470,13 @@ class DDUBert(Model):
         bert_name: str,
         output_size: int,
         projection_size: int = 64,
-        spectral_norm_upper_bound: float = 0.9211,
+        spectral_norm_upper_bound: float = 0.95,
         ignore_indices: List[int] = tuple(),
         is_sequence_classifier: bool = True,
-        lr: float = 0.4931,
-        weight_decay: float = 0.001357,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
-        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
@@ -491,22 +494,24 @@ class DDUBert(Model):
         projection_size: int
             Size hidden dimensions are projected to using PCA to save memory if given.
         spectral_norm_upper_bound: float
-            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it. Default is
+            0.95.
         ignore_indices: List[int]
             Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step. Default is True.
         lr: float
-            Learning rate. Default is 0.4931.
+            Learning rate. Default is 0.001.
         weight_decay: float
-            Weight decay term for optimizer. Default is 0.001357.
+            Weight decay term for optimizer. Default is 0.01.
         optimizer_class: Type[optim.Optimizer]
             Optimizer class. Default is Adam.
-        scheduler_class: Optional[Type[scheduler._LRScheduler]]
-            Learning rate scheduler class. Default is None.
+        scheduler_class: Type[scheduler._LRScheduler]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
         scheduler_kwargs: Optional[Dict[str, Any]]
-            Keyword arguments for learning rate scheduler. Default is None.
+            Keyword arguments for learning rate scheduler. If None, training length and warmup proportion will be set
+            based on the arguments of fit(). Default is None.
         model_dir: Optional[str]
             Directory that model should be saved to.
         device: Device

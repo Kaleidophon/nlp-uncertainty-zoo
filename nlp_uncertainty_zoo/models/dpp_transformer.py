@@ -14,6 +14,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
+import transformers
 
 # PROJECT
 from nlp_uncertainty_zoo.models.variational_transformer import VariationalBertModule, VariationalTransformerModule
@@ -223,19 +224,19 @@ class DPPTransformer(Model):
         self,
         vocab_size: int,
         output_size: int,
-        input_size: int,
-        hidden_size: int,
-        num_layers: int,
-        input_dropout: float,
-        dropout: float,
-        num_heads: int,
-        sequence_length: int,
-        num_predictions: int,
+        input_size: int = 512,
+        hidden_size: int = 512,
+        num_layers: int = 6,
+        input_dropout: float = 0.2,
+        dropout: float = 0.1,
+        num_heads: int = 16,
+        sequence_length: int = 128,
+        num_predictions: int = 10,
         is_sequence_classifier: bool = True,
-        lr: float = 0.4931,
-        weight_decay: float = 0.001357,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
-        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
@@ -251,34 +252,35 @@ class DPPTransformer(Model):
         output_size: int
             Size of output of model.
         input_size: int
-            Dimensionality of input to model.
+            Dimensionality of input to model. efault is 512.
         hidden_size: int
-            Size of hidden representations.
+            Size of hidden representations. efault is 512.
         num_layers: int
-            Number of model layers.
+            Number of model layers. Default is 6
         input_dropout: float
-            Dropout on word embeddings.
+            Dropout on word embeddings. Default is 0.2.
         dropout: float
-            Dropout rate.
+            Dropout rate. Default is 0.1.
         num_heads: int
-            Number of self-attention heads per layer.
+            Number of self-attention heads per layer. Default is 16.
         sequence_length: int
-            Maximum sequence length in dataset. Used to initialize positional embeddings.
+            Maximum sequence length in dataset. Used to initialize positional embeddings. Default is 128.
         num_predictions: int
-            Number of predictions with different dropout masks.
+            Number of predictions with different dropout masks. Default is 10.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
         lr: float
-            Learning rate. Default is 0.4931.
+            Learning rate. Default is 0.001.
         weight_decay: float
-            Weight decay term for optimizer. Default is 0.001357.
+            Weight decay term for optimizer. Default is 0.01.
         optimizer_class: Type[optim.Optimizer]
             Optimizer class. Default is Adam.
-        scheduler_class: Optional[Type[scheduler._LRScheduler]]
-            Learning rate scheduler class. Default is None.
+        scheduler_class: Type[scheduler._LRScheduler]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
         scheduler_kwargs: Optional[Dict[str, Any]]
-            Keyword arguments for learning rate scheduler. Default is None.
+            Keyword arguments for learning rate scheduler. If None, training length and warmup proportion will be set
+            based on the arguments of fit(). Default is None.
         model_dir: Optional[str]
             Directory that model should be saved to.
         device: Device
@@ -382,13 +384,13 @@ class DPPBert(Model):
         self,
         bert_name: str,
         output_size: int,
-        dropout: float,
-        num_predictions: int,
+        dropout: float = 0.1,
+        num_predictions: int = 10,
         is_sequence_classifier: bool = True,
-        lr: float = 0.4931,
-        weight_decay: float = 0.001357,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
-        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
@@ -404,20 +406,20 @@ class DPPBert(Model):
         output_size: int
             Number of classes.
         dropout: float
-            Dropout rate.
+            Dropout rate. Default is 0.1.
         num_predictions: int
-            Number of predictions with different dropout masks.
+            Number of predictions with different dropout masks. Default is 10.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step. Default is True.
         lr: float
-            Learning rate. Default is 0.4931.
+            Learning rate. Default is 0.001.
         weight_decay: float
-            Weight decay term for optimizer. Default is 0.001357.
+            Weight decay term for optimizer. Default is 0.01.
         optimizer_class: Type[optim.Optimizer]
             Optimizer class. Default is Adam.
-        scheduler_class: Optional[Type[scheduler._LRScheduler]]
-            Learning rate scheduler class. Default is None.
+        scheduler_class: Type[scheduler._LRScheduler]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
         scheduler_kwargs: Optional[Dict[str, Any]]
             Keyword arguments for learning rate scheduler. Default is None.
         model_dir: Optional[str]

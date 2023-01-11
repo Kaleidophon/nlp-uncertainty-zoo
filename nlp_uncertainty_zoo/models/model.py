@@ -307,11 +307,12 @@ class Model(ABC):
 
         self.scheduler = None
 
-        if (
-            self.model_params.get("scheduler_class", None) is not None and
-            self.model_params.get("scheduler_kwargs", None) is not None
+        if None not in (
+            self.model_params.get("scheduler_class", None),
+            self.model_params.get("scheduler_kwargs", None)
         ):
             scheduler_class = self.model_params["scheduler_class"]
+
             self.scheduler = scheduler_class(
                 self.optimizer, **self.model_params["scheduler_kwargs"]
             )

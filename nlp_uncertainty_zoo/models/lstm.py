@@ -24,11 +24,11 @@ class LSTMModule(Module):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         dropout: float,
         is_sequence_classifier: bool,
         device: Device,
@@ -39,16 +39,16 @@ class LSTMModule(Module):
 
         Parameters
         ----------
-        num_layers: int
-            Number of layers.
         vocab_size: int
             Number of input vocabulary.
+        output_size: int
+            Number of classes.
         input_size: int
             Dimensionality of input to the first layer (embedding size).
         hidden_size: int
             Size of hidden units.
-        output_size: int
-            Number of classes.
+        num_layers: int
+            Number of layers.
         dropout: float
             Dropout probability.
         is_sequence_classifier: bool
@@ -58,13 +58,13 @@ class LSTMModule(Module):
             Device the model should be moved to.
         """
         super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
 
         # Initialize modules
@@ -198,11 +198,11 @@ class LSTM(Model):
         input_size: int = 650,
         hidden_size: int = 650,
         num_layers: int = 2,
-        dropout: float = 0.223,
-        init_weight: Optional[float] = 0.5848,
+        dropout: float = 0.2,
+        init_weight: Optional[float] = 0.6,
         is_sequence_classifier: bool = True,
-        lr: float = 0.4931,
-        weight_decay: float = 0.001357,
+        lr: float = 0.5,
+        weight_decay: float = 0.001,
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
         scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
@@ -220,20 +220,20 @@ class LSTM(Model):
         output_size: int
             Number of classes.
         input_size: int
-            Dimensionality of input to the first layer (embedding size).
+            Dimensionality of input to the first layer (embedding size). Default is 650.
         hidden_size: int
-            Size of hidden units.
+            Size of hidden units. Default is 650.
         num_layers: int
-            Number of layers.
+            Number of layers. Default is 2.
         dropout: float
-            Dropout probability.
+            Dropout probability. Default is 0.2.
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step. Default is True.
         lr: float
-            Learning rate. Default is 0.4931.
+            Learning rate. Default is 0.5.
         weight_decay: float
-            Weight decay term for optimizer. Default is 0.001357.
+            Weight decay term for optimizer. Default is 0.001.
         optimizer_class: Type[optim.Optimizer]
             Optimizer class. Default is Adam.
         scheduler_class: Optional[Type[scheduler._LRScheduler]]

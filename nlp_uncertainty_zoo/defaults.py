@@ -321,6 +321,12 @@ SEQUENCE_CLASSIFICATION_DEFAULT_PARAMS = {
         "ignore_indices": [-100, 0, 101, 102, 103],
         "num_training_steps": 18480,
         "validation_interval": 469,
+        "scheduler_class": transformers.get_linear_schedule_with_warmup,
+        "scheduler_kwargs": {
+            # Warmup prob: 0.1, training steps: 469
+            "num_warmup_steps": 469 * 40 * 0.1,
+            "num_training_steps": 469 * 40,
+        },
         "num_layers": 6,
         "hidden_size": 768,
         "num_heads": 10,
@@ -337,13 +343,20 @@ SEQUENCE_CLASSIFICATION_DEFAULT_PARAMS = {
     "ddu_bert": {
         "bert_name": "bert-base-uncased",
         "ignore_indices": [-100, 0, 101, 102, 103],
+        "num_training_steps": 18480,
+        "validation_interval": 469,
+        "scheduler_class": transformers.get_linear_schedule_with_warmup,
+        "scheduler_kwargs": {
+            # Warmup prob: 0.1, training steps: 469
+            "num_warmup_steps": 469 * 40 * 0.1,
+            "num_training_steps": 469 * 40,
+        },
         "batch_size": 32,
         "lr": 5e-5,
         "output_size": 151,
         "sequence_length": 35,
         "is_sequence_classifier": True,
         "spectral_norm_upper_bound": 0.95,
-        "validation_interval": 469,
         "projection_size": 4,
     },
 }
