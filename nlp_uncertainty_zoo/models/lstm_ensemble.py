@@ -218,8 +218,8 @@ class LSTMEnsemble(Model):
             Device the model should be moved to.
         """
         super().__init__(
-            "lstm_ensemble",
-            LSTMEnsembleModule,
+            model_name="lstm_ensemble",
+            module_class=LSTMEnsembleModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,
@@ -229,6 +229,7 @@ class LSTMEnsemble(Model):
             ensemble_size=ensemble_size,
             is_sequence_classifier=is_sequence_classifier,
             lr=lr,
+            weight_decay=weight_decay,
             optimizer_class=optimizer_class,
             scheduler_class=scheduler_class,
             scheduler_kwargs=scheduler_kwargs,

@@ -246,8 +246,8 @@ class LSTM(Model):
             Device the model should be moved to.
         """
         super().__init__(
-            "lstm",
-            LSTMModule,
+            model_name="lstm",
+            module_class=LSTMModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,

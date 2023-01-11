@@ -425,8 +425,8 @@ class VariationalLSTM(Model):
             Device the model is located on.
         """
         super().__init__(
-            "variational_lstm",
-            VariationalLSTMModule,
+            model_name="variational_lstm",
+            module_class=VariationalLSTMModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,

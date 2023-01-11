@@ -523,7 +523,7 @@ class SNGPTransformer(Model):
             Device the model is located on.
         """
         super().__init__(
-            "sngp_transformer",
+            model_name="sngp_transformer",
             module_class=SNGPTransformerModule,
             vocab_size=vocab_size,
             output_size=output_size,
@@ -767,7 +767,7 @@ class SNGPBert(Model):
             Device the model is located on.
         """
         super().__init__(
-            f"sngp-{bert_name}",
+            model_name=f"sngp-{bert_name}",
             module_class=SNGPBertModule,
             bert_name=bert_name,
             output_size=output_size,

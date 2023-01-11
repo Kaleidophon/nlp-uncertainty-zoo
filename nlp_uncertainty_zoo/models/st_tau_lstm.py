@@ -254,8 +254,8 @@ class STTauLSTM(Model):
             Device the model is located on.
         """
         super().__init__(
-            "st_tau_lstm",
-            STTauLSTMModule,
+            model_name="st_tau_lstm",
+            module_class=STTauLSTMModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,

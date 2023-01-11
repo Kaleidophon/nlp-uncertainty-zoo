@@ -332,8 +332,8 @@ class DDUTransformer(Model):
             Device the model is located on.
         """
         super().__init__(
-            "ddu_transformer",
-            DDUTransformerModule,
+            model_name="ddu_transformer",
+            module_class=DDUTransformerModule,
             input_size=input_size,
             output_size=output_size,
             num_layers=num_layers,
@@ -518,7 +518,7 @@ class DDUBert(Model):
             Device the model is located on.
         """
         super().__init__(
-            f"ddu-{bert_name}",
+            model_name=f"ddu-{bert_name}",
             module_class=DDUBertModule,
             bert_name=bert_name,
             output_size=output_size,

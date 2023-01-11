@@ -287,8 +287,8 @@ class DPPTransformer(Model):
             Device the model is located on.
         """
         super().__init__(
-            f"dpp-transformer",
-            DPPTransformerModule,
+            model_name=f"dpp-transformer",
+            module_class=DPPTransformerModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,
@@ -428,7 +428,7 @@ class DPPBert(Model):
             Device the model is located on.
         """
         super().__init__(
-            f"dpp-{bert_name}",
+            model_name=f"dpp-{bert_name}",
             module_class=DPPBertModule,
             bert_name=bert_name,
             output_size=output_size,

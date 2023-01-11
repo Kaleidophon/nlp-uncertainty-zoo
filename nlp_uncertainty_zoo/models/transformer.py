@@ -233,8 +233,8 @@ class Transformer(Model):
             Device the model is located on.
         """
         super().__init__(
-            "transformer",
-            TransformerModule,
+            model_name="transformer",
+            module_class=TransformerModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,

@@ -309,8 +309,8 @@ class VariationalTransformer(Model):
             Device the model is located on.
         """
         super().__init__(
-            "variational_transformer",
-            VariationalTransformerModule,
+            model_name="variational_transformer",
+            module_class=VariationalTransformerModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,

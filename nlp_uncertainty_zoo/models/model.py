@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from datetime import datetime
 import dill
-from typing import Dict, Optional, Generator, Callable
+from typing import Dict, Optional, Generator, Callable, Type, Any
 import os
 
 # EX
@@ -23,6 +23,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
+import torch.optim.lr_scheduler as scheduler
 from tqdm import tqdm
 
 # PROJECT
@@ -266,6 +267,11 @@ class Model(ABC):
         self,
         model_name: str,
         module_class: type,
+        lr: float,
+        weight_decay: float,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
         **model_params,
@@ -293,28 +299,18 @@ class Model(ABC):
         self.loss_weights = None
         self.to(device)
 
-        # Prepare for ** operator even when empty
-        if self.model_params["scheduler_kwargs"] is None:
-            self.model_params["scheduler_kwargs"] = {}
-
         # Initialize optimizer and scheduler
-        optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
         self.optimizer = optimizer_class(
             self.module.parameters(),
-            lr=self.model_params["lr"],
-            weight_decay=self.model_params.get("weight_decay", 0),
+            lr=lr,
+            weight_decay=weight_decay
         )
 
         self.scheduler = None
 
-        if None not in (
-            self.model_params.get("scheduler_class", None),
-            self.model_params.get("scheduler_kwargs", None)
-        ):
-            scheduler_class = self.model_params["scheduler_class"]
-
+        if scheduler_class is not None and scheduler_kwargs is not None:
             self.scheduler = scheduler_class(
-                self.optimizer, **self.model_params["scheduler_kwargs"]
+                self.optimizer, **scheduler_kwargs
             )
 
         # Check if model directory exists, if not, create

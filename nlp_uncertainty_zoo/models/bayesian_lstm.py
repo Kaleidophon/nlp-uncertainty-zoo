@@ -216,8 +216,8 @@ class BayesianLSTM(Model):
         """
 
         super().__init__(
-            "bayesian_lstm",
-            BayesianLSTMModule,
+            model_name="bayesian_lstm",
+            module_class=BayesianLSTMModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,
