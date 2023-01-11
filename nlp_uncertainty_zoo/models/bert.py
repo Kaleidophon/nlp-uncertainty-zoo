@@ -196,8 +196,8 @@ class BertModel(Model):
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
         scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
-        model_dir: Optional[str] = None,
         bert_class: Type[HFBertModel] = HFBertModel,
+        model_dir: Optional[str] = None,
         device: Device = "cpu",
         **model_params,
     ):
@@ -227,10 +227,10 @@ class BertModel(Model):
             Learning rate scheduler class. Default is None.
         scheduler_kwargs: Optional[Dict[str, Any]]
             Keyword arguments for learning rate scheduler. Default is None.
-        model_dir: Optional[str]
-            Directory that model should be saved to.
         bert_class: Type[HFBertModel]
             Type of BERT to be used. Default is BertModel from the Huggingface transformers package.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
         device: Device
             Device the model is located on.
         """

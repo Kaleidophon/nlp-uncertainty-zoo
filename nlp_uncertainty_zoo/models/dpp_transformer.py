@@ -15,6 +15,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
 import transformers
+from transformers import BertModel as HFBertModel  # Rename to avoid collision
 
 # PROJECT
 from nlp_uncertainty_zoo.models.variational_transformer import VariationalBertModule, VariationalTransformerModule
@@ -392,6 +393,7 @@ class DPPBert(Model):
         optimizer_class: Type[optim.Optimizer] = optim.Adam,
         scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
+        bert_class: Type[HFBertModel] = HFBertModel,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
         **model_params
@@ -422,6 +424,8 @@ class DPPBert(Model):
             Learning rate scheduler class. Default is a triangular learning rate schedule.
         scheduler_kwargs: Optional[Dict[str, Any]]
             Keyword arguments for learning rate scheduler. Default is None.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used. Default is BertModel from the Huggingface transformers package.
         model_dir: Optional[str]
             Directory that model should be saved to.
         device: Device
@@ -440,6 +444,7 @@ class DPPBert(Model):
             optimizer_class=optimizer_class,
             scheduler_class=scheduler_class,
             scheduler_kwargs=scheduler_kwargs,
+            bert_class=bert_class,
             model_dir=model_dir,
             device=device,
             **model_params
