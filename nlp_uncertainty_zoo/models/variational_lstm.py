@@ -381,6 +381,7 @@ class VariationalLSTM(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a variational LSTM model.
@@ -446,6 +447,7 @@ class VariationalLSTM(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )
 
         # Only for Gal & Ghahramani replication, I know this isn't pretty

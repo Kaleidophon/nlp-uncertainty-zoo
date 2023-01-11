@@ -120,8 +120,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
     logit_multi_shape = None
     uncertainty_scores_shape = None
 
-    @property
-    def trained_models(self) -> Generator[Tuple[str, Model], None, None]:
+    def trained_models(self, progress_bar: tqdm) -> Generator[Tuple[str, Model], None, None]:
         """
         Returns a generator of trained models to avoid having to hold all trained models in memory.
 
@@ -151,8 +150,10 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
                 ] = self.mock_dataset_builder.sequence_length
 
             # Init and fit model
-            model = AVAILABLE_MODELS[model_name](model_params)
-            model.fit(train_split=mock_dataset["train"], verbose=False)
+            progress_bar.set_description(f'Testing model "{model_name}"')
+
+            model = AVAILABLE_MODELS[model_name](**model_params)
+            model.fit(train_split=mock_dataset["train"], verbose=False, **model_params)
 
             return model_name, model
 
@@ -169,12 +170,12 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             return
 
         with tqdm(total=len(AVAILABLE_MODELS)) as progress_bar:
-            for model_name, trained_model in self.trained_models:
-                progress_bar.set_description(f'Testing model "{model_name}"')
-                progress_bar.update(1)
+            for model_name, trained_model in self.trained_models(progress_bar):
 
                 self._test_module_functions(trained_model)
                 self._test_uncertainty_metrics(trained_model)
+
+                progress_bar.update(1)
 
                 del trained_model  # Free up memory
 

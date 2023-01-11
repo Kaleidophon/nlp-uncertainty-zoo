@@ -263,6 +263,7 @@ class VariationalTransformer(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a variational transformer model.
@@ -328,6 +329,7 @@ class VariationalTransformer(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )
 
 
@@ -350,6 +352,7 @@ class VariationalBert(BertModel):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a variational BERT.
@@ -383,7 +386,7 @@ class VariationalBert(BertModel):
         super().__init__(
             model_name=f"variational-{bert_name}",
             bert_name=bert_name,
-            bert_module=VariationalBertModule,
+            module_class=VariationalBertModule,
             output_size=output_size,
             dropout=dropout,
             num_predictions=num_predictions,
@@ -394,6 +397,6 @@ class VariationalBert(BertModel):
             scheduler_class=scheduler_class,
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
-            bert_class=bert_class,
             device=device,
+            **model_params
         )

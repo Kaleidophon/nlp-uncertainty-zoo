@@ -187,6 +187,7 @@ class BertModel(Model):
     def __init__(
         self,
         model_name: str,
+        module_class: type,
         bert_name: str,
         output_size: int,
         is_sequence_classifier: bool,
@@ -207,6 +208,8 @@ class BertModel(Model):
         ----------
         model_name: str
             Name of the model.
+        module_class: type
+            Class of the model that is being wrapped.
         bert_name: str
             Name of the underlying BERT, as specified in HuggingFace transformers.
         output_size: int
@@ -234,6 +237,7 @@ class BertModel(Model):
 
         super().__init__(
             model_name=model_name,
+            module_class=module_class,
             bert_name=bert_name,
             output_size=output_size,
             is_sequence_classifier=is_sequence_classifier,

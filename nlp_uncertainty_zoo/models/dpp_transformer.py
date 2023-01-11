@@ -239,6 +239,7 @@ class DPPTransformer(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a DPP transformer model.
@@ -304,6 +305,7 @@ class DPPTransformer(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )
 
 
@@ -390,6 +392,7 @@ class DPPBert(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a DPP Bert.
@@ -424,7 +427,7 @@ class DPPBert(Model):
         """
         super().__init__(
             f"dpp-{bert_name}",
-            DPPBertModule,
+            module_class=DPPBertModule,
             bert_name=bert_name,
             output_size=output_size,
             dropout=dropout,
@@ -437,4 +440,5 @@ class DPPBert(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )

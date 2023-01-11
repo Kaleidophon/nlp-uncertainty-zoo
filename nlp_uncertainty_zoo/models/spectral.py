@@ -203,17 +203,17 @@ class SpectralTransformerModule(TransformerModule):
             Device the model is located on.
         """
         super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            input_dropout,
-            dropout,
-            num_heads,
-            sequence_length,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
 
         # Add spectral normalization

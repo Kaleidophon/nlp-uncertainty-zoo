@@ -178,6 +178,7 @@ class LSTMEnsemble(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a LSTM ensemble.

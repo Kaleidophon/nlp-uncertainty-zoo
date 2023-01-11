@@ -116,14 +116,14 @@ class STTauLSTMModule(LSTMModule, MultiPredictionMixin):
             Device the model should be moved to.
         """
         super().__init__(
-            vocab_size,
-            output_size,
-            input_size,
-            hidden_size,
-            num_layers,
-            dropout,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            dropout=dropout,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
         MultiPredictionMixin.__init__(self, num_predictions)
         layer_sizes = [input_size] + [hidden_size] * num_layers
@@ -212,6 +212,7 @@ class STTauLSTM(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a ST-tau LSTM model.
@@ -273,4 +274,5 @@ class STTauLSTM(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )

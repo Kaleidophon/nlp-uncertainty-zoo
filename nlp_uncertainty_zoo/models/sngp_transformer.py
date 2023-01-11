@@ -347,24 +347,25 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
             Device the model is located on.
         """
         super().__init__(
-            vocab_size,
-            output_size,
-            input_size,
-            hidden_size,
-            num_layers,
-            input_dropout,
-            dropout,
-            num_heads,
-            sequence_length,
-            spectral_norm_upper_bound,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
         MultiPredictionMixin.__init__(self, num_predictions)
 
         self.sngp_layer = SNGPModule(
             input_size=input_size,
             output_size=output_size,
+            hidden_size=hidden_size,
             ridge_factor=ridge_factor,
             scaling_coefficient=scaling_coefficient,
             beta_length_scale=beta_length_scale,
@@ -372,7 +373,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
             num_predictions=num_predictions,
             device=device,
         )
-        self.layer_norm = nn.LayerNorm([input_size])
+        self.layer_norm = nn.LayerNorm([hidden_size])
 
     def forward(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
         out = self.get_hidden(input_)
@@ -386,6 +387,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         embeddings = self.input_dropout(embeddings)
 
         out = self.encoder(embeddings)
+        out = self.projection(out)
 
         if self.is_sequence_classifier:
             out = self.get_sequence_representation(out)
@@ -460,6 +462,7 @@ class SNGPTransformer(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a SNGP transformer model.
@@ -518,7 +521,7 @@ class SNGPTransformer(Model):
         """
         super().__init__(
             "sngp_transformer",
-            SNGPTransformerModule,
+            module_class=SNGPTransformerModule,
             vocab_size=vocab_size,
             output_size=output_size,
             input_size=input_size,
@@ -542,6 +545,7 @@ class SNGPTransformer(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )
 
     def _finetune(
@@ -602,24 +606,24 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
             Device the model is located on.
         """
         super().__init__(
-            bert_name,
-            output_size,
-            spectral_norm_upper_bound,
-            is_sequence_classifier,
-            device,
+            bert_name=bert_name,
+            output_size=output_size,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
         MultiPredictionMixin.__init__(self, num_predictions)
 
         hidden_size = self.bert.config.hidden_size
         self.sngp_layer = SNGPModule(
-            hidden_size,
-            output_size,
-            ridge_factor,
-            scaling_coefficient,
-            beta_length_scale,
-            kernel_amplitude,
-            num_predictions,
-            device,
+            hidden_size=hidden_size,
+            output_size=output_size,
+            ridge_factor=ridge_factor,
+            scaling_coefficient=scaling_coefficient,
+            beta_length_scale=beta_length_scale,
+            kernel_amplitude=kernel_amplitude,
+            num_predictions=num_predictions,
+            device=device,
         )
         self.layer_norm = nn.LayerNorm([hidden_size])
 
@@ -712,6 +716,7 @@ class SNGPBert(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a BERT model with spectrally-normalized Gaussian Process output layer.
@@ -758,7 +763,7 @@ class SNGPBert(Model):
         """
         super().__init__(
             f"sngp-{bert_name}",
-            SNGPBertModule,
+            module_class=SNGPBertModule,
             bert_name=bert_name,
             output_size=output_size,
             spectral_norm_upper_bound=spectral_norm_upper_bound,
@@ -776,6 +781,7 @@ class SNGPBert(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )
         self.weight_decay_beta = weight_decay_beta
 

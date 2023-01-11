@@ -68,25 +68,25 @@ class TransformerModule(Module):
         """
 
         super().__init__(
-            vocab_size,
-            output_size,
-            input_size,
-            hidden_size,
-            num_layers,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
 
         self.dropout = dropout
         self.input_dropout = nn.Dropout(input_dropout)
-        self.output_dropout = nn.Dropout(self.dropout)
+        self.output_dropout = nn.Dropout(dropout)
         self.num_heads = num_heads
         self.sequence_length = sequence_length
         self.word_embeddings = nn.Embedding(vocab_size, input_size)
         self.pos_embeddings = PositionalEmbedding(sequence_length, input_size)
 
-        self.pooler = nn.Linear(input_size, input_size)
-        self.output = nn.Linear(input_size, output_size)
+        self.projection = nn.Linear(input_size, hidden_size)
+        self.output = nn.Linear(hidden_size, output_size)
 
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=input_size,
@@ -117,6 +117,7 @@ class TransformerModule(Module):
         embeddings = self.input_dropout(embeddings)
 
         hidden = self.encoder(embeddings)
+        hidden = self.projection(hidden)
 
         return hidden
 
@@ -159,7 +160,7 @@ class TransformerModule(Module):
             Representation for the current sequence.
         """
         hidden = hidden[:, 0, :].unsqueeze(1)
-        hidden = torch.tanh(self.pooler(hidden))
+        hidden = torch.tanh(hidden)
 
         return hidden
 
@@ -184,6 +185,7 @@ class Transformer(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a transformer module.
@@ -248,6 +250,7 @@ class Transformer(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )
 
 

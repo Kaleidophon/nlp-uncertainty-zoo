@@ -240,18 +240,18 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
             Device the model is located on.
         """
         super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            input_dropout,
-            dropout,
-            num_heads,
-            sequence_length,
-            spectral_norm_upper_bound,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
         DDUMixin.__init__(self, input_size, output_size, ignore_indices, projection_size)
 
@@ -279,6 +279,7 @@ class DDUTransformer(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a DDU transformer.
@@ -350,6 +351,7 @@ class DDUTransformer(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )
 
     def _finetune(
@@ -475,6 +477,7 @@ class DDUBert(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a DDU Bert.
@@ -511,7 +514,7 @@ class DDUBert(Model):
         """
         super().__init__(
             f"ddu-{bert_name}",
-            DDUBertModule,
+            module_class=DDUBertModule,
             bert_name=bert_name,
             output_size=output_size,
             spectral_norm_upper_bound=spectral_norm_upper_bound,
@@ -525,6 +528,7 @@ class DDUBert(Model):
             scheduler_kwargs=scheduler_kwargs,
             model_dir=model_dir,
             device=device,
+            **model_params
         )
 
     def _finetune(

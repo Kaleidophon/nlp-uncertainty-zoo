@@ -208,6 +208,7 @@ class LSTM(Model):
         scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
         """
         Initialize a LSTM.
@@ -264,7 +265,7 @@ class LSTM(Model):
         )
 
         # Only for Zaremba et al. / Gal & Ghahramani replication, I know this isn't pretty
-        if "init_weight" is not None:
+        if init_weight is not None:
 
             for layer_weights in self.module.lstm.all_weights:
                 for param in layer_weights:
