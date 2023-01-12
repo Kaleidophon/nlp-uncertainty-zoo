@@ -11,6 +11,9 @@ Utility functions from the repository of Joost van Amsterfoort (https://github.c
 import issues, since the original repository is not available as a Python package.
 """
 
+# STD
+from typing import Type
+
 # EXT
 import torch
 import torch.nn as nn
@@ -20,6 +23,7 @@ from torch.nn.utils.spectral_norm import (
     SpectralNormLoadStateDictPreHook,
     SpectralNormStateDictHook,
 )
+from transformers import BertModel as HFBertModel  # Rename to avoid collision
 
 # PROJECT
 from nlp_uncertainty_zoo.models.bert import BertModule
@@ -237,6 +241,7 @@ class SpectralBertModule(BertModule):
         output_size: int,
         spectral_norm_upper_bound: float,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         device: Device,
         **build_params,
     ):
@@ -254,11 +259,18 @@ class SpectralBertModule(BertModule):
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used.
         device: Device
             Device the model should be moved to.
         """
         super().__init__(
-            bert_name, output_size, is_sequence_classifier, device, **build_params
+            bert_name=bert_name,
+            output_size=output_size,
+            is_sequence_classifier=is_sequence_classifier,
+            bert_class=bert_class,
+            device=device,
+            **build_params
         )
 
         self.spectral_norm_upper_bound = spectral_norm_upper_bound

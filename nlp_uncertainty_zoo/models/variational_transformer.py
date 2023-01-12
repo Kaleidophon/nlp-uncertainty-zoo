@@ -151,6 +151,7 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
         dropout: float,
         num_predictions: int,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         device: Device,
         **build_params,
     ):
@@ -174,10 +175,11 @@ class VariationalBertModule(BertModule, MultiPredictionMixin):
         self.num_predictions = num_predictions
 
         super().__init__(
-            bert_name,
-            output_size,
-            is_sequence_classifier,
-            device,
+            bert_name=bert_name,
+            output_size=output_size,
+            is_sequence_classifier=is_sequence_classifier,
+            bert_class=bert_class,
+            device=device,
         )
 
         # Set dropout probability to argument

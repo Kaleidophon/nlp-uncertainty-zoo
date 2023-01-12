@@ -577,6 +577,7 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
         kernel_amplitude: float,
         num_predictions: int,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         device: Device,
         **build_params,
     ):
@@ -606,6 +607,8 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used.
         device: Device
             Device the model is located on.
         """
@@ -614,6 +617,7 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
             output_size=output_size,
             spectral_norm_upper_bound=spectral_norm_upper_bound,
             is_sequence_classifier=is_sequence_classifier,
+            bert_class=bert_class,
             device=device,
         )
         MultiPredictionMixin.__init__(self, num_predictions)

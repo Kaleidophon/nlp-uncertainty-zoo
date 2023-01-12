@@ -324,6 +324,7 @@ class DPPBertModule(VariationalBertModule):
         dropout: float,
         num_predictions: int,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         device: Device,
         **build_params,
     ):
@@ -341,18 +342,21 @@ class DPPBertModule(VariationalBertModule):
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used.
         device: Device
             Device the model is located on.
         """
         self.num_predictions = num_predictions
 
         super().__init__(
-            bert_name,
-            output_size,
-            dropout,
-            num_predictions,
-            is_sequence_classifier,
-            device,
+            bert_name=bert_name,
+            output_size=output_size,
+            dropout=dropout,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            bert_class=bert_class,
+            device=device,
         )
 
         # Replace all dropout layers with DPP dropout

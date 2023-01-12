@@ -397,6 +397,7 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
         projection_size: int,
         spectral_norm_upper_bound: float,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         ignore_indices: List[int],
         device: Device,
         **build_params,
@@ -417,17 +418,20 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used.
         ignore_indices: List[int]
             Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
         device: Device
             Device the model should be moved to.
         """
         super().__init__(
-            bert_name,
-            output_size,
-            spectral_norm_upper_bound,
-            is_sequence_classifier,
-            device,
+            bert_name=bert_name,
+            output_size=output_size,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            is_sequence_classifier=is_sequence_classifier,
+            bert_class=bert_class,
+            device=device,
             **build_params,
         )
         DDUMixin.__init__(self, self.bert.config.hidden_size, output_size, ignore_indices, projection_size)

@@ -29,8 +29,8 @@ class BertModule(Module):
         bert_name: str,
         output_size: int,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         device: Device,
-        bert_class: Type[HFBertModel] = HFBertModel,
         **build_params,
     ):
         """
@@ -45,10 +45,10 @@ class BertModule(Module):
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
-        device: Device
-            Device the model should be moved to.
         bert_class: Type[HFBertModel]
             Type of BERT to be used. Default is BertModel from the Huggingface transformers package.
+        device: Device
+            Device the model should be moved to.
         """
 
         bert = bert_class.from_pretrained(bert_name).to(device)
