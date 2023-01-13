@@ -414,6 +414,7 @@ class Model(ABC):
             batch_loss = self.get_loss(
                 input_ids,
                 labels,
+                training_step=training_step,
                 attention_mask=attention_mask,
                 wandb_run=wandb_run,
             )
@@ -421,6 +422,15 @@ class Model(ABC):
             batch_loss.backward()
 
             clip_grad_norm_(self.module.parameters(), grad_clip)
+
+            grad_norm = torch.norm(
+                torch.stack([
+                    torch.norm(p.grad.detach()).cpu() for p in [
+                        p for p in self.module.parameters() if p.grad is not None
+                    ]
+                ])
+            )
+
             self.optimizer.step()
             self.optimizer.zero_grad(
                 set_to_none=True
@@ -445,7 +455,12 @@ class Model(ABC):
                 progress_bar.update(1)
 
             if wandb_run is not None:
-                wandb_run.log({"batch_train_loss": batch_loss})
+                wandb_run.log(
+                    {
+                        "batch_train_loss": batch_loss,
+                        "batch_grad_norm": grad_norm
+                    }
+                )
 
             # Get validation loss
             if valid_split is not None and training_step % validation_interval == 0 and training_step > 0:
