@@ -415,6 +415,7 @@ class Model(ABC):
                 input_ids,
                 labels,
                 training_step=training_step,
+                num_training_steps=num_training_steps,
                 attention_mask=attention_mask,
                 wandb_run=wandb_run,
             )
