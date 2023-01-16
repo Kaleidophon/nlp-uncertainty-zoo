@@ -300,6 +300,7 @@ class Model(ABC):
         self.to(device)
 
         # Initialize optimizer and scheduler
+        self.optimizer_class = optimizer_class
         self.optimizer = optimizer_class(
             self.module.parameters(),
             lr=lr,
@@ -422,8 +423,6 @@ class Model(ABC):
 
             batch_loss.backward()
 
-            clip_grad_norm_(self.module.parameters(), grad_clip)
-
             grad_norm = torch.norm(
                 torch.stack([
                     torch.norm(p.grad.detach()).cpu() for p in [
@@ -431,6 +430,8 @@ class Model(ABC):
                     ]
                 ])
             )
+
+            clip_grad_norm_(self.module.parameters(), grad_clip)
 
             self.optimizer.step()
             self.optimizer.zero_grad(
@@ -643,6 +644,7 @@ class Model(ABC):
         data_split: DataLoader,
         verbose: bool,
         wandb: Optional[WandBRun] = None,
+        **finetuning_kwargs
     ):
         """
         Do an additional training / fine-tuning step, which is required for some models. Is being overwritten in some
