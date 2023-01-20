@@ -212,7 +212,7 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
         # Only use last output
         if self.is_sequence_classifier:
-            outputs = self.get_sequence_representation(outputs)
+            outputs = self.get_sequence_representation_from_hidden(outputs)
 
         return outputs
 
@@ -288,7 +288,7 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
         return hidden
 
-    def get_sequence_representation(
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """

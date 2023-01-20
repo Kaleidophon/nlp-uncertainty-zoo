@@ -100,17 +100,17 @@ class TransformerModule(Module):
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
     def forward(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
-        hidden = self.get_hidden(input_)
+        hidden = self.get_hidden_representations(input_)
         out = self.output_dropout(hidden)
 
         if self.is_sequence_classifier:
-            out = self.get_sequence_representation(out)
+            out = self.get_sequence_representation_from_hidden(out)
 
         out = self.output(out)
 
         return out
 
-    def get_hidden(
+    def get_hidden_representations(
         self, input_: torch.LongTensor, *args, **kwargs
     ) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
@@ -142,7 +142,7 @@ class TransformerModule(Module):
         """
         return self.forward(input_)
 
-    def get_sequence_representation(
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
@@ -164,6 +164,13 @@ class TransformerModule(Module):
         hidden = torch.tanh(hidden)
 
         return hidden
+
+    def get_sequence_representation(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        hidden = self.get_hidden_representations(input_, *args, **kwargs)
+
+        return self.get_sequence_representation_from_hidden(hidden)
 
 
 class Transformer(Model):

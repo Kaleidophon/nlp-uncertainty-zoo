@@ -378,12 +378,12 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         self.layer_norm = nn.LayerNorm([hidden_size])
 
     def forward(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
-        out = self.get_hidden(input_)
+        out = self.get_hidden_representations(input_)
         out = self.sngp_layer(out)
 
         return out
 
-    def get_hidden(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
+    def get_hidden_representations(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
         embeddings = self.pos_embeddings(word_embeddings)
         embeddings = self.input_dropout(embeddings)
@@ -392,7 +392,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         out = self.projection(out)
 
         if self.is_sequence_classifier:
-            out = self.get_sequence_representation(out)
+            out = self.get_sequence_representation_from_hidden(out)
 
         out = self.output_dropout(out)
         out = self.layer_norm(out)
@@ -426,7 +426,7 @@ class SNGPTransformerModule(SpectralTransformerModule, MultiPredictionMixin):
         if not num_predictions:
             num_predictions = self.num_predictions
 
-        out = self.get_hidden(input_)
+        out = self.get_hidden_representations(input_)
         out = self.sngp_layer.get_logits(out, num_predictions=num_predictions)
 
         return out
@@ -680,7 +680,7 @@ class SNGPBertModule(SpectralBertModule, MultiPredictionMixin):
         if not num_predictions:
             num_predictions = self.num_predictions
 
-        out = self.get_hidden(input_, **kwargs)
+        out = self.get_hidden_representations(input_, **kwargs)
         out = self.sngp_layer.get_logits(out, num_predictions=num_predictions)
 
         return out

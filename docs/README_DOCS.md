@@ -50,7 +50,7 @@ model = LSTMEnsemble(**network_params, ensemble_size=10, is_sequence_classifer=F
 model.fit(train_split=train_dataloader)
 model.get_logits(X)
 model.get_predictions(X)
-model.get_sequence_representation(X)
+model.get_sequence_representation_from_hidden(X)
 model.get_uncertainty(X)
 model.get_uncertainty(X, metric_name="mutual_information")
 ```

@@ -141,7 +141,7 @@ class BertModule(Module):
 
         return probabilities
 
-    def get_sequence_representation(
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
@@ -164,7 +164,7 @@ class BertModule(Module):
 
         return hidden
 
-    def get_hidden(
+    def get_hidden_representations(
         self, input_: torch.LongTensor, *args, **kwargs
     ) -> torch.FloatTensor:
         attention_mask = kwargs["attention_mask"]

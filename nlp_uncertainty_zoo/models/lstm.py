@@ -103,11 +103,21 @@ class LSTMModule(Module):
         """
         batch_size, sequence_length = input_.shape
 
+        hidden_batch_size = 0 if hidden_states is None else hidden_states[0].shape[1]
+        last_hidden_batch_size = 0 if self.last_hidden_states is None else self.last_hidden_states[0].shape[1]
+
         # Initialize hidden activations if not given
         if hidden_states is None and self.last_hidden_states is None:
             hidden_states, cell_states = self.init_hidden_states(
                 batch_size, self.device
             )
+
+        # Initialize new hidden activation if batch size has changed
+        elif hidden_batch_size != batch_size or last_hidden_batch_size != batch_size:
+            hidden_states, cell_states = self.init_hidden_states(
+                batch_size, self.device
+            )
+
         # Detach hidden activations to limit gradient computations
         else:
             hidden_states, cell_states = (
@@ -121,7 +131,7 @@ class LSTMModule(Module):
 
         # Only use last hidden state for prediction
         if self.is_sequence_classifier:
-            out = self.get_sequence_representation(out)
+            out = self.get_sequence_representation_from_hidden(out)
 
         out = self.dropout(out)
         out = self.output(out)
@@ -130,7 +140,7 @@ class LSTMModule(Module):
 
         return out
 
-    def get_sequence_representation(
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
@@ -149,6 +159,42 @@ class LSTMModule(Module):
             Representation for the current sequence.
         """
         return hidden[:, -1, :].unsqueeze(1)
+
+    def get_hidden_representations(
+        self, input_: torch.LongTensor, hidden_states: Optional[HiddenDict] = None, *args, **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Obtain hidden representations for the current input.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Inputs ids for a sentence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        batch_size, sequence_length = input_.shape
+
+        # Initialize hidden activations if not given
+        if hidden_states is None and self.last_hidden_states is None:
+            hidden_states, cell_states = self.init_hidden_states(
+                batch_size, self.device
+            )
+        # Detach hidden activations to limit gradient computations
+        else:
+            hidden_states, cell_states = (
+                self.last_hidden_states if hidden_states is None else hidden_states
+            )
+
+        embeddings = self.embeddings(input_)
+        out, _ = self.lstm(
+            embeddings, (hidden_states, cell_states)
+        )
+
+        return out
 
     def get_logits(
         self, input_: torch.LongTensor, *args, **kwargs

@@ -220,12 +220,25 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             )
         )
 
-        # Test get_sequence_representation()
-        hidden, target_size = self._generate_hidden_and_target(
+        generated_hidden, target_size = self._generate_hidden_and_target(
             model, BATCH_SIZE, SEQUENCE_LENGTH
         )
-        seq_repr = model.module.get_sequence_representation(hidden)
+
+        # Test get_hidden()
+        hidden = model.module.get_hidden_representations(
+            mock_input["input_ids"], attention_mask=mock_input["attention_mask"]
+        )
+        self.assertTrue(hidden.shape == generated_hidden.shape)
+
+        # Test get_sequence_representation_from_hidden()
+        seq_repr = model.module.get_sequence_representation_from_hidden(generated_hidden)
         self.assertTrue(seq_repr.shape == target_size)
+
+        # Test get_sequence_representation()
+        input_seq_repr = model.module.get_hidden_representations(
+            mock_input["input_ids"], attention_mask=mock_input["attention_mask"]
+        )
+        self.assertTrue(input_seq_repr.shape == seq_repr.shape)
 
     def _test_uncertainty_metrics(self, model: Model):
         """

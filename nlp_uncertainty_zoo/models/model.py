@@ -8,15 +8,17 @@ Define common methods of models. This done by separating the logic into two part
 
 # STD
 from abc import ABC, abstractmethod
-from collections import Counter
 from datetime import datetime
 import dill
 from typing import Dict, Optional, Generator, Callable, Type, Any
+from operator import add
 import os
 
 # EX
 from einops import rearrange
 import numpy as np
+from functools import reduce
+from sklearn.utils import class_weight
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -148,7 +150,26 @@ class Module(ABC, nn.Module):
         return probabilities
 
     @abstractmethod
-    def get_sequence_representation(
+    def get_hidden_representations(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Obtain hidden representations for the current input.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Inputs ids for a sentence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        pass
+
+    @abstractmethod
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
@@ -167,6 +188,27 @@ class Module(ABC, nn.Module):
             Representation for the current sequence.
         """
         pass
+
+    def get_sequence_representation(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Define how the representation for an entire sequence is extracted from the input ids. This is
+        relevant in sequence classification. For example, this could be the last hidden state for a unidirectional LSTM
+        or the first hidden state for a transformer, adding a pooler layer.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Inputs ids for a sentence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        hidden = self.get_hidden(input_, *args, **kwargs)
+        return self.get_sequence_representation_from_hidden(hidden)
 
     def get_uncertainty(
         self,
@@ -373,23 +415,24 @@ class Model(ABC):
 
         # Compute loss weights
         if weight_loss:
-            counter = Counter()
+            all_labels = []
 
             for batch in train_split:
                 labels = batch["labels"]
+                all_labels += labels.tolist()
 
-                # Flatten label lists with sum(), then filter ignore label
-                counter.update(filter(lambda label: label != -100, sum(labels.tolist(), [])))
+            all_labels = reduce(add, all_labels, [])
+            all_labels = list(filter(lambda label: label != -100, all_labels))
 
-            self.loss_weights = torch.zeros(self.module.output_size, device=self.device)
+            # Make sure all labels are included even if they do not occur in the training se
+            expected_labels = set(range(self.module.output_size))
+            observed_labels = set(np.unique(all_labels))
+            all_labels.extend(list(expected_labels - observed_labels))  # Add extra dummy labels here
 
-            for key, freq in counter.items():
-                self.loss_weights[key] = freq
-
-            del counter
-
-            self.loss_weights /= torch.sum(self.loss_weights)
-            self.loss_weights = 1 - self.loss_weights
+            class_weights = class_weight.compute_class_weight(
+                class_weight='balanced', classes=list(expected_labels), y=all_labels
+            )
+            self.loss_weights = torch.FloatTensor(class_weights, device=self.device)
 
         def batch_generator(train_split: DataLoader) -> Generator[Dict[str, torch.Tensor], None, None]:
             """
@@ -661,6 +704,13 @@ class Model(ABC):
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         pass
+
+    @property
+    def available_uncertainty_metrics(self) -> Dict[str, Callable]:
+        """
+        Return a dictionary of all available uncertainty metrics of the current model.
+        """
+        return self.module.available_uncertainty_metrics
 
     def to(self, device: Device):
         """
