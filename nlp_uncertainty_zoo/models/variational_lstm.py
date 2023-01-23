@@ -253,6 +253,81 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
         return preds
 
+    def get_hidden_representation(
+            self, input_: torch.LongTensor, hidden_states: Optional[HiddenDict] = None, *args, **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Obtain hidden representations for the current input.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Inputs ids for a sentence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        batch_size, sequence_length = input_.shape
+
+        hidden_batch_size = 0 if hidden_states is None else hidden_states[0].shape[1]
+        last_hidden_batch_size = 0 if self.last_hidden_states is None else self.last_hidden_states[0][0].shape[1]
+
+        # Initialize hidden activations if not given
+        if hidden_states is None and self.last_hidden_states is None:
+            hidden_states = self.init_hidden_states(
+                batch_size, self.device
+            )
+
+        # Initialize new hidden activation if batch size has changed
+        elif hidden_batch_size != batch_size or last_hidden_batch_size != batch_size:
+            hidden_states = self.init_hidden_states(
+                batch_size, self.device
+            )
+
+        # Detach hidden activations to limit gradient computations
+        else:
+            hidden_states = (
+                self.last_hidden_states if hidden_states is None else hidden_states
+            )
+
+        # Sample dropout masks used throughout this batch
+        self.sample_masks(batch_size)
+
+        all_hidden_states = []
+
+        for t in range(sequence_length):
+
+            embeddings = self.embeddings(input_[:, t])
+            layer_input = self.dropout_modules["embedding"][0](embeddings)
+            # layer_input = self.dropout_modules["embedding"](embeddings, input_[:, t])
+
+            for layer, cell in enumerate(self.lstm_layers):
+                hx, cx = cell(
+                    layer_input,  # Hidden state of last layer
+                    (
+                        self.dropout_modules["time"][layer](hidden_states[layer][0]),
+                        hidden_states[layer][1],
+                    ),  # Hidden and cell state state of last time step
+                )
+                layer_input = self.dropout_modules["layer"][layer](
+                    hx
+                )  # This becomes the input to the next layer
+                hidden_states[layer] = (
+                    hx,
+                    cx,
+                )  # This becomes the input for the next time step
+
+            all_hidden_states.append(hx)
+
+        all_hidden_states = torch.stack(all_hidden_states, dim=1)
+
+        if self.is_sequence_classifier:
+            all_hidden_states = all_hidden_states[:, -1, :].unsqueeze(dim=1)
+
+        return all_hidden_states
+
     def _assign_last_hidden_states(self, hidden: HiddenDict):
         """
         Assign hidden states at the end of a batch to an internal variable, detaching them from the computational graph.

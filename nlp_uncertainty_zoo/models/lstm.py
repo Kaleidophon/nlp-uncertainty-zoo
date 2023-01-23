@@ -160,7 +160,7 @@ class LSTMModule(Module):
         """
         return hidden[:, -1, :].unsqueeze(1)
 
-    def get_hidden_representations(
+    def get_hidden_representation(
         self, input_: torch.LongTensor, hidden_states: Optional[HiddenDict] = None, *args, **kwargs
     ) -> torch.FloatTensor:
         """
@@ -193,6 +193,9 @@ class LSTMModule(Module):
         out, _ = self.lstm(
             embeddings, (hidden_states, cell_states)
         )
+
+        if self.is_sequence_classifier:
+            out = out[:, -1, :].unsqueeze(dim=1)
 
         return out
 

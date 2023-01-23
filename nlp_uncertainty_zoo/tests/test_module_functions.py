@@ -225,7 +225,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
         )
 
         # Test get_hidden()
-        hidden = model.module.get_hidden_representations(
+        hidden = model.module.get_hidden_representation(
             mock_input["input_ids"], attention_mask=mock_input["attention_mask"]
         )
         self.assertTrue(hidden.shape == generated_hidden.shape)
@@ -235,7 +235,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
         self.assertTrue(seq_repr.shape == target_size)
 
         # Test get_sequence_representation()
-        input_seq_repr = model.module.get_hidden_representations(
+        input_seq_repr = model.module.get_sequence_representation(
             mock_input["input_ids"], attention_mask=mock_input["attention_mask"]
         )
         self.assertTrue(input_seq_repr.shape == seq_repr.shape)
@@ -290,13 +290,11 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
 
     @staticmethod
     def _generate_hidden_and_target(model: Model, batch_size: int, sequence_length):
-        repr_size = (
-            model.module.hidden_size
-            if not isinstance(model.module, TransformerModule)
-            else model.module.input_size
-        )
-        return torch.randn((batch_size, sequence_length, repr_size)), torch.Size(
-            (batch_size, 1, repr_size)
+        if model.module.is_sequence_classifier:
+            sequence_length = 1
+
+        return torch.randn((batch_size, sequence_length, model.module.hidden_size)), torch.Size(
+            (batch_size, 1, model.module.hidden_size)
         )
 
 

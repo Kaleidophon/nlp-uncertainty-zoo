@@ -164,7 +164,7 @@ class BertModule(Module):
 
         return hidden
 
-    def get_hidden_representations(
+    def get_hidden_representation(
         self, input_: torch.LongTensor, *args, **kwargs
     ) -> torch.FloatTensor:
         attention_mask = kwargs["attention_mask"]

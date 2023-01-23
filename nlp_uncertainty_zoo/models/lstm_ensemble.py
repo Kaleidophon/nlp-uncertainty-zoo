@@ -141,14 +141,16 @@ class LSTMEnsembleModule(Module, MultiPredictionMixin):
         for member in self.ensemble_members:
             member.to(device)
 
-    def get_hidden_representations(
+    def get_hidden_representation(
         self, input_: torch.LongTensor, *args, **kwargs
     ) -> torch.FloatTensor:
+        members = list(self.ensemble_members._modules.values())
+
         hidden = torch.stack([
-            member.get_hidden_representations(input_, *args, **kwargs) for member in self.ensemble_members.__modules
+            member.get_hidden_representation(input_, *args, **kwargs) for member in members
         ], dim=0).mean(dim=0)
 
-        return self.get_sequence_representation_from_hidden(hidden)
+        return hidden
 
     @staticmethod
     def get_sequence_representation_from_hidden(hidden: torch.FloatTensor) -> torch.FloatTensor:

@@ -150,7 +150,7 @@ class Module(ABC, nn.Module):
         return probabilities
 
     @abstractmethod
-    def get_hidden_representations(
+    def get_hidden_representation(
         self, input_: torch.LongTensor, *args, **kwargs
     ) -> torch.FloatTensor:
         """
@@ -207,7 +207,7 @@ class Module(ABC, nn.Module):
         torch.FloatTensor
             Representation for the current sequence.
         """
-        hidden = self.get_hidden(input_, *args, **kwargs)
+        hidden = self.get_hidden_representation(input_, *args, **kwargs)
         return self.get_sequence_representation_from_hidden(hidden)
 
     def get_uncertainty(
