@@ -8,17 +8,15 @@ Define common methods of models. This done by separating the logic into two part
 
 # STD
 from abc import ABC, abstractmethod
+from collections import Counter
 from datetime import datetime
 import dill
 from typing import Dict, Optional, Generator, Callable, Type, Any
-from operator import add
 import os
 
 # EX
 from einops import rearrange
 import numpy as np
-from functools import reduce
-from sklearn.utils import class_weight
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -415,24 +413,23 @@ class Model(ABC):
 
         # Compute loss weights
         if weight_loss:
-            all_labels = []
+            counter = Counter()
 
             for batch in train_split:
                 labels = batch["labels"]
-                all_labels += labels.tolist()
 
-            all_labels = reduce(add, all_labels, [])
-            all_labels = list(filter(lambda label: label != -100, all_labels))
+                # Flatten label lists with sum(), then filter ignore label
+                counter.update(filter(lambda label: label != -100, sum(labels.tolist(), [])))
 
-            # Make sure all labels are included even if they do not occur in the training se
-            expected_labels = set(range(self.module.output_size))
-            observed_labels = set(np.unique(all_labels))
-            all_labels.extend(list(expected_labels - observed_labels))  # Add extra dummy labels here
+            self.loss_weights = torch.zeros(self.module.output_size, device=self.device)
 
-            class_weights = class_weight.compute_class_weight(
-                class_weight='balanced', classes=list(expected_labels), y=all_labels
-            )
-            self.loss_weights = torch.FloatTensor(class_weights, device=self.device)
+            for key, freq in counter.items():
+                self.loss_weights[key] = freq
+
+            del counter
+
+            self.loss_weights /= torch.sum(self.loss_weights)
+            self.loss_weights = 1 - self.loss_weights
 
         def batch_generator(train_split: DataLoader) -> Generator[Dict[str, torch.Tensor], None, None]:
             """
