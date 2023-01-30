@@ -412,24 +412,8 @@ class Model(ABC):
         best_model = dict(self.__dict__)
 
         # Compute loss weights
-        if weight_loss:
-            counter = Counter()
-
-            for batch in train_split:
-                labels = batch["labels"]
-
-                # Flatten label lists with sum(), then filter ignore label
-                counter.update(filter(lambda label: label != -100, sum(labels.tolist(), [])))
-
-            self.loss_weights = torch.zeros(self.module.output_size, device=self.device)
-
-            for key, freq in counter.items():
-                self.loss_weights[key] = freq
-
-            del counter
-
-            self.loss_weights /= torch.sum(self.loss_weights)
-            self.loss_weights = 1 - self.loss_weights
+        if weight_loss and self.loss_weights is not None:
+            self.loss_weights = self.compute_loss_weights(train_split)
 
         def batch_generator(train_split: DataLoader) -> Generator[Dict[str, torch.Tensor], None, None]:
             """
@@ -701,6 +685,39 @@ class Model(ABC):
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         pass
+
+    def compute_loss_weights(self, train_split: DataLoader, *args, **kwargs) -> torch.FloatTensor:
+        """
+        Compute loss weights for unbalanced training sets.
+
+        Parameters
+        ----------
+        train_split: DataLoader
+
+        Returns
+        -------
+        torch.FloatTensor
+            Tensor containing loss weights (should be of size K).
+        """
+        counter = Counter()
+
+        for batch in train_split:
+            labels = batch["labels"]
+
+            # Flatten label lists with sum(), then filter ignore label
+            counter.update(filter(lambda label: label != -100, sum(labels.tolist(), [])))
+
+        loss_weights = torch.zeros(self.module.output_size, device=self.device)
+
+        for key, freq in counter.items():
+            loss_weights[key] = freq
+
+        del counter
+
+        loss_weights /= torch.sum(loss_weights)
+        loss_weights = 1 - loss_weights
+
+        return loss_weights
 
     @property
     def available_uncertainty_metrics(self) -> Dict[str, Callable]:
