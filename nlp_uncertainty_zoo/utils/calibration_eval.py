@@ -1,8 +1,21 @@
 """
 Module to implement different metrics the quality of the model's calibration.
 """
+
+# STD
+from collections import defaultdict
+from typing import Dict, Any, Tuple, Callable
+
+# EXT
+from einops import rearrange
+from frozendict import frozendict
 import numpy as np
 import pandas as pd
+import torch
+from torch.utils.data import DataLoader
+
+# PROJECT
+from nlp_uncertainty_zoo.models.model import Model
 
 
 def ece(y_true: np.array, y_pred: np.array, n_bins: int = 10) -> float:
@@ -206,7 +219,7 @@ def coverage_percentage(y_true: np.array, y_pred: np.array, alpha: float = 0.05)
     return coverage_percentage
 
 
-def coverage_width(y_pred: np.array, alpha: float = 0.05, eps: float = 1e-8):
+def coverage_width(y_pred: np.array, alpha: float = 0.05, eps: float = 1e-8, **kwargs):
     """
     Return the width of the 1 - alpha prediction set. Based on the work by [3].
 
@@ -243,3 +256,97 @@ def coverage_width(y_pred: np.array, alpha: float = 0.05, eps: float = 1e-8):
     average_width = np.mean(widths)
 
     return average_width
+
+
+def evaluate_calibration(
+    model: Model,
+    eval_split: DataLoader,
+    eval_funcs: Dict[str, Callable] = frozendict({
+        "ece": ece,
+        "sce": sce,
+        "ace": ace,
+        "coverage_percentage": coverage_percentage,
+        "coverage_width": coverage_width
+    }),
+    ignore_token_ids: Tuple[int] = (-100, ),
+) -> Dict[str, Any]:
+    """
+    Evaluate the calibration properties of a model.
+
+    Parameters
+    ----------
+    model: Model
+        Model to be evaluated.
+    eval_split: DataLoader
+        Evaluation split.
+    eval_funcs: Dict[str, Callable]
+        Evaluation functions used to assess calibration properties.
+    ignore_token_ids: Tuple[int]
+        IDs of tokens that should be ignored by the model during evaluation.
+
+    Returns
+    -------
+    Dict[str, Any]
+        Results as a dictionary from uncertainty metric / split / eval metric to result.
+    """
+    # Initialize data structure that track stats
+    scores = defaultdict(float)  # Final scores
+    sentence_i = 0
+
+    # Get scores for eval split
+    split_predictions = []  # Collect all predictions on this split
+    split_labels = []  # Collect all labels on this split
+
+    for batch in eval_split:
+        attention_mask, input_ids, labels = (
+            batch["attention_mask"].to(model.device),
+            batch["input_ids"].to(model.device),
+            batch["labels"].to(model.device),
+        )
+
+        # Determine if sequence labelling / token prediction or sequence predction
+        if len(labels.shape) == 2:
+            batch_size, seq_len = labels.shape
+        else:
+            batch_size, seq_len = labels.shape[0], 1
+
+        # Get predictions
+        with torch.no_grad():
+            predictions = model.predict(input_ids, attention_mask=attention_mask)
+
+        # Reshape for easier processing
+        predictions = rearrange(predictions, "b t p -> (b t) p")
+
+        # Filter irrelevant tokens for language modelling / sequence labelling / token predictions
+        batch_mask = rearrange(
+            torch.all(
+                torch.stack([input_ids != idx for idx in ignore_token_ids]), dim=0
+            ),
+            "b s -> (b s)",
+        ).to(model.device)
+
+        # If the task is not sequence classification, we also compute the (mean) sequence loss
+        if not model.module.is_sequence_classifier:
+            labels = rearrange(labels, "b l -> (b l)")
+            predictions = predictions[batch_mask]
+            labels = labels[batch_mask]
+
+        split_predictions.append(predictions.detach().cpu().numpy())
+        split_labels.append(labels.detach().cpu().numpy())
+
+        sentence_i += batch_size
+
+    # Simply all data structures
+    split_predictions = np.concatenate(split_predictions, axis=0)
+    split_labels = np.concatenate(split_labels, axis=0)
+
+    # Mask out predictions for -100
+    label_mask = split_labels != -100
+    split_labels = split_labels[label_mask]
+    split_predictions = split_predictions[label_mask]
+
+    # Compute calibration scores
+    for name, eval_func in eval_funcs.items():
+        scores[name] = eval_func(y_true=split_labels, y_pred=split_predictions)
+
+    return scores
