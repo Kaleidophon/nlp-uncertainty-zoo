@@ -4,7 +4,7 @@ Implementation of evaluation logic.
 
 # STD
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Tuple
 
 # EXT
 import numpy as np
@@ -13,13 +13,12 @@ from sklearn.metrics import accuracy_score, f1_score
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import PreTrainedTokenizerBase
 
 
-def evaluate(
+def evaluate_task(
     model,
     eval_split: DataLoader,
-    tokenizer: PreTrainedTokenizerBase,
+    ignore_token_ids: Tuple[int] = (-100,),
     verbose: bool = True,
 ) -> Dict[str, float]:
     """
@@ -31,8 +30,8 @@ def evaluate(
         Model to be evaluated.
     eval_split: DataSplit
         Data split the model is being evaluated on.
-    tokenizer: PreTrainedTokenizerBase
-        Tokenizer of the evaluated model.
+    ignore_token_ids: Tuple[int]
+        IDs of tokens that should be ignored by the model during evaluation.
     verbose: bool
         Whether to display information about the current progress.
 
@@ -69,10 +68,9 @@ def evaluate(
             labels = rearrange(labels, "b l -> (b l)")
 
         # Filter irrelevant tokens for language modelling / sequence labelling / token predictions
-        ignore_indices = tokenizer.all_special_ids + [-100]
         batch_mask = rearrange(
             torch.all(
-                torch.stack([input_ids != idx for idx in ignore_indices]), dim=0
+                torch.stack([input_ids != idx for idx in ignore_token_ids]), dim=0
             ),
             "b s -> (b s)",
         )
