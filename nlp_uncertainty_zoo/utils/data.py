@@ -17,7 +17,8 @@ from transformers import (
     PreTrainedTokenizerBase,
     DataCollatorForLanguageModeling,
 )
-from transformers.data.data_collator import BatchEncoding, _collate_batch
+from transformers.data.data_collator import _collate_batch
+from transformers.tokenization_utils_base import BatchEncoding
 
 # TYPES
 # Either one set of keyword arguments per split or dictionary mapping split to split-specific keyword args
