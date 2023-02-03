@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model
@@ -269,6 +270,7 @@ def evaluate_calibration(
         "coverage_width": coverage_width
     }),
     ignore_token_ids: Tuple[int] = (-100, ),
+    verbose: bool = True,
 ) -> Dict[str, Any]:
     """
     Evaluate the calibration properties of a model.
@@ -283,6 +285,8 @@ def evaluate_calibration(
         Evaluation functions used to assess calibration properties.
     ignore_token_ids: Tuple[int]
         IDs of tokens that should be ignored by the model during evaluation.
+    verbose: bool
+        Whether to display information about the current progress.
 
     Returns
     -------
@@ -293,11 +297,14 @@ def evaluate_calibration(
     scores = defaultdict(float)  # Final scores
     sentence_i = 0
 
+    num_batches = len(eval_split)
+    progress_bar = tqdm(total=num_batches if verbose else None)
+
     # Get scores for eval split
     split_predictions = []  # Collect all predictions on this split
     split_labels = []  # Collect all labels on this split
 
-    for batch in eval_split:
+    for i, batch in enumerate(eval_split):
         attention_mask, input_ids, labels = (
             batch["attention_mask"].to(model.device),
             batch["input_ids"].to(model.device),
@@ -335,6 +342,11 @@ def evaluate_calibration(
         split_labels.append(labels.detach().cpu().numpy())
 
         sentence_i += batch_size
+
+        if verbose:
+            progress_bar.set_description(f"Evaluating batch {i+1}/{num_batches}...")
+            progress_bar.update(1)
+
 
     # Simply all data structures
     split_predictions = np.concatenate(split_predictions, axis=0)

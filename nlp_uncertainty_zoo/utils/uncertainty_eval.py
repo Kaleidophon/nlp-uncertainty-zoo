@@ -15,6 +15,7 @@ from scipy.stats import kendalltau
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model
@@ -88,6 +89,7 @@ def evaluate_uncertainty(
     eval_funcs: Dict[str, Callable] = frozendict({"kendalls_tau": kendalltau}),
     contrastive_eval_funcs: Tuple[Callable] = frozendict({"aupr": aupr, "auroc": auroc}),
     ignore_token_ids: Tuple[int] = (-100, ),
+    verbose: bool = True,
 ) -> Dict[str, Any]:
     """
     Evaluate the uncertainty properties of a model. Evaluation happens in two ways:
@@ -112,12 +114,21 @@ def evaluate_uncertainty(
         Evaluation functions that evaluate uncertainty by comparing uncertainties on an ID and OOD test set.
     ignore_token_ids: Tuple[int]
         IDs of tokens that should be ignored by the model during evaluation.
+    verbose: bool
+        Whether to display information about the current progress.
 
     Returns
     -------
     Dict[str, Any]
         Results as a dictionary from uncertainty metric / split / eval metric to result.
     """
+    num_batches = len(id_eval_split)
+
+    if ood_eval_split is not None:
+        num_batches += len(ood_eval_split)
+
+    progress_bar = tqdm(total=num_batches if verbose else None)
+
     model_uncertainty_metrics = list(model.available_uncertainty_metrics)
     loss_func = nn.CrossEntropyLoss(reduction="none", ignore_index=-100)
 
@@ -140,7 +151,7 @@ def evaluate_uncertainty(
     # Get scores for both test splits
     for (
             split_name,
-            id_eval_split,
+            eval_split,
             uncertainties,
             seq_uncertainties
     ) in [
@@ -161,7 +172,7 @@ def evaluate_uncertainty(
         split_losses = []  # Collect all (token) losses on this split
         split_seq_losses = []  # Collect all sequence losses on this split
 
-        for batch in id_eval_split:
+        for i, batch in enumerate(eval_split):
             attention_mask, input_ids, labels = (
                 batch["attention_mask"].to(model.device),
                 batch["input_ids"].to(model.device),
@@ -260,6 +271,10 @@ def evaluate_uncertainty(
                     )
 
             sentence_i += batch_size
+
+            if verbose:
+                progress_bar.set_description(f"Evaluating batch {i + 1}/{num_batches}...")
+                progress_bar.update(1)
 
         # Simply all data structures
         split_losses = np.concatenate(split_losses, axis=0)
