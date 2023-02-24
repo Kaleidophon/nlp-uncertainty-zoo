@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>🤖 💬 ❓ nlp-uncertainty-zoo &#8212; nlp-uncertainty-zoo 0.9.1 documentation</title>
+    <title>🤖 💬 ❓ nlp-uncertainty-zoo &#8212; nlp-uncertainty-zoo 0.9.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -36,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="#">
           nlp-uncertainty-zoo</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.9.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#data-module-documentation">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">Samplers</a></li>
@@ -630,7 +630,28 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#data-module-documentation">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder"><code class="docutils literal notranslate"><span class="pre">ClassificationDatasetBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">ClassificationDatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="docutils literal notranslate"><span class="pre">DatasetBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.DatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">DatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder"><code class="docutils literal notranslate"><span class="pre">LanguageModellingDatasetBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">LanguageModellingDatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.mlm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm_probability"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.mlm_probability</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.tokenizer"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.tokenizer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#nlp_uncertainty_zoo.utils.metrics.dempster_shafer"><code class="docutils literal notranslate"><span class="pre">dempster_shafer()</span></code></a></li>
