@@ -17,7 +17,8 @@ from transformers import (
     PreTrainedTokenizerBase,
     DataCollatorForLanguageModeling,
 )
-from transformers.data.data_collator import BatchEncoding, _collate_batch
+from transformers.data.data_collator import _torch_collate_batch
+from transformers.tokenization_utils_base import BatchEncoding
 
 # TYPES
 # Either one set of keyword arguments per split or dictionary mapping split to split-specific keyword args
@@ -48,7 +49,7 @@ class ModifiedDataCollatorForLanguageModeling(DataCollatorForLanguageModeling):
             )
         else:
             batch = {
-                "input_ids": _collate_batch(
+                "input_ids": _torch_collate_batch(
                     examples, self.tokenizer, pad_to_multiple_of=self.pad_to_multiple_of
                 )
             }
