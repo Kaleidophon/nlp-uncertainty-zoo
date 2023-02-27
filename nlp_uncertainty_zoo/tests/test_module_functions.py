@@ -22,7 +22,6 @@ from torch.utils.data import DataLoader
 # PROJECT
 from nlp_uncertainty_zoo.config import AVAILABLE_MODELS, DEFAULT_PARAMS
 from nlp_uncertainty_zoo.models.model import Model, MultiPredictionMixin
-from nlp_uncertainty_zoo.models import TransformerModule
 
 # CONST
 TAKE_LANGUAGE_MODELING_HYPERPARAMS_FROM = "language_modelling"

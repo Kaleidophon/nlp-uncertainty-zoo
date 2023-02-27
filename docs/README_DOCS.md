@@ -7,18 +7,23 @@ implemented in PyTorch. You can install the repository using pip:
 
 If you are using the repository in your academic research, please cite the paper below:
 
-    @article{ulmer2022exploring,
-      title={Exploring Predictive Uncertainty and Calibration in NLP: A Study on the Impact of Method \& Data Scarcity},
-      author={Ulmer, Dennis and Frellsen, Jes and Hardmeier, Christian},
-      journal={arXiv preprint arXiv:2210.15452},
-      year={2022}
-    }
+    @inproceedings{ulmer-etal-2022-exploring,
+      title = "Exploring Predictive Uncertainty and Calibration in {NLP}: A Study on the Impact of Method {\&} Data Scarcity",
+      author = "Ulmer, Dennis  and
+        Frellsen, Jes  and
+        Hardmeier, Christian",
+      booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2022",
+      month = dec,
+      year = "2022",
+      address = "Abu Dhabi, United Arab Emirates",
+      publisher = "Association for Computational Linguistics",
+      url = "https://aclanthology.org/2022.findings-emnlp.198",
+      pages = "2707--2735",
+  }
 
-
-Certain parts of this repository are still incomplete, but will come soon (I promise!):
-
-- [x] Build proper documentation
-- [ ] Add demo jupyter notebook
+To learn more about the package, consult the documentation [here](http://dennisulmer.eu/nlp-uncertainty-zoo/),
+check a Jupyter notebook demo [here](https://github.com/Kaleidophon/nlp-uncertainty-zoo/blob/main/demo.ipynb) or a Google 
+collab [here](https://colab.research.google.com/drive/1-Pl5lvcnpbGL2ZXLGDDNqvJB7Ew8uIsS?usp=sharing).
 
 ### Included models
 
