@@ -55,7 +55,8 @@ model = LSTMEnsemble(**network_params, ensemble_size=10, is_sequence_classifer=F
 model.fit(train_split=train_dataloader)
 model.get_logits(X)
 model.get_predictions(X)
-model.get_sequence_representation_from_hidden(X)
+model.get_sequence_representation(X)
+model.available_uncertainty_metrics
 model.get_uncertainty(X)
 model.get_uncertainty(X, metric_name="mutual_information")
 ```
@@ -67,7 +68,8 @@ sticks closely to `torch.nn.Module`.
 
 To check what arguments are required to initialize and use different models, check [the documentation here](http://nlpuncertaintyzoo.dennisulmer.eu/).
 
-Also, check out the demo provided here (@TODO: Create quick demo)
+Also, check out the demo provided as a Jupyter notebook [here](https://github.com/Kaleidophon/nlp-uncertainty-zoo/blob/main/demo.ipynb) or a Google 
+collab [here](https://colab.research.google.com/drive/1-Pl5lvcnpbGL2ZXLGDDNqvJB7Ew8uIsS?usp=sharing).
 
 ### Repository structure
 

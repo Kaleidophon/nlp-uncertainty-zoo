@@ -210,7 +210,8 @@ the model, prediction, getting the uncertainty for an input batch using a specif
 <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_split</span><span class="o">=</span><span class="n">train_dataloader</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_logits</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">get_sequence_representation_from_hidden</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_sequence_representation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">available_uncertainty_metrics</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">metric_name</span><span class="o">=</span><span class="s2">&quot;mutual_information&quot;</span><span class="p">)</span>
 </pre></div>
@@ -220,7 +221,8 @@ It is intended for research purposes, and for others who would like to embed the
 the model class (e.g. <code class="docutils literal notranslate"><span class="pre">LSTMEnsemble</span></code>) inherits from <code class="docutils literal notranslate"><span class="pre">Model</span></code> and would require to implement certain methods, any <code class="docutils literal notranslate"><span class="pre">Module</span></code> class
 sticks closely to <code class="docutils literal notranslate"><span class="pre">torch.nn.Module</span></code>.</p>
 <p>To check what arguments are required to initialize and use different models, check <a class="reference external" href="http://nlpuncertaintyzoo.dennisulmer.eu/">the documentation here</a>.</p>
-<p>Also, check out the demo provided here (&#64;TODO: Create quick demo)</p>
+<p>Also, check out the demo provided as a Jupyter notebook <a class="reference external" href="https://github.com/Kaleidophon/nlp-uncertainty-zoo/blob/main/demo.ipynb">here</a> or a Google
+collab <a class="reference external" href="https://colab.research.google.com/drive/1-Pl5lvcnpbGL2ZXLGDDNqvJB7Ew8uIsS?usp=sharing">here</a>.</p>
 </section>
 <section id="repository-structure">
 <h2>Repository structure<a class="headerlink" href="#repository-structure" title="Permalink to this heading">¶</a></h2>
@@ -236,6 +238,7 @@ sticks closely to <code class="docutils literal notranslate"><span class="pre">t
 <li><p><code class="docutils literal notranslate"><span class="pre">utils/samplers.py</span></code>: Dataset subsamplers for language modelling, sequence labelling and sequence classification.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">utils/task_eval.py</span></code>: Functions used to evaluate task performance.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">utils/uncertainty_eval.py</span></code>: Function used to evaluate uncertainty quality.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils/calibration_eval.py</span></code>: Function used to evaluate calibration quality.</p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">config.py</span></code>: Define available datasets, model and tasks.</p></li>
