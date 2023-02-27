@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; nlp-uncertainty-zoo 0.9.1 documentation</title>
+    <title>Index &#8212; nlp-uncertainty-zoo 1.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           nlp-uncertainty-zoo</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.0.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -88,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#data-module-documentation">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">Samplers</a></li>
@@ -171,16 +171,22 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.ace">ace() (in module nlp_uncertainty_zoo.utils.uncertainty_eval)</a>
+      <li><a href="nlp_uncertainty_zoo.utils.calibration_eval.html#nlp_uncertainty_zoo.utils.calibration_eval.ace">ace() (in module nlp_uncertainty_zoo.utils.calibration_eval)</a>
 </li>
       <li><a href="nlp_uncertainty_zoo.models.spectral.html#nlp_uncertainty_zoo.models.spectral.SpectralNormFC.apply">apply() (nlp_uncertainty_zoo.models.spectral.SpectralNormFC static method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.aupr">aupr() (in module nlp_uncertainty_zoo.utils.uncertainty_eval)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.auroc">auroc() (in module nlp_uncertainty_zoo.utils.uncertainty_eval)</a>
 </li>
+      <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model.available_uncertainty_metrics">available_uncertainty_metrics (nlp_uncertainty_zoo.models.model.Model property)</a>
+
+      <ul>
+        <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.available_uncertainty_metrics">(nlp_uncertainty_zoo.models.model.Module property)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -191,12 +197,22 @@
 </li>
       <li><a href="nlp_uncertainty_zoo.models.bayesian_lstm.html#nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule">BayesianLSTMModule (class in nlp_uncertainty_zoo.models.bayesian_lstm)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModel">BertModel (class in nlp_uncertainty_zoo.models.bert)</a>
+</li>
       <li><a href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule">BertModule (class in nlp_uncertainty_zoo.models.bert)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="nlp_uncertainty_zoo.models.st_tau_lstm.html#nlp_uncertainty_zoo.models.st_tau_lstm.STTauCell.bias">bias (nlp_uncertainty_zoo.models.st_tau_lstm.STTauCell attribute)</a>
 </li>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder.build">build() (nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder method)</a>
+
+      <ul>
+        <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.DatasetBuilder.build">(nlp_uncertainty_zoo.utils.data.DatasetBuilder method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder.build">(nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -207,13 +223,17 @@
 </li>
       <li><a href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.CellWiseLSTM">CellWiseLSTM (class in nlp_uncertainty_zoo.models.lstm)</a>
 </li>
-      <li><a href="nlp_uncertainty_zoo.models.spectral.html#nlp_uncertainty_zoo.models.spectral.SpectralNormFC.compute_weight">compute_weight() (nlp_uncertainty_zoo.models.spectral.SpectralNormFC method)</a>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder">ClassificationDatasetBuilder (class in nlp_uncertainty_zoo.utils.data)</a>
+</li>
+      <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model.compute_loss_weights">compute_loss_weights() (nlp_uncertainty_zoo.models.model.Model method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_percentage">coverage_percentage() (in module nlp_uncertainty_zoo.utils.uncertainty_eval)</a>
+      <li><a href="nlp_uncertainty_zoo.models.spectral.html#nlp_uncertainty_zoo.models.spectral.SpectralNormFC.compute_weight">compute_weight() (nlp_uncertainty_zoo.models.spectral.SpectralNormFC method)</a>
 </li>
-      <li><a href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_width">coverage_width() (in module nlp_uncertainty_zoo.utils.uncertainty_eval)</a>
+      <li><a href="nlp_uncertainty_zoo.utils.calibration_eval.html#nlp_uncertainty_zoo.utils.calibration_eval.coverage_percentage">coverage_percentage() (in module nlp_uncertainty_zoo.utils.calibration_eval)</a>
+</li>
+      <li><a href="nlp_uncertainty_zoo.utils.calibration_eval.html#nlp_uncertainty_zoo.utils.calibration_eval.coverage_width">coverage_width() (in module nlp_uncertainty_zoo.utils.calibration_eval)</a>
 </li>
       <li><a href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.create_probs_from_dict">create_probs_from_dict() (in module nlp_uncertainty_zoo.utils.samplers)</a>
 </li>
@@ -223,6 +243,8 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.DatasetBuilder">DatasetBuilder (class in nlp_uncertainty_zoo.utils.data)</a>
+</li>
       <li><a href="nlp_uncertainty_zoo.models.ddu_transformer.html#nlp_uncertainty_zoo.models.ddu_transformer.DDUBert">DDUBert (class in nlp_uncertainty_zoo.models.ddu_transformer)</a>
 </li>
       <li><a href="nlp_uncertainty_zoo.models.ddu_transformer.html#nlp_uncertainty_zoo.models.ddu_transformer.DDUBertModule">DDUBertModule (class in nlp_uncertainty_zoo.models.ddu_transformer)</a>
@@ -257,7 +279,7 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.ece">ece() (in module nlp_uncertainty_zoo.utils.uncertainty_eval)</a>
+      <li><a href="nlp_uncertainty_zoo.utils.calibration_eval.html#nlp_uncertainty_zoo.utils.calibration_eval.ece">ece() (in module nlp_uncertainty_zoo.utils.calibration_eval)</a>
 </li>
       <li><a href="nlp_uncertainty_zoo.models.spectral.html#nlp_uncertainty_zoo.models.spectral.SpectralNormFC.eps">eps (nlp_uncertainty_zoo.models.spectral.SpectralNormFC attribute)</a>
 </li>
@@ -275,7 +297,11 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.evaluate">evaluate() (in module nlp_uncertainty_zoo.utils.task_eval)</a>
+      <li><a href="nlp_uncertainty_zoo.utils.calibration_eval.html#nlp_uncertainty_zoo.utils.calibration_eval.evaluate_calibration">evaluate_calibration() (in module nlp_uncertainty_zoo.utils.calibration_eval)</a>
+</li>
+      <li><a href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.evaluate_task">evaluate_task() (in module nlp_uncertainty_zoo.utils.task_eval)</a>
+</li>
+      <li><a href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.evaluate_uncertainty">evaluate_uncertainty() (in module nlp_uncertainty_zoo.utils.uncertainty_eval)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -283,9 +309,11 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsemble.fit">fit() (nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsemble method)</a>
+      <li><a href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModel.fit">fit() (nlp_uncertainty_zoo.models.bert.BertModel method)</a>
 
       <ul>
+        <li><a href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsemble.fit">(nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsemble method)</a>
+</li>
         <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model.fit">(nlp_uncertainty_zoo.models.model.Model method)</a>
 </li>
       </ul></li>
@@ -327,12 +355,20 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_hidden">get_hidden() (nlp_uncertainty_zoo.models.bert.BertModule method)</a>
+      <li><a href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_hidden_representation">get_hidden_representation() (nlp_uncertainty_zoo.models.bert.BertModule method)</a>
 
       <ul>
-        <li><a href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.get_hidden">(nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule method)</a>
+        <li><a href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.get_hidden_representation">(nlp_uncertainty_zoo.models.lstm.LSTMModule method)</a>
 </li>
-        <li><a href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_hidden">(nlp_uncertainty_zoo.models.transformer.TransformerModule method)</a>
+        <li><a href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.get_hidden_representation">(nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_hidden_representation">(nlp_uncertainty_zoo.models.model.Module method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.get_hidden_representation">(nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_hidden_representation">(nlp_uncertainty_zoo.models.transformer.TransformerModule method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.get_hidden_representation">(nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule method)</a>
 </li>
       </ul></li>
       <li><a href="nlp_uncertainty_zoo.models.bayesian_lstm.html#nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule.get_logits">get_logits() (nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule method)</a>
@@ -377,18 +413,24 @@
 </li>
       <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_num_learnable_parameters">get_num_learnable_parameters() (nlp_uncertainty_zoo.models.model.Module method)</a>
 </li>
-      <li><a href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_sequence_representation">get_sequence_representation() (nlp_uncertainty_zoo.models.bert.BertModule method)</a>
+      <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_sequence_representation">get_sequence_representation() (nlp_uncertainty_zoo.models.model.Module method)</a>
 
       <ul>
-        <li><a href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.get_sequence_representation">(nlp_uncertainty_zoo.models.lstm.LSTMModule method)</a>
-</li>
-        <li><a href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.get_sequence_representation">(nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule static method)</a>
-</li>
-        <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_sequence_representation">(nlp_uncertainty_zoo.models.model.Module method)</a>
-</li>
         <li><a href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_sequence_representation">(nlp_uncertainty_zoo.models.transformer.TransformerModule method)</a>
 </li>
-        <li><a href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.get_sequence_representation">(nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule method)</a>
+      </ul></li>
+      <li><a href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_sequence_representation_from_hidden">get_sequence_representation_from_hidden() (nlp_uncertainty_zoo.models.bert.BertModule method)</a>
+
+      <ul>
+        <li><a href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.get_sequence_representation_from_hidden">(nlp_uncertainty_zoo.models.lstm.LSTMModule method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.get_sequence_representation_from_hidden">(nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule static method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_sequence_representation_from_hidden">(nlp_uncertainty_zoo.models.model.Module method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_sequence_representation_from_hidden">(nlp_uncertainty_zoo.models.transformer.TransformerModule method)</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.get_sequence_representation_from_hidden">(nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule method)</a>
 </li>
       </ul></li>
       <li><a href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsemble.get_train_loss">get_train_loss() (nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsemble method)</a>
@@ -445,6 +487,8 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder">LanguageModellingDatasetBuilder (class in nlp_uncertainty_zoo.utils.data)</a>
+</li>
       <li><a href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.LanguageModellingSampler">LanguageModellingSampler (class in nlp_uncertainty_zoo.utils.samplers)</a>
 </li>
       <li><a href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LayerWiseLSTM">LayerWiseLSTM (class in nlp_uncertainty_zoo.models.lstm)</a>
@@ -473,7 +517,13 @@
 </li>
       <li><a href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.merge_instance_dicts">merge_instance_dicts() (in module nlp_uncertainty_zoo.utils.samplers)</a>
 </li>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm">mlm (nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling attribute)</a>
+</li>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm_probability">mlm_probability (nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling attribute)</a>
+</li>
       <li><a href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model">Model (class in nlp_uncertainty_zoo.models.model)</a>
+</li>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling">ModifiedDataCollatorForLanguageModeling (class in nlp_uncertainty_zoo.utils.data)</a>
 </li>
       <li>
     module
@@ -505,7 +555,11 @@
 </li>
         <li><a href="nlp_uncertainty_zoo.models.variational_transformer.html#module-nlp_uncertainty_zoo.models.variational_transformer">nlp_uncertainty_zoo.models.variational_transformer</a>
 </li>
+        <li><a href="nlp_uncertainty_zoo.utils.calibration_eval.html#module-nlp_uncertainty_zoo.utils.calibration_eval">nlp_uncertainty_zoo.utils.calibration_eval</a>
+</li>
         <li><a href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">nlp_uncertainty_zoo.utils.custom_types</a>
+</li>
+        <li><a href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">nlp_uncertainty_zoo.utils.data</a>
 </li>
         <li><a href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">nlp_uncertainty_zoo.utils.metrics</a>
 </li>
@@ -597,8 +651,6 @@
         <li><a href="nlp_uncertainty_zoo.models.spectral.html#module-nlp_uncertainty_zoo.models.spectral">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     nlp_uncertainty_zoo.models.st_tau_lstm
 
@@ -606,6 +658,8 @@
         <li><a href="nlp_uncertainty_zoo.models.st_tau_lstm.html#module-nlp_uncertainty_zoo.models.st_tau_lstm">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     nlp_uncertainty_zoo.models.transformer
 
@@ -628,10 +682,24 @@
 </li>
       </ul></li>
       <li>
+    nlp_uncertainty_zoo.utils.calibration_eval
+
+      <ul>
+        <li><a href="nlp_uncertainty_zoo.utils.calibration_eval.html#module-nlp_uncertainty_zoo.utils.calibration_eval">module</a>
+</li>
+      </ul></li>
+      <li>
     nlp_uncertainty_zoo.utils.custom_types
 
       <ul>
         <li><a href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">module</a>
+</li>
+      </ul></li>
+      <li>
+    nlp_uncertainty_zoo.utils.data
+
+      <ul>
+        <li><a href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">module</a>
 </li>
       </ul></li>
       <li>
@@ -668,6 +736,8 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of">pad_to_multiple_of (nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling attribute)</a>
+</li>
       <li><a href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.PositionalEmbedding">PositionalEmbedding (class in nlp_uncertainty_zoo.models.transformer)</a>
 </li>
       <li><a href="nlp_uncertainty_zoo.models.bayesian_lstm.html#nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule.predict">predict() (nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule method)</a>
@@ -712,7 +782,7 @@
 </li>
       <li><a href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.sample_masks">sample_masks() (nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule method)</a>
 </li>
-      <li><a href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.sce">sce() (in module nlp_uncertainty_zoo.utils.uncertainty_eval)</a>
+      <li><a href="nlp_uncertainty_zoo.utils.calibration_eval.html#nlp_uncertainty_zoo.utils.calibration_eval.sce">sce() (in module nlp_uncertainty_zoo.utils.calibration_eval)</a>
 </li>
       <li><a href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.SequenceClassificationSampler">SequenceClassificationSampler (class in nlp_uncertainty_zoo.utils.samplers)</a>
 </li>
@@ -759,6 +829,8 @@
 </li>
       </ul></li>
       <li><a href="nlp_uncertainty_zoo.utils.samplers.html#nlp_uncertainty_zoo.utils.samplers.TokenClassificationSampler">TokenClassificationSampler (class in nlp_uncertainty_zoo.utils.samplers)</a>
+</li>
+      <li><a href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.tokenizer">tokenizer (nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling attribute)</a>
 </li>
       <li><a href="nlp_uncertainty_zoo.models.bayesian_lstm.html#nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule.training">training (nlp_uncertainty_zoo.models.bayesian_lstm.BayesianLSTMModule attribute)</a>
 

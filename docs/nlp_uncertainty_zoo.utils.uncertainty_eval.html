@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Uncertainty Eval &#8212; nlp-uncertainty-zoo 0.9.1 documentation</title>
+    <title>Uncertainty Eval &#8212; nlp-uncertainty-zoo 1.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -36,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           nlp-uncertainty-zoo</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.0.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#data-module-documentation">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">Samplers</a></li>
@@ -114,14 +114,10 @@
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">Uncertainty Eval</a></li>
 <li><a class="reference internal" href="#module-nlp_uncertainty_zoo.utils.uncertainty_eval">Uncertainty Eval Module Documentation</a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.ace"><code class="docutils literal notranslate"><span class="pre">ace()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.aupr"><code class="docutils literal notranslate"><span class="pre">aupr()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.auroc"><code class="docutils literal notranslate"><span class="pre">auroc()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_percentage"><code class="docutils literal notranslate"><span class="pre">coverage_percentage()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_width"><code class="docutils literal notranslate"><span class="pre">coverage_width()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.ece"><code class="docutils literal notranslate"><span class="pre">ece()</span></code></a></li>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.evaluate_uncertainty"><code class="docutils literal notranslate"><span class="pre">evaluate_uncertainty()</span></code></a></li>
 <li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.kendalls_tau"><code class="docutils literal notranslate"><span class="pre">kendalls_tau()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.sce"><code class="docutils literal notranslate"><span class="pre">sce()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -169,54 +165,19 @@
       
   <section id="uncertainty-eval">
 <h1>Uncertainty Eval<a class="headerlink" href="#uncertainty-eval" title="Permalink to this heading">¶</a></h1>
-<p>Calibration and the quality of uncertainty estimates can be tricky to evaluate, since there are no gold labels like for a classification tasks.
+<p>The quality of uncertainty estimates can be tricky to evaluate, since there are no gold labels like for a classification tasks.
 For that reason, this module contains methods for exactly this purpose.</p>
-<p>For calibration, the module implements the expected calibration error <a class="reference external" href="https://www.aaai.org/ocs/index.php/AAAI/AAAI15/paper/download/9667/9958">(Naeini et al., 2015)</a>, as well as the static calibration error and
-the adaptive calibration error by <a class="reference external" href="https://openaccess.thecvf.com/content_CVPRW_2019/papers/Uncertainty%20and%20Robustness%20in%20Deep%20Visual%20Learning/Nixon_Measuring_Calibration_in_Deep_Learning_CVPRW_2019_paper.pdf">Nixon et al. (2019)</a>, where the former is an extension to multiple classes, and the latter uses ranges instead of bins,
-making sure that every range contains the same number of points.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>In <a class="reference external" href="https://arxiv.org/pdf/2210.15452.pdf">Ulmer et al. (2022)</a>, we found that the SCE is not very informative for a relatively large number of classes (&gt; 5).</p>
-</div>
-<p>Furthermore, we implement the evaluation of prediction sets by <a class="reference external" href="http://arxiv.org/abs/2010.03039">Kompa et al. (2020)</a>: We determine the average width of prediction sets to reach 1 - alpha probability mass (<a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_width" title="nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_width"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_width()</span></code></a>),
-and what percentage of prediction sets contain the correct class (<a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_percentage" title="nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_percentage"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_percentage()</span></code></a>).</p>
 <p>To measure the quality of general uncertainty estimates, we use the common evaluation method of defining a proxy OOD detection tasks,
 where we quantify how well we can distinguish in- and out-of-distribution inputs based on uncertainty scores given by a model.
 This is realized using the area under the receiver-operator-characteristic (<a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.aupr" title="nlp_uncertainty_zoo.utils.uncertainty_eval.aupr"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.aupr()</span></code></a>) and
 the area under precision-recall curve (<a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.auroc" title="nlp_uncertainty_zoo.utils.uncertainty_eval.auroc"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.auroc()</span></code></a>).</p>
 <p>New in <a class="reference external" href="https://arxiv.org/pdf/2210.15452.pdf">Ulmer et al. (2022)</a>, it is also evaluated how indicative the uncertainty score is with the potential loss of a model.
 For this reason, this module also implements the Kendall’s tau correlation coefficient (<a class="reference internal" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.kendalls_tau" title="nlp_uncertainty_zoo.utils.uncertainty_eval.kendalls_tau"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.kendalls_tau()</span></code></a>).</p>
+<p>Instances of the <a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model" title="nlp_uncertainty_zoo.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.model.Model</span></code></a> class can be evaluated in a single function using all the above metrics with <code class="xref py py-func docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.uncertainty_eval.evaluate_uncertainty()</span></code>.</p>
 </section>
 <section id="module-nlp_uncertainty_zoo.utils.uncertainty_eval">
 <span id="uncertainty-eval-module-documentation"></span><h1>Uncertainty Eval Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.utils.uncertainty_eval" title="Permalink to this heading">¶</a></h1>
 <p>Module to implement different metrics the quality of uncertainty metrics.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.uncertainty_eval.ace">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.</span></span><span class="sig-name descname"><span class="pre">ace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_ranges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.ace" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Measure the Adaptive Calibration Error (ACE) by [2], an version of the static calibration error that uses ranges
-instead of bins. Every range contains the same number of predictions.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>y_true: np.array</strong></dt><dd><p>True labels for each input.</p>
-</dd>
-<dt><strong>y_pred: np.array</strong></dt><dd><p>Categorical probability distribution for each input.</p>
-</dd>
-<dt><strong>num_ranges: int</strong></dt><dd><p>Number of ranges. Default is 10.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>Adaptive Calibration Error.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.uncertainty_eval.aupr">
 <span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.</span></span><span class="sig-name descname"><span class="pre">aupr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.aupr" title="Permalink to this definition">¶</a></dt>
@@ -264,76 +225,38 @@ out-of-distribution samples correspond to two different classes, which are diffe
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_percentage">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.</span></span><span class="sig-name descname"><span class="pre">coverage_percentage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_percentage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the percentage of times the true prediction was contained in the 1 - alpha prediction set. Based on the work
-by [3].</p>
-<p>[3] Kompa, Benjamin, Jasper Snoek, and Andrew L. Beam. “Empirical frequentist coverage of deep learning uncertainty
-quantification procedures.” Entropy 23.12 (2021): 1608.</p>
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.uncertainty_eval.evaluate_uncertainty">
+<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.</span></span><span class="sig-name descname"><span class="pre">evaluate_uncertainty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~nlp_uncertainty_zoo.models.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_eval_split:</span> <span class="pre">~torch.utils.data.dataloader.DataLoader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ood_eval_split:</span> <span class="pre">~torch.utils.data.dataloader.DataLoader</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_funcs:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Callable]</span> <span class="pre">=</span> <span class="pre">frozendict.frozendict({'kendalls_tau':</span> <span class="pre">&lt;function</span> <span class="pre">kendalltau&gt;})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contrastive_eval_funcs:</span> <span class="pre">~typing.Tuple[~typing.Callable]</span> <span class="pre">=</span> <span class="pre">frozendict.frozendict({'aupr':</span> <span class="pre">&lt;function</span> <span class="pre">aupr&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'auroc':</span> <span class="pre">&lt;function</span> <span class="pre">auroc&gt;})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_token_ids:</span> <span class="pre">~typing.Tuple[int]</span> <span class="pre">=</span> <span class="pre">(-100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.evaluate_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the uncertainty properties of a model. Evaluation happens in two ways:</p>
+<blockquote>
+<div><p>1. Eval functions that are applied to uncertainty metrics of the model on the <cite>eval_split</cite> (and <cite>ood_eval_split</cite>
+if specified).
+2. Eval functions that take measurements on and in- and out-of-distribution dataset to evaluate a proxy binary
+anomaly detection task, for which the functions specified by <cite>contrastive_eval_func</cite> are used. Also, the
+<cite>ood_eval_split</cite> argument has to be specified.</p>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>y_true: np.array</strong></dt><dd><p>True labels for each input.</p>
+<dt><strong>model: Model</strong></dt><dd><p>Model to be evaluated.</p>
 </dd>
-<dt><strong>y_pred: np.array</strong></dt><dd><p>Categorical probability distribution for each input.</p>
+<dt><strong>id_eval_split: DataLoader</strong></dt><dd><p>Main evaluation split.</p>
 </dd>
-<dt><strong>alpha: float</strong></dt><dd><p>Probability mass threshold.</p>
+<dt><strong>ood_eval_split: Optional[DataLoader]</strong></dt><dd><p>OOD evaluation split. Needs to be specified for contrastive evalualtion functions to work.</p>
+</dd>
+<dt><strong>eval_funcs: Dict[str, Callable]</strong></dt><dd><p>Evaluation function that evaluate uncertainty by comparing it to model losses on a single split.</p>
+</dd>
+<dt><strong>contrastive_eval_funcs: Dict[str, Callable]</strong></dt><dd><p>Evaluation functions that evaluate uncertainty by comparing uncertainties on an ID and OOD test set.</p>
+</dd>
+<dt><strong>ignore_token_ids: Tuple[int]</strong></dt><dd><p>IDs of tokens that should be ignored by the model during evaluation.</p>
+</dd>
+<dt><strong>verbose: bool</strong></dt><dd><p>Whether to display information about the current progress.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>Coverage percentage.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_width">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.</span></span><span class="sig-name descname"><span class="pre">coverage_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_width" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the width of the 1 - alpha prediction set. Based on the work by [3].</p>
-<p>[3] Kompa, Benjamin, Jasper Snoek, and Andrew L. Beam. “Empirical frequentist coverage of deep learning uncertainty
-quantification procedures.” Entropy 23.12 (2021): 1608.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>y_pred: np.array</strong></dt><dd><p>Categorical probability distribution for each input.</p>
-</dd>
-<dt><strong>alpha: float</strong></dt><dd><p>Probability mass threshold.</p>
-</dd>
-<dt><strong>eps: float</strong></dt><dd><p>Small number to avoid floating point precision problems.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>Average prediction set width.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.uncertainty_eval.ece">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.</span></span><span class="sig-name descname"><span class="pre">ece</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.ece" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the Expected Calibration Error: for each bin, the absolute difference between
-the mean fraction of positives and the average predicted probability is taken. The ECE is
-the weighed mean of these differences.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>y: np.ndarray</strong></dt><dd><p>The true labels.</p>
-</dd>
-<dt><strong>y_pred: np.ndarray</strong></dt><dd><p>The predicted probabilities</p>
-</dd>
-<dt><strong>n_bins: int</strong></dt><dd><p>The number of bins to use.</p>
-</dd>
-<dt><strong>Returns</strong></dt><dd></dd>
-<dt><strong>——-</strong></dt><dd></dd>
-<dt><strong>ece: float</strong></dt><dd><p>The expected calibration error.</p>
+<dt>Dict[str, Any]</dt><dd><p>Results as a dictionary from uncertainty metric / split / eval metric to result.</p>
 </dd>
 </dl>
 </dd>
@@ -358,31 +281,6 @@ discordant, it is -1.</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt>float</dt><dd><p>Kendall’s tau, between -1 and 1.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.uncertainty_eval.sce">
-<span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.uncertainty_eval.</span></span><span class="sig-name descname"><span class="pre">sce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.uncertainty_eval.sce" title="Permalink to this definition">¶</a></dt>
-<dd><p>Measure the Static Calibration Error (SCE) by [2], an extension to the Expected Calibration Error to multiple
-classes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>y_true: np.array</strong></dt><dd><p>True labels for each input.</p>
-</dd>
-<dt><strong>y_pred: np.array</strong></dt><dd><p>Categorical probability distribution for each input.</p>
-</dd>
-<dt><strong>num_bins: int</strong></dt><dd><p>Number of bins. Default is 10.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>Static Calibration Error.</p>
 </dd>
 </dl>
 </dd>

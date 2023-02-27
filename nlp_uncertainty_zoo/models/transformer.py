@@ -4,11 +4,14 @@ Implement a vanilla transformer model.
 
 # STD
 import math
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Type
 
 # EXT
 import torch
 import torch.nn as nn
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
+import transformers
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Model, Module
@@ -22,11 +25,11 @@ class TransformerModule(Module):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -40,16 +43,16 @@ class TransformerModule(Module):
 
         Parameters
         ----------
-        num_layers: int
-            Number of model layers.
         vocab_size: int
             Vocabulary size.
+        output_size: int
+            Size of output of model.
         input_size: int
             Dimensionality of input to model.
         hidden_size: int
             Size of hidden representations.
-        output_size: int
-            Size of output of model.
+        num_layers: int
+            Number of model layers.
         input_dropout: float
             Dropout on word embeddings.
         dropout: float
@@ -66,25 +69,25 @@ class TransformerModule(Module):
         """
 
         super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
 
         self.dropout = dropout
         self.input_dropout = nn.Dropout(input_dropout)
-        self.output_dropout = nn.Dropout(self.dropout)
+        self.output_dropout = nn.Dropout(dropout)
         self.num_heads = num_heads
         self.sequence_length = sequence_length
         self.word_embeddings = nn.Embedding(vocab_size, input_size)
         self.pos_embeddings = PositionalEmbedding(sequence_length, input_size)
 
-        self.pooler = nn.Linear(input_size, input_size)
-        self.output = nn.Linear(input_size, output_size)
+        self.projection = nn.Linear(input_size, hidden_size)
+        self.output = nn.Linear(hidden_size, output_size)
 
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=input_size,
@@ -97,17 +100,17 @@ class TransformerModule(Module):
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
     def forward(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
-        hidden = self.get_hidden(input_)
+        hidden = self.get_hidden_representation(input_)
         out = self.output_dropout(hidden)
 
         if self.is_sequence_classifier:
-            out = self.get_sequence_representation(out)
+            out = self.get_sequence_representation_from_hidden(out)
 
         out = self.output(out)
 
         return out
 
-    def get_hidden(
+    def get_hidden_representation(
         self, input_: torch.LongTensor, *args, **kwargs
     ) -> torch.FloatTensor:
         word_embeddings = self.word_embeddings(input_)
@@ -115,6 +118,10 @@ class TransformerModule(Module):
         embeddings = self.input_dropout(embeddings)
 
         hidden = self.encoder(embeddings)
+        hidden = self.projection(hidden)
+
+        if self.is_sequence_classifier:
+            return hidden[:, 0, :].unsqueeze(dim=1)
 
         return hidden
 
@@ -138,7 +145,7 @@ class TransformerModule(Module):
         """
         return self.forward(input_)
 
-    def get_sequence_representation(
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
@@ -157,24 +164,105 @@ class TransformerModule(Module):
             Representation for the current sequence.
         """
         hidden = hidden[:, 0, :].unsqueeze(1)
-        hidden = torch.tanh(self.pooler(hidden))
+        hidden = torch.tanh(hidden)
 
         return hidden
+
+    def get_sequence_representation(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        hidden = self.get_hidden_representation(input_, *args, **kwargs)
+
+        return self.get_sequence_representation_from_hidden(hidden)
 
 
 class Transformer(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        input_size: int = 512,
+        hidden_size: int = 512,
+        num_layers: int = 6,
+        input_dropout: float = 0.2,
+        dropout: float = 0.1,
+        num_heads: int = 16,
+        sequence_length: int = 128,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
+        """
+        Initialize a transformer module.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Vocabulary size.
+        output_size: int
+            Size of output of model.
+        input_size: int
+            Dimensionality of input to model.
+        hidden_size: int
+            Size of hidden representations.
+        num_layers: int
+            Number of model layers.
+        input_dropout: float
+            Dropout on word embeddings.
+        dropout: float
+            Dropout rate.
+        num_heads: int
+            Number of self-attention heads per layer.
+        sequence_length: int
+            Maximum sequence length in dataset. Used to initialize positional embeddings.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.4931.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001357.
+        weight_decay: float
+            Separate weight decay term for the Beta matrix. Default is 0.01.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Type[scheduler._LRScheduler]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. If None, training length and warmup proportion will be set
+            based on the arguments of fit(). Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
-            "transformer",
-            TransformerModule,
-            model_params,
-            model_dir,
-            device,
+            model_name="transformer",
+            module_class=TransformerModule,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
+            **model_params
         )
 
 

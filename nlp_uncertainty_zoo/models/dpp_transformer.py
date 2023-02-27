@@ -5,13 +5,17 @@ Implementing MC Dropout estimates using Determinantal Point Processes by
 """
 
 # STD
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Type
 
 # EXT
 from alpaca.uncertainty_estimator.masks import build_mask
 from einops import rearrange
 import torch
 import torch.nn.functional as F
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
+import transformers
+from transformers import BertModel as HFBertModel  # Rename to avoid collision
 
 # PROJECT
 from nlp_uncertainty_zoo.models.variational_transformer import VariationalBertModule, VariationalTransformerModule
@@ -143,11 +147,11 @@ class DropoutDPP(torch.nn.Module):
 class DPPTransformerModule(VariationalTransformerModule):
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -162,16 +166,16 @@ class DPPTransformerModule(VariationalTransformerModule):
 
         Parameters
         ----------
-        num_layers: int
-            Number of model layers.
         vocab_size: int
             Vocabulary size.
+        output_size: int
+            Size of output of model.
         input_size: int
             Dimensionality of input to model.
         hidden_size: int
             Size of hidden representations.
-        output_size: int
-            Size of output of model.
+        num_layers: int
+            Number of model layers.
         input_dropout: float
             Dropout on word embeddings.
         dropout: float
@@ -189,11 +193,11 @@ class DPPTransformerModule(VariationalTransformerModule):
             Device the model is located on.
         """
         super().__init__(
-            num_layers,
             vocab_size,
+            output_size,
             input_size,
             hidden_size,
-            output_size,
+            num_layers,
             input_dropout,
             dropout,
             num_heads,
@@ -219,16 +223,92 @@ class DPPTransformer(Model):
 
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        input_size: int = 512,
+        hidden_size: int = 512,
+        num_layers: int = 6,
+        input_dropout: float = 0.2,
+        dropout: float = 0.1,
+        num_heads: int = 16,
+        sequence_length: int = 128,
+        num_predictions: int = 10,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
+        """
+        Initialize a DPP transformer model.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Vocabulary size.
+        output_size: int
+            Size of output of model.
+        input_size: int
+            Dimensionality of input to model. efault is 512.
+        hidden_size: int
+            Size of hidden representations. efault is 512.
+        num_layers: int
+            Number of model layers. Default is 6
+        input_dropout: float
+            Dropout on word embeddings. Default is 0.2.
+        dropout: float
+            Dropout rate. Default is 0.1.
+        num_heads: int
+            Number of self-attention heads per layer. Default is 16.
+        sequence_length: int
+            Maximum sequence length in dataset. Used to initialize positional embeddings. Default is 128.
+        num_predictions: int
+            Number of predictions with different dropout masks. Default is 10.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.001.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.01.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Type[scheduler._LRScheduler]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. If None, training length and warmup proportion will be set
+            based on the arguments of fit(). Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
-            f"dpp-transformer",
-            DPPTransformerModule,
-            model_params,
-            model_dir,
-            device,
+            model_name=f"dpp-transformer",
+            module_class=DPPTransformerModule,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
+            **model_params
         )
 
 
@@ -244,6 +324,7 @@ class DPPBertModule(VariationalBertModule):
         dropout: float,
         num_predictions: int,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         device: Device,
         **build_params,
     ):
@@ -261,18 +342,21 @@ class DPPBertModule(VariationalBertModule):
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used.
         device: Device
             Device the model is located on.
         """
         self.num_predictions = num_predictions
 
         super().__init__(
-            bert_name,
-            output_size,
-            dropout,
-            num_predictions,
-            is_sequence_classifier,
-            device,
+            bert_name=bert_name,
+            output_size=output_size,
+            dropout=dropout,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            bert_class=bert_class,
+            device=device,
         )
 
         # Replace all dropout layers with DPP dropout
@@ -303,15 +387,69 @@ class DPPBert(Model):
 
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        bert_name: str,
+        output_size: int,
+        dropout: float = 0.1,
+        num_predictions: int = 10,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
+        bert_class: Type[HFBertModel] = HFBertModel,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
-        bert_name = model_params["bert_name"]
+        """
+        Initialize a DPP Bert.
+
+        Parameters
+        ----------
+        bert_name: str
+            Name of the underlying BERT, as specified in HuggingFace transformers.
+        output_size: int
+            Number of classes.
+        dropout: float
+            Dropout rate. Default is 0.1.
+        num_predictions: int
+            Number of predictions with different dropout masks. Default is 10.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step. Default is True.
+        lr: float
+            Learning rate. Default is 0.001.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.01.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Type[scheduler._LRScheduler]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used. Default is BertModel from the Huggingface transformers package.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
-            f"dpp-{bert_name}",
-            DPPBertModule,
-            model_params,
-            model_dir,
-            device,
+            model_name=f"dpp-{bert_name}",
+            module_class=DPPBertModule,
+            bert_name=bert_name,
+            output_size=output_size,
+            dropout=dropout,
+            num_predictions=num_predictions,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            bert_class=bert_class,
+            model_dir=model_dir,
+            device=device,
+            **model_params
         )

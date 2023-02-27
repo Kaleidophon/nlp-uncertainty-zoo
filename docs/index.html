@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>🤖 💬 ❓ nlp-uncertainty-zoo &#8212; nlp-uncertainty-zoo 0.9.1 documentation</title>
+    <title>🤖 💬 ❓ nlp-uncertainty-zoo &#8212; nlp-uncertainty-zoo 1.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -36,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="#">
           nlp-uncertainty-zoo</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.0.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#data-module-documentation">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">Samplers</a></li>
@@ -171,19 +171,25 @@ implemented in PyTorch. You can install the repository using pip:</p>
 </pre></div>
 </div>
 <p>If you are using the repository in your academic research, please cite the paper below:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">ulmer2022exploring</span><span class="p">,</span>
-  <span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="n">Exploring</span> <span class="n">Predictive</span> <span class="n">Uncertainty</span> <span class="ow">and</span> <span class="n">Calibration</span> <span class="ow">in</span> <span class="n">NLP</span><span class="p">:</span> <span class="n">A</span> <span class="n">Study</span> <span class="n">on</span> <span class="n">the</span> <span class="n">Impact</span> <span class="n">of</span> <span class="n">Method</span> \<span class="o">&amp;</span> <span class="n">Data</span> <span class="n">Scarcity</span><span class="p">},</span>
-  <span class="n">author</span><span class="o">=</span><span class="p">{</span><span class="n">Ulmer</span><span class="p">,</span> <span class="n">Dennis</span> <span class="ow">and</span> <span class="n">Frellsen</span><span class="p">,</span> <span class="n">Jes</span> <span class="ow">and</span> <span class="n">Hardmeier</span><span class="p">,</span> <span class="n">Christian</span><span class="p">},</span>
-  <span class="n">journal</span><span class="o">=</span><span class="p">{</span><span class="n">arXiv</span> <span class="n">preprint</span> <span class="n">arXiv</span><span class="p">:</span><span class="mf">2210.15452</span><span class="p">},</span>
-  <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2022</span><span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="nd">@inproceedings</span><span class="p">{</span><span class="n">ulmer</span><span class="o">-</span><span class="n">etal</span><span class="o">-</span><span class="mi">2022</span><span class="o">-</span><span class="n">exploring</span><span class="p">,</span>
+   <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Exploring Predictive Uncertainty and Calibration in </span><span class="si">{NLP}</span><span class="s2">: A Study on the Impact of Method {\&amp;} Data Scarcity&quot;</span><span class="p">,</span>
+   <span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;Ulmer, Dennis  and</span>
+     <span class="n">Frellsen</span><span class="p">,</span> <span class="n">Jes</span>  <span class="ow">and</span>
+     <span class="n">Hardmeier</span><span class="p">,</span> <span class="n">Christian</span><span class="s2">&quot;,</span>
+   <span class="n">booktitle</span> <span class="o">=</span> <span class="s2">&quot;Findings of the Association for Computational Linguistics: EMNLP 2022&quot;</span><span class="p">,</span>
+   <span class="n">month</span> <span class="o">=</span> <span class="n">dec</span><span class="p">,</span>
+   <span class="n">year</span> <span class="o">=</span> <span class="s2">&quot;2022&quot;</span><span class="p">,</span>
+   <span class="n">address</span> <span class="o">=</span> <span class="s2">&quot;Abu Dhabi, United Arab Emirates&quot;</span><span class="p">,</span>
+   <span class="n">publisher</span> <span class="o">=</span> <span class="s2">&quot;Association for Computational Linguistics&quot;</span><span class="p">,</span>
+   <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://aclanthology.org/2022.findings-emnlp.198&quot;</span><span class="p">,</span>
+   <span class="n">pages</span> <span class="o">=</span> <span class="s2">&quot;2707--2735&quot;</span><span class="p">,</span>
+
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Certain parts of this repository are still incomplete, but will come soon (I promise!):</p>
-<ul class="simple">
-<li><p>[x] Build proper documentation</p></li>
-<li><p>[ ] Add demo jupyter notebook</p></li>
-</ul>
+<p>To learn more about the package, consult the documentation <a class="reference external" href="http://dennisulmer.eu/nlp-uncertainty-zoo/">here</a>,
+check a Jupyter notebook demo <a class="reference external" href="https://github.com/Kaleidophon/nlp-uncertainty-zoo/blob/main/demo.ipynb">here</a> or a Google
+collab <a class="reference external" href="https://colab.research.google.com/drive/1-Pl5lvcnpbGL2ZXLGDDNqvJB7Ew8uIsS?usp=sharing">here</a>.</p>
 <section id="included-models">
 <h2>Included models<a class="headerlink" href="#included-models" title="Permalink to this heading">¶</a></h2>
 <p>The following models are implemented in the repository. They can all be imported by using <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">nlp-uncertainty-zoo</span> <span class="pre">import</span> <span class="pre">&lt;MODEL&gt;</span></code>.
@@ -255,7 +261,7 @@ the model, prediction, getting the uncertainty for an input batch using a specif
 <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_split</span><span class="o">=</span><span class="n">train_dataloader</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_logits</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">get_sequence_representation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_sequence_representation_from_hidden</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">metric_name</span><span class="o">=</span><span class="s2">&quot;mutual_information&quot;</span><span class="p">)</span>
 </pre></div>
@@ -327,11 +333,15 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html">BERT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert">BERT Module Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModel"><code class="docutils literal notranslate"><span class="pre">BertModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModel.fit"><code class="docutils literal notranslate"><span class="pre">BertModel.fit()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule"><code class="docutils literal notranslate"><span class="pre">BertModule</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.forward"><code class="docutils literal notranslate"><span class="pre">BertModule.forward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_hidden"><code class="docutils literal notranslate"><span class="pre">BertModule.get_hidden()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_hidden_representation"><code class="docutils literal notranslate"><span class="pre">BertModule.get_hidden_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_logits"><code class="docutils literal notranslate"><span class="pre">BertModule.get_logits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">BertModule.get_sequence_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.get_sequence_representation_from_hidden"><code class="docutils literal notranslate"><span class="pre">BertModule.get_sequence_representation_from_hidden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.predict"><code class="docutils literal notranslate"><span class="pre">BertModule.predict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#nlp_uncertainty_zoo.models.bert.BertModule.training"><code class="docutils literal notranslate"><span class="pre">BertModule.training</span></code></a></li>
 </ul>
@@ -396,8 +406,9 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 </li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule"><code class="docutils literal notranslate"><span class="pre">LSTMModule</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.forward"><code class="docutils literal notranslate"><span class="pre">LSTMModule.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.get_hidden_representation"><code class="docutils literal notranslate"><span class="pre">LSTMModule.get_hidden_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.get_logits"><code class="docutils literal notranslate"><span class="pre">LSTMModule.get_logits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">LSTMModule.get_sequence_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.get_sequence_representation_from_hidden"><code class="docutils literal notranslate"><span class="pre">LSTMModule.get_sequence_representation_from_hidden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.init_hidden_states"><code class="docutils literal notranslate"><span class="pre">LSTMModule.init_hidden_states()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#nlp_uncertainty_zoo.models.lstm.LSTMModule.training"><code class="docutils literal notranslate"><span class="pre">LSTMModule.training</span></code></a></li>
 </ul>
@@ -419,8 +430,9 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 </li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.forward"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.get_hidden_representation"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule.get_hidden_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.get_logits"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule.get_logits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule.get_sequence_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.get_sequence_representation_from_hidden"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule.get_sequence_representation_from_hidden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.predict"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule.predict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.to"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule.to()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#nlp_uncertainty_zoo.models.lstm_ensemble.LSTMEnsembleModule.training"><code class="docutils literal notranslate"><span class="pre">LSTMEnsembleModule.training</span></code></a></li>
@@ -433,6 +445,8 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models.model">Models Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model.available_uncertainty_metrics"><code class="docutils literal notranslate"><span class="pre">Model.available_uncertainty_metrics</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model.compute_loss_weights"><code class="docutils literal notranslate"><span class="pre">Model.compute_loss_weights()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model.eval"><code class="docutils literal notranslate"><span class="pre">Model.eval()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model.fit"><code class="docutils literal notranslate"><span class="pre">Model.fit()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model.get_loss"><code class="docutils literal notranslate"><span class="pre">Model.get_loss()</span></code></a></li>
@@ -443,10 +457,13 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module"><code class="docutils literal notranslate"><span class="pre">Module</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.available_uncertainty_metrics"><code class="docutils literal notranslate"><span class="pre">Module.available_uncertainty_metrics</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.forward"><code class="docutils literal notranslate"><span class="pre">Module.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_hidden_representation"><code class="docutils literal notranslate"><span class="pre">Module.get_hidden_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_logits"><code class="docutils literal notranslate"><span class="pre">Module.get_logits()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_num_learnable_parameters"><code class="docutils literal notranslate"><span class="pre">Module.get_num_learnable_parameters()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">Module.get_sequence_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_sequence_representation_from_hidden"><code class="docutils literal notranslate"><span class="pre">Module.get_sequence_representation_from_hidden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.get_uncertainty"><code class="docutils literal notranslate"><span class="pre">Module.get_uncertainty()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.predict"><code class="docutils literal notranslate"><span class="pre">Module.predict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Module.training"><code class="docutils literal notranslate"><span class="pre">Module.training</span></code></a></li>
@@ -479,7 +496,7 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformer"><code class="docutils literal notranslate"><span class="pre">SNGPTransformer</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule"><code class="docutils literal notranslate"><span class="pre">SNGPTransformerModule</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.forward"><code class="docutils literal notranslate"><span class="pre">SNGPTransformerModule.forward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.get_hidden"><code class="docutils literal notranslate"><span class="pre">SNGPTransformerModule.get_hidden()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.get_hidden_representation"><code class="docutils literal notranslate"><span class="pre">SNGPTransformerModule.get_hidden_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.get_logits"><code class="docutils literal notranslate"><span class="pre">SNGPTransformerModule.get_logits()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.predict"><code class="docutils literal notranslate"><span class="pre">SNGPTransformerModule.predict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#nlp_uncertainty_zoo.models.sngp_transformer.SNGPTransformerModule.training"><code class="docutils literal notranslate"><span class="pre">SNGPTransformerModule.training</span></code></a></li>
@@ -539,9 +556,10 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.Transformer"><code class="docutils literal notranslate"><span class="pre">Transformer</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule"><code class="docutils literal notranslate"><span class="pre">TransformerModule</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.forward"><code class="docutils literal notranslate"><span class="pre">TransformerModule.forward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_hidden"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_hidden()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_hidden_representation"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_hidden_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_logits"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_logits()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_sequence_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_sequence_representation_from_hidden"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_sequence_representation_from_hidden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.training"><code class="docutils literal notranslate"><span class="pre">TransformerModule.training</span></code></a></li>
 </ul>
 </li>
@@ -577,9 +595,10 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.Transformer"><code class="docutils literal notranslate"><span class="pre">Transformer</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule"><code class="docutils literal notranslate"><span class="pre">TransformerModule</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.forward"><code class="docutils literal notranslate"><span class="pre">TransformerModule.forward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_hidden"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_hidden()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_hidden_representation"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_hidden_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_logits"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_logits()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_sequence_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.get_sequence_representation_from_hidden"><code class="docutils literal notranslate"><span class="pre">TransformerModule.get_sequence_representation_from_hidden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#nlp_uncertainty_zoo.models.transformer.TransformerModule.training"><code class="docutils literal notranslate"><span class="pre">TransformerModule.training</span></code></a></li>
 </ul>
 </li>
@@ -596,8 +615,9 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTM"><code class="docutils literal notranslate"><span class="pre">VariationalLSTM</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.forward"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.get_hidden_representation"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule.get_hidden_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.get_logits"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule.get_logits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.get_sequence_representation"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule.get_sequence_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.get_sequence_representation_from_hidden"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule.get_sequence_representation_from_hidden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.init_hidden_states"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule.init_hidden_states()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.predict"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule.predict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#nlp_uncertainty_zoo.models.variational_lstm.VariationalLSTMModule.sample_masks"><code class="docutils literal notranslate"><span class="pre">VariationalLSTMModule.sample_masks()</span></code></a></li>
@@ -630,7 +650,28 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#data-module-documentation">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder"><code class="docutils literal notranslate"><span class="pre">ClassificationDatasetBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">ClassificationDatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="docutils literal notranslate"><span class="pre">DatasetBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.DatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">DatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder"><code class="docutils literal notranslate"><span class="pre">LanguageModellingDatasetBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">LanguageModellingDatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.mlm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm_probability"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.mlm_probability</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.tokenizer"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.tokenizer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#nlp_uncertainty_zoo.utils.metrics.dempster_shafer"><code class="docutils literal notranslate"><span class="pre">dempster_shafer()</span></code></a></li>
@@ -654,19 +695,15 @@ add the metric to the <code class="docutils literal notranslate"><span class="pr
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html">Task Eval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#module-nlp_uncertainty_zoo.utils.task_eval">Task Eval Module Documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.evaluate"><code class="docutils literal notranslate"><span class="pre">evaluate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.task_eval.html#nlp_uncertainty_zoo.utils.task_eval.evaluate_task"><code class="docutils literal notranslate"><span class="pre">evaluate_task()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html">Uncertainty Eval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#module-nlp_uncertainty_zoo.utils.uncertainty_eval">Uncertainty Eval Module Documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.ace"><code class="docutils literal notranslate"><span class="pre">ace()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.aupr"><code class="docutils literal notranslate"><span class="pre">aupr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.auroc"><code class="docutils literal notranslate"><span class="pre">auroc()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_percentage"><code class="docutils literal notranslate"><span class="pre">coverage_percentage()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.coverage_width"><code class="docutils literal notranslate"><span class="pre">coverage_width()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.ece"><code class="docutils literal notranslate"><span class="pre">ece()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.evaluate_uncertainty"><code class="docutils literal notranslate"><span class="pre">evaluate_uncertainty()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.kendalls_tau"><code class="docutils literal notranslate"><span class="pre">kendalls_tau()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="nlp_uncertainty_zoo.utils.uncertainty_eval.html#nlp_uncertainty_zoo.utils.uncertainty_eval.sce"><code class="docutils literal notranslate"><span class="pre">sce()</span></code></a></li>
 </ul>
 </li>
 </ul>

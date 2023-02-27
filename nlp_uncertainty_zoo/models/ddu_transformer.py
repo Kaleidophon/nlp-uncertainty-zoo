@@ -5,7 +5,7 @@ Implementation of the Deep Deterministic Uncertainty (DDU) Transformer by
 
 # STD
 import math
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Type
 
 # EXT
 import numpy as np
@@ -13,6 +13,10 @@ from sklearn.decomposition import PCA
 import torch
 from einops import rearrange
 from torch.utils.data import DataLoader
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
+import transformers
+from transformers import BertModel as HFBertModel  # Rename to avoid collision
 
 # PROJECT
 from nlp_uncertainty_zoo.models.spectral import (
@@ -186,11 +190,11 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -203,20 +207,20 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
         **build_params,
     ):
         """
-        Initialize a DDU transformer.
+        Initialize a DDU transformer module.
 
         Parameters
         ----------
-        num_layers: int
-            Number of model layers.
         vocab_size: int
             Vocabulary size.
+        output_size: int
+            Size of output of model.
         input_size: int
             Dimensionality of input to model.
         hidden_size: int
             Size of hidden representations.
-        output_size: int
-            Size of output of model.
+        num_layers: int
+            Number of model layers.
         input_dropout: float
             Input dropout added to embeddings.
         dropout: float
@@ -225,6 +229,8 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
             Number of self-attention heads per layer.
         sequence_length: int
             Maximum sequence length in dataset. Used to initialize positional embeddings.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
         projection_size: int
             Size hidden dimensions are projected to using PCA to save memory if given.
         is_sequence_classifier: bool
@@ -236,18 +242,18 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
             Device the model is located on.
         """
         super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            input_dropout,
-            dropout,
-            num_heads,
-            sequence_length,
-            spectral_norm_upper_bound,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
         DDUMixin.__init__(self, input_size, output_size, ignore_indices, projection_size)
 
@@ -255,16 +261,101 @@ class DDUTransformerModule(SpectralTransformerModule, DDUMixin):
 class DDUTransformer(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        input_size: int = 512,
+        hidden_size: int = 512,
+        projection_size: int = 64,
+        num_layers: int = 6,
+        input_dropout: float = 0.2,
+        dropout: float = 0.1,
+        num_heads: int = 16,
+        sequence_length: int = 128,
+        spectral_norm_upper_bound: float = 0.95,
+        ignore_indices: List[int] = tuple(),
+        is_sequence_classifier: bool = True,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
+        """
+        Initialize a DDU transformer.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Vocabulary size.
+        output_size: int
+            Size of output of model.
+        input_size: int
+            Dimensionality of input to model. Default is 512.
+        hidden_size: int
+            Size of hidden representations. Default is 512.
+        projection_size: int
+            Size hidden dimensions are projected to using PCA to save memory if given. Default is 64.
+        num_layers: int
+            Number of model layers. Default is 6.
+        input_dropout: float
+            Dropout rate. Default is 0.2.
+        dropout: float
+            Dropout rate. Default is 0.1.
+        num_heads: int
+            Number of self-attention heads per layer. Default is 16.
+        sequence_length: int
+            Maximum sequence length in dataset. Used to initialize positional embeddings. Default is 128.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it. Default is
+            0.95.
+        ignore_indices: List[int]
+            Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step. Default is True.
+        lr: float
+            Learning rate. Default is 0.001.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.01.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. If None, training length and warmup proportion will be set
+            based on the arguments of fit(). Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
-            "ddu_transformer",
-            DDUTransformerModule,
-            model_params,
-            model_dir,
-            device,
+            model_name="ddu_transformer",
+            module_class=DDUTransformerModule,
+            input_size=input_size,
+            output_size=output_size,
+            num_layers=num_layers,
+            vocab_size=vocab_size,
+            hidden_size=hidden_size,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            projection_size=projection_size,
+            ignore_indices=ignore_indices,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
+            **model_params
         )
 
     def _finetune(
@@ -303,19 +394,44 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
         self,
         bert_name: str,
         output_size: int,
-        spectral_norm_upper_bound: float,
         projection_size: int,
+        spectral_norm_upper_bound: float,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         ignore_indices: List[int],
         device: Device,
         **build_params,
     ):
+        """
+        Initialize a DDU Bert Module.
+
+        Parameters
+        ----------
+        bert_name: str
+            Name of the underlying BERT, as specified in HuggingFace transformers.
+        output_size: int
+            Number of classes.
+        projection_size: int
+            Size hidden dimensions are projected to using PCA to save memory if given.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used.
+        ignore_indices: List[int]
+            Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
+        device: Device
+            Device the model should be moved to.
+        """
         super().__init__(
-            bert_name,
-            output_size,
-            spectral_norm_upper_bound,
-            is_sequence_classifier,
-            device,
+            bert_name=bert_name,
+            output_size=output_size,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            is_sequence_classifier=is_sequence_classifier,
+            bert_class=bert_class,
+            device=device,
             **build_params,
         )
         DDUMixin.__init__(self, self.bert.config.hidden_size, output_size, ignore_indices, projection_size)
@@ -356,17 +472,77 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
 class DDUBert(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        bert_name: str,
+        output_size: int,
+        projection_size: int = 64,
+        spectral_norm_upper_bound: float = 0.95,
+        ignore_indices: List[int] = tuple(),
+        is_sequence_classifier: bool = True,
+        lr: float = 0.001,
+        weight_decay: float = 0.01,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Type[scheduler._LRScheduler] = transformers.get_linear_schedule_with_warmup,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
+        bert_class: Type[HFBertModel] = HFBertModel,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
-        bert_name = model_params["bert_name"]
+        """
+        Initialize a DDU Bert.
+
+        Parameters
+        ----------
+        bert_name: str
+            Name of the underlying BERT, as specified in HuggingFace transformers.
+        output_size: int
+            Number of classes.
+        projection_size: int
+            Size hidden dimensions are projected to using PCA to save memory if given.
+        spectral_norm_upper_bound: float
+            Set a limit when weight matrices will be spectrally normalized if their eigenvalue surpasses it. Default is
+            0.95.
+        ignore_indices: List[int]
+            Token indices to ignore when fitting the Gaussian Discriminant Analysis. Is empty by default.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step. Default is True.
+        lr: float
+            Learning rate. Default is 0.001.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.01.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Type[scheduler._LRScheduler]
+            Learning rate scheduler class. Default is a triangular learning rate schedule.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. If None, training length and warmup proportion will be set
+            based on the arguments of fit(). Default is None.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used. Default is BertModel from the Huggingface transformers package.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
-            f"ddu-{bert_name}",
-            DDUBertModule,
-            model_params,
-            model_dir,
-            device,
+            model_name=f"ddu-{bert_name}",
+            module_class=DDUBertModule,
+            bert_name=bert_name,
+            output_size=output_size,
+            spectral_norm_upper_bound=spectral_norm_upper_bound,
+            projection_size=projection_size,
+            ignore_indices=ignore_indices,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            bert_class=bert_class,
+            model_dir=model_dir,
+            device=device,
+            **model_params
         )
 
     def _finetune(

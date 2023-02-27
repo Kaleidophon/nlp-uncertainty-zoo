@@ -4,12 +4,14 @@ Implementation of a variational LSTM, as presented by
 """
 
 # STD
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Type
 
 # EXT
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
 
 # PROJECT
 from nlp_uncertainty_zoo.models.model import Module, MultiPredictionMixin, Model
@@ -62,11 +64,11 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         embedding_dropout: float,
         layer_dropout: float,
         time_dropout: float,
@@ -80,16 +82,16 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
         Parameters
         ----------
-        num_layers: int
-            Number of layers.
         vocab_size: int
             Number of input vocabulary.
+        output_size: int
+            Number of classes.
         input_size: int
             Dimensionality of input to the first layer (embedding size).
         hidden_size: int
             Size of hidden units.
-        output_size: int
-            Number of classes.
+        num_layers: int
+            Number of layers.
         embedding_dropout: float
             Dropout probability for the input embeddings.
         layer_dropout: float
@@ -105,11 +107,11 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
             Device the model should be moved to.
         """
         super().__init__(
-            num_layers,
             vocab_size,
+            output_size,
             input_size,
             hidden_size,
-            output_size,
+            num_layers,
             is_sequence_classifier,
             device,
         )
@@ -210,7 +212,7 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
         # Only use last output
         if self.is_sequence_classifier:
-            outputs = self.get_sequence_representation(outputs)
+            outputs = self.get_sequence_representation_from_hidden(outputs)
 
         return outputs
 
@@ -251,6 +253,81 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
         return preds
 
+    def get_hidden_representation(
+            self, input_: torch.LongTensor, hidden_states: Optional[HiddenDict] = None, *args, **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Obtain hidden representations for the current input.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Inputs ids for a sentence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        batch_size, sequence_length = input_.shape
+
+        hidden_batch_size = 0 if hidden_states is None else hidden_states[0].shape[1]
+        last_hidden_batch_size = 0 if self.last_hidden_states is None else self.last_hidden_states[0][0].shape[1]
+
+        # Initialize hidden activations if not given
+        if hidden_states is None and self.last_hidden_states is None:
+            hidden_states = self.init_hidden_states(
+                batch_size, self.device
+            )
+
+        # Initialize new hidden activation if batch size has changed
+        elif hidden_batch_size != batch_size or last_hidden_batch_size != batch_size:
+            hidden_states = self.init_hidden_states(
+                batch_size, self.device
+            )
+
+        # Detach hidden activations to limit gradient computations
+        else:
+            hidden_states = (
+                self.last_hidden_states if hidden_states is None else hidden_states
+            )
+
+        # Sample dropout masks used throughout this batch
+        self.sample_masks(batch_size)
+
+        all_hidden_states = []
+
+        for t in range(sequence_length):
+
+            embeddings = self.embeddings(input_[:, t])
+            layer_input = self.dropout_modules["embedding"][0](embeddings)
+            # layer_input = self.dropout_modules["embedding"](embeddings, input_[:, t])
+
+            for layer, cell in enumerate(self.lstm_layers):
+                hx, cx = cell(
+                    layer_input,  # Hidden state of last layer
+                    (
+                        self.dropout_modules["time"][layer](hidden_states[layer][0]),
+                        hidden_states[layer][1],
+                    ),  # Hidden and cell state state of last time step
+                )
+                layer_input = self.dropout_modules["layer"][layer](
+                    hx
+                )  # This becomes the input to the next layer
+                hidden_states[layer] = (
+                    hx,
+                    cx,
+                )  # This becomes the input for the next time step
+
+            all_hidden_states.append(hx)
+
+        all_hidden_states = torch.stack(all_hidden_states, dim=1)
+
+        if self.is_sequence_classifier:
+            all_hidden_states = all_hidden_states[:, -1, :].unsqueeze(dim=1)
+
+        return all_hidden_states
+
     def _assign_last_hidden_states(self, hidden: HiddenDict):
         """
         Assign hidden states at the end of a batch to an internal variable, detaching them from the computational graph.
@@ -286,7 +363,7 @@ class VariationalLSTMModule(Module, MultiPredictionMixin):
 
         return hidden
 
-    def get_sequence_representation(
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
@@ -361,21 +438,93 @@ class VariationalLSTM(Model):
 
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        input_size: int = 650,
+        hidden_size: int = 650,
+        num_layers: int = 2,
+        embedding_dropout: float = 0.15,
+        layer_dropout: float = 0.15,
+        time_dropout: float = 0.15,
+        num_predictions: int = 10,
+        init_weight: Optional[float] = 0.6,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.5,
+        weight_decay: float = 0.001,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
+        """
+        Initialize a variational LSTM model.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Number of input vocabulary.
+        output_size: int
+            Number of classes.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size). Default is 650.
+        hidden_size: int
+            Size of hidden units. Default is 650.
+        num_layers: int
+            Number of layers. Default is 2.
+        embedding_dropout: float
+            Dropout probability for the input embeddings. Default is 0.15.
+        layer_dropout: float
+            Dropout probability for hidden states between layers. Default is 0.15.
+        time_dropout: float
+            Dropout probability for hidden states between time steps. Default is 0.15.
+        num_predictions: int
+            Number of predictions (forward passes) used to make predictions. Default is 10.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step.
+        lr: float
+            Learning rate. Default is 0.5.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model is located on.
+        """
         super().__init__(
-            "variational_lstm",
-            VariationalLSTMModule,
-            model_params,
-            model_dir,
-            device,
+            model_name="variational_lstm",
+            module_class=VariationalLSTMModule,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            embedding_dropout=embedding_dropout,
+            layer_dropout=layer_dropout,
+            time_dropout=time_dropout,
+            num_predictions=num_predictions,
+            init_weight=init_weight,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
+            **model_params
         )
 
         # Only for Gal & Ghahramani replication, I know this isn't pretty
-        if "init_weight" in model_params:
-            init_weight = model_params["init_weight"]
+        if init_weight is not None:
 
             for cell in self.module.lstm_layers:
                 cell.weight_hh.data.uniform_(-init_weight, init_weight)

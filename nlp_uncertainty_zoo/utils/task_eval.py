@@ -4,7 +4,7 @@ Implementation of evaluation logic.
 
 # STD
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Tuple
 
 # EXT
 import numpy as np
@@ -12,13 +12,14 @@ from einops import rearrange
 from sklearn.metrics import accuracy_score, f1_score
 import torch
 from torch.utils.data import DataLoader
-from transformers import PreTrainedTokenizerBase
+from tqdm import tqdm
 
 
-def evaluate(
+def evaluate_task(
     model,
     eval_split: DataLoader,
-    tokenizer: PreTrainedTokenizerBase,
+    ignore_token_ids: Tuple[int] = (-100,),
+    verbose: bool = True,
 ) -> Dict[str, float]:
     """
     Evaluate a model and save predictions (if applicable).
@@ -29,8 +30,10 @@ def evaluate(
         Model to be evaluated.
     eval_split: DataSplit
         Data split the model is being evaluated on.
-    tokenizer: PreTrainedTokenizerBase
-        Tokenizer of the evaluated model.
+    ignore_token_ids: Tuple[int]
+        IDs of tokens that should be ignored by the model during evaluation.
+    verbose: bool
+        Whether to display information about the current progress.
 
     Returns
     -------
@@ -39,9 +42,13 @@ def evaluate(
     """
     scores = defaultdict(float)
 
+    num_batches = len(eval_split)
+    progress_bar = tqdm(total=num_batches if verbose else None)
+
     split_predictions = []
     split_labels = []
-    for batch in eval_split:
+
+    for i, batch in enumerate(eval_split):
         attention_mask, input_ids, labels = (
             batch["attention_mask"].to(model.device),
             batch["input_ids"].to(model.device),
@@ -61,10 +68,9 @@ def evaluate(
             labels = rearrange(labels, "b l -> (b l)")
 
         # Filter irrelevant tokens for language modelling / sequence labelling / token predictions
-        ignore_indices = tokenizer.all_special_ids + [-100]
         batch_mask = rearrange(
             torch.all(
-                torch.stack([input_ids != idx for idx in ignore_indices]), dim=0
+                torch.stack([input_ids != idx for idx in ignore_token_ids]), dim=0
             ),
             "b s -> (b s)",
         )
@@ -78,6 +84,10 @@ def evaluate(
 
         split_predictions.append(np.argmax(predictions.detach().cpu().numpy(), axis=-1))
         split_labels.append(labels.detach().cpu().numpy())
+
+        if verbose:
+            progress_bar.set_description(f"Evaluating batch {i+1}/{num_batches}...")
+            progress_bar.update(1)
 
     split_predictions = np.concatenate(split_predictions, axis=0)
     split_labels = np.concatenate(split_labels, axis=0)

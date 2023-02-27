@@ -22,7 +22,6 @@ from torch.utils.data import DataLoader
 # PROJECT
 from nlp_uncertainty_zoo.config import AVAILABLE_MODELS, DEFAULT_PARAMS
 from nlp_uncertainty_zoo.models.model import Model, MultiPredictionMixin
-from nlp_uncertainty_zoo.models import TransformerModule
 
 # CONST
 TAKE_LANGUAGE_MODELING_HYPERPARAMS_FROM = "language_modelling"
@@ -120,8 +119,7 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
     logit_multi_shape = None
     uncertainty_scores_shape = None
 
-    @property
-    def trained_models(self) -> Generator[Tuple[str, Model], None, None]:
+    def trained_models(self, progress_bar: tqdm) -> Generator[Tuple[str, Model], None, None]:
         """
         Returns a generator of trained models to avoid having to hold all trained models in memory.
 
@@ -151,8 +149,10 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
                 ] = self.mock_dataset_builder.sequence_length
 
             # Init and fit model
-            model = AVAILABLE_MODELS[model_name](model_params)
-            model.fit(train_split=mock_dataset["train"], verbose=False)
+            progress_bar.set_description(f'Testing model "{model_name}"')
+
+            model = AVAILABLE_MODELS[model_name](**model_params)
+            model.fit(train_split=mock_dataset["train"], verbose=False, **model_params)
 
             return model_name, model
 
@@ -169,12 +169,12 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             return
 
         with tqdm(total=len(AVAILABLE_MODELS)) as progress_bar:
-            for model_name, trained_model in self.trained_models:
-                progress_bar.set_description(f'Testing model "{model_name}"')
-                progress_bar.update(1)
+            for model_name, trained_model in self.trained_models(progress_bar):
 
                 self._test_module_functions(trained_model)
                 self._test_uncertainty_metrics(trained_model)
+
+                progress_bar.update(1)
 
                 del trained_model  # Free up memory
 
@@ -219,12 +219,25 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
             )
         )
 
-        # Test get_sequence_representation()
-        hidden, target_size = self._generate_hidden_and_target(
+        generated_hidden, target_size = self._generate_hidden_and_target(
             model, BATCH_SIZE, SEQUENCE_LENGTH
         )
-        seq_repr = model.module.get_sequence_representation(hidden)
+
+        # Test get_hidden()
+        hidden = model.module.get_hidden_representation(
+            mock_input["input_ids"], attention_mask=mock_input["attention_mask"]
+        )
+        self.assertTrue(hidden.shape == generated_hidden.shape)
+
+        # Test get_sequence_representation_from_hidden()
+        seq_repr = model.module.get_sequence_representation_from_hidden(generated_hidden)
         self.assertTrue(seq_repr.shape == target_size)
+
+        # Test get_sequence_representation()
+        input_seq_repr = model.module.get_sequence_representation(
+            mock_input["input_ids"], attention_mask=mock_input["attention_mask"]
+        )
+        self.assertTrue(input_seq_repr.shape == seq_repr.shape)
 
     def _test_uncertainty_metrics(self, model: Model):
         """
@@ -276,13 +289,11 @@ class AbstractFunctionTests(unittest.TestCase, ABC):
 
     @staticmethod
     def _generate_hidden_and_target(model: Model, batch_size: int, sequence_length):
-        repr_size = (
-            model.module.hidden_size
-            if not isinstance(model.module, TransformerModule)
-            else model.module.input_size
-        )
-        return torch.randn((batch_size, sequence_length, repr_size)), torch.Size(
-            (batch_size, 1, repr_size)
+        if model.module.is_sequence_classifier:
+            sequence_length = 1
+
+        return torch.randn((batch_size, sequence_length, model.module.hidden_size)), torch.Size(
+            (batch_size, 1, model.module.hidden_size)
         )
 
 

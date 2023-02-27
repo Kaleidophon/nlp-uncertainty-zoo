@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from datetime import datetime
 import dill
-from typing import Dict, Any, Optional, Generator
+from typing import Dict, Optional, Generator, Callable, Type, Any
 import os
 
 # EX
@@ -23,6 +23,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
+import torch.optim.lr_scheduler as scheduler
 from tqdm import tqdm
 
 # PROJECT
@@ -147,7 +148,26 @@ class Module(ABC, nn.Module):
         return probabilities
 
     @abstractmethod
-    def get_sequence_representation(
+    def get_hidden_representation(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Obtain hidden representations for the current input.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Inputs ids for a sentence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        pass
+
+    @abstractmethod
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
@@ -166,6 +186,27 @@ class Module(ABC, nn.Module):
             Representation for the current sequence.
         """
         pass
+
+    def get_sequence_representation(
+        self, input_: torch.LongTensor, *args, **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Define how the representation for an entire sequence is extracted from the input ids. This is
+        relevant in sequence classification. For example, this could be the last hidden state for a unidirectional LSTM
+        or the first hidden state for a transformer, adding a pooler layer.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Inputs ids for a sentence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        hidden = self.get_hidden_representation(input_, *args, **kwargs)
+        return self.get_sequence_representation_from_hidden(hidden)
 
     def get_uncertainty(
         self,
@@ -229,6 +270,16 @@ class Module(ABC, nn.Module):
 
         return num_parameters
 
+    @property
+    def available_uncertainty_metrics(self) -> Dict[str, Callable]:
+        """
+        Return a dictionary of all available uncertainty metrics of the current model.
+        """
+        return {
+            **self.single_prediction_uncertainty_metrics,
+            **self.multi_prediction_uncertainty_metrics
+        }
+
 
 class MultiPredictionMixin:
     """
@@ -256,9 +307,14 @@ class Model(ABC):
         self,
         model_name: str,
         module_class: type,
-        model_params: Dict[str, Any],
+        lr: float,
+        weight_decay: float,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params,
     ):
         """
         Initialize a module.
@@ -269,8 +325,8 @@ class Model(ABC):
             Name of the model.
         module_class: type
             Class of the model that is being wrapped.
-        model_params: Dict[str, Any]
-            Parameters to initialize the model.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
         device: Device
             The device the model is located on.
         """
@@ -284,18 +340,18 @@ class Model(ABC):
         self.to(device)
 
         # Initialize optimizer and scheduler
-        optimizer_class = self.model_params.get("optimizer_class", optim.Adam)
+        self.optimizer_class = optimizer_class
         self.optimizer = optimizer_class(
             self.module.parameters(),
-            lr=self.model_params["lr"],
-            weight_decay=self.model_params.get("weight_decay", 0),
+            lr=lr,
+            weight_decay=weight_decay
         )
 
         self.scheduler = None
-        if "scheduler_class" in self.model_params:
-            scheduler_class = self.model_params["scheduler_class"]
+
+        if scheduler_class is not None and scheduler_kwargs is not None:
             self.scheduler = scheduler_class(
-                self.optimizer, **self.model_params["scheduler_kwargs"]
+                self.optimizer, **scheduler_kwargs
             )
 
         # Check if model directory exists, if not, create
@@ -308,10 +364,16 @@ class Model(ABC):
     def fit(
         self,
         train_split: DataLoader,
+        num_training_steps: int,
         valid_split: Optional[DataLoader] = None,
-        verbose: bool = True,
         weight_loss: bool = False,
+        grad_clip: float = 10,
+        validation_interval: Optional[int] = None,
+        early_stopping_pat: int = np.inf,
+        early_stopping: bool = False,
+        verbose: bool = True,
         wandb_run: Optional[WandBRun] = None,
+        **training_kwargs
     ):
         """
         Fit the model to training data.
@@ -320,45 +382,38 @@ class Model(ABC):
         ----------
         train_split: DataLoader
             Dataset the model is being trained on.
+        num_training_steps: int
+            Number of training steps until completion.
         valid_split: Optional[DataLoader]
             Validation set the model is being evaluated on if given.
         verbose: bool
             Whether to display information about current loss.
         weight_loss: bool
             Weight classes in loss function. Default is False.
+        grad_clip: float
+            Parameter grad norm value before it will be clipped. Default is 10.
+        validation_interval: Optional[int]
+            Interval of training steps between validations on the validation set. If None, the model is evaluated after
+            each pass through the training data.
+        early_stopping_pat: int
+            Patience in number of training steps before early stopping kicks in. Default is np.inf.
+        early_stopping: bool
+            Whether early stopping should be used. Default is False.
         wandb_run: Optional[WandBRun]
             Weights and Biases run to track training statistics. Training and validation loss (if applicable) are
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
-        num_training_steps = self.model_params["num_training_steps"]
+        if validation_interval is None:
+            validation_interval = len(train_split)
+
         best_val_loss = np.inf
-        grad_clip = self.model_params.get("grad_clip", np.inf)
-        validation_interval = self.model_params["validation_interval"]
-        early_stopping_pat = self.model_params.get("early_stopping_pat", np.inf)
-        early_stopping = self.model_params.get("early_stopping", True)
         num_no_improvements = 0
         progress_bar = tqdm(total=num_training_steps) if verbose else None
         best_model = dict(self.__dict__)
 
         # Compute loss weights
-        if weight_loss:
-            counter = Counter()
-
-            for batch in train_split:
-                labels = batch["labels"]
-
-                # Flatten label lists with sum(), then filter ignore label
-                counter.update(filter(lambda label: label != -100, sum(labels.tolist(), [])))
-
-            self.loss_weights = torch.zeros(self.module.output_size, device=self.device)
-
-            for key, freq in counter.items():
-                self.loss_weights[key] = freq
-
-            del counter
-
-            self.loss_weights /= torch.sum(self.loss_weights)
-            self.loss_weights = 1 - self.loss_weights
+        if weight_loss and self.loss_weights is not None:
+            self.loss_weights = self.compute_loss_weights(train_split)
 
         def batch_generator(train_split: DataLoader) -> Generator[Dict[str, torch.Tensor], None, None]:
             """
@@ -384,13 +439,24 @@ class Model(ABC):
             batch_loss = self.get_loss(
                 input_ids,
                 labels,
+                training_step=training_step,
+                num_training_steps=num_training_steps,
                 attention_mask=attention_mask,
                 wandb_run=wandb_run,
             )
 
             batch_loss.backward()
 
+            grad_norm = torch.norm(
+                torch.stack([
+                    torch.norm(p.grad.detach()).cpu() for p in [
+                        p for p in self.module.parameters() if p.grad is not None
+                    ]
+                ])
+            )
+
             clip_grad_norm_(self.module.parameters(), grad_clip)
+
             self.optimizer.step()
             self.optimizer.zero_grad(
                 set_to_none=True
@@ -415,7 +481,12 @@ class Model(ABC):
                 progress_bar.update(1)
 
             if wandb_run is not None:
-                wandb_run.log({"batch_train_loss": batch_loss})
+                wandb_run.log(
+                    {
+                        "batch_train_loss": batch_loss,
+                        "batch_grad_norm": grad_norm
+                    }
+                )
 
             # Get validation loss
             if valid_split is not None and training_step % validation_interval == 0 and training_step > 0:
@@ -597,6 +668,7 @@ class Model(ABC):
         data_split: DataLoader,
         verbose: bool,
         wandb: Optional[WandBRun] = None,
+        **finetuning_kwargs
     ):
         """
         Do an additional training / fine-tuning step, which is required for some models. Is being overwritten in some
@@ -613,6 +685,46 @@ class Model(ABC):
             tracked by default, everything else is defined in _epoch_iter() and _finetune() depending on the model.
         """
         pass
+
+    def compute_loss_weights(self, train_split: DataLoader, *args, **kwargs) -> torch.FloatTensor:
+        """
+        Compute loss weights for unbalanced training sets.
+
+        Parameters
+        ----------
+        train_split: DataLoader
+
+        Returns
+        -------
+        torch.FloatTensor
+            Tensor containing loss weights (should be of size K).
+        """
+        counter = Counter()
+
+        for batch in train_split:
+            labels = batch["labels"]
+
+            # Flatten label lists with sum(), then filter ignore label
+            counter.update(filter(lambda label: label != -100, sum(labels.tolist(), [])))
+
+        loss_weights = torch.zeros(self.module.output_size, device=self.device)
+
+        for key, freq in counter.items():
+            loss_weights[key] = freq
+
+        del counter
+
+        loss_weights /= torch.sum(loss_weights)
+        loss_weights = 1 - loss_weights
+
+        return loss_weights
+
+    @property
+    def available_uncertainty_metrics(self) -> Dict[str, Callable]:
+        """
+        Return a dictionary of all available uncertainty metrics of the current model.
+        """
+        return self.module.available_uncertainty_metrics
 
     def to(self, device: Device):
         """

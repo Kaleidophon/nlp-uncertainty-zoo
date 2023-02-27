@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>|:robot:| |:speech_balloon:| |:question:| nlp-uncertainty-zoo &#8212; nlp-uncertainty-zoo 0.9.1 documentation</title>
+    <title>|:robot:| |:speech_balloon:| |:question:| nlp-uncertainty-zoo &#8212; nlp-uncertainty-zoo 1.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -35,7 +35,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           nlp-uncertainty-zoo</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.0.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#data-module-documentation">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">Samplers</a></li>
@@ -166,19 +166,24 @@ implemented in PyTorch. You can install the repository using pip:</p>
 </pre></div>
 </div>
 <p>If you are using the repository in your academic research, please cite the paper below:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">ulmer2022exploring</span><span class="p">,</span>
-  <span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="n">Exploring</span> <span class="n">Predictive</span> <span class="n">Uncertainty</span> <span class="ow">and</span> <span class="n">Calibration</span> <span class="ow">in</span> <span class="n">NLP</span><span class="p">:</span> <span class="n">A</span> <span class="n">Study</span> <span class="n">on</span> <span class="n">the</span> <span class="n">Impact</span> <span class="n">of</span> <span class="n">Method</span> \<span class="o">&amp;</span> <span class="n">Data</span> <span class="n">Scarcity</span><span class="p">},</span>
-  <span class="n">author</span><span class="o">=</span><span class="p">{</span><span class="n">Ulmer</span><span class="p">,</span> <span class="n">Dennis</span> <span class="ow">and</span> <span class="n">Frellsen</span><span class="p">,</span> <span class="n">Jes</span> <span class="ow">and</span> <span class="n">Hardmeier</span><span class="p">,</span> <span class="n">Christian</span><span class="p">},</span>
-  <span class="n">journal</span><span class="o">=</span><span class="p">{</span><span class="n">arXiv</span> <span class="n">preprint</span> <span class="n">arXiv</span><span class="p">:</span><span class="mf">2210.15452</span><span class="p">},</span>
-  <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2022</span><span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@inproceedings</span><span class="p">{</span><span class="n">ulmer</span><span class="o">-</span><span class="n">etal</span><span class="o">-</span><span class="mi">2022</span><span class="o">-</span><span class="n">exploring</span><span class="p">,</span>
+  <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Exploring Predictive Uncertainty and Calibration in </span><span class="si">{NLP}</span><span class="s2">: A Study on the Impact of Method {\&amp;} Data Scarcity&quot;</span><span class="p">,</span>
+  <span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;Ulmer, Dennis  and</span>
+    <span class="n">Frellsen</span><span class="p">,</span> <span class="n">Jes</span>  <span class="ow">and</span>
+    <span class="n">Hardmeier</span><span class="p">,</span> <span class="n">Christian</span><span class="s2">&quot;,</span>
+  <span class="n">booktitle</span> <span class="o">=</span> <span class="s2">&quot;Findings of the Association for Computational Linguistics: EMNLP 2022&quot;</span><span class="p">,</span>
+  <span class="n">month</span> <span class="o">=</span> <span class="n">dec</span><span class="p">,</span>
+  <span class="n">year</span> <span class="o">=</span> <span class="s2">&quot;2022&quot;</span><span class="p">,</span>
+  <span class="n">address</span> <span class="o">=</span> <span class="s2">&quot;Abu Dhabi, United Arab Emirates&quot;</span><span class="p">,</span>
+  <span class="n">publisher</span> <span class="o">=</span> <span class="s2">&quot;Association for Computational Linguistics&quot;</span><span class="p">,</span>
+  <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://aclanthology.org/2022.findings-emnlp.198&quot;</span><span class="p">,</span>
+  <span class="n">pages</span> <span class="o">=</span> <span class="s2">&quot;2707--2735&quot;</span><span class="p">,</span>
 </pre></div>
 </div>
-<p>Certain parts of this repository are still incomplete, but will come soon (I promise!):</p>
-<ul class="simple">
-<li><p>[x] Build proper documentation</p></li>
-<li><p>[ ] Add demo jupyter notebook</p></li>
-</ul>
+<p>}</p>
+<p>To learn more about the package, consult the documentation <a class="reference external" href="http://dennisulmer.eu/nlp-uncertainty-zoo/">here</a>,
+check a Jupyter notebook demo <a class="reference external" href="https://github.com/Kaleidophon/nlp-uncertainty-zoo/blob/main/demo.ipynb">here</a> or a Google
+collab <a class="reference external" href="https://colab.research.google.com/drive/1-Pl5lvcnpbGL2ZXLGDDNqvJB7Ew8uIsS?usp=sharing">here</a>.</p>
 <section id="included-models">
 <h2>Included models<a class="headerlink" href="#included-models" title="Permalink to this heading">¶</a></h2>
 <p>The following models are implemented in the repository. They can all be imported by using <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">nlp-uncertainty-zoo</span> <span class="pre">import</span> <span class="pre">&lt;MODEL&gt;</span></code>.
@@ -205,7 +210,7 @@ the model, prediction, getting the uncertainty for an input batch using a specif
 <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_split</span><span class="o">=</span><span class="n">train_dataloader</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_logits</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">get_sequence_representation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_sequence_representation_from_hidden</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">metric_name</span><span class="o">=</span><span class="s2">&quot;mutual_information&quot;</span><span class="p">)</span>
 </pre></div>

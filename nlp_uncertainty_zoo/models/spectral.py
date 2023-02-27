@@ -11,6 +11,9 @@ Utility functions from the repository of Joost van Amsterfoort (https://github.c
 import issues, since the original repository is not available as a Python package.
 """
 
+# STD
+from typing import Type
+
 # EXT
 import torch
 import torch.nn as nn
@@ -20,6 +23,7 @@ from torch.nn.utils.spectral_norm import (
     SpectralNormLoadStateDictPreHook,
     SpectralNormStateDictHook,
 )
+from transformers import BertModel as HFBertModel  # Rename to avoid collision
 
 # PROJECT
 from nlp_uncertainty_zoo.models.bert import BertModule
@@ -156,11 +160,11 @@ class SpectralTransformerModule(TransformerModule):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         input_dropout: float,
         dropout: float,
         num_heads: int,
@@ -176,16 +180,16 @@ class SpectralTransformerModule(TransformerModule):
         Parameters
         ----------
 
-        num_layers: int
-            Number of model layers.
         vocab_size: int
             Vocabulary size.
+        output_size: int
+            Size of output of model.
         input_size: int
             Dimensionality of input to model.
         hidden_size: int
             Size of hidden representations.
-        output_size: int
-            Size of output of model.
+        num_layers: int
+            Number of model layers.
         input_dropout: float
             Dropout on word embeddings.
         dropout: float
@@ -203,17 +207,17 @@ class SpectralTransformerModule(TransformerModule):
             Device the model is located on.
         """
         super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            input_dropout,
-            dropout,
-            num_heads,
-            sequence_length,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            input_dropout=input_dropout,
+            dropout=dropout,
+            num_heads=num_heads,
+            sequence_length=sequence_length,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
 
         # Add spectral normalization
@@ -237,6 +241,7 @@ class SpectralBertModule(BertModule):
         output_size: int,
         spectral_norm_upper_bound: float,
         is_sequence_classifier: bool,
+        bert_class: Type[HFBertModel],
         device: Device,
         **build_params,
     ):
@@ -254,11 +259,18 @@ class SpectralBertModule(BertModule):
         is_sequence_classifier: bool
             Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
             made at every time step.
+        bert_class: Type[HFBertModel]
+            Type of BERT to be used.
         device: Device
             Device the model should be moved to.
         """
         super().__init__(
-            bert_name, output_size, is_sequence_classifier, device, **build_params
+            bert_name=bert_name,
+            output_size=output_size,
+            is_sequence_classifier=is_sequence_classifier,
+            bert_class=bert_class,
+            device=device,
+            **build_params
         )
 
         self.spectral_norm_upper_bound = spectral_norm_upper_bound

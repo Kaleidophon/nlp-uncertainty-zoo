@@ -2,11 +2,23 @@
 Module to implement different metrics the quality of uncertainty metrics.
 """
 
+# STD
+from collections import defaultdict
+from typing import Dict, Any, Optional, Tuple, Callable
+
 # EXT
+from einops import rearrange
+from frozendict import frozendict
 import numpy as np
-import pandas as pd
 from sklearn.metrics import average_precision_score, roc_auc_score
 from scipy.stats import kendalltau
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+# PROJECT
+from nlp_uncertainty_zoo.models.model import Model
 
 
 def aupr(y_true: np.array, y_pred: np.array) -> float:
@@ -70,241 +82,236 @@ def kendalls_tau(losses: np.array, uncertainties: np.array) -> float:
     return kendalltau(losses, uncertainties, nan_policy="omit", method="asymptotic")[0]
 
 
-def ece(y_true: np.array, y_pred: np.array, n_bins: int = 10) -> float:
+def evaluate_uncertainty(
+    model: Model,
+    id_eval_split: DataLoader,
+    ood_eval_split: Optional[DataLoader] = None,
+    eval_funcs: Dict[str, Callable] = frozendict({"kendalls_tau": kendalltau}),
+    contrastive_eval_funcs: Tuple[Callable] = frozendict({"aupr": aupr, "auroc": auroc}),
+    ignore_token_ids: Tuple[int] = (-100, ),
+    verbose: bool = True,
+) -> Dict[str, Any]:
     """
+    Evaluate the uncertainty properties of a model. Evaluation happens in two ways:
 
-    Calculate the Expected Calibration Error: for each bin, the absolute difference between
-    the mean fraction of positives and the average predicted probability is taken. The ECE is
-    the weighed mean of these differences.
+        1. Eval functions that are applied to uncertainty metrics of the model on the `eval_split` (and `ood_eval_split`
+        if specified).
+        2. Eval functions that take measurements on and in- and out-of-distribution dataset to evaluate a proxy binary
+        anomaly detection task, for which the functions specified by `contrastive_eval_func` are used. Also, the
+        `ood_eval_split` argument has to be specified.
 
     Parameters
     ----------
-    y: np.ndarray
-        The true labels.
-    y_pred: np.ndarray
-        The predicted probabilities
-    n_bins: int
-        The number of bins to use.
-    Returns
-    -------
-    ece: float
-        The expected calibration error.
-    """
-    n = len(y_pred)
-    bins = np.arange(0.0, 1.0, 1.0 / n_bins)
-    y_pred = np.max(y_pred, axis=-1)
-    bins_per_prediction = np.digitize(y_pred, bins)
-
-    df = pd.DataFrame({"y_pred": y_pred, "y": y_true, "pred_bins": bins_per_prediction})
-
-    grouped_by_bins = df.groupby("pred_bins")
-    # calculate the mean y and predicted probabilities per bin
-    binned = grouped_by_bins.mean()
-
-    # calculate the number of items per bin
-    binned_counts = grouped_by_bins["y"].count()
-
-    # calculate the proportion of data per bin
-    binned["weight"] = binned_counts / n
-
-    weighed_diff = abs(binned["y_pred"] - binned["y"]) * binned["weight"]
-    return weighed_diff.sum()
-
-
-def sce(y_true: np.array, y_pred: np.array, num_bins: int = 10) -> float:
-    """
-    Measure the Static Calibration Error (SCE) by [2], an extension to the Expected Calibration Error to multiple
-    classes.
-
-    Parameters
-    ----------
-    y_true: np.array
-        True labels for each input.
-    y_pred: np.array
-        Categorical probability distribution for each input.
-    num_bins: int
-        Number of bins. Default is 10.
+    model: Model
+        Model to be evaluated.
+    id_eval_split: DataLoader
+        Main evaluation split.
+    ood_eval_split: Optional[DataLoader]
+        OOD evaluation split. Needs to be specified for contrastive evalualtion functions to work.
+    eval_funcs: Dict[str, Callable]
+        Evaluation function that evaluate uncertainty by comparing it to model losses on a single split.
+    contrastive_eval_funcs: Dict[str, Callable]
+        Evaluation functions that evaluate uncertainty by comparing uncertainties on an ID and OOD test set.
+    ignore_token_ids: Tuple[int]
+        IDs of tokens that should be ignored by the model during evaluation.
+    verbose: bool
+        Whether to display information about the current progress.
 
     Returns
     -------
-    float
-        Static Calibration Error.
+    Dict[str, Any]
+        Results as a dictionary from uncertainty metric / split / eval metric to result.
     """
-    assert len(y_pred.shape) == 2, "y_pred must be a matrix!"
-    assert (
-        y_true.shape[0] == y_pred.shape[0]
-    ), "Shapes of y_true and y_pred do not match!"
+    num_batches = len(id_eval_split)
 
-    N = len(y_true)
-    num_classes = y_pred.shape[1]
-    bins = np.arange(0, 1, 1 / num_bins)
-    bin_indices = np.digitize(np.max(y_pred, axis=1), bins)
-    sce = 0
+    if ood_eval_split is not None:
+        num_batches += len(ood_eval_split)
 
-    for bin in range(num_bins):
-        # Get predictions and labels for the current bin
-        bin_preds = y_pred[bin_indices == bin, :]
-        bin_labels = y_true[bin_indices == bin]
+    progress_bar = tqdm(total=num_batches if verbose else None)
 
-        for k in range(num_classes):
-            # Get accuracy and confidence for the current class k in the current bin
-            bin_class_preds = bin_preds[bin_labels == k, :]
+    model_uncertainty_metrics = list(model.available_uncertainty_metrics)
+    loss_func = nn.CrossEntropyLoss(reduction="none", ignore_index=-100)
 
-            if bin_class_preds.shape[0] == 0:
-                continue
+    # Initialize data structure that track stats
+    scores = defaultdict(float)  # Final scores
+    # Uncertainties for tokens and sequences (in-distribution)
+    id_uncertainties, id_seq_uncertainties = (
+        defaultdict(list),
+        defaultdict(list)
+    )
+    # Uncertainties for tokens and sequences (out-of-distribution)
+    ood_uncertainties, ood_seq_uncertainties = (
+        defaultdict(list),
+        defaultdict(list)
+    )
 
-            n_bk = bin_class_preds.shape[0]
-            bin_class_acc = np.mean(
-                (np.argmax(bin_class_preds, axis=1) == k).astype(float)
+    # Initialize result df that will later be written to .csv
+    sentence_i = 0
+
+    # Get scores for both test splits
+    for (
+            split_name,
+            eval_split,
+            uncertainties,
+            seq_uncertainties
+    ) in [
+        (
+                "id",
+                id_eval_split,
+                id_uncertainties,
+                id_seq_uncertainties
+        ),
+        (
+                "ood",
+                ood_eval_split,
+                ood_uncertainties,
+                ood_seq_uncertainties
+        ),
+    ]:
+        split_labels = []  # Collect all labels on this split
+        split_losses = []  # Collect all (token) losses on this split
+        split_seq_losses = []  # Collect all sequence losses on this split
+
+        for i, batch in enumerate(eval_split):
+            attention_mask, input_ids, labels = (
+                batch["attention_mask"].to(model.device),
+                batch["input_ids"].to(model.device),
+                batch["labels"].to(model.device),
             )
-            bin_class_conf = np.mean(np.max(bin_class_preds, axis=1))
-            sce += n_bk / N * abs(bin_class_acc - bin_class_conf)
 
-    sce /= num_classes
+            # Determine if sequence labelling / token prediction or sequence predction
+            if len(labels.shape) == 2:
+                batch_size, seq_len = labels.shape
+            else:
+                batch_size, seq_len = labels.shape[0], 1
 
-    return sce
+            # Get predictions
+            with torch.no_grad():
+                predictions = model.predict(input_ids, attention_mask=attention_mask)
 
+            # Reshape for easier processing
+            predictions = rearrange(predictions, "b t p -> (b t) p")
 
-def ace(y_true: np.array, y_pred: np.array, num_ranges: int = 10) -> float:
-    """
-     Measure the Adaptive Calibration Error (ACE) by [2], an version of the static calibration error that uses ranges
-     instead of bins. Every range contains the same number of predictions.
-
-    Parameters
-     ----------
-     y_true: np.array
-         True labels for each input.
-     y_pred: np.array
-         Categorical probability distribution for each input.
-     num_ranges: int
-         Number of ranges. Default is 10.
-
-     Returns
-     -------
-     float
-         Adaptive Calibration Error.
-    """
-    assert len(y_pred.shape) == 2, "y_pred must be a matrix!"
-    assert (
-        y_true.shape[0] == y_pred.shape[0]
-    ), "Shapes of y_true and y_pred do not match!"
-
-    N = len(y_true)
-    num_classes = y_pred.shape[1]
-    confs = np.sort(np.max(y_pred, axis=1))
-    step = int(np.floor(N / num_ranges))  # Inputs per range
-    thresholds = np.repeat(
-        np.array([confs[i] for i in range(0, step * num_ranges, step)])[np.newaxis, ...], N, axis=0
-    )  # Get the thresholds corresponding to ranges
-
-    max_preds = np.repeat(
-        np.max(y_pred, axis=1)[..., np.newaxis], num_ranges, axis=1
-    )  # Repeat all maximum predictions
-    b = (max_preds <= thresholds).astype(
-        int
-    )  # Compare max predictions against thresholds
-    bin_indices = np.argmax(b, axis=1)
-    ace = 0
-
-    for bin in range(num_ranges):
-        bin_preds = y_pred[bin_indices == bin, :]
-        bin_labels = y_true[bin_indices == bin]
-
-        for k in range(num_classes):
-            bin_class_preds = bin_preds[bin_labels == k, :]
-
-            if bin_class_preds.shape[0] == 0:
-                continue
-
-            bin_class_acc = np.mean(
-                (np.argmax(bin_class_preds, axis=1) == k).astype(int)
+            # Filter irrelevant tokens for language modelling / sequence labelling / token predictions
+            batch_mask = rearrange(
+                torch.all(
+                    torch.stack([input_ids != idx for idx in ignore_token_ids]), dim=0
+                ),
+                "b s -> (b s)",
+            ).to(model.device)
+            seq_batch_mask = rearrange(batch_mask, "(b s) -> b s", b=batch_size).to(
+                model.device
             )
-            bin_class_conf = np.mean(np.max(bin_class_preds, axis=1))
-            ace += abs(bin_class_acc - bin_class_conf)
 
-    ace /= num_classes * num_ranges
+            # If the task is not sequence classification, we also compute the (mean) sequence loss
+            if not model.module.is_sequence_classifier:
+                labels = rearrange(labels, "b l -> (b l)")
 
-    return ace
+                # Mask out losses for ignore tokens and recompute sequence losses
+                seq_losses = rearrange(
+                    loss_func(predictions, labels), "(b l) -> b l", b=batch_size
+                )
+                seq_losses *= (
+                    seq_batch_mask.int()
+                )  # Mask out all uninteresting tokens' uncertainties
+                seq_losses = seq_losses.mean(dim=1)
+                seq_losses *= seq_len
+                seq_losses /= seq_batch_mask.int().sum(dim=1)
+                split_seq_losses.append(seq_losses.detach().cpu().numpy())
 
+                predictions = predictions[batch_mask]
+                labels = labels[batch_mask]
 
-def coverage_percentage(y_true: np.array, y_pred: np.array, alpha: float = 0.05):
-    """
-    Return the percentage of times the true prediction was contained in the 1 - alpha prediction set. Based on the work
-    by [3].
+            else:
+                seq_losses = loss_func(predictions, labels)
+                split_seq_losses.append(seq_losses.detach().cpu().numpy())
 
-    [3] Kompa, Benjamin, Jasper Snoek, and Andrew L. Beam. "Empirical frequentist coverage of deep learning uncertainty
-    quantification procedures." Entropy 23.12 (2021): 1608.
+            split_labels.append(labels.detach().cpu().numpy())
 
-    Parameters
-    ----------
-    y_true: np.array
-         True labels for each input.
-    y_pred: np.array
-         Categorical probability distribution for each input.
-    alpha: float
-        Probability mass threshold.
+            # Compute uncertainty
+            losses = loss_func(predictions, labels)
+            split_losses.append(losses.detach().cpu().numpy())
 
-    Returns
-    -------
-    float
-        Coverage percentage.
-    """
-    sorted_indices = np.argsort(-y_pred, axis=1)  # Add minus to sort descendingly
-    # See https://stackoverflow.com/questions/19775831/row-wise-indexing-in-numpy for explanation for expression below
-    sorted_probs = y_pred[np.arange(y_pred.shape[0])[:, None], sorted_indices]
-    cum_probs = np.cumsum(sorted_probs, axis=1)
+            for metric_name in model_uncertainty_metrics:
+                with torch.no_grad():
+                    uncertainty = model.get_uncertainty(
+                        input_ids,
+                        metric_name=metric_name,
+                        attention_mask=attention_mask,
+                    )
 
-    # Create boolean array as int to determine the classes in the prediction set
-    thresholded_cum_probs = (cum_probs >= (1 - alpha - 1e-8)).astype(int)
+                seq_uncertainty = torch.clone(uncertainty)
+                uncertainty = rearrange(uncertainty, "b l -> (b l)")
 
-    # Use argmax to find first class for which the 1 - alpha threshold is surpassed - all other classes are outside
-    # of the prediction set.
-    cut_indices = np.argmax(thresholded_cum_probs, axis=1) + 1
+                # Filter uncertainties for uninteresting tokens
+                if not model.module.is_sequence_classifier:
+                    uncertainty = uncertainty[batch_mask]
 
-    # Check if class is contained in prediction set
-    num_covered = 0
-    for i, cut_idx in enumerate(cut_indices):
-        num_covered += int(y_true[i] in sorted_indices[i, :cut_idx])
+                    # Get the sequence uncertainties setting non batch-mask tokens to zero and re-normalizing means
+                    # across second axis
+                    seq_uncertainty *= (
+                        seq_batch_mask.int()
+                    )  # Mask out all uninteresting tokens' uncertainties
+                    seq_uncertainty = seq_uncertainty.mean(dim=1)
+                    seq_uncertainty *= seq_len
+                    seq_uncertainty /= seq_batch_mask.int().sum(dim=1)
+                    seq_uncertainties[metric_name].append(
+                        seq_uncertainty.detach().cpu().numpy()
+                    )
 
-    coverage_percentage = num_covered / y_true.shape[0]
+                    uncertainties[metric_name].append(
+                        uncertainty.detach().cpu().numpy()
+                    )
 
-    return coverage_percentage
+                # Sequence classification tasks, sequence uncertainties are just the uncertainties of the single
+                # sequence-wide prediction
+                else:
+                    seq_uncertainties[metric_name].append(
+                        uncertainty.detach().cpu().numpy()
+                    )
 
+            sentence_i += batch_size
 
-def coverage_width(y_pred: np.array, alpha: float = 0.05, eps: float = 1e-8):
-    """
-    Return the width of the 1 - alpha prediction set. Based on the work by [3].
+            if verbose:
+                progress_bar.set_description(f"Evaluating batch {i + 1}/{num_batches}...")
+                progress_bar.update(1)
 
-    [3] Kompa, Benjamin, Jasper Snoek, and Andrew L. Beam. "Empirical frequentist coverage of deep learning uncertainty
-    quantification procedures." Entropy 23.12 (2021): 1608.
+        # Simply all data structures
+        split_losses = np.concatenate(split_losses, axis=0)
+        split_seq_losses = np.concatenate(split_seq_losses, axis=0)
 
-    Parameters
-    ----------
-    y_pred: np.array
-         Categorical probability distribution for each input.
-    alpha: float
-        Probability mass threshold.
-    eps: float
-        Small number to avoid floating point precision problems.
+        # Compute Kendall's tau scores
+        for metric_name in model_uncertainty_metrics:
 
-    Returns
-    -------
-    float
-        Average prediction set width.
-    """
-    sorted_indices = np.argsort(-y_pred, axis=1)  # Add minus to sort descendingly
-    # See https://stackoverflow.com/questions/19775831/row-wise-indexing-in-numpy for explanation for expression below
-    sorted_probs = y_pred[np.arange(y_pred.shape[0])[:, None], sorted_indices]
-    cum_probs = np.cumsum(sorted_probs, axis=1)
+            for eval_name, eval_func in eval_funcs.items():
 
-    # Create boolean array as int to determine the classes in the prediction set
-    thresholded_cum_probs = (cum_probs >= (1 - alpha - eps)).astype(int)
+                if not model.module.is_sequence_classifier:
+                    uncertainties[metric_name] = np.concatenate(uncertainties[metric_name])
 
-    # Use argmax to find first class for which the 1 - alpha threshold is surpassed - all other classes are outside
-    # of the prediction set.
-    widths = np.argmax(thresholded_cum_probs, axis=1).astype(float) + 1
+                    scores[f"{eval_name}_{split_name}_{metric_name}_token"] = eval_func(
+                        split_losses, uncertainties[metric_name]
+                    )
 
-    # Compute average width
-    average_width = np.mean(widths)
+                seq_uncertainties[metric_name] = np.concatenate(
+                    seq_uncertainties[metric_name]
+                )
+                scores[f"{eval_name}_{split_name}_{metric_name}_seq"] = eval_func(
+                    split_seq_losses, seq_uncertainties[metric_name]
+                )
 
-    return average_width
+        del split_losses, split_labels
+
+    metric_key = model_uncertainty_metrics[0]
+    num_id = len(id_seq_uncertainties[metric_key])
+    num_ood = len(ood_seq_uncertainties[metric_key])
+
+    for metric_name in model_uncertainty_metrics:
+        for eval_name, eval_func in contrastive_eval_funcs.items():
+            scores[f"{eval_name}_{metric_name}"] = eval_func(
+                [0] * num_id + [1] * num_ood,
+                np.concatenate(
+                    (id_seq_uncertainties[metric_name], ood_seq_uncertainties[metric_name])
+                ),
+            )
+
+    return scores

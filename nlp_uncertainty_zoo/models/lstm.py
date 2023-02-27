@@ -3,9 +3,11 @@ Implement a simple vanilla LSTM.
 """
 
 # STD
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List, Tuple, Type
 
 # EXT
+import torch.optim as optim
+import torch.optim.lr_scheduler as scheduler
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -22,11 +24,11 @@ class LSTMModule(Module):
 
     def __init__(
         self,
-        num_layers: int,
         vocab_size: int,
+        output_size: int,
         input_size: int,
         hidden_size: int,
-        output_size: int,
+        num_layers: int,
         dropout: float,
         is_sequence_classifier: bool,
         device: Device,
@@ -37,16 +39,16 @@ class LSTMModule(Module):
 
         Parameters
         ----------
-        num_layers: int
-            Number of layers.
         vocab_size: int
             Number of input vocabulary.
+        output_size: int
+            Number of classes.
         input_size: int
             Dimensionality of input to the first layer (embedding size).
         hidden_size: int
             Size of hidden units.
-        output_size: int
-            Number of classes.
+        num_layers: int
+            Number of layers.
         dropout: float
             Dropout probability.
         is_sequence_classifier: bool
@@ -56,13 +58,13 @@ class LSTMModule(Module):
             Device the model should be moved to.
         """
         super().__init__(
-            num_layers,
-            vocab_size,
-            input_size,
-            hidden_size,
-            output_size,
-            is_sequence_classifier,
-            device,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            is_sequence_classifier=is_sequence_classifier,
+            device=device,
         )
 
         # Initialize modules
@@ -101,11 +103,21 @@ class LSTMModule(Module):
         """
         batch_size, sequence_length = input_.shape
 
+        hidden_batch_size = 0 if hidden_states is None else hidden_states[0].shape[1]
+        last_hidden_batch_size = 0 if self.last_hidden_states is None else self.last_hidden_states[0].shape[1]
+
         # Initialize hidden activations if not given
         if hidden_states is None and self.last_hidden_states is None:
             hidden_states, cell_states = self.init_hidden_states(
                 batch_size, self.device
             )
+
+        # Initialize new hidden activation if batch size has changed
+        elif hidden_batch_size != batch_size or last_hidden_batch_size != batch_size:
+            hidden_states, cell_states = self.init_hidden_states(
+                batch_size, self.device
+            )
+
         # Detach hidden activations to limit gradient computations
         else:
             hidden_states, cell_states = (
@@ -119,7 +131,7 @@ class LSTMModule(Module):
 
         # Only use last hidden state for prediction
         if self.is_sequence_classifier:
-            out = self.get_sequence_representation(out)
+            out = self.get_sequence_representation_from_hidden(out)
 
         out = self.dropout(out)
         out = self.output(out)
@@ -128,7 +140,7 @@ class LSTMModule(Module):
 
         return out
 
-    def get_sequence_representation(
+    def get_sequence_representation_from_hidden(
         self, hidden: torch.FloatTensor
     ) -> torch.FloatTensor:
         """
@@ -147,6 +159,45 @@ class LSTMModule(Module):
             Representation for the current sequence.
         """
         return hidden[:, -1, :].unsqueeze(1)
+
+    def get_hidden_representation(
+        self, input_: torch.LongTensor, hidden_states: Optional[HiddenDict] = None, *args, **kwargs
+    ) -> torch.FloatTensor:
+        """
+        Obtain hidden representations for the current input.
+
+        Parameters
+        ----------
+        input_: torch.LongTensor
+            Inputs ids for a sentence.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Representation for the current sequence.
+        """
+        batch_size, sequence_length = input_.shape
+
+        # Initialize hidden activations if not given
+        if hidden_states is None and self.last_hidden_states is None:
+            hidden_states, cell_states = self.init_hidden_states(
+                batch_size, self.device
+            )
+        # Detach hidden activations to limit gradient computations
+        else:
+            hidden_states, cell_states = (
+                self.last_hidden_states if hidden_states is None else hidden_states
+            )
+
+        embeddings = self.embeddings(input_)
+        out, _ = self.lstm(
+            embeddings, (hidden_states, cell_states)
+        )
+
+        if self.is_sequence_classifier:
+            out = out[:, -1, :].unsqueeze(dim=1)
+
+        return out
 
     def get_logits(
         self, input_: torch.LongTensor, *args, **kwargs
@@ -191,15 +242,79 @@ class LSTMModule(Module):
 class LSTM(Model):
     def __init__(
         self,
-        model_params: Dict[str, Any],
+        vocab_size: int,
+        output_size: int,
+        input_size: int = 650,
+        hidden_size: int = 650,
+        num_layers: int = 2,
+        dropout: float = 0.2,
+        init_weight: Optional[float] = 0.6,
+        is_sequence_classifier: bool = True,
+        lr: float = 0.5,
+        weight_decay: float = 0.001,
+        optimizer_class: Type[optim.Optimizer] = optim.Adam,
+        scheduler_class: Optional[Type[scheduler._LRScheduler]] = None,
+        scheduler_kwargs: Optional[Dict[str, Any]] = None,
         model_dir: Optional[str] = None,
         device: Device = "cpu",
+        **model_params
     ):
-        super().__init__("lstm", LSTMModule, model_params, model_dir, device)
+        """
+        Initialize a LSTM.
+
+        Parameters
+        ----------
+        vocab_size: int
+            Number of input vocabulary.
+        output_size: int
+            Number of classes.
+        input_size: int
+            Dimensionality of input to the first layer (embedding size). Default is 650.
+        hidden_size: int
+            Size of hidden units. Default is 650.
+        num_layers: int
+            Number of layers. Default is 2.
+        dropout: float
+            Dropout probability. Default is 0.2.
+        is_sequence_classifier: bool
+            Indicate whether model is going to be used as a sequence classifier. Otherwise, predictions are going to
+            made at every time step. Default is True.
+        lr: float
+            Learning rate. Default is 0.5.
+        weight_decay: float
+            Weight decay term for optimizer. Default is 0.001.
+        optimizer_class: Type[optim.Optimizer]
+            Optimizer class. Default is Adam.
+        scheduler_class: Optional[Type[scheduler._LRScheduler]]
+            Learning rate scheduler class. Default is None.
+        scheduler_kwargs: Optional[Dict[str, Any]]
+            Keyword arguments for learning rate scheduler. Default is None.
+        model_dir: Optional[str]
+            Directory that model should be saved to.
+        device: Device
+            Device the model should be moved to.
+        """
+        super().__init__(
+            model_name="lstm",
+            module_class=LSTMModule,
+            vocab_size=vocab_size,
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            dropout=dropout,
+            is_sequence_classifier=is_sequence_classifier,
+            lr=lr,
+            weight_decay=weight_decay,
+            optimizer_class=optimizer_class,
+            scheduler_class=scheduler_class,
+            scheduler_kwargs=scheduler_kwargs,
+            model_dir=model_dir,
+            device=device,
+        )
 
         # Only for Zaremba et al. / Gal & Ghahramani replication, I know this isn't pretty
-        if "init_weight" in model_params:
-            init_weight = model_params["init_weight"]
+        if init_weight is not None:
 
             for layer_weights in self.module.lstm.all_weights:
                 for param in layer_weights:

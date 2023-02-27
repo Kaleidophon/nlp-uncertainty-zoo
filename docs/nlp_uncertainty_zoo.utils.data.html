@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Data &#8212; nlp-uncertainty-zoo 0.9.1 documentation</title>
+    <title>Data &#8212; nlp-uncertainty-zoo 1.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           nlp-uncertainty-zoo</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.0.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -91,7 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#data-module-documentation">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">Samplers</a></li>
@@ -114,7 +114,28 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">Data</a></li>
-<li><a class="reference internal" href="#data-module-documentation">Data Module Documentation</a></li>
+<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a><ul>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder"><code class="docutils literal notranslate"><span class="pre">ClassificationDatasetBuilder</span></code></a><ul>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">ClassificationDatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="docutils literal notranslate"><span class="pre">DatasetBuilder</span></code></a><ul>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">DatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder"><code class="docutils literal notranslate"><span class="pre">LanguageModellingDatasetBuilder</span></code></a><ul>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder.build"><code class="docutils literal notranslate"><span class="pre">LanguageModellingDatasetBuilder.build()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling</span></code></a><ul>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.mlm</span></code></a></li>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm_probability"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.mlm_probability</span></code></a></li>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of</span></code></a></li>
+<li><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.tokenizer"><code class="docutils literal notranslate"><span class="pre">ModifiedDataCollatorForLanguageModeling.tokenizer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </ul>
 </li>
@@ -166,7 +187,7 @@
 <h1>Data<a class="headerlink" href="#data" title="Permalink to this heading">¶</a></h1>
 <p>The contents of this module are mostly concerned with creating compatibility with the
 <a class="reference external" href="https://huggingface.co/docs/transformers/index">Huggingface transformers package</a>.
-Specifically, the <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.DatasetBuilder</span></code> class tries to provide an easy interface to
+Specifically, the <a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder" title="nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.DatasetBuilder</span></code></a> class tries to provide an easy interface to
 load local datasets and utilizing the Huggingface code.
 Furthermore, it supports the easy use of custom samplers defined in the <a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html#module-nlp_uncertainty_zoo.utils.samplers" title="nlp_uncertainty_zoo.utils.samplers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.samplers</span></code></a> module,
 that produce representative sub-samples of training sets for different tasks.
@@ -174,17 +195,131 @@ These were for instance used in <a class="reference external" href="https://arxi
 <p>The following dataset builder classes are included:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.DatasetBuilder</span></code>: Abstract superclass that can be used for inheritance in order to support new task types.</p></li>
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder</span></code>: Dataset builder used for language modelling, including both “classic” language modelling and masked language modelling. To indicate which type of language modelling us used, either <cite>“next_token_prediction”</cite> or <cite>“mlm”</cite> should be specified for the <cite>type_</cite> argument during initialization.</p></li>
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder</span></code>: As the name suggests, this class is aimed at classification problems, both in terms of sequence labelling and sequence prediction. This is again specified by passing <cite>“sequence_classification”</cite> or <cite>“token_classification”</cite> in the <cite>type_</cite> argument during initialization. Dataset files are expected to be in the <cite>.csv</cite> format with tab-separated columns containing the sentence and label(s). When using sequence labelling, labels spanning multiple subword tokens will only be assigned to the first part, while the other subword tokens receive a <cite>-100</cite> label.</p></li>
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder" title="nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.DatasetBuilder</span></code></a>: Abstract superclass that can be used for inheritance in order to support new task types.</p></li>
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder" title="nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder</span></code></a>: Dataset builder used for language modelling, including both “classic” language modelling and masked language modelling. To indicate which type of language modelling us used, either <cite>“next_token_prediction”</cite> or <cite>“mlm”</cite> should be specified for the <cite>type_</cite> argument during initialization.</p></li>
+<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder" title="nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder</span></code></a>: As the name suggests, this class is aimed at classification problems, both in terms of sequence labelling and sequence prediction. This is again specified by passing <cite>“sequence_classification”</cite> or <cite>“token_classification”</cite> in the <cite>type_</cite> argument during initialization. Dataset files are expected to be in the <cite>.csv</cite> format with tab-separated columns containing the sentence and label(s). When using sequence labelling, labels spanning multiple subword tokens will only be assigned to the first part, while the other subword tokens receive a <cite>-100</cite> label.</p></li>
 </ul>
 </div></blockquote>
 <p>Furthermore, the module constain a modified version of Huggingface’s <cite>DataCollatorForLanguageModeling &lt;:py:class:`nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder</cite>: &gt;`_:
 It seemed that for the classical next token prediction, the collator wouldn’t produce the right offset between tokens and labels, i.e. the next tokens to be predicted.
-The <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling</span></code> provides a minimal modification of the original code to ensure this property.</p>
+The <a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling" title="nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling</span></code></a> provides a minimal modification of the original code to ensure this property.</p>
 </section>
-<section id="data-module-documentation">
-<h1>Data Module Documentation<a class="headerlink" href="#data-module-documentation" title="Permalink to this heading">¶</a></h1>
+<section id="module-nlp_uncertainty_zoo.utils.data">
+<span id="data-module-documentation"></span><h1>Data Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.utils.data" title="Permalink to this heading">¶</a></h1>
+<p>Module to implement data reading and batching functionalities.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.data.</span></span><span class="sig-name descname"><span class="pre">ClassificationDatasetBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PreTrainedTokenizerBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder" title="nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetBuilder</span></code></a></p>
+<p>DatasetBuilder for classification datasets. This includes sequence classification and token classification /
+sequence labelling.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">dataloader_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataLoader</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.ClassificationDatasetBuilder.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a language modelling dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>batch_size: int</strong></dt><dd><p>The desired batch size.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Dict[str, DataLoader]</dt><dd><p>Dictionary of DataLoaders for every given split.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.DatasetBuilder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.data.</span></span><span class="sig-name descname"><span class="pre">DatasetBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PreTrainedTokenizerBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract dataset builder class used to create a variety of different dataset types, including sequence prediction,
+token prediction, next-token-prediction language modelling and masked language modelling.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.DatasetBuilder.build">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">dataloader_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataLoader</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>batch_size: int</strong></dt><dd><p>The desired batch size.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Dict[str, DataLoader]</dt><dd><p>Dictionary of DataLoaders for every given split.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.data.</span></span><span class="sig-name descname"><span class="pre">LanguageModellingDatasetBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PreTrainedTokenizerBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nlp_uncertainty_zoo.utils.data.DatasetBuilder" title="nlp_uncertainty_zoo.utils.data.DatasetBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetBuilder</span></code></a></p>
+<p>DatasetBuilder for language modelling datasets. This includes “classic” language modelling (aka next token
+prediction) as well as masked language modelling.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">dataloader_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataLoader</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.LanguageModellingDatasetBuilder.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a language modelling dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>batch_size: int</strong></dt><dd><p>The desired batch size.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Dict[str, DataLoader]</dt><dd><p>Dictionary of DataLoaders for every given split.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.utils.data.</span></span><span class="sig-name descname"><span class="pre">ModifiedDataCollatorForLanguageModeling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PreTrainedTokenizerBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlm_probability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_to_multiple_of</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_experimental_compile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_tensors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCollatorForLanguageModeling</span></code></p>
+<p>Modified version of the DataCollatorForLanguageModelling. The only change introduced is to the __call__ function,
+where an offset between input_ids and labels for next token prediction language modelling in order to be consistent
+with the rest of the code base.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm">
+<span class="sig-name descname"><span class="pre">mlm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm_probability">
+<span class="sig-name descname"><span class="pre">mlm_probability</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.15</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.mlm_probability" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of">
+<span class="sig-name descname"><span class="pre">pad_to_multiple_of</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.pad_to_multiple_of" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.tokenizer">
+<span class="sig-name descname"><span class="pre">tokenizer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PreTrainedTokenizerBase</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.utils.data.ModifiedDataCollatorForLanguageModeling.tokenizer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

@@ -12,4 +12,5 @@ scipy>=1.5.4
 dill>=0.3.3
 joblib>=1.0.1
 alpaca-ml>=0.8.2
+frozendict==2.3.4
 protobuf==3.20.0
