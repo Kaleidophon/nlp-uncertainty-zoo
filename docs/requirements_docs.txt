@@ -5,3 +5,4 @@ readme2tex>=0.0.1b2
 m2r>=0.2.1
 recommonmark>=0.7.1
 numpydoc>=1.1.0
+sphinx_bootstrap_theme==0.8.1
