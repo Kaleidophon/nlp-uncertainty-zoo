@@ -82,6 +82,7 @@ The repository has the following structure:
     * `utils/samplers.py`: Dataset subsamplers for language modelling, sequence labelling and sequence classification.
     * `utils/task_eval.py`: Functions used to evaluate task performance.
     * `utils/uncertainty_eval.py`: Function used to evaluate uncertainty quality.
+    * `utils/calibration_eval.py`: Function used to evaluate calibration quality.
 * `config.py`: Define available datasets, model and tasks.
 * `defaults.py`: Define default config parameters for sequence classification and language modelling (**Note**: These might not be very good parameters).
 
