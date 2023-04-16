@@ -90,7 +90,7 @@ class DDUMixin:
                     batch["labels"].to(self.device),
                 )
 
-                hidden = self.get_hidden(input_ids, attention_mask=attention_mask)
+                hidden = self.get_hidden_representation(input_ids, attention_mask=attention_mask)
 
                 if not self.is_sequence_classifier:
                     # Filter our labels and activations for uninformative classes like PAD
@@ -153,7 +153,7 @@ class DDUMixin:
             Probability of the input under every mixture component, with one component per class.
         """
         batch_size = input_.shape[0]
-        hidden = self.get_hidden(input_)  # batch_size x seq_length x input_size
+        hidden = self.get_hidden_representation(input_)  # batch_size x seq_length x input_size
         hidden = (
             self.get_sequence_representation(hidden).squeeze(1)
             if self.is_sequence_classifier

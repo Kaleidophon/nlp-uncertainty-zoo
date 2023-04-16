@@ -1,3 +1,7 @@
+## 1.0.2
+
+- Fix bug in DDUMixin that called an outdated function that was renamed in 1.0.0.
+
 ## 1.0.0
 
 - Massive changes to repository structure, including restructuing of APIs and bug fixes. See the points below:
