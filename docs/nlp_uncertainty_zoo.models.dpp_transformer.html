@@ -3,12 +3,15 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>DPP Transformer &#8212; nlp-uncertainty-zoo 1.0.1 documentation</title>
+    <title>DPP Transformer &#8212; nlp-uncertainty-zoo 1.0.3 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -37,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           nlp-uncertainty-zoo</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.0.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -58,40 +61,40 @@
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html">Bayesian LSTM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bayesian_lstm.html#bayesian-lstm-module-documentation">Bayesian LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html">BERT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert">BERT Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#bert-module-documentation">BERT Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html">DDU Transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#module-nlp_uncertainty_zoo.models.ddu_transformer">DDU Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.ddu_transformer.html#ddu-transformer-module-documentation">DDU Transformer Module Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">DPP Transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.dpp_transformer">DPP Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#dpp-transformer-module-documentation">DPP Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html">LSTM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm.html#module-nlp_uncertainty_zoo.models.lstm">LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html">LSTM Ensemble</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#module-nlp_uncertainty_zoo.models.lstm_ensemble">LSTM Ensemble Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.lstm_ensemble.html#lstm-ensemble-module-documentation">LSTM Ensemble Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-module-class">The <cite>Module</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#the-model-class">The <cite>Model</cite> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#module-nlp_uncertainty_zoo.models.model">Models Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html">SNGP Transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#module-nlp_uncertainty_zoo.models.sngp_transformer">SNGP Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.sngp_transformer.html#sngp-transformer-module-documentation">SNGP Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html">Spectral</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#module-nlp_uncertainty_zoo.models.spectral">Spectral Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.spectral.html#spectral-module-documentation">Spectral Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">ST-tau LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html#module-nlp_uncertainty_zoo.models.st_tau_lstm">ST-tau LSTM Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html#st-tau-lstm-module-documentation">ST-tau LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">Transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#module-nlp_uncertainty_zoo.models.transformer">Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#transformer-module-documentation">Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html">ST-tau LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html#module-nlp_uncertainty_zoo.models.st_tau_lstm">ST-tau LSTM Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.st_tau_lstm.html#st-tau-lstm-module-documentation">ST-tau LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html">Transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#module-nlp_uncertainty_zoo.models.transformer">Transformer Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#transformer-module-documentation">Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html">Variational LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#module-nlp_uncertainty_zoo.models.variational_lstm">Variational LSTM Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_lstm.html#variational-lstm-module-documentation">Variational LSTM Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html">Variational Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#variational-transformer-module-documentation">Variational Transformer Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.html">Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html">Custom Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.custom_types.html#module-nlp_uncertainty_zoo.utils.custom_types">Custom Types Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#module-nlp_uncertainty_zoo.utils.data">Data Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.data.html#data-module-documentation">Data Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html">Uncertainty metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.metrics.html#module-nlp_uncertainty_zoo.utils.metrics">Metric Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nlp_uncertainty_zoo.utils.samplers.html">Samplers</a></li>
@@ -114,30 +117,7 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">DPP Transformer</a></li>
-<li><a class="reference internal" href="#module-nlp_uncertainty_zoo.models.dpp_transformer">DPP Transformer Module Documentation</a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBert"><code class="docutils literal notranslate"><span class="pre">DPPBert</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule"><code class="docutils literal notranslate"><span class="pre">DPPBertModule</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule.eval"><code class="docutils literal notranslate"><span class="pre">DPPBertModule.eval()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule.training"><code class="docutils literal notranslate"><span class="pre">DPPBertModule.training</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformer"><code class="docutils literal notranslate"><span class="pre">DPPTransformer</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule"><code class="docutils literal notranslate"><span class="pre">DPPTransformerModule</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule.eval"><code class="docutils literal notranslate"><span class="pre">DPPTransformerModule.eval()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule.training"><code class="docutils literal notranslate"><span class="pre">DPPTransformerModule.training</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP"><code class="docutils literal notranslate"><span class="pre">DropoutDPP</span></code></a><ul>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.calc_non_zero_neurons"><code class="docutils literal notranslate"><span class="pre">DropoutDPP.calc_non_zero_neurons()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.dropout_id"><code class="docutils literal notranslate"><span class="pre">DropoutDPP.dropout_id</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.forward"><code class="docutils literal notranslate"><span class="pre">DropoutDPP.forward()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.get_mask"><code class="docutils literal notranslate"><span class="pre">DropoutDPP.get_mask()</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.training"><code class="docutils literal notranslate"><span class="pre">DropoutDPP.training</span></code></a></li>
-<li><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.update"><code class="docutils literal notranslate"><span class="pre">DropoutDPP.update()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#dpp-transformer-module-documentation">DPP Transformer Module Documentation</a></li>
 </ul>
 </ul>
 </li>
@@ -188,175 +168,18 @@
   <section id="dpp-transformer">
 <h1>DPP Transformer<a class="headerlink" href="#dpp-transformer" title="Permalink to this heading">¶</a></h1>
 <p>This module includes an implementation of the transformers using deep determinantal point processes by <a class="reference external" href="https://aclanthology.org/2021.eacl-main.157.pdf">Shelmanov et al. (2021)</a>.
-The idea is very related to using Monte Carlo dropout (see <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#module-nlp_uncertainty_zoo.models.variational_transformer" title="nlp_uncertainty_zoo.models.variational_transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer</span></code></a>).
+The idea is very related to using Monte Carlo dropout (see <code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.variational_transformer</span></code>).
 The difference is that dropout masks are constructed using correlation kernel between neurons, in order to obtain less correlated predictions overall.</p>
 <p>In this model, we implement two versions:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformer" title="nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformer</span></code></a> / <a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule" title="nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule</span></code></a>: DPPs applied to a transformer trained from scratch. See <a class="reference internal" href="nlp_uncertainty_zoo.models.transformer.html#module-nlp_uncertainty_zoo.models.transformer" title="nlp_uncertainty_zoo.models.transformer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.transformer</span></code></a> for more information on how to use the <cite>Transformer</cite> model &amp; module.</p></li>
-<li><p><a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBert" title="nlp_uncertainty_zoo.models.dpp_transformer.DPPBert"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.DPPBert</span></code></a> / <a class="reference internal" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule" title="nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule</span></code></a>:  DPPs applied to pre-trained and then fine-tuned. See <a class="reference internal" href="nlp_uncertainty_zoo.models.bert.html#module-nlp_uncertainty_zoo.models.bert" title="nlp_uncertainty_zoo.models.bert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert</span></code></a> for more information on how to use the <cite>Bert</cite> model &amp; module.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformer</span></code> / <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule</span></code>: DPPs applied to a transformer trained from scratch. See <code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.transformer</span></code> for more information on how to use the <cite>Transformer</cite> model &amp; module.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.DPPBert</span></code> / <code class="xref py py-class docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule</span></code>:  DPPs applied to pre-trained and then fine-tuned. See <code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp_uncertainty_zoo.models.bert</span></code> for more information on how to use the <cite>Bert</cite> model &amp; module.</p></li>
 </ul>
 </div></blockquote>
 </section>
-<section id="module-nlp_uncertainty_zoo.models.dpp_transformer">
-<span id="dpp-transformer-module-documentation"></span><h1>DPP Transformer Module Documentation<a class="headerlink" href="#module-nlp_uncertainty_zoo.models.dpp_transformer" title="Permalink to this heading">¶</a></h1>
-<p>Implementing MC Dropout estimates using Determinantal Point Processes by
-<cite>Shelmanov et al. (2021) &lt;https://aclanthology.org/2021.eacl-main.157.pdf&gt;_</cite>. Code is a modified version of
-<cite>their codebase &lt;https://github.com/skoltech-nlp/certain-transformer&gt;_</cite>.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DPPBert">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.</span></span><span class="sig-name descname"><span class="pre">DPPBert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bert_name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_predictions:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_decay:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_class:</span> <span class="pre">~typing.Type[~torch.optim.optimizer.Optimizer]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'torch.optim.adam.Adam'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler_class:</span> <span class="pre">~typing.Type[~torch.optim.lr_scheduler._LRScheduler]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">get_linear_schedule_with_warmup&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler_kwargs:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bert_class:</span> <span class="pre">~typing.Type[~transformers.models.bert.modeling_bert.BertModel]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'transformers.models.bert.modeling_bert.BertModel'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device:</span> <span class="pre">~torch.device</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**model_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model" title="nlp_uncertainty_zoo.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
-<p>BERT model using determinantal point process dropout.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.</span></span><span class="sig-name descname"><span class="pre">DPPBertModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bert_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_predictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bert_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">BertModel</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#nlp_uncertainty_zoo.models.variational_transformer.VariationalBertModule" title="nlp_uncertainty_zoo.models.variational_transformer.VariationalBertModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariationalBertModule</span></code></a></p>
-<p>Implementation of a transformer with determinantal point process dropout for BERT.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the module in evaluation mode.</p>
-<p>This has any effect only on certain modules. See documentations of
-particular modules for details of their behaviors in training/evaluation
-mode, if they are affected, e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">Dropout</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">BatchNorm</span></code>,
-etc.</p>
-<p>This is equivalent with <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.train(False)</span></code>.</p>
-<p>See <span class="xref std std-ref">locally-disable-grad-doc</span> for a comparison between
-<cite>.eval()</cite> and several similar mechanisms that may be confused with it.</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>Module: self</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPBertModule.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.</span></span><span class="sig-name descname"><span class="pre">DPPTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vocab_size:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_layers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dropout:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_predictions:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_decay:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_class:</span> <span class="pre">~typing.Type[~torch.optim.optimizer.Optimizer]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'torch.optim.adam.Adam'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler_class:</span> <span class="pre">~typing.Type[~torch.optim.lr_scheduler._LRScheduler]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">get_linear_schedule_with_warmup&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler_kwargs:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device:</span> <span class="pre">~torch.device</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**model_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.model.html#nlp_uncertainty_zoo.models.model.Model" title="nlp_uncertainty_zoo.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
-<p>Transformer model using determinantal point process dropout.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.</span></span><span class="sig-name descname"><span class="pre">DPPTransformerModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_predictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_classifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nlp_uncertainty_zoo.models.variational_transformer.html#nlp_uncertainty_zoo.models.variational_transformer.VariationalTransformerModule" title="nlp_uncertainty_zoo.models.variational_transformer.VariationalTransformerModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariationalTransformerModule</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the module in evaluation mode.</p>
-<p>This has any effect only on certain modules. See documentations of
-particular modules for details of their behaviors in training/evaluation
-mode, if they are affected, e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">Dropout</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">BatchNorm</span></code>,
-etc.</p>
-<p>This is equivalent with <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.train(False)</span></code>.</p>
-<p>See <span class="xref std std-ref">locally-disable-grad-doc</span> for a comparison between
-<cite>.eval()</cite> and several similar mechanisms that may be confused with it.</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>Module: self</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DPPTransformerModule.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nlp_uncertainty_zoo.models.dpp_transformer.</span></span><span class="sig-name descname"><span class="pre">DropoutDPP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_frac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<p>Implementation of the determinantal point process dropout, modified version of
-<cite>the original implementation &lt;https://github.com/skoltech-nlp/certain-transformer/blob/main/src/ue4nlp/dropout_dpp.py&gt;_</cite>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.calc_non_zero_neurons">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calc_non_zero_neurons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sum_mask</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.calc_non_zero_neurons" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the fraction of neurons that have not been dropped out yet.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>sum_mask: torch.Tensor</strong></dt><dd><p>Current mask.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>Percentage of non-dropped out neurons.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.dropout_id">
-<span class="sig-name descname"><span class="pre">dropout_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.dropout_id" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply mask to the input. If model is in training mode, apply a normal dropout mask. If the model is in
-inference mode, apply DPP dropout.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>x: torch.Tensor</strong></dt><dd><p>Input to which dropout mask is being applied to.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.Tensor</dt><dd><p>Input after applying dropout mask.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.get_mask">
-<span class="sig-name descname"><span class="pre">get_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatTensor</span></span></span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.get_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a new mask for a given input.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>x: torch.Tensor</strong></dt><dd><p>Input for which the mask is supposed to be generated.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.FloatTensor</dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.update">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nlp_uncertainty_zoo.models.dpp_transformer.DropoutDPP.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<section id="dpp-transformer-module-documentation">
+<h1>DPP Transformer Module Documentation<a class="headerlink" href="#dpp-transformer-module-documentation" title="Permalink to this heading">¶</a></h1>
 </section>
 
 
@@ -372,7 +195,7 @@ inference mode, apply DPP dropout.</p>
     </p>
     <p>
         &copy; Copyright 2022, Dennis Ulmer.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

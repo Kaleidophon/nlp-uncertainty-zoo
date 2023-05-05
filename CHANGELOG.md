@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Fix another bug in DDUMixin, similar to the one in version 1.0.2.
+
 ## 1.0.2
 
 - Fix bug in DDUMixin that called an outdated function that was renamed in 1.0.0.

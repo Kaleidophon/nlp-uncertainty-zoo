@@ -8,7 +8,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="nlp-uncertainty-zoo",
-    version="1.0.2",
+    version="1.0.3",
     author="Dennis Ulmer",
     description="PyTorch Implementation of Models used for Uncertainty Estimation in Natural Language Processing.",
     long_description=long_description,

@@ -102,7 +102,7 @@ class DDUMixin:
 
                 else:
                     hidden = (
-                        self.get_sequence_representation(hidden).squeeze(1)
+                        self.get_sequence_representation_from_hidden(hidden).squeeze(1)
                     )
 
                 hiddens.append(hidden)
@@ -138,7 +138,7 @@ class DDUMixin:
                 )  # Compute determinant
                 self.Sigma[cls, :, :] = torch.linalg.inv(self.Sigma[cls, :, :])
 
-    def gmm_predict(self, input_: torch.LongTensor) -> torch.FloatTensor:
+    def gmm_predict(self, input_: torch.LongTensor, **kwargs) -> torch.FloatTensor:
         """
         Make a prediction with the Gaussian mixture Model for a batch of inputs.
 
@@ -153,9 +153,9 @@ class DDUMixin:
             Probability of the input under every mixture component, with one component per class.
         """
         batch_size = input_.shape[0]
-        hidden = self.get_hidden_representation(input_)  # batch_size x seq_length x input_size
+        hidden = self.get_hidden_representation(input_, **kwargs)  # batch_size x seq_length x input_size
         hidden = (
-            self.get_sequence_representation(hidden).squeeze(1)
+            self.get_sequence_representation_from_hidden(hidden).squeeze(1)
             if self.is_sequence_classifier
             else rearrange(hidden, "b s i -> (b s) i")
         )
@@ -463,7 +463,7 @@ class DDUBertModule(SpectralBertModule, DDUMixin):
 
         if metric_name == "log_prob":
             with torch.no_grad():
-                return self.gmm_predict(input_)
+                return self.gmm_predict(input_, **kwargs)
 
         else:
             return super().get_uncertainty(input_, metric_name=metric_name, **kwargs)
